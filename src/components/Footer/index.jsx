@@ -1,10 +1,11 @@
 import React from "react";
+import { NavLink } from "react-router-dom";
 
 const Footer = () => {
   return (
-    <footer className="bg-gray-800 text-white py-12">
+    <footer className="bg-black text-white py-12">
       <div className="container mx-auto px-4">
-        <div className="grid md:grid-cols-4 gap-8">
+        <div className="grid md:grid-cols-4 gap-8 ml-20 mr-20">
           <div>
             <div className="text-2xl font-bold mb-4">
               Fathom <span style={{ color: "#A5292A" }}>Legal</span>
@@ -76,9 +77,12 @@ const Footer = () => {
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-white transition-colors">
+                <NavLink 
+                  to="/terms-of-service" 
+                  className="hover:text-white transition-colors"
+                >
                   Terms of Service
-                </a>
+                </NavLink>
               </li>
               <li>
                 <a href="#" className="hover:text-white transition-colors">

@@ -94,7 +94,7 @@ const GeneralCorporateAdvisory = () => {
             <h2 className="text-4xl font-bold text-gray-800 mb-8">
               Services We Offer:
             </h2>
-            <p className="text-lg text-gray-600 leading-relaxed">
+            <p className="text-lg text-left text-gray-600 leading-relaxed">
               At Fathom Legal, our General Corporate Advisory services are
               designed to support businesses at every stage of their growth. We
               offer a comprehensive suite of legal solutions tailored to meet
@@ -113,7 +113,7 @@ const GeneralCorporateAdvisory = () => {
           {services.map((service, index) => (
             <div
               key={index}
-              className={`grid lg:grid-cols-2 gap-12 items-center ${
+              className={`grid lg:grid-cols-2 gap-12 items-center px-4 sm:px-8 md:px-12 lg:px-20 ${
                 index !== services.length - 1 ? "mb-20" : ""
               }`}
             >

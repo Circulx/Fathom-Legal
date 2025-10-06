@@ -145,7 +145,7 @@ const VCFundingSupport = () => {
       {/* Main Content Section */}
       <section className="py-20 bg-white">
         <div className="container mx-auto px-4">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <div className="grid lg:grid-cols-2 gap-12 items-center px-4 sm:px-8 md:px-12 lg:px-20">
             <div>
               <h2 className="text-4xl font-bold text-gray-800 mb-8">
                 Fuel Your Growth with Smart Capital
@@ -204,7 +204,7 @@ const VCFundingSupport = () => {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 px-4 sm:px-8 md:px-12 lg:px-20">
             {fundingServices.map((service, index) => (
               <div
                 key={index}
@@ -244,7 +244,7 @@ const VCFundingSupport = () => {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 px-4 sm:px-8 md:px-12 lg:px-20">
             {fundingStages.map((stage, index) => (
               <div
                 key={index}
@@ -271,7 +271,7 @@ const VCFundingSupport = () => {
       {/* Why Choose Section */}
       <section className="py-20" style={{ backgroundColor: "#FAFAFA" }}>
         <div className="container mx-auto px-4">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <div className="grid lg:grid-cols-2 gap-12 items-center px-4 sm:px-8 md:px-12 lg:px-20">
             <div className="lg:order-2">
               <h2 className="text-4xl font-bold text-gray-800 mb-6">
                 Why Startups Choose Our VC Support

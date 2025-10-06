@@ -17,6 +17,7 @@ import VCFundingSupport from "./pages/valueBoostingSolutions/vcFundingSupport";
 import PitchDeckServices from "./pages/valueBoostingSolutions/pitchDeckServices";
 import Templates from "./pages/templates/page";
 import Web3Law from "./pages/web3law/page";
+import TermsOfService from "./pages/terms_of_service";
 import Contact from "./pages/contact";
 import Gallery from "./pages/gallery";
 const App = () => {
@@ -86,6 +87,9 @@ const App = () => {
 
       {/* Contact */}
       <Route path="/contact" element={<Contact />} />
+
+      {/* Terms of Service */}
+      <Route path="/terms-of-service" element={<TermsOfService />} />
 
     </Routes>
   );

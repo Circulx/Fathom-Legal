@@ -121,7 +121,7 @@ const DisputeResolution = () => {
             <h2 className="text-4xl font-bold text-gray-800 mb-8">
                Our Areas of Expertise Include:
             </h2>
-            <p className="text-lg text-gray-600 leading-relaxed">
+            <p className="text-lg text-left text-gray-600 leading-relaxed">
               At Fathom Legal, we specialize in resolving a wide range of
               disputes with professionalism, efficiency, and integrity. Our team
               of experienced litigators and dispute resolution experts is
@@ -142,7 +142,7 @@ const DisputeResolution = () => {
           {expertiseAreas.map((area, index) => (
             <div
               key={index}
-              className={`grid lg:grid-cols-2 gap-12 items-center ${
+              className={`grid lg:grid-cols-2 gap-12 items-center px-4 sm:px-8 md:px-12 lg:px-20 ${
                 index !== expertiseAreas.length - 1 ? "mb-20" : ""
               }`}
             >

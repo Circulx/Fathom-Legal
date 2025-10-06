@@ -91,12 +91,12 @@ const Contact = () => {
       <section className="py-20 bg-gradient-to-br from-gray-50 via-white to-gray-100 relative overflow-hidden">
         
         <div className="container mx-auto px-4 relative z-10">
-          <div className="max-w-4xl mx-auto text-center">
+          <div className="max-w-5xl mx-auto text-center">
             
-            <h1 className="text-2xl md:text-4xl font-bold text-gray-800 mb-4">
+            <h1 className="text-4xl lg:text-6xl font-bold text-gray-800 mb-6">
               Get in <span style={{ color: "#A5292A" }}>Touch</span>
             </h1>
-            <p className="text-lg text-gray-600  max-w-3xl mx-auto ">
+            <p className="text-xl text-gray-600 max-w-4xl mx-auto">
               Ready to discuss your legal needs? Contact our experienced team 
               for professional legal consultation and expert guidance.
             </p>
@@ -107,52 +107,52 @@ const Contact = () => {
       </section>
 
       {/* Contact Form & Info Section */}
-      <section className="py-3 bg-white">
+      <section className="py-20 bg-white">
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
             {/* Headlines Section */}
-            <div className="grid lg:grid-cols-2 gap-50 mb-8">
+            <div className="grid lg:grid-cols-2 gap-12 mb-12">
               <div className="text-center lg:text-left">
-                <h2 className="text-2xl font-bold text-gray-800 mb-4">
+                <h2 className="text-3xl font-bold text-gray-800 mb-6">
                   Contact Information
                 </h2>
-                <p className="text-base text-gray-600">
+                <p className="text-lg text-gray-600">
                   Get in touch with our legal experts. We're here to help you 
                   navigate complex legal challenges and provide expert guidance.
                 </p>
               </div>
               <div className="text-center lg:text-left">
-                <h2 className="text-2xl font-bold text-gray-800 mb-3">
+                <h2 className="text-3xl font-bold text-gray-800 mb-6">
                   Send us a Message
                 </h2>
-                <p className="text-base text-gray-600">
+                <p className="text-lg text-gray-600">
                   Fill out the form below and we'll get back to you within 24 hours
                 </p>
               </div>
             </div>
 
             {/* Contact Information and Form Section */}
-            <div className="grid lg:grid-cols-2 gap-50">
+            <div className="grid lg:grid-cols-2 gap-12">
               {/* Contact Information Section */}
               <div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-12">
                   {contactInfo.map((info, index) => (
                     <div key={index} className="bg-white p-6 rounded-xl shadow-lg border-2 border-gray-300 hover:border-[#A5292A] hover:shadow-xl transition-all duration-300">
                       <div className="text-center">
-                        <div className="flex justify-center mb-4">
+                        <div className="flex justify-center mb-6">
                           <div>
                             {info.icon}
                           </div>
                         </div>
-                        <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                        <h3 className="text-lg font-semibold text-gray-800 mb-3">
                           {info.title}
                         </h3>
                         {info.details.map((detail, idx) => (
-                          <p key={idx} className="text-gray-600 mb-1 text-sm">
+                          <p key={idx} className="text-gray-600 mb-2 text-sm md:text-base">
                             {detail}
                           </p>
                         ))}
-                        <p className="text-xs text-gray-500 mt-2">
+                        <p className="text-xs md:text-sm text-gray-500 mt-3">
                           {info.description}
                         </p>
                       </div>
@@ -162,14 +162,14 @@ const Contact = () => {
 
                 {/* Quick Contact CTA */}
                 <div className="bg-gradient-to-br from-[#A5292A] to-[#8B1E1E] p-6 rounded-2xl text-white shadow-lg text-center mt-20">
-                  <h3 className="text-xl font-semibold mb-3">
+                  <h3 className="text-xl font-semibold mb-4">
                     Need Immediate Assistance?
                   </h3>
-                  <p className="text-white text-opacity-90 mb-4 text-sm">
+                  <p className="text-white text-opacity-90 mb-6 text-base">
                     For urgent legal matters, call us directly or schedule a 
                     same-day consultation.
                   </p>
-                  <button className="bg-white text-[#A5292A] px-4 py-2 rounded-lg font-semibold hover:opacity-90 transition-all flex items-center text-sm mx-auto">
+                  <button className="bg-white text-[#A5292A] px-6 py-3 rounded-lg font-semibold hover:opacity-90 transition-all flex items-center text-base mx-auto">
                     Schedule Consultation <ArrowRight className="ml-2 w-4 h-4" />
                   </button>
                 </div>

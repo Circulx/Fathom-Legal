@@ -266,7 +266,7 @@ const ServicesPage = () => {
       {/* Stress-Free Legal Solutions */}
       <section className="py-20 bg-white">
         <div className="container mx-auto px-4">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <div className="grid lg:grid-cols-2 gap-12 items-center px-4 sm:px-8 md:px-12 lg:px-20">
             <div>
               <p
                 className="text-lg font-semibold mb-2"

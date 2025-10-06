@@ -96,10 +96,10 @@ const AboutUs = () => {
 
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-5xl md:text-6xl font-bold mb-6">
+            <h1 className="text-5xl md:text-6xl font-bold mb-4">
               About <span style={{ color: "#A5292A" }}>Fathom Legal</span>
             </h1>
-            <p className="text-xl md:text-2xl mb-8 text-gray-700">
+            <p className="text-xl mb-4 text-gray-700">
               Excellence in Legal Practice Since Our Inception
             </p>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto">
@@ -113,8 +113,8 @@ const AboutUs = () => {
 
       {/* Why Choose Fathom Legal */}
       <section className="py-20 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
+        <div className="container mx-auto px-4 ">
+          <div className="text-center mb-16  ">
             <h2 className="text-4xl font-bold text-gray-800 mb-4">
               Why Choose Fathom Legal?
             </h2>
@@ -125,13 +125,13 @@ const AboutUs = () => {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 px-4 sm:px-8 md:px-12 lg:px-20">
             {whyChooseUs.map((item, index) => (
               <div
                 key={index}
                 className="bg-white p-8 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 group text-center"
               >
-                <div className="text-[#A5292A] mb-6 group-hover:opacity-80 transition-opacity flex justify-center">
+                <div className="text-[#A5292A] mb-4 group-hover:opacity-80 transition-opacity flex justify-center">
                   {item.icon}
                 </div>
                 <h3 className="text-xl font-semibold text-gray-800 mb-4">
@@ -147,9 +147,9 @@ const AboutUs = () => {
       {/* Our Philosophy */}
       <section className="py-20" style={{ backgroundColor: "#FAFAFA" }}>
         <div className="container mx-auto px-4">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <div className="grid lg:grid-cols-2 gap-12 items-center px-4 sm:px-8 md:px-12 lg:px-20">
             <div>
-              <h2 className="text-4xl font-bold text-gray-800 mb-6">
+              <h2 className="text-4xl font-bold text-gray-800 mb-4">
                 Our Philosophy
               </h2>
               <div className="space-y-6 text-lg text-gray-600">
@@ -243,7 +243,7 @@ const AboutUs = () => {
           </div>
 
           <div className="max-w-6xl mx-auto">
-            <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div className="grid lg:grid-cols-2 gap-12 items-center px-4 sm:px-8 md:px-12 lg:px-20">
               {/* Founder Image */}
               <div className="text-center">
                 <div className="relative inline-block">
@@ -261,10 +261,10 @@ const AboutUs = () => {
 
               {/* Founder Details */}
               <div>
-                <h3 className="text-3xl font-bold text-gray-800 mb-2">
+                <h3 className="text-3xl font-bold text-gray-800 mb-3">
                   Adv. Ishita Sharma
                 </h3>
-                <p className="text-xl mb-6" style={{ color: "#A5292A" }}>
+                <p className="text-xl mb-4" style={{ color: "#A5292A" }}>
                   Founder & Managing Partner
                 </p>
 
@@ -276,7 +276,7 @@ const AboutUs = () => {
                     truly understand and support business growth.
                   </p>
 
-                  <p>
+                  <p className="text-base">
                     She specializes in corporate structuring, startup ecosystem
                     guidance, and strategic legal planning. Her expertise spans
                     across various industries, making her a trusted advisor for
@@ -284,31 +284,31 @@ const AboutUs = () => {
                   </p>
 
                   <div>
-                    <h4 className="text-lg font-semibold text-gray-800 mb-3">
+                    <h4 className="text-lg font-semibold text-gray-800 mb-4">
                       Areas of Practice:
                     </h4>
-                    <div className="grid sm:grid-cols-2 gap-3">
+                    <div className="grid sm:grid-cols-2 gap-4">
                       {practiceAreas.map((area, index) => (
                         <div key={index} className="flex items-center">
                           <div
                             className="w-2 h-2 rounded-full mr-3"
                             style={{ backgroundColor: "#A5292A" }}
                           ></div>
-                          <span className="text-gray-700">{area}</span>
+                          <span className="text-gray-700 text-sm md:text-base">{area}</span>
                         </div>
                       ))}
                     </div>
                   </div>
 
-                  <div className="pt-4">
-                    <h4 className="text-lg font-semibold text-gray-800 mb-3">
+                  <div className="pt-6">
+                    <h4 className="text-lg font-semibold text-gray-800 mb-4">
                       Qualifications:
                     </h4>
-                    <ul className="space-y-2 text-gray-600">
-                      <li>• LL.B. from National Law University</li>
-                      <li>• LL.M. in Corporate Law</li>
-                      <li>• Member, Bar Council of India</li>
-                      <li>• Certified Corporate Legal Advisor</li>
+                    <ul className="space-y-3 text-gray-600">
+                      <li className="text-sm md:text-base">• LL.B. from National Law University</li>
+                      <li className="text-sm md:text-base">• LL.M. in Corporate Law</li>
+                      <li className="text-sm md:text-base">• Member, Bar Council of India</li>
+                      <li className="text-sm md:text-base">• Certified Corporate Legal Advisor</li>
                     </ul>
                   </div>
                 </div>
@@ -321,43 +321,43 @@ const AboutUs = () => {
       {/* Connect With Us */}
       <section className="py-20" style={{ backgroundColor: "#A5292A" }}>
         <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-white mb-6">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-white mb-4">
               Connect With Us
             </h2>
-            <p className="text-xl text-white text-opacity-90 max-w-3xl mx-auto">
+            <p className="text-xl text-white text-opacity-90 max-w-4xl mx-auto">
               Ready to partner with us for your legal needs? Get in touch with
               our experienced team today.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
             <div className="text-center">
               <MapPin className="w-12 h-12 text-white text-opacity-80 mx-auto mb-4" />
-              <h4 className="text-lg font-semibold text-white mb-2">
+              <h4 className="text-lg font-semibold text-white mb-3">
                 Office Address
               </h4>
-              <p className="text-white text-opacity-80">New Delhi, India</p>
+              <p className="text-white text-opacity-80 text-sm md:text-base">New Delhi, India</p>
             </div>
 
             <div className="text-center">
               <Phone className="w-12 h-12 text-white text-opacity-80 mx-auto mb-4" />
-              <h4 className="text-lg font-semibold text-white mb-2">Phone</h4>
-              <p className="text-white text-opacity-80">+91-XX-XXXX-XXXX</p>
+              <h4 className="text-lg font-semibold text-white mb-3">Phone</h4>
+              <p className="text-white text-opacity-80 text-sm md:text-base">+91-XX-XXXX-XXXX</p>
             </div>
 
             <div className="text-center">
               <Mail className="w-12 h-12 text-white text-opacity-80 mx-auto mb-4" />
-              <h4 className="text-lg font-semibold text-white mb-2">Email</h4>
-              <p className="text-white text-opacity-80">info@fathomlegal.com</p>
+              <h4 className="text-lg font-semibold text-white mb-3">Email</h4>
+              <p className="text-white text-opacity-80 text-sm md:text-base">info@fathomlegal.com</p>
             </div>
 
             <div className="text-center">
               <Heart className="w-12 h-12 text-white text-opacity-80 mx-auto mb-4" />
-              <h4 className="text-lg font-semibold text-white mb-2">
+              <h4 className="text-lg font-semibold text-white mb-3">
                 Follow Us
               </h4>
-              <div className="flex justify-center space-x-4 mt-2">
+              <div className="flex justify-center space-x-4 mt-3">
                 <Linkedin className="w-6 h-6 text-white text-opacity-80 hover:text-white cursor-pointer" />
                 <Twitter className="w-6 h-6 text-white text-opacity-80 hover:text-white cursor-pointer" />
                 <Instagram className="w-6 h-6 text-white text-opacity-80 hover:text-white cursor-pointer" />
@@ -367,7 +367,7 @@ const AboutUs = () => {
 
           <div className="text-center">
             <button
-              className="bg-white hover:bg-gray-100 px-8 py-4 rounded-lg font-semibold transition-colors text-lg"
+              className="bg-white hover:bg-gray-100 px-10 py-5 rounded-lg font-semibold transition-colors text-lg"
               style={{ color: "#A5292A" }}
             >
               Schedule a Consultation{" "}

@@ -100,7 +100,7 @@ const ChiefLegalOfficerService = () => {
         ></div>
 
         <div className="container mx-auto px-4 relative z-10">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <div className="grid lg:grid-cols-2 gap-12 items-center px-4 sm:px-8 md:px-12 lg:px-20">
             <div>
               <h1 className="text-4xl md:text-5xl font-bold mb-8 text-gray-800">
                 Chief Legal Officer Service
@@ -146,7 +146,7 @@ const ChiefLegalOfficerService = () => {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 px-4 sm:px-8 md:px-12 lg:px-20">
             {benefits.map((benefit, index) => (
               <div
                 key={index}
@@ -173,7 +173,7 @@ const ChiefLegalOfficerService = () => {
       {/* Service Areas Section */}
       <section className="py-20" style={{ backgroundColor: "#FAFAFA" }}>
         <div className="container mx-auto px-4">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <div className="grid lg:grid-cols-2 gap-12 items-center px-4 sm:px-8 md:px-12 lg:px-20">
             <div>
               <h2 className="text-4xl font-bold text-gray-800 mb-6">
                 Comprehensive Legal Leadership
@@ -185,7 +185,7 @@ const ChiefLegalOfficerService = () => {
                 business needs to thrive in today's competitive landscape.
               </p>
 
-              <div className="grid sm:grid-cols-2 gap-4">
+              <div className="grid sm:grid-cols-2 gap-4 px-4 sm:px-8 md:px-12 lg:px-20">
                 {serviceAreas.map((area, index) => (
                   <div
                     key={index}
@@ -250,7 +250,7 @@ const ChiefLegalOfficerService = () => {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-4 gap-8">
+          <div className="grid md:grid-cols-4 gap-8 px-4 sm:px-8 md:px-12 lg:px-20">
             <div className="text-center">
               <div
                 className="text-white p-4 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-6"

@@ -25,7 +25,20 @@ import {
   BookOpen,
   MessageCircle,
   Plus,
-  Minus
+  Minus,
+  FileCheck,
+  Gavel,
+  Briefcase,
+  FileSignature,
+  Copyright,
+  UserCheck,
+  Search,
+  FileBarChart,
+  Calculator,
+  ArrowUpRight,
+  FileSpreadsheet,
+  Settings,
+  Plane
 } from "lucide-react";
 
 const Web3Law = () => {
@@ -39,124 +52,10 @@ const Web3Law = () => {
   const handleContactClick = () => {
     navigate('/contact');
   };
-  const practiceAreas = [
-    {
-      icon: <Coins className="w-6 h-6" />,
-      title: "Crypto & Digital Assets",
-      description: "Compliance with local and international crypto regulations, licensing, securities law compliance, and regulatory filings.",
-      services: ["Securities law compliance", "KYC/AML setup", "Exchange licensing", "Custody solutions"]
-    },
-    {
-      icon: <Users className="w-6 h-6" />,
-      title: "DAOs & Governance",
-      description: "Structuring DAOs, liability issues, governance models, and legal frameworks for decentralized organizations.",
-      services: ["DAO legal structure", "Governance frameworks", "Liability protection", "Voting mechanisms"]
-    },
-    {
-      icon: <FileText className="w-6 h-6" />,
-      title: "Smart Contracts",
-      description: "Enforceability, drafting, auditing for compliance, and legal review of automated contract systems.",
-      services: ["Smart contract audits", "Legal enforceability", "Compliance review", "Risk assessment"]
-    },
-    {
-      icon: <Palette className="w-6 h-6" />,
-      title: "NFTs & Digital Art",
-      description: "Intellectual property rights, licensing, royalties, ownership disputes, and digital asset protection.",
-      services: ["IP rights protection", "Licensing agreements", "Royalty structures", "Ownership disputes"]
-    },
-    {
-      icon: <TrendingUp className="w-6 h-6" />,
-      title: "DeFi (Decentralized Finance)",
-      description: "Lending, staking, yield farming, regulatory compliance, and legal frameworks for DeFi protocols.",
-      services: ["DeFi protocol structure", "Yield farming compliance", "Lending regulations", "Staking legal issues"]
-    },
-    {
-      icon: <Building className="w-6 h-6" />,
-      title: "Tokenization & ICOs/IDOs",
-      description: "Securities law compliance, whitepaper review, structuring, and regulatory guidance for token launches.",
-      services: ["Token launch compliance", "Whitepaper review", "Securities regulations", "IDO structuring"]
-    },
-    {
-      icon: <Lock className="w-6 h-6" />,
-      title: "Data Privacy & Cybersecurity",
-      description: "GDPR, data handling in blockchain, privacy compliance, and cybersecurity legal frameworks.",
-      services: ["GDPR compliance", "Data protection", "Privacy frameworks", "Cybersecurity laws"]
-    },
-    {
-      icon: <Globe className="w-6 h-6" />,
-      title: "Taxation & Cross-Border Issues",
-      description: "Crypto taxation, cross-border digital assets, international compliance, and tax optimization strategies.",
-      services: ["Crypto taxation", "Cross-border compliance", "Tax optimization", "International regulations"]
-    }
-  ];
+  
+  
 
-  const whyChooseUs = [
-    {
-      icon: <Zap className="w-8 h-8" />,
-      title: "Deep Technical Understanding",
-      description: "Our team combines legal expertise with hands-on experience in blockchain technology, smart contracts, and DeFi protocols."
-    },
-    {
-      icon: <Globe className="w-8 h-8" />,
-      title: "Multi-Jurisdictional Expertise",
-      description: "We navigate complex international regulations across major crypto-friendly jurisdictions including US, EU, Singapore, and Switzerland."
-    },
-    {
-      icon: <Shield className="w-8 h-8" />,
-      title: "Proactive Compliance",
-      description: "Stay ahead of evolving regulations with our proactive approach to compliance and risk management in the fast-moving Web3 space."
-    },
-    {
-      icon: <Users className="w-8 h-8" />,
-      title: "Proven Track Record",
-      description: "Successfully advised numerous Web3 projects, from early-stage startups to established protocols and major exchanges."
-    }
-  ];
-
-  const resources = [
-    {
-      title: "Are NFTs Considered Securities?",
-      description: "Understanding the regulatory classification of NFTs and compliance requirements.",
-      readTime: "5 min read"
-    },
-    {
-      title: "Legal Risks of DAOs",
-      description: "Key legal considerations for decentralized autonomous organizations.",
-      readTime: "7 min read"
-    },
-    {
-      title: "DeFi Protocol Compliance Guide",
-      description: "Essential compliance requirements for decentralized finance protocols.",
-      readTime: "10 min read"
-    },
-    {
-      title: "Smart Contract Legal Framework",
-      description: "Legal enforceability and compliance considerations for smart contracts.",
-      readTime: "6 min read"
-    }
-  ];
-
-  const testimonials = [
-    {
-      name: "Alex Chen",
-      company: "DeFi Protocol Founder",
-      text: "Fathom Legal's expertise in Web3 law helped us navigate complex regulatory requirements for our DeFi protocol. Their smart contract audit saved us from potential legal issues.",
-      rating: 5,
-    },
-    {
-      name: "Sarah Johnson",
-      company: "NFT Marketplace CEO",
-      text: "The team's understanding of NFT legal frameworks and intellectual property rights was exceptional. They helped us build a compliant marketplace from the ground up.",
-      rating: 5,
-    },
-    {
-      name: "Michael Rodriguez",
-      company: "DAO Governance Lead",
-      text: "Their DAO governance legal framework was comprehensive and practical. We now have clear legal structure and liability protection for our decentralized organization.",
-      rating: 5,
-    },
-  ];
-
+ 
   return (
     <div className="min-h-screen bg-white">
       <Navbar page="web3law" />
@@ -185,14 +84,14 @@ const Web3Law = () => {
         ></div>
 
         <div className="container mx-auto px-4 relative z-10">
-          <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-5xl md:text-6xl font-bold mb-6">
+          <div className="max-w-5xl mx-auto text-center">
+            <h1 className="text-5xl md:text-6xl font-bold mb-4">
               Web3 <span style={{ color: "#A5292A" }}>Legal</span>
             </h1>
-            <h2 className="text-2xl md:text-3xl font-semibold text-gray-700 mb-8">
+            <h2 className="text-2xl md:text-3xl lg:text-4xl font-semibold text-gray-700 mb-4">
               Building Confidence & Mitigating Risk in Web3 Legal Practice
             </h2>
-            <p className="text-lg text-gray-600 mb-10 max-w-3xl mx-auto">
+            <p className="text-lg text-gray-600 mb-4 max-w-4xl mx-auto">
               Navigating the complex and rapidly changing regulatory environment to unlock opportunities in Web3 legal matters.
             </p>
             <button 
@@ -206,134 +105,571 @@ const Web3Law = () => {
         </div>
       </section>
 
-
-
-
-      
-      {/* 2. The Advent of Web3 */}
+          {/*  Web3 Legal Services */}
       <section className="py-20 bg-gray-50">
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
-            <h2 className="text-3xl font-bold text-gray-800 mb-12 text-center">The Rise of Web3 Technology</h2>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-              <div className="prose prose-lg max-w-none">
-                <p className="text-gray-600 leading-relaxed mb-6">
-                  Over the past four decades, the internet has evolved into a centralized system dominated by major tech corporations and government entities controlling vast amounts of user data and digital infrastructure. Web3 emerges as a revolutionary response, seeking to transform digital interactions, business transactions, and online governance through decentralized, user-controlled systems.
-                </p>
-                <p className="text-gray-600 leading-relaxed mb-6">
-                  Web3 encompasses a broad spectrum of technologies including blockchain networks, digital currencies, decentralized financial protocols (DeFi), autonomous organizations (DAOs), virtual worlds, and unique digital assets (NFTs). This ecosystem represents a fundamental shift toward user sovereignty and peer-to-peer interactions.
-                </p>
-                <p className="text-gray-600 leading-relaxed mb-6">
-                  At its core, blockchain technology provides the foundation for Web3 - a secure, distributed, immutable ledger system that enables trustless transactions. This technology is rapidly being adopted across diverse sectors such as finance, supply chain management, energy distribution, healthcare, insurance, media, and numerous other industries.
-                </p>
-                <p className="text-gray-600 leading-relaxed mb-8">
-                  The common theme across all Web3 innovations is empowering users with greater control, privacy, and freedom from traditional gatekeepers. However, as this technology matures, industry leaders recognize that appropriate legal frameworks and regulatory guidance are essential to ensure user protection and mainstream adoption.
-                </p>
-                <p className="text-gray-600 leading-relaxed">
-                  At Fathom Legal, our Web3 practice has been at the forefront of this technological revolution, working with pioneering companies, innovative DAOs, visionary founders, investment funds, creative professionals, and fellow legal practitioners across India and globally.
-                </p>
-              </div>
-              <div className="flex justify-center h-full">
-                <img 
-                  src="/blockchain.jpg" 
-                  alt="Web3 Technology Illustration" 
-                  className="w-full h-full object-cover rounded-lg shadow-lg"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 3. Cryptocurrency and DeFi */}
-      <section className="py-20 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto">
-            <h2 className="text-3xl font-bold text-gray-800 mb-8">Digital Assets and Decentralized Finance</h2>
-            <div className="prose prose-lg max-w-none">
-              <p className="text-gray-600 leading-relaxed mb-6">
-                The digital asset revolution began with Bitcoin's introduction in 2009, fundamentally changing how we think about money and value transfer. This innovation sparked the creation of thousands of alternative cryptocurrencies and digital tokens. The regulatory landscape has been equally dynamic - while some nations like El Salvador and the Central African Republic have embraced Bitcoin as legal tender, others like China have implemented strict prohibitions while developing their own central bank digital currencies.
-              </p>
-              <p className="text-gray-600 leading-relaxed mb-6">
-                The digital asset market has experienced explosive growth, reaching valuations exceeding $3 trillion at its peak. This rapid expansion has created significant challenges for traditional financial regulators, who must balance innovation with consumer protection and market stability in an environment that operates 24/7 across global boundaries.
-              </p>
-              <p className="text-gray-600 leading-relaxed mb-6">
-                The decentralized nature of digital assets introduces unique legal complexities, including jurisdictional ambiguity, enhanced security risks, and novel compliance requirements. Traditional financial institutions face unprecedented challenges in adapting their risk management and regulatory frameworks to accommodate these borderless digital currencies.
-              </p>
-              <p className="text-gray-600 leading-relaxed mb-6">
-                As the digital asset ecosystem continues to mature, there's growing consensus among industry participants that thoughtful regulation is necessary. However, the scope, implementation, and oversight of such regulations remain subjects of intense debate. The regulatory framework that emerges will significantly impact taxation policies, compliance obligations, banking relationships, intellectual property protection, and data privacy requirements.
-              </p>
-              <p className="text-gray-600 leading-relaxed">
-                Success in this evolving landscape requires sophisticated legal guidance that combines traditional transactional expertise with deep understanding of digital asset technologies. Our clients benefit from our experience in cross-border transactions, regulatory compliance, and the unique challenges presented by decentralized financial systems.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-
-       {/* 4. Decentralized Autonomous Organizations (DAOs) */}
-      <section className="py-20 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <div className="max-w-6xl mx-auto">
-            <h2 className="text-3xl font-bold text-gray-800 mb-12 text-center">Decentralized Autonomous Organizations (DAOs)</h2>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-              <div className="prose prose-lg max-w-none">
-                <p className="text-gray-600 leading-relaxed mb-6">
-                DAOs represent a revolutionary approach to organizational governance, enabling communities to operate collectively without traditional hierarchical structures or centralized control. These blockchain-based organizations function through consensus mechanisms and smart contracts, allowing members to collaborate on diverse objectives ranging from investment strategies to social impact initiatives.
-                  </p>
-                <p className="text-gray-600 leading-relaxed mb-6">
-                Unlike traditional corporations, DAOs operate without formal corporate structures, board of directors, or conventional governance documents. Instead, their operational rules and decision-making processes are encoded directly into smart contracts on the blockchain. This creates unique challenges as these automated systems often don't align with established corporate law frameworks or securities regulations that govern traditional investment vehicles.
-                </p>
-
-                
-              </div>
-              <div className="flex justify-center h-full">
-                <img 
-                 src="/dao.png" 
-                 alt="Decentralized Autonomous Organizations (DAOs) Illustration" 
-                  className="w-full h-full object-cover rounded-lg shadow-lg"
-                />
-              </div>
-            </div>
-          </div>
+            <h1 className="text-4xl font-bold text-gray-800 mb-4 text-center">Comprehensive Legal Services</h1>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {/* Crypto & Digital Assets */}
+              <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+                <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4">
+                  <FileCheck className="w-6 h-6" style={{ color: "#A5292A" }} />
                 </div>
-      </section>
-
-
-     
-      
-
-      {/* 5. Non-fungible Tokens (NFTs) */}
-      <section className="py-20 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto">
-            <h2 className="text-3xl font-bold text-gray-800 mb-8">Non-Fungible Tokens (NFTs)</h2>
-            <div className="prose prose-lg max-w-none">
-              <p className="text-gray-600 leading-relaxed mb-6">
-                NFTs represent a groundbreaking category of digital assets that can represent ownership of unique items, both digital and physical. These blockchain-based tokens have created new markets for digital art, collectibles, virtual real estate, and even real-world assets. The NFT ecosystem has experienced remarkable growth, creating new opportunities for creators, collectors, and investors worldwide.
-              </p>
-              <p className="text-gray-600 leading-relaxed mb-6">
-                While NFTs themselves are unique and non-interchangeable, the underlying intellectual property rights they represent can be complex and multifaceted. Creators typically retain certain rights to their work even after selling the NFT, while purchasers acquire specific ownership rights. This creates a nuanced legal landscape that requires careful consideration of licensing terms, usage rights, and intellectual property protection.
-              </p>
-              <p className="text-gray-600 leading-relaxed">
-                The NFT ecosystem involves multiple stakeholders - from individual creators and artists to large-scale NFT platforms, marketplaces, and institutional buyers. Each participant requires comprehensive legal support covering intellectual property protection, contract negotiation, regulatory compliance, cross-border transactions, and dispute resolution. Success in this space demands sophisticated legal guidance that understands both traditional IP law and the unique characteristics of blockchain-based digital assets.
-              </p>
+                <h3 className="text-xl font-semibold text-gray-800 mb-4">Digital Asset Licensing & Compliance</h3>
+                <p className="text-gray-600 text-base mb-4">
+                  We help digital-asset ventures navigate the complex regulatory landscape by securing necessary licenses, ensuring full compliance, and building frameworks that align innovation with enforceable law.
+                </p>
+                <ul className="space-y-2">
+                  <li className="flex items-center text-sm text-gray-600">
+                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
+                      <span className="text-white text-xs">✓</span>
+                    </span>
+                    License structuring across jurisdictions
+                  </li>
+                  <li className="flex items-center text-sm text-gray-600">
+                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
+                      <span className="text-white text-xs">✓</span>
+                    </span>
+                    Regulatory gap analysis & compliance roadmap
+                  </li>
+                  <li className="flex items-center text-sm text-gray-600">
+                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
+                      <span className="text-white text-xs">✓</span>
+                    </span>
+                    AML / KYC / CFT policy drafting
+                  </li>
+                  <li className="flex items-center text-sm text-gray-600">
+                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
+                      <span className="text-white text-xs">✓</span>
+                    </span>
+                    Ongoing supervision & liaison with regulators
+                  </li>
+                </ul>
               </div>
+
+              
+              <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+                <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4">
+                  <Gavel className="w-6 h-6" style={{ color: "#A5292A" }} />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-800 mb-4">Legal Opinion on Tokens</h3>
+                <p className="text-gray-600 text-base mb-4">
+                  We issue authoritative opinions assessing whether a token qualifies as a security, commodity, or utility, thereby providing clarity and defensibility to issuers and investors.
+                </p>
+                <ul className="space-y-2">
+                  <li className="flex items-center text-sm text-gray-600">
+                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
+                      <span className="text-white text-xs">✓</span>
+                    </span>
+                    Token classification analysis
+                  </li>
+                  <li className="flex items-center text-sm text-gray-600">
+                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
+                      <span className="text-white text-xs">✓</span>
+                    </span>
+                    Jurisdictional risk & legal exposure review
+                  </li>
+                  <li className="flex items-center text-sm text-gray-600">
+                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
+                      <span className="text-white text-xs">✓</span>
+                    </span>
+                    Regulatory alignment & disclosure requirements
+                  </li>
+                  <li className="flex items-center text-sm text-gray-600">
+                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
+                      <span className="text-white text-xs">✓</span>
+                    </span>
+                    Mitigation of investor liability
+                  </li>
+                </ul>
+              </div>
+
+              
+              <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+                <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4">
+                  <Briefcase className="w-6 h-6" style={{ color: "#A5292A" }} />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-800 mb-4">Global Incorporation & Structuring</h3>
+                <p className="text-gray-600 text-base mb-4">
+                  For blockchain firms eyeing global reach, we design corporate structures that optimize taxation, regulatory burden, and capital flows across jurisdictions.
+                </p>
+                <ul className="space-y-2">
+                  <li className="flex items-center text-sm text-gray-600">
+                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
+                      <span className="text-white text-xs">✓</span>
+                    </span>
+                    Holding / operating / licensing entity design
+                  </li>
+                  <li className="flex items-center text-sm text-gray-600">
+                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
+                      <span className="text-white text-xs">✓</span>
+                    </span>
+                    Tax-efficient cross-border models
+                  </li>
+                  <li className="flex items-center text-sm text-gray-600">
+                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
+                      <span className="text-white text-xs">✓</span>
+                    </span>
+                    Regulatory compliance per jurisdiction
+                  </li>
+                  <li className="flex items-center text-sm text-gray-600">
+                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
+                      <span className="text-white text-xs">✓</span>
+                    </span>
+                    Capital flow & repatriation planning
+                  </li>
+                </ul>
+              </div>
+
+          
+              <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+                <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4">
+                  <FileSignature className="w-6 h-6" style={{ color: "#A5292A" }} />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-800 mb-4">Legal Drafting: SAFE, SAFT, Token Warrants</h3>
+                <p className="text-gray-600 text-base mb-4">
+                  We draft and tailor investment instruments (SAFEs, SAFTs, warrants) that balance founder interests, investor protections, and regulatory compliance.
+                </p>
+                <ul className="space-y-2">
+                  <li className="flex items-center text-sm text-gray-600">
+                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
+                      <span className="text-white text-xs">✓</span>
+                    </span>
+                    Drafting token sale & investment agreements
+                  </li>
+                  <li className="flex items-center text-sm text-gray-600">
+                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
+                      <span className="text-white text-xs">✓</span>
+                    </span>
+                    Risk allocation & indemnity clauses
+                  </li>
+                  <li className="flex items-center text-sm text-gray-600">
+                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
+                      <span className="text-white text-xs">✓</span>
+                    </span>
+                    Vesting, anti-dilution & conversion mechanisms
+                  </li>
+                  <li className="flex items-center text-sm text-gray-600">
+                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
+                      <span className="text-white text-xs">✓</span>
+                    </span>
+                    Compliance disclosures & protective covenants
+                  </li>
+                </ul>
+              </div>
+
+              
+              <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+                <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4">
+                  <Copyright className="w-6 h-6" style={{ color: "#A5292A" }} />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-800 mb-4">Blockchain-based IP</h3>
+                <p className="text-gray-600 text-base mb-4">
+                  We help clients tokenize intellectual property, manage licensing in Web3 environments, and protect rights in decentralized contexts.
+                </p>
+                <ul className="space-y-2">
+                  <li className="flex items-center text-sm text-gray-600">
+                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
+                      <span className="text-white text-xs">✓</span>
+                    </span>
+                    Tokenization of copyrights, patents & trade marks
+                  </li>
+                  <li className="flex items-center text-sm text-gray-600">
+                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
+                      <span className="text-white text-xs">✓</span>
+                    </span>
+                    Licensing & royalty frameworks on-chain
+                  </li>
+                  <li className="flex items-center text-sm text-gray-600">
+                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
+                      <span className="text-white text-xs">✓</span>
+                    </span>
+                    Enforcement in decentralized settings
+                  </li>
+                  <li className="flex items-center text-sm text-gray-600">
+                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
+                      <span className="text-white text-xs">✓</span>
+                    </span>
+                    Revenue sharing & secondary market rights
+                  </li>
+                </ul>
+              </div>
+
+              
+              <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+                <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4">
+                  <UserCheck className="w-6 h-6" style={{ color: "#A5292A" }} />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-800 mb-4">Tokens for Employees (ETOPs)</h3>
+                <p className="text-gray-600 text-base mb-4">
+                  We design employee token incentive plans that respect securities regulation, labor law, and taxation, while fostering alignment and retention.
+                </p>
+                <ul className="space-y-2">
+                  <li className="flex items-center text-sm text-gray-600">
+                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
+                      <span className="text-white text-xs">✓</span>
+                    </span>
+                    Structuring employee token allocation schemes
+                  </li>
+                  <li className="flex items-center text-sm text-gray-600">
+                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
+                      <span className="text-white text-xs">✓</span>
+                    </span>
+                    Vesting schedules, performance triggers & lock-ups
+                  </li>
+                  <li className="flex items-center text-sm text-gray-600">
+                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
+                      <span className="text-white text-xs">✓</span>
+                    </span>
+                    Compliance with labor & securities laws
+                  </li>
+                  <li className="flex items-center text-sm text-gray-600">
+                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
+                      <span className="text-white text-xs">✓</span>
+                    </span>
+                    Tax treatment and reporting strategy
+                  </li>
+                </ul>
+          </div>
+
+              
+              <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+                <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4">
+                  <Search className="w-6 h-6" style={{ color: "#A5292A" }} />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-800 mb-4">Smart Contract Legal Audit</h3>
+                <p className="text-gray-600 text-base mb-4">
+                  We perform a legal audit of smart contracts to identify risks, gaps, and compliance issues, working alongside technical audits to strengthen legal defensibility.
+                </p>
+                <ul className="space-y-2">
+                  <li className="flex items-center text-sm text-gray-600">
+                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
+                      <span className="text-white text-xs">✓</span>
+                    </span>
+                    Review of contract terms & logic flows
+                  </li>
+                  <li className="flex items-center text-sm text-gray-600">
+                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
+                      <span className="text-white text-xs">✓</span>
+                    </span>
+                    Liability & indemnity assessment
+                  </li>
+                  <li className="flex items-center text-sm text-gray-600">
+                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
+                      <span className="text-white text-xs">✓</span>
+                    </span>
+                    Regulatory compliance checks
+                  </li>
+                  <li className="flex items-center text-sm text-gray-600">
+                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
+                      <span className="text-white text-xs">✓</span>
+                    </span>
+                    Dispute-resolution & upgrade clauses
+                  </li>
+                </ul>
+              </div>
+
+              
+              <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+                <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4">
+                  <FileBarChart className="w-6 h-6" style={{ color: "#A5292A" }} />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-800 mb-4">FIU-IND Registration</h3>
+                <p className="text-gray-600 text-base mb-4">
+                  We assist Virtual Asset Service Providers (VASPs) in India with registration before the Financial Intelligence Unit (FIU-IND), setting up compliance structures per local law.
+                </p>
+                <ul className="space-y-2">
+                  <li className="flex items-center text-sm text-gray-600">
+                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
+                      <span className="text-white text-xs">✓</span>
+                    </span>
+                    Application preparation & liaison
+                  </li>
+                  <li className="flex items-center text-sm text-gray-600">
+                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
+                      <span className="text-white text-xs">✓</span>
+                    </span>
+                    AML / CFT program design
+                  </li>
+                  <li className="flex items-center text-sm text-gray-600">
+                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
+                      <span className="text-white text-xs">✓</span>
+                    </span>
+                    Reporting systems & audit trails
+                  </li>
+                  <li className="flex items-center text-sm text-gray-600">
+                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
+                      <span className="text-white text-xs">✓</span>
+                    </span>
+                    Ongoing compliance support
+                  </li>
+                </ul>
+              </div>
+
+              <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+                <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4">
+                  <Calculator className="w-6 h-6" style={{ color: "#A5292A" }} />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-800 mb-4">VDA Tax Services</h3>
+                <p className="text-gray-600 text-base mb-4">
+                  We specialize in taxation of Virtual Digital Assets (VDAs), helping clients classify, compute, plan, and comply with domestic and cross-border tax obligations.
+                </p>
+                <ul className="space-y-2">
+                  <li className="flex items-center text-sm text-gray-600">
+                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
+                      <span className="text-white text-xs">✓</span>
+                    </span>
+                    Tax classification & event mapping
+                  </li>
+                  <li className="flex items-center text-sm text-gray-600">
+                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
+                      <span className="text-white text-xs">✓</span>
+                    </span>
+                    Income tax, capital gains & GST treatment
+                  </li>
+                  <li className="flex items-center text-sm text-gray-600">
+                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
+                      <span className="text-white text-xs">✓</span>
+                    </span>
+                    Cross-border tax planning
+                  </li>
+                  <li className="flex items-center text-sm text-gray-600">
+                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
+                      <span className="text-white text-xs">✓</span>
+                    </span>
+                    Audit defense & disclosure strategy
+                  </li>
+                </ul>
+              </div>
+
+              <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+                <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4">
+                  <ArrowUpRight className="w-6 h-6" style={{ color: "#A5292A" }} />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-800 mb-4">Web2 to Web3 Transition</h3>
+                <p className="text-gray-600 text-base mb-4">
+                  We guide traditional Web2 firms in legally transitioning into the Web3 space — migrating assets, contracts, governance, and compliance frameworks.
+                </p>
+                <ul className="space-y-2">
+                  <li className="flex items-center text-sm text-gray-600">
+                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
+                      <span className="text-white text-xs">✓</span>
+                    </span>
+                    Contractual migration & amendments
+                  </li>
+                  <li className="flex items-center text-sm text-gray-600">
+                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
+                      <span className="text-white text-xs">✓</span>
+                    </span>
+                    IP re-licensing & tokenization strategy
+                  </li>
+                  <li className="flex items-center text-sm text-gray-600">
+                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
+                      <span className="text-white text-xs">✓</span>
+                    </span>
+                    Compliance transformation roadmap
+                  </li>
+                  <li className="flex items-center text-sm text-gray-600">
+                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
+                      <span className="text-white text-xs">✓</span>
+                    </span>
+                    Stakeholder transition & governance realignment
+                  </li>
+                </ul>
+              </div>
+
+              <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+                <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4">
+                  <FileSpreadsheet className="w-6 h-6" style={{ color: "#A5292A" }} />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-800 mb-4">Indian FEMA Compliances</h3>
+                <p className="text-gray-600 text-base mb-4">
+                  We help crypto & blockchain businesses comply with India's foreign exchange (FEMA) rules when dealing with cross-border flows, investments, or token transfers.
+                </p>
+                <ul className="space-y-2">
+                  <li className="flex items-center text-sm text-gray-600">
+                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
+                      <span className="text-white text-xs">✓</span>
+                    </span>
+                    Structuring foreign inward / outward remittances
+                  </li>
+                  <li className="flex items-center text-sm text-gray-600">
+                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
+                      <span className="text-white text-xs">✓</span>
+                    </span>
+                    Reporting & approvals under FEMA
+                  </li>
+                  <li className="flex items-center text-sm text-gray-600">
+                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
+                      <span className="text-white text-xs">✓</span>
+                    </span>
+                    RBI coordination & regulatory advisory
+                  </li>
+                  <li className="flex items-center text-sm text-gray-600">
+                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
+                      <span className="text-white text-xs">✓</span>
+                    </span>
+                    Cross-border capital movement planning
+                  </li>
+                </ul>
+              </div>
+
+              <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+                <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4">
+                  <BookOpen className="w-6 h-6" style={{ color: "#A5292A" }} />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-800 mb-4">Whitepapers</h3>
+                <p className="text-gray-600 text-base mb-4">
+                  We draft legally robust whitepapers that combine technical clarity with regulatory disclosures, risk statements, and investor protections.
+                </p>
+                <ul className="space-y-2">
+                  <li className="flex items-center text-sm text-gray-600">
+                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
+                      <span className="text-white text-xs">✓</span>
+                    </span>
+                    Market, technical & legal narrative balance
+                  </li>
+
+                  <li className="flex items-center text-sm text-gray-600">
+                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
+                      <span className="text-white text-xs">✓</span>
+                    </span>
+                    Review and vetting
+                  </li>
+                  <li className="flex items-center text-sm text-gray-600">
+                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
+                      <span className="text-white text-xs">✓</span>
+                    </span>
+                    Risk & compliance disclosures
+                  </li>
+                  <li className="flex items-center text-sm text-gray-600">
+                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
+                      <span className="text-white text-xs">✓</span>
+                    </span>
+                    Tokenomics & governance explanation
+                  </li>
+                  <li className="flex items-center text-sm text-gray-600">
+                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
+                      <span className="text-white text-xs">✓</span>
+                    </span>
+                    Legal disclaimers & regulatory alignment
+                  </li>
+                </ul>
+              </div>
+
+              <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+                <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4">
+                  <Settings className="w-6 h-6" style={{ color: "#A5292A" }} />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-800 mb-4">Governance & Policy</h3>
+                <p className="text-gray-600 text-base mb-4">
+                  We assist DAOs, protocols, and blockchain platforms to design governance rules, policy frameworks, and liability shields that are legally resilient and operationally coherent.
+                </p>
+                <ul className="space-y-2">
+                  <li className="flex items-center text-sm text-gray-600">
+                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
+                      <span className="text-white text-xs">✓</span>
+                    </span>
+                    DAO constitutional design & rules
+                  </li>
+                  <li className="flex items-center text-sm text-gray-600">
+                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
+                      <span className="text-white text-xs">✓</span>
+                    </span>
+                    Voting mechanisms & dispute resolution
+                  </li>
+                  <li className="flex items-center text-sm text-gray-600">
+                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
+                      <span className="text-white text-xs">✓</span>
+                    </span>
+                    Liability limiting frameworks
+                  </li>
+                  <li className="flex items-center text-sm text-gray-600">
+                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
+                      <span className="text-white text-xs">✓</span>
+                    </span>
+                    Policy drafting (privacy, token use, KYC)
+                  </li>
+                </ul>
+              </div>
+
+              <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+                <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4">
+                  <Plane className="w-6 h-6" style={{ color: "#A5292A" }} />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-800 mb-4">India to Global Transitions</h3>
+                <p className="text-gray-600 text-base mb-4">
+                  We support Indian blockchain ventures in expanding overseas — structuring international legal presence, ensuring compliance abroad, and facilitating global fundraising.
+                </p>
+                <ul className="space-y-2">
+                  <li className="flex items-center text-sm text-gray-600">
+                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
+                      <span className="text-white text-xs">✓</span>
+                    </span>
+                    Jurisdiction selection & entity setup
+                  </li>
+                  <li className="flex items-center text-sm text-gray-600">
+                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
+                      <span className="text-white text-xs">✓</span>
+                    </span>
+                    Cross-border regulatory & tax compliance
+                  </li>
+                  <li className="flex items-center text-sm text-gray-600">
+                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
+                      <span className="text-white text-xs">✓</span>
+                    </span>
+                    Global investor onboarding
+                  </li>
+                  <li className="flex items-center text-sm text-gray-600">
+                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
+                      <span className="text-white text-xs">✓</span>
+                    </span>
+                    Capital repatriation & exit structuring
+                  </li>
+                </ul>
+              </div>
+
+
+            </div>
           </div>
         </div>
       </section>
+       {/* 9. Contact Section */}
+       <section className="py-20 text-white" style={{ backgroundColor: "#A5292A" }}>
+         <div className="container mx-auto px-4 text-center">
+           <h2 className="text-4xl font-bold mb-4">Contact Us</h2>
+           <p className="text-xl mb-4 text-white text-opacity-90 max-w-4xl mx-auto">
+             Ready to discuss your Web3 legal needs? Contact our experienced team for professional legal consultation.
+           </p>
+           <div className="flex flex-col sm:flex-row gap-6 justify-center">
+             <button 
+               onClick={handleContactClick}
+               className="bg-white text-[#A5292A] px-8 py-4 rounded-lg font-semibold hover:opacity-90 transition-all hover:cursor-pointer text-lg"
+             >
+               Contact Us
+             </button>
+             <button className="border-2 border-white text-white hover:bg-white hover:text-[#A5292A] px-8 py-4 rounded-lg font-semibold transition-all text-lg">
+               Call Us: +91-XX-XXXX-XXXX
+             </button>
+           </div>
+         </div>
+       </section>
 
-      {/* 6. Full-Service Planning for Web 3.0 Law */}
+
+      
+     
+
+           
       <section className="py-20 bg-gray-50">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
-            <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">Comprehensive Web3 Legal Solutions</h2>
-            <p className="text-lg text-gray-600 mb-8 text-center">
+            <h2 className="text-3xl font-bold text-gray-800 mb-4 text-center">Comprehensive Web3 Legal Solutions</h2>
+            <p className="text-lg text-gray-600 mb-4 text-center">
               Our Web3 legal team provides comprehensive support across all aspects of decentralized technology law:
             </p>
             
-            <div className="grid md:grid-cols-2 gap-8">
+            <div className="grid md:grid-cols-2 gap-6">
               <div className="space-y-6">
                 <div className="flex items-start">
                   <Building className="w-6 h-6 text-[#A5292A] mr-3 mt-1 flex-shrink-0" />
@@ -386,338 +722,16 @@ const Web3Law = () => {
         </div>
       </section>
 
-      {/* 7. An International Network of Experts */}
-      <section className="py-20 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto">
-            <h2 className="text-3xl font-bold text-gray-800 mb-8">Global Expertise and Local Knowledge</h2>
-            <div className="prose prose-lg max-w-none">
-              <p className="text-gray-600 leading-relaxed mb-6">
-                Fathom Legal has established itself as a trusted advisor in complex, rapidly evolving legal landscapes, helping clients navigate regulatory uncertainty and capitalize on emerging opportunities. Our team has built a reputation for delivering innovative legal solutions that combine deep technical understanding with practical business acumen.
-              </p>
-              <p className="text-gray-600 leading-relaxed mb-6">
-                Our Web3 practice leverages this proven approach, drawing on expertise from across our firm's practice areas to provide integrated legal solutions. We collaborate with specialists in corporate law, intellectual property, international trade, and regulatory compliance to deliver comprehensive support that addresses the multifaceted challenges of decentralized technology.
-              </p>
-              <p className="text-gray-600 leading-relaxed">
-                The global nature of Web3 technologies requires sophisticated understanding of diverse legal systems and regulatory frameworks. Our international network of legal professionals, combined with our deep knowledge of Indian law and emerging markets, positions us to provide seamless support for clients operating across multiple jurisdictions.
-            </p>
-          </div>
-          </div>
-        </div>
-      </section>
+     
 
-      {/* 8. Web3 Legal Services */}
-      <section className="py-20 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <div className="max-w-6xl mx-auto">
-            <h2 className="text-3xl font-bold text-gray-800 mb-12 text-center">Our Web3 Legal Services</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-              {/* Crypto & Digital Assets */}
-              <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
-                <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4">
-                  <Coins className="w-6 h-6" style={{ color: "#A5292A" }} />
-                </div>
-                <h3 className="text-xl font-semibold text-gray-800 mb-3">Crypto & Digital Assets</h3>
-                <p className="text-gray-600 text-sm mb-4">
-                  Compliance with local and international crypto regulations, licensing, securities law compliance, and regulatory filings.
-                </p>
-                <ul className="space-y-2">
-                  <li className="flex items-center text-sm text-gray-600">
-                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
-                      <span className="text-white text-xs">✓</span>
-                    </span>
-                    Securities law compliance
-                  </li>
-                  <li className="flex items-center text-sm text-gray-600">
-                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
-                      <span className="text-white text-xs">✓</span>
-                    </span>
-                    KYC/AML setup
-                  </li>
-                  <li className="flex items-center text-sm text-gray-600">
-                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
-                      <span className="text-white text-xs">✓</span>
-                    </span>
-                    Exchange licensing
-                  </li>
-                  <li className="flex items-center text-sm text-gray-600">
-                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
-                      <span className="text-white text-xs">✓</span>
-                    </span>
-                    Custody solutions
-                  </li>
-                </ul>
-              </div>
-
-              {/* DAOs & Governance */}
-              <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
-                <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4">
-                  <Users className="w-6 h-6" style={{ color: "#A5292A" }} />
-                </div>
-                <h3 className="text-xl font-semibold text-gray-800 mb-3">DAOs & Governance</h3>
-                <p className="text-gray-600 text-sm mb-4">
-                  Structuring DAOs, liability issues, governance models, and legal frameworks for decentralized organizations.
-                </p>
-                <ul className="space-y-2">
-                  <li className="flex items-center text-sm text-gray-600">
-                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
-                      <span className="text-white text-xs">✓</span>
-                    </span>
-                    DAO legal structure
-                  </li>
-                  <li className="flex items-center text-sm text-gray-600">
-                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
-                      <span className="text-white text-xs">✓</span>
-                    </span>
-                    Governance frameworks
-                  </li>
-                  <li className="flex items-center text-sm text-gray-600">
-                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
-                      <span className="text-white text-xs">✓</span>
-                    </span>
-                    Liability protection
-                  </li>
-                  <li className="flex items-center text-sm text-gray-600">
-                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
-                      <span className="text-white text-xs">✓</span>
-                    </span>
-                    Voting mechanisms
-                  </li>
-                </ul>
-              </div>
-
-              {/* Smart Contracts */}
-              <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
-                <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4">
-                  <FileText className="w-6 h-6" style={{ color: "#A5292A" }} />
-                </div>
-                <h3 className="text-xl font-semibold text-gray-800 mb-3">Smart Contracts</h3>
-                <p className="text-gray-600 text-sm mb-4">
-                  Enforceability, drafting, auditing for compliance, and legal review of automated contract systems.
-                </p>
-                <ul className="space-y-2">
-                  <li className="flex items-center text-sm text-gray-600">
-                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
-                      <span className="text-white text-xs">✓</span>
-                    </span>
-                    Smart contract audits
-                  </li>
-                  <li className="flex items-center text-sm text-gray-600">
-                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
-                      <span className="text-white text-xs">✓</span>
-                    </span>
-                    Legal enforceability
-                  </li>
-                  <li className="flex items-center text-sm text-gray-600">
-                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
-                      <span className="text-white text-xs">✓</span>
-                    </span>
-                    Compliance review
-                  </li>
-                  <li className="flex items-center text-sm text-gray-600">
-                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
-                      <span className="text-white text-xs">✓</span>
-                    </span>
-                    Risk assessment
-                  </li>
-                </ul>
-              </div>
-
-              {/* NFTs & Digital Art */}
-              <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
-                <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4">
-                  <Shield className="w-6 h-6" style={{ color: "#A5292A" }} />
-                </div>
-                <h3 className="text-xl font-semibold text-gray-800 mb-3">NFTs & Digital Art</h3>
-                <p className="text-gray-600 text-sm mb-4">
-                  Intellectual property rights, licensing, royalties, ownership disputes, and digital asset protection.
-                </p>
-                <ul className="space-y-2">
-                  <li className="flex items-center text-sm text-gray-600">
-                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
-                      <span className="text-white text-xs">✓</span>
-                    </span>
-                    IP rights protection
-                  </li>
-                  <li className="flex items-center text-sm text-gray-600">
-                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
-                      <span className="text-white text-xs">✓</span>
-                    </span>
-                    Licensing agreements
-                  </li>
-                  <li className="flex items-center text-sm text-gray-600">
-                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
-                      <span className="text-white text-xs">✓</span>
-                    </span>
-                    Royalty structures
-                  </li>
-                  <li className="flex items-center text-sm text-gray-600">
-                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
-                      <span className="text-white text-xs">✓</span>
-                    </span>
-                    Ownership disputes
-                  </li>
-                </ul>
-              </div>
-
-              {/* DeFi */}
-              <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
-                <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4">
-                  <Globe className="w-6 h-6" style={{ color: "#A5292A" }} />
-                </div>
-                <h3 className="text-xl font-semibold text-gray-800 mb-3">DeFi (Decentralized Finance)</h3>
-                <p className="text-gray-600 text-sm mb-4">
-                  Lending, staking, yield farming, regulatory compliance, and legal frameworks for DeFi protocols.
-                </p>
-                <ul className="space-y-2">
-                  <li className="flex items-center text-sm text-gray-600">
-                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
-                      <span className="text-white text-xs">✓</span>
-                    </span>
-                    DeFi protocol structure
-                  </li>
-                  <li className="flex items-center text-sm text-gray-600">
-                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
-                      <span className="text-white text-xs">✓</span>
-                    </span>
-                    Yield farming compliance
-                  </li>
-                  <li className="flex items-center text-sm text-gray-600">
-                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
-                      <span className="text-white text-xs">✓</span>
-                    </span>
-                    Lending regulations
-                  </li>
-                  <li className="flex items-center text-sm text-gray-600">
-                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
-                      <span className="text-white text-xs">✓</span>
-                    </span>
-                    Staking legal issues
-                  </li>
-                </ul>
-              </div>
-
-              {/* Tokenization & ICOs/IDOs */}
-              <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
-                <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4">
-                  <Building className="w-6 h-6" style={{ color: "#A5292A" }} />
-                </div>
-                <h3 className="text-xl font-semibold text-gray-800 mb-3">Tokenization & ICOs/IDOs</h3>
-                <p className="text-gray-600 text-sm mb-4">
-                  Securities law compliance, whitepaper review structuring, and regulatory guidance for token launches.
-                </p>
-                <ul className="space-y-2">
-                  <li className="flex items-center text-sm text-gray-600">
-                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
-                      <span className="text-white text-xs">✓</span>
-                    </span>
-                    Token launch compliance
-                  </li>
-                  <li className="flex items-center text-sm text-gray-600">
-                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
-                      <span className="text-white text-xs">✓</span>
-                    </span>
-                    Whitepaper review
-                  </li>
-                  <li className="flex items-center text-sm text-gray-600">
-                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
-                      <span className="text-white text-xs">✓</span>
-                    </span>
-                    Securities regulations
-                  </li>
-                  <li className="flex items-center text-sm text-gray-600">
-                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
-                      <span className="text-white text-xs">✓</span>
-                    </span>
-                    IDO structuring
-                  </li>
-                </ul>
-          </div>
-
-              {/* Data Privacy & Cybersecurity */}
-              <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
-                <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4">
-                  <Lock className="w-6 h-6" style={{ color: "#A5292A" }} />
-                </div>
-                <h3 className="text-xl font-semibold text-gray-800 mb-3">Data Privacy & Cybersecurity</h3>
-                <p className="text-gray-600 text-sm mb-4">
-                  GDPR, data handling in blockchain, privacy compliance, and cybersecurity legal frameworks.
-                </p>
-                <ul className="space-y-2">
-                  <li className="flex items-center text-sm text-gray-600">
-                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
-                      <span className="text-white text-xs">✓</span>
-                    </span>
-                    GDPR compliance
-                  </li>
-                  <li className="flex items-center text-sm text-gray-600">
-                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
-                      <span className="text-white text-xs">✓</span>
-                    </span>
-                    Data protection
-                  </li>
-                  <li className="flex items-center text-sm text-gray-600">
-                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
-                      <span className="text-white text-xs">✓</span>
-                    </span>
-                    Privacy frameworks
-                  </li>
-                  <li className="flex items-center text-sm text-gray-600">
-                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
-                      <span className="text-white text-xs">✓</span>
-                  </span>
-                    Cybersecurity laws
-                  </li>
-                </ul>
-              </div>
-
-              {/* Taxation & Cross-Border Issues */}
-              <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
-                <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4">
-                  <Globe className="w-6 h-6" style={{ color: "#A5292A" }} />
-                </div>
-                <h3 className="text-xl font-semibold text-gray-800 mb-3">Taxation & Cross-Border Issues</h3>
-                <p className="text-gray-600 text-sm mb-4">
-                  Crypto taxation, cross-border digital assets, international compliance, and tax optimization strategies.
-                </p>
-                <ul className="space-y-2">
-                  <li className="flex items-center text-sm text-gray-600">
-                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
-                      <span className="text-white text-xs">✓</span>
-                    </span>
-                    Crypto taxation
-                  </li>
-                  <li className="flex items-center text-sm text-gray-600">
-                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
-                      <span className="text-white text-xs">✓</span>
-                    </span>
-                    Cross-border compliance
-                  </li>
-                  <li className="flex items-center text-sm text-gray-600">
-                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
-                      <span className="text-white text-xs">✓</span>
-                    </span>
-                    Tax optimization
-                  </li>
-                  <li className="flex items-center text-sm text-gray-600">
-                    <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
-                      <span className="text-white text-xs">✓</span>
-                    </span>
-                    International regulations
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      
 
      
       {/* 9. Frequently Asked Questions */}
       <section className="py-20 bg-white">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
-            <h2 className="text-3xl font-bold text-gray-800 mb-12 text-center">Frequently Asked Questions</h2>
+            <h2 className="text-3xl font-bold text-gray-800 mb-4 text-center">Frequently Asked Questions</h2>
             
             <div className="space-y-4">
               <div className="border border-gray-200 rounded-lg">
@@ -792,26 +806,7 @@ const Web3Law = () => {
         </div>
       </section>
 
-      {/* 9. Contact Section */}
-      <section className="py-20 text-white" style={{ backgroundColor: "#A5292A" }}>
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-4xl font-bold mb-6">Contact Us</h2>
-          <p className="text-xl mb-8 text-white text-opacity-90 max-w-3xl mx-auto">
-            Ready to discuss your Web3 legal needs? Contact our experienced team for professional legal consultation.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button 
-              onClick={handleContactClick}
-              className="bg-white text-[#A5292A] px-8 py-4 rounded-lg font-semibold hover:opacity-90 transition-all hover:cursor-pointer"
-            >
-              Contact Us
-            </button>
-            <button className="border-2 border-white text-white hover:bg-white hover:text-[#A5292A] px-8 py-4 rounded-lg font-semibold transition-all">
-              Call Us: +91-XX-XXXX-XXXX
-            </button>
-          </div>
-        </div>
-      </section>
+      
 
     
 

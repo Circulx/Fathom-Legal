@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { NavLink } from "react-router-dom";
 import logo from "../../assets/cropped-icon-red-192x192.png";
 import Footer from "../../components/Footer";
@@ -19,22 +19,58 @@ import {
 } from "lucide-react";
 import { Navbar } from "../../components/Navbar";
 
+// Custom hook for scroll animations
+const useScrollAnimation = (delay = 0) => {
+  const [isVisible, setIsVisible] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => {
+            setIsVisible(true);
+          }, delay);
+        } else {
+          setIsVisible(false);
+        }
+      },
+      {
+        threshold: 0.15,
+        rootMargin: '0px 0px -100px 0px'
+      }
+    );
+
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+
+    return () => {
+      if (ref.current) {
+        observer.unobserve(ref.current);
+      }
+    };
+  }, [delay]);
+
+  return [ref, isVisible];
+};
+
 const DisclaimerPopup = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 shadow-lg">
-      <div className="container mx-auto px-4 py-4">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+      <div className="container mx-auto px-8 py-6">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex-1">
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">
+            <h3 className="text-xl font-semibold text-gray-800 mb-3">
               <span style={{ color: "#A5292A" }}>Disclaimer</span>
             </h3>
-            <p className="text-sm text-gray-600 leading-relaxed">
+            <p className="text-base text-gray-600 leading-relaxed">
               In accordance with the regulations set by the Bar Council of India, lawyers and law firms are prohibited from actively seeking work or engaging in advertising practices. By selecting 'I Agree', you affirm that you are voluntarily seeking information about Fathom Legal, Advocates & Corporate Consultants (FLACC) and that there has been no form of advertising, direct communication, solicitation, invitation, or any other attempt from FLACC or any of its members to encourage work engagement through this website.
             </p>
           </div>
-          <div className="flex gap-3">
+          <div className="flex gap-4">
             <button
               onClick={onClose}
               className="text-white px-6 py-2 rounded-lg font-semibold hover:opacity-90 transition-all text-sm"
@@ -59,19 +95,81 @@ const Home = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [showDisclaimer, setShowDisclaimer] = useState(true);
+  
+  // Scroll animation hooks removed
+  const [counters, setCounters] = useState({
+    years: 0,
+    cases: 0,
+    ipSupport: 0,
+    successRate: 0
+  });
 
   const handleDisclaimerClose = () => {
     setShowDisclaimer(false);
   };
 
+  // Counter animation effect with scroll trigger
+  useEffect(() => {
+    const trackRecordSection = document.getElementById('track-record');
+    
+    const animateCounters = () => {
+      const targets = { years: 8, cases: 500, ipSupport: 120, successRate: 98 };
+      const duration = 2000; // 2 seconds
+      const steps = 60; // 60 steps for smooth animation
+      const stepDuration = duration / steps;
+
+      let currentStep = 0;
+      const timer = setInterval(() => {
+        currentStep++;
+        const progress = currentStep / steps;
+        
+        setCounters({
+          years: Math.floor(targets.years * progress),
+          cases: Math.floor(targets.cases * progress),
+          ipSupport: Math.floor(targets.ipSupport * progress),
+          successRate: Math.floor(targets.successRate * progress)
+        });
+
+        if (currentStep >= steps) {
+          clearInterval(timer);
+          setCounters(targets); // Ensure final values are exact
+        }
+      }, stepDuration);
+
+      return () => clearInterval(timer);
+    };
+
+    const handleScroll = () => {
+      if (trackRecordSection) {
+        const rect = trackRecordSection.getBoundingClientRect();
+        const isVisible = rect.top < window.innerHeight && rect.bottom > 0;
+        
+        if (isVisible && counters.years === 0) {
+          // Only animate if counters haven't been animated yet
+          animateCounters();
+        }
+      }
+    };
+
+    // Add scroll listener
+    window.addEventListener('scroll', handleScroll);
+    
+    // Check on mount in case section is already visible
+    handleScroll();
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [counters.years]);
+
   const services = [
-    {
-      icon: <Scale className="w-8 h-8" />,
-      title: "Corporate Law",
-      description:
-        "Comprehensive corporate legal services including compliance, governance, and regulatory matters.",
-      link: "/services/generalcorporateadvisory",
-    },
+      {
+        icon: <Scale className="w-8 h-8" />,
+        title: "Web3 & Blockchain",
+        description:
+          "Specialized legal services for Web3 projects, DeFi protocols, NFT platforms, and blockchain compliance.",
+        link: "/web3law",
+      },
     {
       icon: <Users className="w-8 h-8" />,
       title: "Startup Legal Services",
@@ -141,172 +239,413 @@ const Home = () => {
       {/* Hero Section */}
       <section
         id="home"
-        className="text-gray-800 py-20 relative"
-        style={{ backgroundColor: "#FAFAFA" }}
+        className="min-h-screen flex relative"
       >
-        {/* Background Image Layer with Blur */}
+        {/* Full Screen Background Image */}
         <div
           className="absolute inset-0"
           style={{
-            backgroundImage: `url('https://images.unsplash.com/photo-1505664194779-8beaceb93744?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80')`,
+            backgroundImage: `url('/Homepage.png')`,
             backgroundSize: "cover",
             backgroundPosition: "center",
             backgroundRepeat: "no-repeat",
-            filter: "blur(4px)",
+          }}
+        ></div>
+        
+        {/* Red Overlay to match theme */}
+        <div
+          className="absolute inset-0"
+          style={{ 
+            backgroundColor: "rgba(165, 41, 42, 0.3)" 
           }}
         ></div>
 
-        {/* Overlay */}
-        <div
-          className="absolute inset-0"
-          style={{ backgroundColor: "rgba(250, 250, 250, 0.6)" }}
-        ></div>
+        {/* Left Panel - Text Content */}
+        <div className="w-full lg:w-1/2 flex flex-col justify-center px-4 sm:px-8 lg:px-16 py-12 sm:py-16 lg:py-20 relative z-10">
+          
+          
 
-        <div className="container mx-auto px-4 relative z-10">
-          <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-5xl md:text-6xl font-bold mb-6">
-              Where Law and Business{" "}
-              <span style={{ color: "#A5292A" }}>MEETS</span>
-            </h1>
-            <p className="text-xl md:text-2xl mb-8 text-gray-700">
-              Expert Legal Services for Businesses and Individuals
-            </p>
-            <p className="text-lg mb-10 text-gray-600 max-w-3xl mx-auto">
-              Fathom Legal Advocates & Corporate Consultants is a full-service
-              law firm headquartered in New Delhi, India. We deliver
-              high-quality legal services to clients across the country and the
-              world.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+
+          {/* Tagline */}
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-8 leading-tight text-white">
+            Facilitating commercial<br />
+            legal solutions
+          </h1>
+
+          {/* Description */}
+          <p className="text-base sm:text-lg text-white text-opacity-90 mb-12 max-w-lg leading-relaxed">
+            Our expertise across diverse practice areas and sectors covers varied and nuanced needs. 
+            Backed by experienced professionals, delighted clients from across the globe, and topical, 
+            commercial and specialised services, we deliver the best legal solutions for our clients.
+          </p>
+
+          {/* CTA Buttons */}
+          <div className="flex flex-col sm:flex-row gap-4">
+           <NavLink to="/contact"
+              className="flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 bg-white border-2 border-white text-gray-800 font-semibold hover:bg-gray-100 transition-all duration-300 group text-sm sm:text-base"
+            >
+              GET FREE CONSULTATION
+              <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            </NavLink>
+            <NavLink to="/services"
+              className="flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 bg-transparent border-2 border-white text-white font-semibold hover:bg-white hover:text-gray-800 transition-all duration-300 group text-sm sm:text-base"
+            >
+              OUR SERVICES
+              <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            </NavLink>
+          </div>
+
+          
+        </div>
+
+        {/* Right Navigation */}
+        <div className="absolute right-2 sm:right-4 lg:right-8 top-1/2 transform -translate-y-1/2 flex flex-col items-center z-10">
+          {/* Vertical Line */}
+          <div className="absolute w-0.5 h-20 sm:h-24 lg:h-32 bg-white opacity-30"></div>
+          
+          {/* Navigation Items */}
+          <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8">
+            <div className="flex items-center gap-2 sm:gap-3 lg:gap-4 group">
+              <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-white shadow-lg group-hover:scale-110 transition-transform duration-300 flex-shrink-0"></div>
+              <NavLink to="/services" className="text-white font-bold text-xs sm:text-sm lg:text-base hover:text-gray-300 transition-colors">
+                Services
+              </NavLink>
+            </div>
+            
+            <div className="flex items-center gap-2 sm:gap-3 lg:gap-4 group">
+              <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full border-2 border-white group-hover:bg-white group-hover:scale-110 transition-all duration-300 flex-shrink-0"></div>
               <button
                 onClick={() => {
-                  const contactSection = document.getElementById('contact');
-                  if (contactSection) {
-                    contactSection.scrollIntoView({ behavior: 'smooth' });
+                  const whyChooseUsSection = document.querySelector('section:nth-of-type(3)');
+                  if (whyChooseUsSection) {
+                    whyChooseUsSection.scrollIntoView({ behavior: 'smooth' });
                   }
                 }}
-                className="text-white px-8 py-4 rounded-lg text-lg font-semibold hover:opacity-90 transition-all flex items-center justify-center cursor-pointer"
-                style={{ backgroundColor: "#A5292A" }}
+                className="text-white font-bold text-xs sm:text-sm lg:text-base hover:text-gray-300 transition-colors cursor-pointer"
               >
-                Get Free Consultation <ArrowRight className="ml-2 w-5 h-5" />
+                Why Choose Us?
               </button>
-              
+            </div>
+            
+            <div className="flex items-center gap-2 sm:gap-3 lg:gap-4 group">
+              <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full border-2 border-white group-hover:bg-white group-hover:scale-110 transition-all duration-300 flex-shrink-0"></div>
+              <button
+                onClick={() => {
+                  const testimonialsSection = document.getElementById('testimonials');
+                  if (testimonialsSection) {
+                    testimonialsSection.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }}
+                className="text-white font-bold text-xs sm:text-sm lg:text-base hover:text-gray-300 transition-colors cursor-pointer"
+              >
+                Client Testimonials
+              </button>
+            </div>
+            
+            <div className="flex items-center gap-2 sm:gap-3 lg:gap-4 group">
+              <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full border-2 border-white group-hover:bg-white group-hover:scale-110 transition-all duration-300 flex-shrink-0"></div>
+              <NavLink to="/contact" className="text-white font-bold text-xs sm:text-sm lg:text-base hover:text-gray-300 transition-colors">
+                Contact
+              </NavLink>
             </div>
           </div>
         </div>
+
       </section>
 
       {/* Services Section */}
-      <section id="services" className="py-20 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-800 mb-4">
-              Our Legal Services
+      <section id="services" className="py-20 bg-gray-100">
+  <div className="container mx-auto px-4">
+     <div className="text-center mb-16">
+      <h2 className="text-3xl md:text-4xl font-bold text-black mb-2">
+        Our Legal <span style={{ color: "#A5292A" }}>Services</span>
+      </h2>
+     
+    </div>
+
+    <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 px-4 sm:px-8 md:px-12 lg:px-20">
+      {services.map((service, index) => (
+         <div
+           key={index}
+           className="relative h-80 rounded-xl overflow-hidden group cursor-pointer"
+         >
+          {/* Background Image */}
+          <div
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-transform duration-500 group-hover:scale-110"
+            style={{
+              backgroundImage:
+                index === 0
+                  ? `url('/corporatelaw.jpg')`
+                  : index === 1
+                  ? `url('/legalservices.jpg')`
+                  : index === 2
+                  ? `url('/contract.jpg')`
+                  : `url('https://images.unsplash.com/photo-1521791136064-7986c2920216?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80')`,
+            }}
+          ></div>
+
+           {/* Overlay (dark transparent layer over image) */}
+           <div className="absolute inset-0 bg-black/65"></div>
+
+           {/* Content */}
+           <div className="absolute inset-0 flex flex-col justify-between p-6">
+             {/* Icon and Title */}
+             <div className="relative z-10 flex flex-col items-center justify-center">
+               <div className="text-white mb-4">
+                 {service.icon}
+               </div>
+               <h3 className="text-2xl font-bold text-white text-center ">
+                 {service.title}
+               </h3>
+             </div>
+
+             {/* Description and Learn More Button */}
+             <div className="relative z-10">
+               <p className="text-white text-sm mb-4 leading-relaxed">
+                 {service.description}
+               </p>
+               <NavLink
+                 to={service.link}
+                 className="inline-flex items-center justify-center w-full px-4 py-2 bg-white text-gray-800 font-semibold rounded-lg hover:bg-[#A5292A] hover:text-white transition-all duration-300"
+               >
+                 Learn More <ChevronRight className="ml-2 w-4 h-4" />
+               </NavLink>
+             </div>
+           </div>
+        </div>
+      ))}
+    </div>
+    
+    {/* Contact Us Button */}
+    <div className="text-center mt-12">
+      <NavLink
+        to="/contact"
+        className="inline-flex items-center justify-center px-8 py-4 bg-[#A5292A] border-2 border-gray-300 text-white font-semibold rounded-lg hover:border-gray-400 hover:bg-gray-50 hover:text-[#A5292A] transition-all duration-300 group"
+      >
+        Contact Us <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+      </NavLink>
+    </div>
+  </div>
+</section>
+
+      {/* Why Choose Us Section */}
+      <section className="py-10 bg-white">
+        <div className="container mx-auto">
+          <div className="text-center mb-16 ">
+            <h2 className="text-3xl md:text-4xl font-bold mb-2" >
+              <span style={{ color: "#A5292A" }}>Why</span> Choose Us?
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Comprehensive legal solutions tailored to your business needs with
-              a focus on the startup ecosystem and SMB sector.
-            </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {services.map((service, index) => (
-              <div
-                key={index}
-                className="bg-white p-8 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 group"
-              >
-                <div className="text-[#A5292A] mb-4 group-hover:opacity-80 transition-opacity">
-                  {service.icon}
-                </div>
-                <h3 className="text-xl font-semibold text-gray-800 mb-3">
-                  {service.title}
-                </h3>
-                <p className="text-gray-600 mb-4">{service.description}</p>
-                <NavLink
-                  to={service.link}
-                  className="text-[#A5292A] font-medium hover:opacity-80 flex items-center"
-                >
-                  Learn More <ChevronRight className="ml-1 w-4 h-4" />
-                </NavLink>
+          <div className="grid md:grid-cols-2 lg:grid-cols-2 gap-8 px-4 sm:px-8 md:px-12 lg:px-20">
+            <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100 transition-all duration-500 ease-out hover:shadow-lg hover:-translate-y-2 hover:border-[#A5292A] group cursor-pointer">
+              <div className="flex items-center mb-4">
+                <ArrowRight className="w-6 h-6 mr-3 group-hover:translate-x-1 transition-transform duration-300" style={{ color: "#A5292A" }} />
+                <h3 className="text-xl font-bold text-gray-800 group-hover:text-[#A5292A] transition-colors duration-300">Expert Legal Team</h3>
               </div>
-            ))}
+              <p className="text-gray-600 leading-relaxed group-hover:text-gray-700 transition-colors duration-300">
+                Our dedicated team of experienced legal professionals brings decades of combined expertise in corporate law, startup advisory, and dispute resolution to deliver exceptional results for our clients.
+              </p>
+            </div>
+
+            <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100 transition-all duration-500 ease-out hover:shadow-lg hover:-translate-y-2 hover:border-[#A5292A] group cursor-pointer">
+              <div className="flex items-center mb-4">
+                <ArrowRight className="w-6 h-6 mr-3 group-hover:translate-x-1 transition-transform duration-300" style={{ color: "#A5292A" }} />
+                <h3 className="text-xl font-bold text-gray-800 group-hover:text-[#A5292A] transition-colors duration-300">Startup Specialization</h3>
+              </div>
+              <p className="text-gray-600 leading-relaxed group-hover:text-gray-700 transition-colors duration-300">
+                We specialize in the startup ecosystem, providing tailored legal solutions for emerging businesses, from incorporation and funding to growth strategies and compliance management.
+              </p>
+            </div>
+
+            <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100 transition-all duration-500 ease-out hover:shadow-lg hover:-translate-y-2 hover:border-[#A5292A] group cursor-pointer">
+              <div className="flex items-center mb-4">
+                <ArrowRight className="w-6 h-6 mr-3 group-hover:translate-x-1 transition-transform duration-300" style={{ color: "#A5292A" }} />
+                <h3 className="text-xl font-bold text-gray-800 group-hover:text-[#A5292A] transition-colors duration-300">Client-Focused Approach</h3>
+              </div>
+              <p className="text-gray-600 leading-relaxed group-hover:text-gray-700 transition-colors duration-300">
+                We prioritize our clients' success with a personalized approach, ethical governance, and transparent communication throughout every legal matter we handle.
+              </p>
+            </div>
+
+            <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100 transition-all duration-500 ease-out hover:shadow-lg hover:-translate-y-2 hover:border-[#A5292A] group cursor-pointer">
+              <div className="flex items-center mb-4">
+                <ArrowRight className="w-6 h-6 mr-3 group-hover:translate-x-1 transition-transform duration-300" style={{ color: "#A5292A" }} />
+                <h3 className="text-xl font-bold text-gray-800 group-hover:text-[#A5292A] transition-colors duration-300">Global Reach</h3>
+              </div>
+              <p className="text-gray-600 leading-relaxed group-hover:text-gray-700 transition-colors duration-300">
+                With nationwide and international service delivery capabilities, we provide comprehensive legal support to clients across diverse practice areas and industry verticals.
+              </p>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Practice Areas */}
-      <section className="py-20" style={{ backgroundColor: "#FAFAFA" }}>
+      {/* Track Record Section */}
+      <section id="track-record" className="py-8 bg-[#A5292A]">
+        <div className="w-full px-4">
+          <div className="text-center mb-8">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Track Record Since 2016</h2>
+          </div>
+          
+          {/* Key Metrics */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 px-4 sm:px-8 md:px-12 lg:px-20">
+            <div className="text-center">
+              <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-2 sm:mb-4">{counters.years}+</div>
+              <div className="text-white text-sm sm:text-lg md:text-xl font-medium">Years of Service</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-2 sm:mb-4">{counters.cases}+</div>
+              <div className="text-white text-sm sm:text-lg md:text-xl font-medium">Cases Handled</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-2 sm:mb-4">{counters.ipSupport}+</div>
+              <div className="text-white text-sm sm:text-lg md:text-xl font-medium">IP Support</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-2 sm:mb-4">{counters.successRate}%</div>
+              <div className="text-white text-sm sm:text-lg md:text-xl font-medium">Client Success Rate</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Featured Content */}
+      <section className="py-16 bg-black">
         <div className="container mx-auto px-4">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <h2 className="text-4xl font-bold text-gray-800 mb-6">
-                Practice Areas
-              </h2>
-              <p className="text-lg text-gray-600 mb-8">
-                We specialize in Mercantile law, Dispute Resolution and General
-                Corporate Advisory, with a focus on the Startup Ecosystem and
-                Small and Medium Businesses (SMB) sector.
-              </p>
-              <div className="grid sm:grid-cols-2 gap-4">
-                {practiceAreas.map((area, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center p-4 bg-white rounded-lg border border-gray-100"
-                  >
-                    <div
-                      className="w-2 h-2 rounded-full mr-3"
-                      style={{ backgroundColor: "#A5292A" }}
-                    ></div>
-                    <span className="text-gray-700 font-medium">{area}</span>
-                  </div>
-                ))}
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-white mb-4">
+              <span style={{ color: "#A5292A" }}>Featured</span> Content
+            </h2>
+            <p className="text-lg text-left text-white max-w-2xl mx-auto">
+              Discover our latest webinars, interviews, and featured articles that highlight 
+              our expertise in immigration law, startup support, and corporate legal services.
+            </p>
+          </div>
+          
+          {/* Featured Content Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-4 sm:px-8 md:px-12 lg:px-20">
+            {/* Lawctopus Webinar */}
+            <a
+              href="https://www.lawctopus.com/webinar-fathom-legal/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-white rounded-lg shadow-md hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer overflow-hidden border border-gray-100"
+            >
+              {/* Image/Visual Section */}
+              <div className="h-48 relative overflow-hidden">
+                <img 
+                  src="/lawctopus.jpg" 
+                  alt="Lawctopus Webinar" 
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute top-4 left-4 bg-white bg-opacity-90 rounded px-2 py-1">
+                  <span className="text-gray-800 text-xs font-medium">WEBINAR</span>
+                </div>
               </div>
-            </div>
-            <div className="lg:pl-8">
-              <div
-                className="p-8 rounded-2xl text-white"
-                style={{ backgroundColor: "#A5292A" }}
-              >
-                <h3 className="text-2xl font-bold mb-4">
-                  Why Choose Fathom Legal?
+              
+              {/* Content Section */}
+              <div className="p-6">
+                <h3 className="text-lg font-semibold text-gray-800 mb-3 leading-tight">
+                  Behind the Scenes: Building International Legal Careers with Immigration Law Expertise
                 </h3>
-                <ul className="space-y-4">
-                  <li className="flex items-start">
-                    <div className="w-2 h-2 bg-white bg-opacity-70 rounded-full mt-2 mr-3 flex-shrink-0"></div>
-                    <span>Dedicated team of experienced professionals</span>
-                  </li>
-                  <li className="flex items-start">
-                    <div className="w-2 h-2 bg-white bg-opacity-70 rounded-full mt-2 mr-3 flex-shrink-0"></div>
-                    <span>Specialized expertise in startup ecosystem</span>
-                  </li>
-                  <li className="flex items-start">
-                    <div className="w-2 h-2 bg-white bg-opacity-70 rounded-full mt-2 mr-3 flex-shrink-0"></div>
-                    <span>Client-focused approach with ethical governance</span>
-                  </li>
-                  <li className="flex items-start">
-                    <div className="w-2 h-2 bg-white bg-opacity-70 rounded-full mt-2 mr-3 flex-shrink-0"></div>
-                    <span>Nationwide and international service delivery</span>
-                  </li>
-                </ul>
+                <div className="flex items-center text-sm text-gray-500 mb-4">
+                  <span className="font-medium">Fathom Legal Team</span>
+                  <span className="mx-2">•</span>
+                  <span>15 minute read</span>
+                </div>
+                <p className="text-gray-600 text-sm leading-relaxed">
+                  Featured on Lawctopus: "How to Build an International Career as an Immigration Lawyer in the USA"
+                </p>
               </div>
-            </div>
+            </a>
+
+            {/* SuperLawyer Interview */}
+            <a
+              href="https://superlawyer.in/witness-ishitas-unique-approach-to-supporting-startups-smes-and-smbs-where-legal-challenges-are-met-with-a-combination-of-intersectional-learning-and-on-site-visits-to-comprehend-the-intricacies"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-white rounded-lg shadow-md hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer overflow-hidden border border-gray-100"
+            >
+              {/* Image/Visual Section */}
+              <div className="h-48 relative overflow-hidden">
+                <img 
+                  src="/Superlawyer.jpg" 
+                  alt="SuperLawyer Interview" 
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute top-4 left-4 bg-white bg-opacity-90 rounded px-2 py-1">
+                  <span className="text-gray-800 text-xs font-medium">INTERVIEW</span>
+                </div>
+              </div>
+              
+              {/* Content Section */}
+              <div className="p-6">
+                <h3 className="text-lg font-semibold text-gray-800 mb-3 leading-tight">
+                  Enhancing Startup Success Through Unique Legal Support and On-Site Visits
+                </h3>
+                <div className="flex items-center text-sm text-gray-500 mb-4">
+                  <span className="font-medium">Ishita Sharma</span>
+                  <span className="mx-2">•</span>
+                  <span>8 minute read</span>
+                </div>
+                <p className="text-gray-600 text-sm leading-relaxed">
+                  SuperLawyer interview featuring our unique approach to supporting startups, SMEs, and SMBs
+                </p>
+              </div>
+            </a>
+
+            {/* Business Connect India */}
+            <a
+              href="https://businessconnectindia.in/fathom-legal-advocates-corporate/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-white rounded-lg shadow-md hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer overflow-hidden border border-gray-100"
+            >
+               {/* Image/Visual Section */}
+               <div className="h-48 relative overflow-hidden">
+                 <img 
+                   src="/businessconnect.jpg" 
+                   alt="Business Connect India Feature" 
+                   className="w-full h-full object-cover"
+                 />
+                 <div className="absolute top-4 left-4 bg-white bg-opacity-90 rounded px-2 py-1">
+                   <span className="text-gray-800 text-xs font-medium">FEATURE</span>
+                 </div>
+               </div>
+              
+              {/* Content Section */}
+              <div className="p-6">
+                <h3 className="text-lg font-semibold text-gray-800 mb-3 leading-tight">
+                  Corporate Legal Excellence: Comprehensive Services for Modern Businesses
+                </h3>
+                <div className="flex items-center text-sm text-gray-500 mb-4">
+                  <span className="font-medium">Fathom Legal</span>
+                  <span className="mx-2">•</span>
+                  <span>6 minute read</span>
+                </div>
+                <p className="text-gray-600 text-sm leading-relaxed">
+                  Featured on Business Connect India showcasing our corporate legal expertise and services
+                </p>
+              </div>
+            </a>
           </div>
         </div>
       </section>
 
       {/* Testimonials */}
-      <section className="py-20 bg-white">
+      <section id="testimonials" className="py-20 bg-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-800 mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-6">
               Client Testimonials
             </h2>
-            <p className="text-xl text-gray-600">
+            <p className="text-xl md:text-2xl text-[#A5292A]">
               What our clients say about our legal services
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+           <div className="grid md:grid-cols-3 gap-8 px-4 sm:px-8 md:px-12 lg:px-20">
             {testimonials.map((testimonial, index) => (
               <div
                 key={index}
@@ -344,15 +683,15 @@ const Home = () => {
         style={{ backgroundColor: "#A5292A" }}
       >
         <div className="container mx-auto px-4">
-          <div className="grid lg:grid-cols-2 gap-12">
+           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 px-4 sm:px-8 md:px-12 lg:px-20">
             <div>
-              <h2 className="text-4xl font-bold mb-6">Get in Touch</h2>
-              <p className="text-xl text-white text-opacity-90 mb-8">
+              <h2 className="text-4xl md:text-5xl font-bold mb-10">Get in Touch</h2>
+              <p className="text-xl md:text-2xl text-white text-opacity-90 mb-10">
                 Ready to discuss your legal needs? Contact our experienced team
                 for professional legal consultation.
               </p>
 
-              <div className="space-y-6">
+              <div className="space-y-8">
                 <div className="flex items-center">
                   <MapPin className="w-6 h-6 text-white text-opacity-70 mr-4" />
                   <div>
@@ -383,10 +722,10 @@ const Home = () => {
               </div>
             </div>
 
-            <div className="bg-white p-8 rounded-xl text-gray-800">
-              <h3 className="text-2xl font-bold mb-6">Send us a Message</h3>
+            <div className="bg-white p-8 md:p-10 rounded-xl text-gray-800">
+              <h3 className="text-2xl md:text-3xl font-bold mb-10">Send us a Message</h3>
               <div className="space-y-6">
-                <div className="grid sm:grid-cols-2 gap-4">
+                <div className="grid sm:grid-cols-2 gap-6">
                   <input
                     type="text"
                     placeholder="First Name"

@@ -94,12 +94,12 @@ const RealEstateSolutions = () => {
       {/* Property Disputes Section */}
       <section className="py-20 bg-white">
         <div className="container mx-auto px-4">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <div className="grid lg:grid-cols-2 gap-12 items-center px-4 sm:px-8 md:px-12 lg:px-20">
             <div>
-              <h2 className="text-4xl font-bold text-gray-800 mb-6">
+              <h2 className="text-4xl font-bold text-gray-800 mb-6 ">
                 Property Disputes
               </h2>
-              <p className="text-lg text-gray-600 mb-8 leading-relaxed">
+              <p className="text-lg text-left text-gray-600 mb-8 leading-relaxed">
                 Property ownership can be fraught with challenges, particularly
                 for owners facing disputes over ownership, boundaries,
                 encroachments, or unauthorized constructions. At Fathom Legal,
@@ -143,7 +143,7 @@ const RealEstateSolutions = () => {
       {/* Property Management Section */}
       <section className="py-20" style={{ backgroundColor: "#FAFAFA" }}>
         <div className="container mx-auto px-4">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <div className="grid lg:grid-cols-2 gap-12 items-center px-4 sm:px-8 md:px-12 lg:px-20">
             <div className="lg:order-2">
               <h2 className="text-4xl font-bold text-gray-800 mb-6">
                 Property Management
@@ -202,7 +202,7 @@ const RealEstateSolutions = () => {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 px-4 sm:px-8 md:px-12 lg:px-20">
             {propertyServices.map((service, index) => (
               <div
                 key={index}
@@ -306,7 +306,7 @@ const RealEstateSolutions = () => {
       {/* Trust & Value Section */}
       <section className="py-20 bg-white">
         <div className="container mx-auto px-4">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <div className="grid lg:grid-cols-2 gap-12 items-center px-4 sm:px-8 md:px-12 lg:px-20">
             <div>
               <h2 className="text-4xl font-bold text-gray-800 mb-6">
                 Why Choose Fathom Legal for Real Estate?

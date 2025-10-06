@@ -116,7 +116,7 @@ const TechLegalBlueprint = () => {
       {/* Main Content Section */}
       <section className="py-20 bg-white">
         <div className="container mx-auto px-4">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <div className="grid lg:grid-cols-2 gap-12 items-center px-4 sm:px-8 md:px-12 lg:px-20">
             <div>
               <h2 className="text-4xl font-bold text-gray-800 mb-8">
                 A Blueprint for Tech Success
@@ -177,7 +177,7 @@ const TechLegalBlueprint = () => {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 px-4 sm:px-8 md:px-12 lg:px-20">
             {keyFeatures.map((feature, index) => (
               <div
                 key={index}
@@ -206,8 +206,8 @@ const TechLegalBlueprint = () => {
       {/* Why Choose Tech Legal Blueprint */}
       <section className="py-20 bg-white">
         <div className="container mx-auto px-4">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="lg:order-2">
+          <div className="max-w-4xl mx-auto px-4 sm:px-8 md:px-12 lg:px-20">
+            <div className="text-center">
               <h2 className="text-4xl font-bold text-gray-800 mb-6">
                 Why Tech Companies Trust Our Blueprint
               </h2>
@@ -218,68 +218,54 @@ const TechLegalBlueprint = () => {
                 facing technology companies and provide practical solutions.
               </p>
 
-              <div className="space-y-6">
-                <div className="flex items-start">
+              <div className="grid md:grid-cols-3 gap-8 mt-12">
+                <div className="text-center">
                   <div
-                    className="w-3 h-3 rounded-full mr-4 mt-2"
+                    className="w-16 h-16 rounded-full flex items-center justify-center text-white text-xl font-bold mb-4 mx-auto"
                     style={{ backgroundColor: "#A5292A" }}
-                  ></div>
-                  <div>
-                    <h4 className="font-semibold text-gray-800 mb-2">
-                      Industry Expertise
-                    </h4>
-                    <p className="text-gray-600">
-                      Deep understanding of technology sector challenges and
-                      opportunities.
-                    </p>
+                  >
+                    <i className="fas fa-industry"></i>
                   </div>
+                  <h4 className="font-semibold text-gray-800 mb-2">
+                    Industry Expertise
+                  </h4>
+                  <p className="text-gray-600">
+                    Deep understanding of technology sector challenges and
+                    opportunities.
+                  </p>
                 </div>
 
-                <div className="flex items-start">
+                <div className="text-center">
                   <div
-                    className="w-3 h-3 rounded-full mr-4 mt-2"
+                    className="w-16 h-16 rounded-full flex items-center justify-center text-white text-xl font-bold mb-4 mx-auto"
                     style={{ backgroundColor: "#A5292A" }}
-                  ></div>
-                  <div>
-                    <h4 className="font-semibold text-gray-800 mb-2">
-                      Future-Ready Solutions
-                    </h4>
-                    <p className="text-gray-600">
-                      Legal frameworks that anticipate and adapt to
-                      technological evolution.
-                    </p>
+                  >
+                    <i className="fas fa-rocket"></i>
                   </div>
+                  <h4 className="font-semibold text-gray-800 mb-2">
+                    Future-Ready Solutions
+                  </h4>
+                  <p className="text-gray-600">
+                    Legal frameworks that anticipate and adapt to
+                    technological evolution.
+                  </p>
                 </div>
 
-                <div className="flex items-start">
+                <div className="text-center">
                   <div
-                    className="w-3 h-3 rounded-full mr-4 mt-2"
+                    className="w-16 h-16 rounded-full flex items-center justify-center text-white text-xl font-bold mb-4 mx-auto"
                     style={{ backgroundColor: "#A5292A" }}
-                  ></div>
-                  <div>
-                    <h4 className="font-semibold text-gray-800 mb-2">
-                      Practical Implementation
-                    </h4>
-                    <p className="text-gray-600">
-                      Actionable strategies that integrate seamlessly with your
-                      business operations.
-                    </p>
+                  >
+                    <i className="fas fa-cogs"></i>
                   </div>
+                  <h4 className="font-semibold text-gray-800 mb-2">
+                    Practical Implementation
+                  </h4>
+                  <p className="text-gray-600">
+                    Actionable strategies that integrate seamlessly with your
+                    business operations.
+                  </p>
                 </div>
-              </div>
-            </div>
-
-            <div className="lg:order-1">
-              <div className="relative">
-                <img
-                  src="https://images.unsplash.com/photo-1560472354-b33ff0c44a43?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2126&q=80"
-                  alt="Technology innovation and legal compliance"
-                  className="rounded-2xl shadow-lg w-full h-96 object-cover"
-                />
-                <div
-                  className="absolute inset-0 rounded-2xl"
-                  style={{ backgroundColor: "rgba(165, 41, 42, 0.1)" }}
-                ></div>
               </div>
             </div>
           </div>
@@ -299,7 +285,7 @@ const TechLegalBlueprint = () => {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 px-4 sm:px-8 md:px-12 lg:px-20">
             {[
               {
                 step: "01",

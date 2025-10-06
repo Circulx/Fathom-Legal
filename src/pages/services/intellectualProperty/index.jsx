@@ -128,7 +128,7 @@ const IntellectualProperty = () => {
           {services.map((service, index) => (
             <div
               key={index}
-              className={`grid lg:grid-cols-2 gap-12 items-center ${
+              className={`grid lg:grid-cols-2 gap-12 items-center px-4 sm:px-8 md:px-12 lg:px-20 ${
                 index !== services.length - 1 ? "mb-20" : ""
               }`}
             >

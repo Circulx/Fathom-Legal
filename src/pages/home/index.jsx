@@ -239,7 +239,7 @@ const Home = () => {
       {/* Hero Section */}
       <section
         id="home"
-        className="min-h-screen flex relative"
+        className="min-h-screen flex flex-col lg:flex-row relative"
       >
         {/* Full Screen Background Image */}
         <div
@@ -279,6 +279,59 @@ const Home = () => {
             commercial and specialised services, we deliver the best legal solutions for our clients.
           </p>
 
+          {/* Mobile Navigation - Above CTA buttons */}
+          <div className="lg:hidden flex justify-center items-center mb-8 relative">
+            {/* Vertical Line */}
+            <div className="absolute w-0.5 h-16 bg-white opacity-30"></div>
+            
+            {/* Navigation Items */}
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center gap-3 group">
+                <div className="w-3 h-3 rounded-full bg-white shadow-lg group-hover:scale-110 transition-transform duration-300 flex-shrink-0"></div>
+                <NavLink to="/services" className="text-white  font-bold text-sm hover:text-gray-300 transition-colors">
+                  Services
+                </NavLink>
+              </div>
+              
+              <div className="flex items-center gap-3 group">
+                <div className="w-3 h-3 rounded-full border-2 border-white group-hover:bg-white group-hover:scale-110 transition-all duration-300 flex-shrink-0"></div>
+                <button
+                  onClick={() => {
+                    const whyChooseUsSection = document.querySelector('section:nth-of-type(3)');
+                    if (whyChooseUsSection) {
+                      whyChooseUsSection.scrollIntoView({ behavior: 'smooth' });
+                    }
+                  }}
+                  className="text-white  font-bold text-sm hover:text-gray-300 transition-colors cursor-pointer"
+                >
+                  Why Choose Us?
+                </button>
+              </div>
+              
+              <div className="flex items-center gap-3 group">
+                <div className="w-3 h-3 rounded-full border-2 border-white group-hover:bg-white group-hover:scale-110 transition-all duration-300 flex-shrink-0"></div>
+                <button
+                  onClick={() => {
+                    const testimonialsSection = document.getElementById('testimonials');
+                    if (testimonialsSection) {
+                      testimonialsSection.scrollIntoView({ behavior: 'smooth' });
+                    }
+                  }}
+                  className="text-white font-bold text-sm hover:text-gray-300 transition-colors cursor-pointer"
+                >
+                  Client Testimonials
+                </button>
+              </div>
+              
+              <div className="flex items-center gap-3 group">
+                <div className="w-3 h-3 rounded-full border-2 border-white group-hover:bg-white group-hover:scale-110 transition-all duration-300 flex-shrink-0"></div>
+                <NavLink to="/contact" className="text-white font-bold text-sm hover:text-gray-300 transition-colors">
+                  Contact
+                </NavLink>
+              </div>
+            </div>
+          </div>
+
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4">
            <NavLink to="/contact"
@@ -298,8 +351,9 @@ const Home = () => {
           
         </div>
 
-        {/* Right Navigation */}
-        <div className="absolute right-2 sm:right-4 lg:right-8 top-1/2 transform -translate-y-1/2 flex flex-col items-center z-10">
+
+        {/* Desktop Right Navigation - Hidden on mobile */}
+        <div className="hidden lg:flex absolute right-2 sm:right-4 lg:right-8 top-1/2 transform -translate-y-1/2 flex-col items-center z-10">
           {/* Vertical Line */}
           <div className="absolute w-0.5 h-20 sm:h-24 lg:h-32 bg-white opacity-30"></div>
           

@@ -136,7 +136,7 @@ const Home = () => {
     try {
       // EmailJS configuration
       const serviceId = 'service_hrntxm5';
-      const templateId = 'template_4vstf8q';
+      const templateId = 'template_kq2l3yk';
       const publicKey = '5suuijzXCHnnvG_YW';
 
       const templateParams = {
@@ -144,7 +144,7 @@ const Home = () => {
         from_email: formData.email,
         phone: formData.phone,
         message: formData.message,
-        to_email: 'sudarsanagogoi06@gmail.com'
+        to_email: 'assist@fathomlegal.com'
       };
 
       await emailjs.send(serviceId, templateId, templateParams, publicKey);

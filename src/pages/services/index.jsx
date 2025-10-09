@@ -39,14 +39,7 @@ const ServicesPage = () => {
       slug: "corporate-advisory",
       url: "/services/generalcorporateadvisory",
     },
-    {
-      icon: <UserCheck className="w-8 h-8" />,
-      title: "Ankush: Safe & Inclusive Workplace",
-      description:
-        "Specialized workplace safety solutions, harassment prevention, and inclusive culture development programs.",
-      slug: "workplace-safety",
-      url: "/services/ankush",
-    },
+   
     {
       icon: <Gavel className="w-8 h-8" />,
       title: "Dispute Resolution",

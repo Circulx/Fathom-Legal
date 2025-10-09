@@ -18,6 +18,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { Navbar } from "../../components/Navbar";
+import emailjs from '@emailjs/browser';
 
 // Custom hook for scroll animations
 const useScrollAnimation = (delay = 0) => {
@@ -96,6 +97,16 @@ const Home = () => {
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [showDisclaimer, setShowDisclaimer] = useState(true);
   
+  // Contact form state
+  const [formData, setFormData] = useState({
+    name: '',
+    phone: '',
+    email: '',
+    message: ''
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState('');
+  
   // Scroll animation hooks removed
   const [counters, setCounters] = useState({
     years: 0,
@@ -106,6 +117,51 @@ const Home = () => {
 
   const handleDisclaimerClose = () => {
     setShowDisclaimer(false);
+  };
+
+  // Contact form handlers
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setSubmitStatus('');
+
+    try {
+      // EmailJS configuration
+      const serviceId = 'service_hrntxm5';
+      const templateId = 'template_4vstf8q';
+      const publicKey = '5suuijzXCHnnvG_YW';
+
+      const templateParams = {
+        from_name: formData.name,
+        from_email: formData.email,
+        phone: formData.phone,
+        message: formData.message,
+        to_email: 'sudarsanagogoi06@gmail.com'
+      };
+
+      await emailjs.send(serviceId, templateId, templateParams, publicKey);
+      
+      setSubmitStatus('success');
+      setFormData({
+        name: '',
+        phone: '',
+        email: '',
+        message: ''
+      });
+    } catch (error) {
+      console.error('Error sending email:', error);
+      setSubmitStatus('error');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // Counter animation effect with scroll trigger
@@ -731,91 +787,162 @@ const Home = () => {
       </section>
 
       {/* Contact Section */}
-      <section
-        id="contact"
-        className="py-20 text-white"
-        style={{ backgroundColor: "#A5292A" }}
+      <section 
+        id="contact" 
+        className="py-12 relative overflow-hidden"
+        style={{
+          backgroundImage: `url('/contactusbg.jpg')`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+          backgroundAttachment: "fixed",
+        }}
       >
-        <div className="container mx-auto px-4">
-           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 px-4 sm:px-8 md:px-12 lg:px-20">
-            <div>
-              <h2 className="text-4xl md:text-5xl font-bold mb-10">Get in Touch</h2>
-              <p className="text-xl md:text-2xl text-white text-opacity-90 mb-10">
-                Ready to discuss your legal needs? Contact our experienced team
-                for professional legal consultation.
-              </p>
+        {/* Black Background Overlay */}
+        <div className="absolute inset-0 bg-black/60"></div>
+        
+        {/* Gradient Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-br from-black/60 via-gray-900/50 to-black/70"></div>
+        
+        <div className="container mx-auto px-4 relative z-10">
+          {/* Section Header */}
+          <div className="text-center mb-10">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+              Get in <span style={{ color: "#A5292A" }}>Touch</span> with Us!
+            </h2>
+            <p className="text-lg text-white/90 max-w-3xl mx-auto">
+              Let our experience pave the path to your success.
+            </p>
+          </div>
 
-              <div className="space-y-8">
-                <div className="flex items-center">
-                  <MapPin className="w-6 h-6 text-white text-opacity-70 mr-4" />
-                  <div>
-                    <div className="font-semibold">Office Address</div>
-                    <div className="text-white text-opacity-80">
-                      New Delhi, India
-                    </div>
+          <div className="grid lg:grid-cols-2 gap-8 px-4 sm:px-8 md:px-12 lg:px-20">
+            {/* Contact Information */}
+            <div className="space-y-8">
+              {/* Corporate Office */}
+              <div>
+                <h3 className="text-xl font-bold text-white mb-4" style={{ color: "#A5292A" }}>
+                  Corporate Office
+                </h3>
+                <div className="space-y-3 text-white/90">
+                  <div className="flex items-start space-x-3">
+                    <MapPin className="w-5 h-5 text-white mt-1 flex-shrink-0" />
+                    <p>27th main road, 1st sector, HSR Layout, Bangalore, 560102</p>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <Phone className="w-5 h-5 text-white flex-shrink-0" />
+                    <a href="tel:+919625206671" className="hover:text-white transition-colors duration-300">+919625206671</a>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <Mail className="w-5 h-5 text-white flex-shrink-0" />
+                    <a href="https://mail.google.com/mail/?view=cm&fs=1&to=assist@fathomlegal.com" target="_blank" rel="noopener noreferrer" className="hover:text-[#A5292A] transition-colors duration-300">assist@fathomlegal.com</a>
                   </div>
                 </div>
-                <div className="flex items-center">
-                  <Phone className="w-6 h-6 text-white text-opacity-70 mr-4" />
-                  <div>
-                    <div className="font-semibold">Phone</div>
-                    <div className="text-white text-opacity-80">
-                      +91-XX-XXXX-XXXX
-                    </div>
+              </div>
+
+              {/* Dubai Office */}
+              <div>
+                <h3 className="text-xl font-bold text-white mb-4" style={{ color: "#A5292A" }}>
+                  Dubai Office
+                </h3>
+                <div className="space-y-3 text-white/90">
+                  <div className="flex items-start space-x-3">
+                    <MapPin className="w-5 h-5 text-white mt-1 flex-shrink-0" />
+                    <p> Dubai, UAE</p>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <Mail className="w-5 h-5 text-white flex-shrink-0" />
+                    <a href="https://mail.google.com/mail/?view=cm&fs=1&to=assist@fathomlegal.com" target="_blank" rel="noopener noreferrer" className="hover:text-[#A5292A] transition-colors duration-300">assist@fathomlegal.com</a>
                   </div>
                 </div>
-                <div className="flex items-center">
-                  <Mail className="w-6 h-6 text-white text-opacity-70 mr-4" />
-                  <div>
-                    <div className="font-semibold">Email</div>
-                    <div className="text-white text-opacity-80">
-                      info@fathomlegal.com
-                    </div>
+              </div>
+
+              {/* Dallas Office */}
+              <div>
+                <h3 className="text-xl font-bold text-white mb-4" style={{ color: "#A5292A" }}>
+                  Dallas Office
+                </h3>
+                <div className="space-y-3 text-white/90">
+                  <div className="flex items-start space-x-3">
+                    <MapPin className="w-5 h-5 text-white mt-1 flex-shrink-0" />
+                    <p>Dallas, Texas, USA</p>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <Mail className="w-5 h-5 text-white flex-shrink-0" />
+                    <a href="https://mail.google.com/mail/?view=cm&fs=1&to=assist@fathomlegal.com" target="_blank" rel="noopener noreferrer" className="hover:text-[#A5292A] transition-colors duration-300">assist@fathomlegal.com</a>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white p-8 md:p-10 rounded-xl text-gray-800">
-              <h3 className="text-2xl md:text-3xl font-bold mb-10">Send us a Message</h3>
-              <div className="space-y-6">
-                <div className="grid sm:grid-cols-2 gap-6">
+            {/* Contact Form */}
+            <div className="bg-white/95 backdrop-blur-md p-6 rounded-lg shadow-2xl border border-white/30">
+              <h3 className="text-xl font-bold text-gray-800 mb-4">Contact Form</h3>
+              <form onSubmit={handleSubmit} className="space-y-3">
+                <div>
                   <input
                     type="text"
-                    placeholder="First Name"
-                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#A5292A] focus:ring-opacity-20 focus:border-[#A5292A] outline-none"
-                  />
-                  <input
-                    type="text"
-                    placeholder="Last Name"
-                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#A5292A] focus:ring-opacity-20 focus:border-[#A5292A] outline-none"
+                    name="name"
+                    placeholder="Name"
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    required
+                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#A5292A] focus:border-[#A5292A] outline-none transition-all duration-300"
                   />
                 </div>
-                <input
-                  type="email"
-                  placeholder="Email Address"
-                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#A5292A] focus:ring-opacity-20 focus:border-[#A5292A] outline-none"
-                />
-                <input
-                  type="tel"
-                  placeholder="Phone Number"
-                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#A5292A] focus:ring-opacity-20 focus:border-[#A5292A] outline-none"
-                />
-                <textarea
-                  placeholder="Tell us about your legal needs"
-                  rows={4}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#A5292A] focus:ring-opacity-20 focus:border-[#A5292A] outline-none"
-                ></textarea>
+                <div>
+                  <input
+                    type="tel"
+                    name="phone"
+                    placeholder="Phone"
+                    value={formData.phone}
+                    onChange={handleInputChange}
+                    required
+                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#A5292A] focus:border-[#A5292A] outline-none transition-all duration-300"
+                  />
+                </div>
+                <div>
+                  <input
+                    type="email"
+                    name="email"
+                    placeholder="Email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    required
+                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#A5292A] focus:border-[#A5292A] outline-none transition-all duration-300"
+                  />
+                </div>
+                <div>
+                  <textarea
+                    name="message"
+                    placeholder="Message"
+                    rows={4}
+                    value={formData.message}
+                    onChange={handleInputChange}
+                    required
+                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#A5292A] focus:border-[#A5292A] outline-none transition-all duration-300 resize-none"
+                  ></textarea>
+                </div>
+                
+                {/* Status Messages */}
+                {submitStatus === 'success' && (
+                  <div className="p-3 bg-green-100 border border-green-400 text-green-700 rounded-lg">
+                    Message sent successfully! We'll get back to you soon.
+                  </div>
+                )}
+                {submitStatus === 'error' && (
+                  <div className="p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+                    Failed to send message. Please try again or contact us directly.
+                  </div>
+                )}
+                
                 <button
-                  onClick={() =>
-                    alert("Message sent! We will contact you soon.")
-                  }
-                  className="w-full text-white py-3 px-6 rounded-lg font-semibold hover:opacity-90 transition-all"
-                  style={{ backgroundColor: "#A5292A" }}
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full bg-[#A5292A] text-white py-3 px-6 rounded-lg font-semibold hover:opacity-90 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Send Message
+                  {isSubmitting ? 'Sending...' : 'Send Message'}
                 </button>
-              </div>
+              </form>
             </div>
           </div>
         </div>

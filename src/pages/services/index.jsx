@@ -487,18 +487,25 @@ const ServicesPage = () => {
             <h2 className="text-4xl font-bold text-white mb-6">
               Ready to Connect? Get a Quote Now!
             </h2>
-            <p className="text-xl text-white text-opacity-90 mb-8 leading-relaxed">
+            <p className="text-xl text-left text-white text-opacity-90 mb-8 leading-relaxed">
               Let Fathom Legal handle your legal needs with expertise and
               dedication. Reach out to us today for a personalized quote and
               discover how our comprehensive legal solutions can benefit you.
               Your peace of mind is just a click away.
             </p>
-            <button
-              className="bg-white hover:bg-gray-100 px-8 py-4 rounded-lg font-semibold transition-colors text-lg"
-              style={{ color: "#A5292A" }}
-            >
-              Get quote <ArrowRight className="ml-2 w-5 h-5 inline" />
-            </button>
+            <div className="flex flex-col sm:flex-row justify-center">
+                  <a 
+                      href="https://calendly.com/ishita-fathomlegal/free-20-mins-consultation"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center  rounded-lg justify-center px-6 sm:px-8 py-3 sm:py-4 bg-white border-2 border-white text-[#A5292A] font-semibold hover:bg-gray-100 transition-all duration-300 group text-sm sm:text-base"
+                    >
+                    Get Quote <ArrowRight className="ml-2 w-4 h-4" />
+                    
+                  </a>
+           
+                  
+                  </div>
           </div>
         </div>
       </section>

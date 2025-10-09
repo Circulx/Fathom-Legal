@@ -248,9 +248,9 @@ const Contact = () => {
                       />
                     </div>
                     <div>
-                      <textarea
-                        name="message"
-                        placeholder="Message"
+                       <textarea
+                         name="message"
+                         placeholder="Query"
                         rows={3}
                         value={formData.message}
                         onChange={handleInputChange}

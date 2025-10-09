@@ -917,7 +917,7 @@ const Home = () => {
                 <div>
                   <textarea
                     name="message"
-                    placeholder="Message"
+                    placeholder="Query"
                     rows={4}
                     value={formData.message}
                     onChange={handleInputChange}

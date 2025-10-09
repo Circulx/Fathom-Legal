@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Navbar } from "../../components/Navbar";
 import Footer from "../../components/Footer";
+import emailjs from '@emailjs/browser';
 import { 
   MapPin, 
   Phone, 
@@ -17,16 +18,14 @@ import {
 
 const Contact = () => {
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
+    name: '',
     phone: '',
-    company: '',
-    subject: '',
+    email: '',
     message: ''
   });
 
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState('');
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -36,42 +35,59 @@ const Contact = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Form submitted:', formData);
-    setIsSubmitted(true);
-    
-    setTimeout(() => {
-      setIsSubmitted(false);
+    setIsSubmitting(true);
+    setSubmitStatus('');
+
+    try {
+      // EmailJS configuration
+      const serviceId = 'service_hrntxm5';
+      const templateId = 'template_kq2l3yk';
+      const publicKey = '5suuijzXCHnnvG_YW';
+
+      const templateParams = {
+        from_name: formData.name,
+        from_email: formData.email,
+        phone: formData.phone,
+        message: formData.message,
+        to_email: 'assist@fathomlegal.com'
+      };
+
+      await emailjs.send(serviceId, templateId, templateParams, publicKey);
+      
+      setSubmitStatus('success');
       setFormData({
-        firstName: '',
-        lastName: '',
-        email: '',
+        name: '',
         phone: '',
-        company: '',
-        subject: '',
+        email: '',
         message: ''
       });
-    }, 3000);
+    } catch (error) {
+      console.error('Error sending email:', error);
+      setSubmitStatus('error');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const contactInfo = [
     {
       icon: <MapPin className="w-8 h-8 text-blue-600" />,
-      title: "Office Address",
-      details: ["New Delhi, India", "110001"],
-      description: "Visit our office for in-person consultations"
+      title: "Corporate Office",
+      details: ["27th main road, 1st sector, HSR Layout", "Bangalore, 560102"],
+      description: "Offices also in Dubai and Dallas"
     },
     {
       icon: <Phone className="w-8 h-8 text-green-600" />,
       title: "Phone",
-      details: ["+91-XX-XXXX-XXXX"],
+      details: ["+919625206671"],
       description: "Call us for immediate legal assistance"
     },
     {
       icon: <Mail className="w-8 h-8 text-purple-600" />,
       title: "Email",
-      details: ["info@fathomlegal.com", "support@fathomlegal.com"],
+      details: ["assist@fathomlegal.com"],
       description: "Send us your legal queries via email"
     },
     {
@@ -169,152 +185,96 @@ const Contact = () => {
                     For urgent legal matters, call us directly or schedule a 
                     same-day consultation.
                   </p>
-                  <button className="bg-white text-[#A5292A] px-6 py-3 rounded-lg font-semibold hover:opacity-90 transition-all flex items-center text-base mx-auto">
+                  <a 
+                    href="https://calendly.com/ishita-fathomlegal/free-20-mins-consultation"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 bg-white border-2 border-white text-[#A5292A] font-semibold hover:bg-[#A5292A] hover:text-white transition-all duration-300 group text-sm sm:text-base rounded-lg"
+                  >
                     Schedule Consultation <ArrowRight className="ml-2 w-4 h-4" />
-                  </button>
+                  </a>
                 </div>
               </div>
 
               {/* Contact Form Section */}
-              <div className="bg-gray-100 p-6 rounded-2xl">
-                <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
+              <div className="bg-white pt-4 px-4 pb-3 rounded-lg shadow-2xl border border-gray-200 h-133">
+                <h3 className="text-lg font-bold text-gray-800 mb-3">Contact Form</h3>
               
-              {isSubmitted ? (
-                <div className="text-center py-12">
-                  <div className="inline-flex items-center justify-center w-20 h-20 bg-green-100 rounded-full mb-6">
-                    <CheckCircle className="w-10 h-10 text-green-600" />
+                {submitStatus === 'success' ? (
+                  <div className="text-center py-8">
+                    <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
+                      <CheckCircle className="w-8 h-8 text-green-600" />
+                    </div>
+                    <h3 className="text-xl font-semibold text-gray-800 mb-2">
+                      Message Sent Successfully!
+                    </h3>
+                    <p className="text-gray-600 text-sm">
+                      Thank you for contacting us. We'll get back to you within 24 hours.
+                    </p>
                   </div>
-                  <h3 className="text-2xl font-semibold text-gray-800 mb-3">
-                    Message Sent Successfully!
-                  </h3>
-                  <p className="text-gray-600">
-                    Thank you for contacting us. We'll get back to you within 24 hours.
-                  </p>
-                </div>
-              ) : (
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  <div className="grid sm:grid-cols-2 gap-4">
+                ) : (
+                   <form onSubmit={handleSubmit} className="space-y-10">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        First Name <span className="text-red-500">*</span>
-                      </label>
                       <input
                         type="text"
-                        name="firstName"
-                        value={formData.firstName}
+                        name="name"
+                        placeholder="Name"
+                        value={formData.name}
                         onChange={handleInputChange}
                         required
-                        className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#A5292A] focus:ring-opacity-20 focus:border-[#A5292A] outline-none transition-all bg-white"
-                        placeholder="Enter your first name"
+                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#A5292A] focus:border-[#A5292A] outline-none transition-all duration-300"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Last Name <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        name="lastName"
-                        value={formData.lastName}
-                        onChange={handleInputChange}
-                        required
-                        className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#A5292A] focus:ring-opacity-20 focus:border-[#A5292A] outline-none transition-all bg-white"
-                        placeholder="Enter your last name"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Email Address <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleInputChange}
-                        required
-                        className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#A5292A] focus:ring-opacity-20 focus:border-[#A5292A] outline-none transition-all bg-white"
-                        placeholder="Enter your email"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Phone Number
-                      </label>
                       <input
                         type="tel"
                         name="phone"
+                        placeholder="Phone"
                         value={formData.phone}
                         onChange={handleInputChange}
-                        className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#A5292A] focus:ring-opacity-20 focus:border-[#A5292A] outline-none transition-all bg-white"
-                        placeholder="Enter your phone number"
+                        required
+                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#A5292A] focus:border-[#A5292A] outline-none transition-all duration-300"
                       />
                     </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Company/Organization
-                    </label>
-                    <input
-                      type="text"
-                      name="company"
-                      value={formData.company}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#A5292A] focus:ring-opacity-20 focus:border-[#A5292A] outline-none transition-all bg-white"
-                      placeholder="Enter your company name"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Subject <span className="text-red-500">*</span>
-                    </label>
-                    <select
-                      name="subject"
-                      value={formData.subject}
-                      onChange={handleInputChange}
-                      required
-                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#A5292A] focus:ring-opacity-20 focus:border-[#A5292A] outline-none transition-all bg-white"
+                    <div>
+                      <input
+                        type="email"
+                        name="email"
+                        placeholder="Email"
+                        value={formData.email}
+                        onChange={handleInputChange}
+                        required
+                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#A5292A] focus:border-[#A5292A] outline-none transition-all duration-300"
+                      />
+                    </div>
+                    <div>
+                      <textarea
+                        name="message"
+                        placeholder="Message"
+                        rows={3}
+                        value={formData.message}
+                        onChange={handleInputChange}
+                        required
+                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#A5292A] focus:border-[#A5292A] outline-none transition-all duration-300 resize-none"
+                      ></textarea>
+                    </div>
+                    
+                    {/* Status Messages */}
+                    {submitStatus === 'error' && (
+                      <div className="p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+                        Failed to send message. Please try again or contact us directly.
+                      </div>
+                    )}
+                    
+                    <button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="w-full bg-[#A5292A] text-white py-2 px-6 rounded-lg font-semibold hover:opacity-90 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      <option value="">Select a subject</option>
-                      <option value="general">General Legal Consultation</option>
-                      <option value="corporate">Corporate Law</option>
-                      <option value="startup">Startup Legal Services</option>
-                      <option value="dispute">Dispute Resolution</option>
-                      <option value="web3">Web3 Legal Services</option>
-                      <option value="templates">Legal Templates</option>
-                      <option value="other">Other</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Message <span className="text-red-500">*</span>
-                    </label>
-                    <textarea
-                      name="message"
-                      value={formData.message}
-                      onChange={handleInputChange}
-                      required
-                      rows={5}
-                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#A5292A] focus:ring-opacity-20 focus:border-[#A5292A] outline-none transition-all resize-none bg-white"
-                      placeholder="Tell us about your legal needs..."
-                    />
-                  </div>
-
-                  <button
-                    type="submit"
-                    className="w-full text-white py-4 px-6 rounded-lg font-semibold hover:opacity-90 transition-all flex items-center justify-center shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-                    style={{ backgroundColor: "#A5292A" }}
-                  >
-                    Send Message <Send className="ml-2 w-5 h-5" />
-                  </button>
-                </form>
-              )}
-                </div>
+                      {isSubmitting ? 'Sending...' : 'Send Message'}
+                    </button>
+                  </form>
+                )}
               </div>
             </div>
           </div>

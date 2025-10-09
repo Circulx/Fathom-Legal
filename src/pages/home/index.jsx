@@ -390,12 +390,15 @@ const Home = () => {
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4">
-           <NavLink to="/contact"
+           <a 
+              href="https://calendly.com/ishita-fathomlegal/free-20-mins-consultation"
+              target="_blank"
+              rel="noopener noreferrer"
               className="flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 bg-white border-2 border-white text-gray-800 font-semibold hover:bg-gray-100 transition-all duration-300 group text-sm sm:text-base"
             >
               GET FREE CONSULTATION
               <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            </NavLink>
+            </a>
             <NavLink to="/services"
               className="flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 bg-transparent border-2 border-white text-white font-semibold hover:bg-white hover:text-gray-800 transition-all duration-300 group text-sm sm:text-base"
             >
@@ -938,7 +941,7 @@ const Home = () => {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full bg-[#A5292A] text-white py-3 px-6 rounded-lg font-semibold hover:opacity-90 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full bg-[#A5292A] text-white py-3 px-6 rounded-lg font-semibold hover:cursor-pointer transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isSubmitting ? 'Sending...' : 'Send Message'}
                 </button>

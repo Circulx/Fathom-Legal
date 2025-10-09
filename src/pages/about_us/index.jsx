@@ -19,14 +19,66 @@ import {
   ChevronRight,
   Award,
   Target,
-  Heart,
-  Linkedin,
-  Twitter,
-  Instagram,
 } from "lucide-react";
+import emailjs from '@emailjs/browser';
 
 const AboutUs = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  
+  // Contact form state
+  const [formData, setFormData] = useState({
+    name: '',
+    phone: '',
+    email: '',
+    message: ''
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState('');
+
+  // Contact form handlers
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setSubmitStatus('');
+
+    try {
+      // EmailJS configuration
+      const serviceId = 'service_hrntxm5';
+      const templateId = 'template_kq2l3yk';
+      const publicKey = '5suuijzXCHnnvG_YW';
+
+      const templateParams = {
+        from_name: formData.name,
+        from_email: formData.email,
+        phone: formData.phone,
+        message: formData.message,
+        to_email: 'assist@fathomlegal.com'
+      };
+
+      await emailjs.send(serviceId, templateId, templateParams, publicKey);
+      
+      setSubmitStatus('success');
+      setFormData({
+        name: '',
+        phone: '',
+        email: '',
+        message: ''
+      });
+    } catch (error) {
+      console.error('Error sending email:', error);
+      setSubmitStatus('error');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const whyChooseUs = [
     {
@@ -318,61 +370,177 @@ const AboutUs = () => {
         </div>
       </section>
 
-      {/* Connect With Us */}
-      <section className="py-20" style={{ backgroundColor: "#A5292A" }}>
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-white mb-4">
-              Connect With Us
+      {/* Contact Section */}
+      <section 
+        id="contact" 
+        className="py-12 relative overflow-hidden"
+        style={{
+          backgroundImage: `url('/contactusbg.jpg')`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+          backgroundAttachment: "fixed",
+        }}
+      >
+        {/* Black Background Overlay */}
+        <div className="absolute inset-0 bg-black/60"></div>
+        
+        {/* Gradient Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-br from-black/60 via-gray-900/50 to-black/70"></div>
+        
+        <div className="container mx-auto px-4 relative z-10">
+          {/* Section Header */}
+          <div className="text-center mb-10">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+              Get in <span style={{ color: "#A5292A" }}>Touch</span> with Us!
             </h2>
-            <p className="text-xl text-white text-opacity-90 max-w-4xl mx-auto">
-              Ready to partner with us for your legal needs? Get in touch with
-              our experienced team today.
+            <p className="text-lg text-white/90 max-w-3xl mx-auto">
+              Let our experience pave the path to your success.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
-            <div className="text-center">
-              <MapPin className="w-12 h-12 text-white text-opacity-80 mx-auto mb-4" />
-              <h4 className="text-lg font-semibold text-white mb-3">
-                Office Address
-              </h4>
-              <p className="text-white text-opacity-80 text-sm md:text-base">New Delhi, India</p>
-            </div>
+          <div className="grid lg:grid-cols-2 gap-8 px-4 sm:px-8 md:px-12 lg:px-20">
+            {/* Contact Information */}
+            <div className="space-y-8">
+              {/* Corporate Office */}
+              <div>
+                <h3 className="text-xl font-bold text-white mb-4" style={{ color: "#A5292A" }}>
+                  Corporate Office
+                </h3>
+                <div className="space-y-3 text-white/90">
+                  <div className="flex items-start space-x-3">
+                    <MapPin className="w-5 h-5 text-white mt-1 flex-shrink-0" />
+                    <p>27th main road, 1st sector, HSR Layout, Bangalore, 560102</p>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <Phone className="w-5 h-5 text-white flex-shrink-0" />
+                    <a href="tel:+919625206671" className="hover:text-white transition-colors duration-300">+919625206671</a>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <Mail className="w-5 h-5 text-white flex-shrink-0" />
+                    <a href="https://mail.google.com/mail/?view=cm&fs=1&to=assist@fathomlegal.com" target="_blank" rel="noopener noreferrer" className="hover:text-[#A5292A] transition-colors duration-300">assist@fathomlegal.com</a>
+                  </div>
+                </div>
+              </div>
 
-            <div className="text-center">
-              <Phone className="w-12 h-12 text-white text-opacity-80 mx-auto mb-4" />
-              <h4 className="text-lg font-semibold text-white mb-3">Phone</h4>
-              <p className="text-white text-opacity-80 text-sm md:text-base">+91-XX-XXXX-XXXX</p>
-            </div>
+              {/* Dubai Office */}
+              <div>
+                <h3 className="text-xl font-bold text-white mb-4" style={{ color: "#A5292A" }}>
+                  Dubai Office
+                </h3>
+                <div className="space-y-3 text-white/90">
+                  <div className="flex items-start space-x-3">
+                    <MapPin className="w-5 h-5 text-white mt-1 flex-shrink-0" />
+                    <p> Dubai, UAE</p>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <Mail className="w-5 h-5 text-white flex-shrink-0" />
+                    <a href="https://mail.google.com/mail/?view=cm&fs=1&to=assist@fathomlegal.com" target="_blank" rel="noopener noreferrer" className="hover:text-[#A5292A] transition-colors duration-300">assist@fathomlegal.com</a>
+                  </div>
+                </div>
+              </div>
 
-            <div className="text-center">
-              <Mail className="w-12 h-12 text-white text-opacity-80 mx-auto mb-4" />
-              <h4 className="text-lg font-semibold text-white mb-3">Email</h4>
-              <p className="text-white text-opacity-80 text-sm md:text-base">info@fathomlegal.com</p>
-            </div>
-
-            <div className="text-center">
-              <Heart className="w-12 h-12 text-white text-opacity-80 mx-auto mb-4" />
-              <h4 className="text-lg font-semibold text-white mb-3">
-                Follow Us
-              </h4>
-              <div className="flex justify-center space-x-4 mt-3">
-                <Linkedin className="w-6 h-6 text-white text-opacity-80 hover:text-white cursor-pointer" />
-                <Twitter className="w-6 h-6 text-white text-opacity-80 hover:text-white cursor-pointer" />
-                <Instagram className="w-6 h-6 text-white text-opacity-80 hover:text-white cursor-pointer" />
+              {/* Dallas Office */}
+              <div>
+                <h3 className="text-xl font-bold text-white mb-4" style={{ color: "#A5292A" }}>
+                  Dallas Office
+                </h3>
+                <div className="space-y-3 text-white/90">
+                  <div className="flex items-start space-x-3">
+                    <MapPin className="w-5 h-5 text-white mt-1 flex-shrink-0" />
+                    <p>Dallas, Texas, USA</p>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <Mail className="w-5 h-5 text-white flex-shrink-0" />
+                    <a href="https://mail.google.com/mail/?view=cm&fs=1&to=assist@fathomlegal.com" target="_blank" rel="noopener noreferrer" className="hover:text-[#A5292A] transition-colors duration-300">assist@fathomlegal.com</a>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Schedule Consultation Button */}
+              <div className="mt-8">
+                <a 
+                  href="https://calendly.com/ishita-fathomlegal/free-20-mins-consultation"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 bg-white border-2 border-white text-[#A5292A] font-semibold hover:bg-[#A5292A] hover:text-white transition-all duration-300 group text-sm sm:text-base "
+                >
+                  Schedule Consultation <ArrowRight className="ml-2 w-4 h-4" />
+                </a>
               </div>
             </div>
-          </div>
+             
 
-          <div className="text-center">
-            <button
-              className="bg-white hover:bg-gray-100 px-10 py-5 rounded-lg font-semibold transition-colors text-lg"
-              style={{ color: "#A5292A" }}
-            >
-              Schedule a Consultation{" "}
-              <ArrowRight className="ml-2 w-5 h-5 inline" />
-            </button>
+            {/* Contact Form */}
+            <div className="bg-white/95 backdrop-blur-md p-6 rounded-lg shadow-2xl border border-white/30">
+              <h3 className="text-xl font-bold text-gray-800 mb-4">Contact Form</h3>
+              <form onSubmit={handleSubmit} className="space-y-3">
+                <div>
+                  <input
+                    type="text"
+                    name="name"
+                    placeholder="Name"
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    required
+                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#A5292A] focus:border-[#A5292A] outline-none transition-all duration-300"
+                  />
+                </div>
+                <div>
+                  <input
+                    type="tel"
+                    name="phone"
+                    placeholder="Phone"
+                    value={formData.phone}
+                    onChange={handleInputChange}
+                    required
+                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#A5292A] focus:border-[#A5292A] outline-none transition-all duration-300"
+                  />
+                </div>
+                <div>
+                  <input
+                    type="email"
+                    name="email"
+                    placeholder="Email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    required
+                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#A5292A] focus:border-[#A5292A] outline-none transition-all duration-300"
+                  />
+                </div>
+                <div>
+                  <textarea
+                    name="message"
+                    placeholder="Message"
+                    rows={4}
+                    value={formData.message}
+                    onChange={handleInputChange}
+                    required
+                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#A5292A] focus:border-[#A5292A] outline-none transition-all duration-300 resize-none"
+                  ></textarea>
+                </div>
+                
+                {/* Status Messages */}
+                {submitStatus === 'success' && (
+                  <div className="p-3 bg-green-100 border border-green-400 text-green-700 rounded-lg">
+                    Message sent successfully! We'll get back to you soon.
+                  </div>
+                )}
+                {submitStatus === 'error' && (
+                  <div className="p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+                    Failed to send message. Please try again or contact us directly.
+                  </div>
+                )}
+                
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full bg-[#A5292A] text-white py-3 px-6 rounded-lg font-semibold hover:opacity-90 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isSubmitting ? 'Sending...' : 'Send Message'}
+                </button>
+              </form>
+            </div>
           </div>
         </div>
       </section>

@@ -650,7 +650,7 @@ const Web3Law = () => {
                Contact Us
              </button>
              <button className="border-2 border-white text-white hover:bg-white hover:text-[#A5292A] px-8 py-4 rounded-lg font-semibold transition-all text-lg">
-               Call Us: +91-XX-XXXX-XXXX
+               Call Us: 9625206671
              </button>
            </div>
          </div>

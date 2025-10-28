@@ -177,7 +177,7 @@ export default function Templates() {
         
         <div className="container mx-auto px-4 relative z-10">
           <div className="text-center max-w-4xl mx-auto">
-            <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 sm:mb-6">
              Our <span style={{ color: '#A5292A' }}>Products </span> 
             </h1>
            
@@ -195,29 +195,29 @@ export default function Templates() {
       </section>
 
       {/* Search and Filter */}
-      <section className="py-8 bg-white border-b border-gray-200">
+      <section className="py-6 sm:py-8 bg-white border-b border-gray-200">
         <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row gap-4 justify-center items-center">
+          <div className="flex flex-col lg:flex-row gap-4 justify-center items-center">
             {/* Search */}
-            <div className="relative w-full md:w-96">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <div className="relative w-full lg:w-96">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
               <input
                 type="text"
                 placeholder="Search templates..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                className="w-full pl-8 sm:pl-10 pr-4 py-2 sm:py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 text-sm sm:text-base"
               />
             </div>
             
             {/* Category Filter and Cart */}
-            <div className="flex flex-wrap justify-center items-center gap-4">
-              <div className="flex flex-wrap gap-2">
+            <div className="flex flex-col sm:flex-row justify-center items-center gap-4 w-full lg:w-auto">
+              <div className="flex flex-wrap gap-2 justify-center">
                 {categories.map((category) => (
                   <button
                     key={category.value}
                     onClick={() => setSelectedCategory(category.value)}
-                    className={`px-4 py-2 rounded-full font-medium transition-all ${
+                    className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full font-medium transition-all text-xs sm:text-sm ${
                       selectedCategory === category.value
                         ? "bg-[#A5292A] text-white"
                         : "bg-gray-100 text-gray-600 hover:bg-gray-200"
@@ -231,12 +231,12 @@ export default function Templates() {
               {/* Cart Icon */}
               <button
                 onClick={goToCheckout}
-                className="relative flex items-center justify-center w-12 h-12 bg-[#A5292A] text-white rounded-full hover:bg-red-700 transition-colors shadow-lg"
+                className="relative flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-[#A5292A] text-white rounded-full hover:bg-red-700 transition-colors shadow-lg"
                 title="View Cart"
               >
-                <ShoppingCart className="w-6 h-6" />
+                <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6" />
                 {cartItems.length > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
+                  <span className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center">
                     {cartItems.length}
                   </span>
                 )}
@@ -248,28 +248,28 @@ export default function Templates() {
 
 
       {/* Templates Grid */}
-      <section className="py-16">
+      <section className="py-12 sm:py-16">
         <div className="container mx-auto px-4">
           {loading ? (
             <div className="flex justify-center items-center py-12">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600"></div>
+              <div className="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-red-600"></div>
             </div>
           ) : templates.length === 0 ? (
             <div className="text-center py-12">
-              <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No templates found</h3>
-              <p className="text-gray-500">Try adjusting your search or filter criteria.</p>
+              <FileText className="h-10 w-10 sm:h-12 sm:w-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-2">No templates found</h3>
+              <p className="text-sm sm:text-base text-gray-500">Try adjusting your search or filter criteria.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 justify-items-center ml-12">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 sm:gap-6 justify-items-center">
               {templates.map((template) => (
                     <div
                       key={template._id}
-                      className="relative bg-white shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 overflow-hidden w-80 flex flex-col"
+                      className="relative bg-white shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 overflow-hidden w-full max-w-80 flex flex-col"
                     >
                   {/* Product Image - Top Section */}
                   <div 
-                    className="h-72 bg-cover bg-center bg-no-repeat relative flex-shrink-0"
+                    className="h-48 sm:h-56 lg:h-64 xl:h-72 bg-cover bg-center bg-no-repeat relative flex-shrink-0"
                     style={{
                       backgroundImage: template.imageUrl ? `url(${template.imageUrl})` : 'none',
                       backgroundColor: template.imageUrl ? 'transparent' : '#f3f4f6'
@@ -282,32 +282,32 @@ export default function Templates() {
                     {isAdmin && (
                       <button
                         onClick={() => handleDelete(template._id)}
-                        className="absolute top-2 right-2 p-2 bg-red-600 text-white hover:bg-red-700 transition-colors z-10"
+                        className="absolute top-2 right-2 p-1.5 sm:p-2 bg-red-600 text-white hover:bg-red-700 transition-colors z-10"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
                       </button>
                     )}
                     
                     {/* Fallback Icon if no image */}
                     {!template.imageUrl && (
                       <div className="h-full flex items-center justify-center">
-                        <FileText className="h-16 w-16 text-gray-400" />
+                        <FileText className="h-12 w-12 sm:h-16 sm:w-16 text-gray-400" />
                       </div>
                     )}
                   </div>
                   
                   {/* Content Section - Bottom */}
-                  <div className="p-4 flex flex-col flex-grow">
+                  <div className="p-3 sm:p-4 flex flex-col flex-grow">
                     {/* Title */}
-                    <h3 className="text-sm font-semibold text-gray-900 mb-2 line-clamp-2 flex-grow">
+                    <h3 className="text-xs sm:text-sm font-semibold text-gray-900 mb-2 line-clamp-2 flex-grow">
                       {template.title}
                     </h3>
                     
                     {/* Price and Button at Bottom */}
                     <div className="mt-auto">
                       {/* Price */}
-                      <div className="mb-3">
-                        <div className="text-lg font-bold text-gray-900">
+                      <div className="mb-2 sm:mb-3">
+                        <div className="text-base sm:text-lg font-bold text-gray-900">
                           ₹{template.price || 0}
                         </div>
                         <div className="text-xs text-gray-500">+ Taxes</div>
@@ -316,9 +316,9 @@ export default function Templates() {
                       {/* Add to Cart Button */}
                       <button
                         onClick={() => addToCart(template)}
-                        className="w-full flex items-center justify-center px-4 py-3 bg-red-600 text-white hover:bg-red-700 transition-colors font-medium"
+                        className="w-full flex items-center justify-center px-3 sm:px-4 py-2 sm:py-3 bg-red-600 text-white hover:bg-red-700 transition-colors font-medium text-xs sm:text-sm"
                       >
-                        <ShoppingCart className="h-4 w-4 mr-2" />
+                        <ShoppingCart className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
                         Add to cart
                       </button>
                     </div>
@@ -333,24 +333,24 @@ export default function Templates() {
       {/* Notification Popup */}
       {showNotification && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white rounded-lg shadow-xl p-6 max-w-md w-full mx-4 animate-popup">
-            <div className="flex items-center space-x-4">
+          <div className="bg-white rounded-lg shadow-xl p-4 sm:p-6 max-w-md w-full mx-4 animate-popup">
+            <div className="flex items-center space-x-3 sm:space-x-4">
               <div className="flex-shrink-0">
-                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                  <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-100 rounded-full flex items-center justify-center">
+                  <svg className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                 </div>
               </div>
               <div className="flex-1">
-                <h3 className="text-lg font-semibold text-gray-900">Success!</h3>
-                <p className="text-gray-600">{notificationMessage}</p>
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900">Success!</h3>
+                <p className="text-sm sm:text-base text-gray-600">{notificationMessage}</p>
               </div>
               <button
                 onClick={() => setShowNotification(false)}
                 className="flex-shrink-0 text-gray-400 hover:text-gray-600 transition-colors"
               >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
@@ -358,7 +358,7 @@ export default function Templates() {
             <div className="mt-4 flex justify-end">
               <button
                 onClick={() => setShowNotification(false)}
-                className="px-4 py-2 bg-[#A5292A] text-white rounded-lg hover:bg-red-700 transition-colors font-medium"
+                className="px-3 sm:px-4 py-1.5 sm:py-2 bg-[#A5292A] text-white rounded-lg hover:bg-red-700 transition-colors font-medium text-sm sm:text-base"
               >
                 OK
               </button>

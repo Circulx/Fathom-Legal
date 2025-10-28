@@ -104,7 +104,7 @@ export default function DisputeResolution() {
         
         <div className="container mx-auto px-4 relative z-10">
           <div className="text-center max-w-4xl mx-auto">
-            <h1 className="text-5xl md:text-6xl font-bold text-white mb-10">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 sm:mb-8 md:mb-10">
             <span style={{ color: '#A5292A' }}>Dispute Resolution</span>
             </h1>
             
@@ -126,13 +126,13 @@ export default function DisputeResolution() {
         </div>
       </section>
       {/* Section 1 - Intro Content with Side Navigation */}
-      <section className="py-20 bg-white">
+      <section className="py-12 sm:py-16 lg:py-20 bg-white">
         <div className="container mx-auto px-4">
-          <div className="grid lg:grid-cols-3 gap-12 max-w-7xl mx-auto">
+          <div className="grid lg:grid-cols-3 gap-8 lg:gap-12 max-w-7xl mx-auto">
             {/* Side Navigation Box */}
-            <div className="lg:col-span-1">
-              <div className="bg-white rounded-lg shadow-sm border border-black p-6 sticky top-24">
-                <h3 className="text-lg font-semibold text-gray-800 mb-4">
+            <div className="lg:col-span-1 order-2 lg:order-1">
+              <div className="bg-white rounded-lg shadow-sm border border-black p-4 sm:p-6 lg:sticky lg:top-24">
+                <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-3 sm:mb-4">
                   Our Expertise Areas
                 </h3>
                 <nav className="space-y-0">
@@ -145,24 +145,24 @@ export default function DisputeResolution() {
                           element.scrollIntoView({ behavior: 'smooth' });
                         }
                       }}
-                      className="w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-[#A5292A] hover:bg-gray-50 transition-all duration-200 group border-b border-gray-100 last:border-b-0"
+                      className="w-full flex items-center justify-between px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-medium text-[#A5292A] hover:bg-gray-50 transition-all duration-200 group border-b border-gray-100 last:border-b-0"
                     >
                       <div className="flex items-center">
-                        <div className="w-1 h-4 bg-[#A5292A] mr-3 rounded-full flex-shrink-0"></div>
+                        <div className="w-1 h-3 sm:h-4 bg-[#A5292A] mr-2 sm:mr-3 rounded-full flex-shrink-0"></div>
                         <span className="text-left">{area.title}</span>
                       </div>
-                      <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-[#A5292A] transition-colors duration-200 flex-shrink-0" />
+                      <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400 group-hover:text-[#A5292A] transition-colors duration-200 flex-shrink-0" />
                     </button>
                   ))}
                 </nav>
               </div>
             </div>
             {/* Services We Offer Content */}
-            <div className="lg:col-span-2">
-              <h2 className="text-3xl font-bold text-gray-800 mb-8">
+            <div className="lg:col-span-2 order-1 lg:order-2">
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-6 sm:mb-8">
                 Our Areas of Expertise Include:
               </h2>
-              <p className="text-base text-gray-800 leading-relaxed">
+              <p className="text-sm sm:text-base text-gray-800 leading-relaxed">
                 At Fathom Legal, we specialize in resolving a wide range of
                 disputes with professionalism, efficiency, and integrity. Our team
                 of experienced litigators and dispute resolution experts is
@@ -179,22 +179,22 @@ export default function DisputeResolution() {
       </section>
 
       {/* Section 2 - Detailed Services */}
-      <section className="py-20 bg-gray-50">
-        <div className="container mx-auto px-12 lg:px-24 xl:px-32">
+      <section className="py-12 sm:py-16 lg:py-20 bg-gray-50">
+        <div className="container mx-auto px-4 sm:px-8 lg:px-12 xl:px-16">
           {expertiseAreas.map((area, index) => (
             <div
               key={index}
               id={`expertise-${index}`}
-              className={`grid lg:grid-cols-2 gap-0 items-stretch ${
-                index !== expertiseAreas.length - 1 ? "" : ""
+              className={`grid grid-cols-1 lg:grid-cols-2 gap-0 items-stretch mb-8 lg:mb-0 ${
+                index !== expertiseAreas.length - 1 ? "lg:mb-8" : ""
               }`}
             >
               {/* Text Content with Dark Blue Background */}
-              <div className={`${index % 2 === 0 ? "order-1" : "order-2"} bg-[#A5292A] p-16 flex flex-col justify-center`}>
-                <h3 className="text-2xl font-bold text-white mb-6">
+              <div className={`${index % 2 === 0 ? "lg:order-1" : "lg:order-2"} bg-[#A5292A] p-6 sm:p-8 lg:p-12 xl:p-16 flex flex-col justify-center`}>
+                <h3 className="text-xl sm:text-2xl font-bold text-white mb-4 sm:mb-6">
                   {area.title}
                 </h3>
-                <p className="text-white text-base leading-relaxed mb-8">
+                <p className="text-white text-sm sm:text-base leading-relaxed mb-6 sm:mb-8">
                   {area.description}
                 </p>
                 <a 
@@ -209,7 +209,7 @@ export default function DisputeResolution() {
               </div>
 
               {/* Image */}
-              <div className={`${index % 2 === 0 ? "order-2" : "order-1"} h-full`}>
+              <div className={`${index % 2 === 0 ? "lg:order-2" : "lg:order-1"} relative h-64 sm:h-80 lg:h-auto`}>
                 <Image
                   src={area.image}
                   alt={`${area.title} representation`}
@@ -224,48 +224,48 @@ export default function DisputeResolution() {
       </section>
 
       {/* Section 3: Why Choose Fathom Legal? */}
-      <section className="py-20 bg-white">
+      <section className="py-12 sm:py-16 lg:py-20 bg-white">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
-            <div className="text-center mb-16">
-              <h2 className="text-4xl font-bold text-gray-800 mb-6">
+            <div className="text-center mb-12 sm:mb-16">
+              <h2 className="text-3xl sm:text-4xl font-bold text-gray-800 mb-4 sm:mb-6">
                 Why Choose Fathom Legal for Dispute Resolution?
               </h2>
-              <p className="text-lg text-gray-600">
+              <p className="text-base sm:text-lg text-gray-600">
                 Our commitment to excellence ensures that you receive the best
                 legal support possible.
               </p>
             </div>
 
             {/* Accordion Items */}
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               {whyChooseUs.map((item, index) => (
                 <div
                   key={index}
                   className="border border-gray-100 rounded-lg overflow-hidden"
                 >
                   <button
-                    className="w-full text-left bg-white p-6 flex items-center justify-between hover:bg-gray-50 transition-colors"
+                    className="w-full text-left bg-white p-4 sm:p-6 flex items-center justify-between hover:bg-gray-50 transition-colors"
                     onClick={() => toggleAccordion(index)}
                   >
-                    <span className="font-semibold text-gray-800 text-lg">
+                    <span className="font-semibold text-gray-800 text-base sm:text-lg">
                       {item.title}
                     </span>
                     {openAccordion === index ? (
                       <Minus
-                        className="w-5 h-5 flex-shrink-0"
+                        className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0"
                         style={{ color: "#A5292A" }}
                       />
                     ) : (
                       <Plus
-                        className="w-5 h-5 flex-shrink-0"
+                        className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0"
                         style={{ color: "#A5292A" }}
                       />
                     )}
                   </button>
                   {openAccordion === index && (
-                    <div className="bg-gray-50 px-6 pb-6">
-                      <p className="text-gray-600 leading-relaxed">
+                    <div className="bg-gray-50 px-4 sm:px-6 pb-4 sm:pb-6">
+                      <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
                         {item.description}
                       </p>
                     </div>
@@ -278,13 +278,13 @@ export default function DisputeResolution() {
       </section>
 
       {/* Section 3 - Notice Box (Call to Action) */}
-      <section className="py-20 bg-white">
+      <section className="py-12 sm:py-16 lg:py-20 bg-white">
         <div className="container mx-auto px-4">
           <div
-            className="max-w-4xl mx-auto text-center p-12 rounded-2xl"
+            className="max-w-4xl mx-auto text-center p-6 sm:p-8 lg:p-12 rounded-2xl"
             style={{ backgroundColor: "#A5292A" }}
           >
-            <p className="text-base text-left text-white text-opacity-90 mb-8 leading-relaxed">
+            <p className="text-sm sm:text-base text-left text-white text-opacity-90 mb-6 sm:mb-8 leading-relaxed">
               If you're facing a dispute and need expert legal representation,
               contact Fathom Legal today. Let us help you navigate your legal
               challenges and achieve a favorable resolution.
@@ -294,9 +294,9 @@ export default function DisputeResolution() {
                 href="https://calendly.com/ishita-fathomlegal/free-20-mins-consultation"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center justify-center px-8 py-4 bg-white border-2 border-gray-300 text-[#A5292A] font-semibold rounded-lg hover:border-gray-400 hover:bg-[#A5292A] hover:text-white transition-all duration-300 group"
+                className="inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 bg-white border-2 border-gray-300 text-[#A5292A] font-semibold rounded-lg hover:border-gray-400 hover:bg-[#A5292A] hover:text-white transition-all duration-300 group text-sm sm:text-base"
               >
-                Book your slot today <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                Book your slot today <ArrowRight className="ml-2 w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" />
               </a>
             </div>
           </div>

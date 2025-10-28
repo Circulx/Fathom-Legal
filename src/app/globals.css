@@ -1,0 +1,307 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-inter: 'Inter', sans-serif;
+  --font-playfair: 'Playfair Display', serif;
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: linear-gradient(
+      to bottom,
+      transparent,
+      rgb(var(--background-end-rgb))
+    )
+    rgb(var(--background-start-rgb));
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  html {
+    color-scheme: dark;
+  }
+}
+
+/* Continuous scrolling animation for testimonials */
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-scroll {
+  animation: scroll 18s linear infinite;
+}
+
+.animate-marquee {
+  animation: marquee 60s linear infinite;
+}
+
+/* Faster animation for mobile devices */
+@media (max-width: 768px) {
+  .animate-scroll {
+    animation: scroll 12s linear infinite;
+  }
+  
+  .animate-marquee {
+    animation: marquee 50s linear infinite;
+  }
+}
+
+/* Pause animation on hover */
+.animate-scroll:hover,
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
+
+/* Zoom-in animation for hero background */
+@keyframes zoom-in {
+  0% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+  50% {
+    transform: scale(1.02);
+    filter: brightness(1.02);
+  }
+  100% {
+    transform: scale(1.05);
+    filter: brightness(1.05);
+  }
+}
+
+.animate-zoom-in {
+  animation: zoom-in 20s ease-out forwards;
+  transform-origin: center center;
+  will-change: transform;
+}
+
+/* Text animations for hero section */
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInLeft {
+  0% {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeInRight {
+  0% {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 1s ease-out forwards;
+}
+
+.animate-fade-in-left {
+  animation: fadeInLeft 1s ease-out forwards;
+}
+
+.animate-fade-in-right {
+  animation: fadeInRight 1s ease-out forwards;
+}
+
+.animate-fade-in {
+  animation: fadeIn 1s ease-out forwards;
+}
+
+/* Staggered animation delays */
+.animate-delay-200 {
+  animation-delay: 0.2s;
+  opacity: 0;
+}
+
+.animate-delay-400 {
+  animation-delay: 0.4s;
+  opacity: 0;
+}
+
+.animate-delay-600 {
+  animation-delay: 0.6s;
+  opacity: 0;
+}
+
+.animate-delay-800 {
+  animation-delay: 0.8s;
+  opacity: 0;
+}
+
+.animate-delay-1000 {
+  animation-delay: 1s;
+  opacity: 0;
+}
+
+/* Footer specific animations */
+@keyframes slideInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInLeft {
+  0% {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  0% {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-slide-in-up {
+  animation: slideInUp 0.8s ease-out forwards;
+}
+
+.animate-slide-in-left {
+  animation: slideInLeft 0.8s ease-out forwards;
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 0.8s ease-out forwards;
+}
+
+/* Footer staggered delays */
+.animate-delay-100 {
+  animation-delay: 0.1s;
+  opacity: 0;
+}
+
+.animate-delay-300 {
+  animation-delay: 0.3s;
+  opacity: 0;
+}
+
+.animate-delay-500 {
+  animation-delay: 0.5s;
+  opacity: 0;
+}
+
+.animate-delay-700 {
+  animation-delay: 0.7s;
+  opacity: 0;
+}
+
+.animate-delay-900 {
+  animation-delay: 0.9s;
+  opacity: 0;
+}
+
+.animate-delay-1100 {
+  animation-delay: 1.1s;
+  opacity: 0;
+}
+
+/* Custom dropdown styling for better visibility */
+select option {
+  background-color: white !important;
+  color: #374151 !important;
+  padding: 8px 12px;
+}
+
+select option:hover {
+  background-color: #f3f4f6 !important;
+  color: #111827 !important;
+}
+
+select option:checked {
+  background-color: #A5292A !important;
+  color: white !important;
+}
+
+/* Notification popup animation */
+@keyframes popup {
+  from {
+    transform: scale(0.8) translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-popup {
+  animation: popup 0.3s ease-out;
+}
+
+
+
+
+

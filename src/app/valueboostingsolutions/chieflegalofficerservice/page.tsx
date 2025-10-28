@@ -129,7 +129,7 @@ export default function ChiefLegalOfficerService() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 lg:ml-20 lg:mr-20">
             {benefits.map((benefit, index) => (
               <div
                 key={index}
@@ -160,9 +160,9 @@ export default function ChiefLegalOfficerService() {
       {/* Service Areas Section */}
       <section className="py-12 sm:py-16 lg:py-20 bg-white">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center lg:ml-20 lg:mr-20">
             <div>
-              <h2 className="text-3xl sm:text-4xl font-bold text-gray-800 mb-4 sm:mb-6">
+              <h2 className="text-3xl sm:text-4xl font-bold text-gray-800 mb-4 sm:mb-6 ">
                 <span style={{ color: '#A5292A' }}>Comprehensive Legal Leadership</span>
               </h2>
               <p className="text-sm sm:text-base text-gray-600 mb-6 sm:mb-8 leading-relaxed">
@@ -241,7 +241,7 @@ export default function ChiefLegalOfficerService() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 lg:ml-20 lg:mr-20">
             <div className="text-center group hover:scale-105 transition-all duration-500">
               <div
                 className="text-white p-3 sm:p-4 rounded-full w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center mx-auto mb-4 sm:mb-6 group-hover:scale-110 group-hover:rotate-12 transition-all duration-500"
@@ -310,7 +310,7 @@ export default function ChiefLegalOfficerService() {
       </section>
 
       {/* Call to Action Section */}
-      <section className="py-12 sm:py-16 lg:py-20" style={{ backgroundColor: "#A5292A" }}>
+      <section className="py-12 sm:py-16 lg:py-2" style={{ backgroundColor: "#A5292A" }}>
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
             <div className="p-6 sm:p-8 lg:p-12 rounded-2xl text-center">

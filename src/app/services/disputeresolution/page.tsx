@@ -185,7 +185,7 @@ export default function DisputeResolution() {
             <div
               key={index}
               id={`expertise-${index}`}
-              className={`grid grid-cols-1 lg:grid-cols-2 gap-0 items-stretch mb-8 lg:mb-0 ${
+              className={`grid grid-cols-1 lg:grid-cols-2 gap-0 items-stretch mb-8 lg:mb-0  lg:ml-20 lg:mr-20 ${
                 index !== expertiseAreas.length - 1 ? "lg:mb-8" : ""
               }`}
             >

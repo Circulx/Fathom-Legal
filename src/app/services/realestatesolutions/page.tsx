@@ -103,7 +103,7 @@ const RealEstateSolutions = () => {
 
       {/* Property Disputes and Management Sections */}
       <section className="bg-gray-50">
-        <div className="container mx-auto px-4 sm:px-8 lg:px-12 xl:px-16">
+        <div className="container mx-auto px-4 sm:px-8 lg:px-16 xl:px-24 2xl:px-32">
           {/* Property Disputes */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 mt-12 sm:mt-16 lg:mt-20 items-stretch">
             {/* Text Content with Dark Red Background */}
@@ -197,7 +197,7 @@ const RealEstateSolutions = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6  sm:gap-8  lg:ml-20 lg:mr-20">
             {propertyServices.map((service, index) => (
               <div
                 key={index}
@@ -301,7 +301,7 @@ const RealEstateSolutions = () => {
       {/* Trust & Value Section */}
       <section className="py-12 sm:py-16 lg:py-20 bg-white">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center px-4 sm:px-8 md:px-12 lg:px-16 xl:px-24 2xl:px-32">
             <div>
               <h2 className="text-3xl sm:text-4xl font-bold text-gray-800 mb-4 sm:mb-6">
                 Why Choose Fathom Legal for Real Estate?

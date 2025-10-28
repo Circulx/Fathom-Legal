@@ -152,17 +152,17 @@ export default function GeneralCorporateAdvisory() {
       </section>
 
       {/* Section 2 - Detailed Services */}
-      <section className="py-12 sm:py-16 lg:py-20 bg-gray-100">
-        <div className="container mx-auto px-4 sm:px-8 lg:px-12 xl:px-16">
+      <section className="py-12 sm:py-16 lg:py-20 bg-gray-100 ">
+        <div className="container mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 ">
           {services.map((service, index) => (
             <div
               key={index}
               id={`service-${index}`}
-              className={`grid grid-cols-1 lg:grid-cols-2 gap-0 items-stretch mb-8 lg:mb-0 ${
+              className={`grid grid-cols-1 lg:grid-cols-2 gap-0 items-stretch mb-8 lg:mb-0  lg:ml-20 lg:mr-20 ${
                 index !== services.length - 1 ? "lg:mb-8" : ""
               }`}
             >
-              {/* Text Content with Dark Blue Background */}
+              {/* Text Content with Dark Red Background */}
               <div className={`${index % 2 === 0 ? "lg:order-1" : "lg:order-2"} bg-[#A5292A] p-6 sm:p-8 lg:p-12 xl:p-16 flex flex-col justify-center`}>
                 <h3 className="text-xl sm:text-2xl font-bold text-white mb-4 sm:mb-6">
                   {service.title}

@@ -149,11 +149,11 @@ const REITSolutions = () => {
 
       {/* REIT Services Sections */}
       <section className="py-12 sm:py-16 lg:py-20 bg-gray-50">
-        <div className="container mx-auto px-4 sm:px-8 lg:px-12 xl:px-16">
+        <div className="container mx-auto px-4 sm:px-8 lg:px-16 xl:px-24 2xl:px-32">
           {reitServices.map((service, index) => (
             <div
               key={index}
-              className={`grid grid-cols-1 lg:grid-cols-2 gap-0 items-stretch mb-8 lg:mb-0 ${
+              className={`grid grid-cols-1 lg:grid-cols-2 gap-0 items-stretch mb-8 lg:mb-0  lg:ml-20 lg:mr-20 ${
                 index !== reitServices.length - 1 ? "lg:mb-8" : ""
               }`}
             >
@@ -199,7 +199,7 @@ const REITSolutions = () => {
       {/* Why Choose Us for REIT Services */}
       <section className="py-12 sm:py-16 lg:py-20 bg-white">
         <div className="container mx-auto px-4"> 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center px-4 sm:px-8 md:px-12 lg:px-16 xl:px-24 2xl:px-32">
             <div>
               <h2 className="text-3xl sm:text-4xl font-bold text-gray-800 mb-4 sm:mb-6">
                 Why Choose Fathom Legal for REIT Solutions?
@@ -290,7 +290,7 @@ const REITSolutions = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 lg:ml-20 lg:mr-20">
             <div className="bg-white p-6 sm:p-8 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100">
               <div
                 className="text-white p-2 sm:p-3 rounded-lg mb-4 sm:mb-6 w-fit"

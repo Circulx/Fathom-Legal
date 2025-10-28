@@ -18,7 +18,7 @@ interface Blog {
 async function getBlogs(): Promise<Blog[]> {
   try {
     const response = await fetch(`${process.env.NEXTAUTH_URL}/api/blogs`, {
-      cache: 'no-store'
+      next: { revalidate: 3600 } // Revalidate every hour
     })
 
     if (!response.ok) {

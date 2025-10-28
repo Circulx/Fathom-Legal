@@ -4,12 +4,14 @@ import Template from '@/models/Template'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectDB()
     
-    const template = await Template.findById(params.id)
+    const { id } = await params
+    
+    const template = await Template.findById(id)
       .populate('uploadedBy', 'name email')
     
     if (!template) {

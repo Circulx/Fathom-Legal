@@ -7,7 +7,7 @@ import { Navbar } from '@/components/Navbar'
 import Footer from '@/components/Footer'
 
 interface GalleryBlogPageProps {
-  params: { slug: string }
+  params: Promise<{ slug: string }>
 }
 
 async function getGalleryBlogBySlug(slug: string) {
@@ -30,7 +30,7 @@ async function getGalleryBlogBySlug(slug: string) {
     }
 
     return {
-      id: galleryBlog._id.toString(),
+      id: (galleryBlog._id as any).toString(),
       title: galleryBlog.title,
       description: galleryBlog.description,
       category: galleryBlog.category,

@@ -20,7 +20,7 @@ interface Blog {
 }
 
 interface BlogPageProps {
-  params: { slug: string }
+  params: Promise<{ slug: string }>
 }
 
 async function getBlogBySlug(slug: string): Promise<Blog | null> {
@@ -43,16 +43,16 @@ async function getBlogBySlug(slug: string): Promise<Blog | null> {
     }
 
     return {
-      id: blog._id.toString(),
+      id: (blog._id as any).toString(),
       title: blog.title,
       description: blog.description,
       category: blog.category,
       content: blog.content,
       imageUrl: blog.imageUrl,
-      slug: blog.slug,
-      publishedAt: blog.publishedAt,
-      createdAt: blog.createdAt,
-      updatedAt: blog.updatedAt
+      slug: blog.slug || '',
+      publishedAt: blog.publishedAt?.toISOString() || new Date().toISOString(),
+      createdAt: blog.createdAt.toISOString(),
+      updatedAt: blog.updatedAt.toISOString()
     }
   } catch (error) {
     console.error('Error fetching blog:', error)
@@ -61,7 +61,8 @@ async function getBlogBySlug(slug: string): Promise<Blog | null> {
 }
 
 export default async function BlogPage({ params }: BlogPageProps) {
-  const blog = await getBlogBySlug(params.slug)
+  const { slug } = await params
+  const blog = await getBlogBySlug(slug)
 
   if (!blog) {
     notFound()
@@ -153,7 +154,8 @@ export default async function BlogPage({ params }: BlogPageProps) {
 
 // Generate metadata for SEO
 export async function generateMetadata({ params }: BlogPageProps) {
-  const blog = await getBlogBySlug(params.slug)
+  const { slug } = await params
+  const blog = await getBlogBySlug(slug)
 
   if (!blog) {
     return {

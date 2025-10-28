@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
     if (content && !externalUrl) {
       // Get existing slugs to ensure uniqueness
       const existingBlogs = await Blog.find({ slug: { $exists: true } }, 'slug')
-      const existingSlugs = existingBlogs.map(blog => blog.slug).filter(Boolean)
+      const existingSlugs = existingBlogs.map(blog => blog.slug).filter((slug): slug is string => Boolean(slug))
       
       slug = await generateUniqueSlug(title, existingSlugs)
     }

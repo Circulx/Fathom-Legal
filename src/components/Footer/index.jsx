@@ -8,17 +8,17 @@ const Footer = () => {
   return (
     <footer className="bg-black text-white py-10">
       <div className="container mx-auto px-4">
-        <div className="grid md:grid-cols-4 gap-8 ml-20 mr-20">
-          <div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="sm:col-span-2 lg:col-span-1">
             <div className="flex items-center mb-4">
               <div className="w-10 h-10 mr-3">
                 <Image src={logo} alt="Fathom Legal Logo" width={40} height={40} />
               </div>
-              <div className="text-3xl font-bold text-white">
+              <div className="text-2xl sm:text-3xl font-bold text-white">
                 Fathom <span style={{ color: "#A5292A" }}>Legal</span>
               </div>
             </div>
-            <p className="text-gray-300 text-base mb-4">
+            <p className="text-gray-300 text-sm sm:text-base mb-4">
               Expert legal services for businesses and individuals with a focus
               on startup ecosystem and SMB sector.
             </p>
@@ -103,58 +103,60 @@ const Footer = () => {
 
         {/* Footer Bottom Section */}
         <div className="border-t border-gray-700 mt-6 pt-4">
-          <div className="grid md:grid-cols-2 gap-8 ml-20 mr-20">
-            <p className="text-center text-gray-300">
+          <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4">
+            <p className="text-center lg:text-left text-gray-300 text-sm">
               &copy; 2024 Fathom Legal Advocates & Corporate Consultants. All
               rights reserved.
             </p>
-            <div className="flex justify-center space-x-4">
-              <p className="text-gray-300">Connect with us on:</p>
-              <a 
-                href="https://www.linkedin.com/company/fathom-legal/" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-gray-300 hover:text-[#0077B5] transition-colors duration-300"
-                aria-label="LinkedIn"
-              >
-                <FaLinkedin size={24} />
-              </a>
-              <a 
-                href="https://www.instagram.com/p/DQTdaqAiOYw/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-gray-300 hover:text-[#E4405F] transition-colors duration-300"
-                aria-label="Instagram"
-              >
-                <FaInstagram size={24} />
-              </a>
-              <a 
-                href="https://www.facebook.com/share/p/1Jk8RH2qxG/" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-gray-300 hover:text-[#1877F2] transition-colors duration-300"
-                aria-label="Facebook"
-              >
-                <FaFacebook size={24} />
-              </a>
-              <a 
-                href="https://youtube.com/@fathomlegal" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-gray-300 hover:text-[#FF0000] transition-colors duration-300"
-                aria-label="YouTube"
-              >
-                <FaYoutube size={24} />
-              </a>
-              <a 
-                href="https://wa.me/919625206671" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-gray-300 hover:text-[#25D366] transition-colors duration-300"
-                aria-label="WhatsApp"
-              >
-                <FaWhatsapp size={24} />
-              </a>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4">
+              <p className="text-gray-300 text-sm">Connect with us on:</p>
+              <div className="flex space-x-3">
+                <a 
+                  href="https://www.linkedin.com/company/fathom-legal/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-gray-300 hover:text-[#0077B5] transition-colors duration-300"
+                  aria-label="LinkedIn"
+                >
+                  <FaLinkedin size={20} />
+                </a>
+                <a 
+                  href="https://www.instagram.com/p/DQTdaqAiOYw/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-gray-300 hover:text-[#E4405F] transition-colors duration-300"
+                  aria-label="Instagram"
+                >
+                  <FaInstagram size={20} />
+                </a>
+                <a 
+                  href="https://www.facebook.com/share/p/1Jk8RH2qxG/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-gray-300 hover:text-[#1877F2] transition-colors duration-300"
+                  aria-label="Facebook"
+                >
+                  <FaFacebook size={20} />
+                </a>
+                <a 
+                  href="https://youtube.com/@fathomlegal" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-gray-300 hover:text-[#FF0000] transition-colors duration-300"
+                  aria-label="YouTube"
+                >
+                  <FaYoutube size={20} />
+                </a>
+                <a 
+                  href="https://wa.me/919625206671" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-gray-300 hover:text-[#25D366] transition-colors duration-300"
+                  aria-label="WhatsApp"
+                >
+                  <FaWhatsapp size={20} />
+                </a>
+              </div>
             </div>
           </div>
         </div>

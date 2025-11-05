@@ -80,9 +80,12 @@ const Footer = () => {
             <h4 className="text-lg font-semibold mb-2 text-white">Legal</h4>
             <ul className="space-y-2 text-gray-300 text-sm">
               <li>
-                <a href="#" className="hover:text-white transition-colors">
+                <Link 
+                  href="/privacy-policy" 
+                  className="hover:text-white transition-colors"
+                >
                   Privacy Policy
-                </a>
+                </Link>
               </li>
               <li>
                 <Link 
@@ -93,9 +96,12 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-white transition-colors">
-                  Disclaimer
-                </a>
+                <Link 
+                  href="/refund-cancellation-policy" 
+                  className="hover:text-white transition-colors"
+                >
+                  Refund and Cancellation Policy
+                </Link>
               </li>
             </ul>
           </div>

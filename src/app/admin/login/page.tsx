@@ -84,7 +84,12 @@ export default function AdminLogin() {
           router.push('/admin/dashboard')
         } else {
           console.error('Login failed:', result?.error)
-          setError(result?.error || 'Invalid email or password')
+          // Map NextAuth error codes to user-friendly messages
+          if (result?.error === 'CredentialsSignin') {
+            setError('Invalid credentials')
+          } else {
+            setError(result?.error || 'Invalid credentials')
+          }
         }
       }
     } catch (error) {

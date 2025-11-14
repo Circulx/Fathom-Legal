@@ -11,11 +11,11 @@ export async function POST(request: NextRequest) {
     console.log('Database connected successfully')
 
     const formData = await request.formData()
-    const title = formData.get('title') as string
-    const description = formData.get('description') as string
-    const category = formData.get('category') as string
-    const content = formData.get('content') as string
-    const externalUrl = formData.get('externalUrl') as string
+    const title = (formData.get('title') as string)?.trim()
+    const description = (formData.get('description') as string)?.trim()
+    const category = (formData.get('category') as string)?.trim()
+    const content = (formData.get('content') as string)?.trim() || undefined
+    const externalUrl = (formData.get('externalUrl') as string)?.trim() || undefined
     const image = formData.get('image') as File | null
 
     console.log('Form data received:', { title, description, category, content, externalUrl, hasImage: !!image })
@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate external URL format if provided
-    if (externalUrl && externalUrl.trim()) {
+    if (externalUrl) {
       try {
         new URL(externalUrl)
       } catch {
@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    let imageUrl = ''
+    let imageUrl: string | undefined = undefined
 
     // Handle image upload if provided
     if (image && image.size > 0) {
@@ -69,41 +69,65 @@ export async function POST(request: NextRequest) {
         }, { status: 400 })
       }
 
-      // Create uploads directory if it doesn't exist
-      const uploadsDir = join(process.cwd(), 'public', 'uploads', 'gallery-blogs')
-      await mkdir(uploadsDir, { recursive: true })
-
-      // Generate unique filename
-      const timestamp = Date.now()
-      const fileExtension = image.name.split('.').pop()
-      const fileName = `gallery-blog-${timestamp}.${fileExtension}`
-      const filePath = join(uploadsDir, fileName)
-
-      // Save image
-      const bytes = await image.arrayBuffer()
-      const buffer = Buffer.from(bytes)
-      await writeFile(filePath, buffer)
-
-      imageUrl = `/uploads/gallery-blogs/${fileName}`
+      try {
+        const bytes = await image.arrayBuffer()
+        const buffer = Buffer.from(bytes)
+        
+        // Check if we're on Vercel (serverless environment)
+        const isVercel = process.env.VERCEL === '1'
+        
+        // Always use base64 for production compatibility
+        // This ensures images work on both local and production
+        // NOTE: For better performance with large images, consider using cloud storage (S3, Cloudinary, etc.)
+        const base64 = buffer.toString('base64')
+        imageUrl = `data:${image.type};base64,${base64}`
+        
+        // Also save to filesystem for local development (optional, for easier file management)
+        if (!isVercel) {
+          // Optional: Also save to filesystem for local development
+          try {
+            const uploadsDir = join(process.cwd(), 'public', 'uploads', 'gallery-blogs')
+            await mkdir(uploadsDir, { recursive: true })
+            const timestamp = Date.now()
+            const fileExtension = image.name.split('.').pop() || 'jpg'
+            const fileName = `gallery-blog-${timestamp}.${fileExtension}`
+            const filePath = join(uploadsDir, fileName)
+            await writeFile(filePath, buffer)
+            // Note: We still use base64 URL above for consistency
+          } catch (fsError) {
+            // Ignore filesystem errors, base64 URL is already set
+            console.warn('Could not save to filesystem, using base64 only:', fsError)
+          }
+        }
+      } catch (fileError) {
+        console.error('File upload error:', fileError)
+        return NextResponse.json({ 
+          error: 'Failed to upload image. Please try again.',
+          details: fileError instanceof Error ? fileError.message : 'Unknown file error'
+        }, { status: 500 })
+      }
     }
 
     console.log('Creating gallery blog with data:', {
       title,
-      description: description || '',
-      category: category || 'ARTICLE',
-      content: content || '',
-      externalUrl: externalUrl || '',
-      imageUrl
+      description,
+      category,
+      hasContent: !!content,
+      hasExternalUrl: !!externalUrl,
+      hasImage: !!imageUrl
     })
+
+    // Generate slug
+    const slug = `${title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')}-${Date.now()}`
 
     const galleryBlog = new GalleryBlog({
       title,
       description,
       category,
-      content: content || undefined,
-      externalUrl: externalUrl || undefined,
-      imageUrl: imageUrl || undefined,
-      slug: `${title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')}-${Date.now()}`,
+      content,
+      externalUrl,
+      imageUrl,
+      slug,
       isDraft: false,
       publishedAt: new Date(),
       isActive: true,

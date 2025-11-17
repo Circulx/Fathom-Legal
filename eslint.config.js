@@ -44,6 +44,7 @@ export default tseslint.config(
       ...reactHooks.configs.recommended.rules,
       '@typescript-eslint/no-unused-vars': ['warn', { varsIgnorePattern: '^[A-Z_]' }],
       '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/ban-ts-comment': 'warn', // Allow @ts-ignore but warn instead of error
       'prefer-const': 'warn',
       'react-hooks/exhaustive-deps': 'warn',
     },

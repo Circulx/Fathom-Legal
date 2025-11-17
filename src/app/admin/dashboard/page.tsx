@@ -5,7 +5,7 @@ import { useSession, signOut } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
-import TextStyle from '@tiptap/extension-text-style'
+import { TextStyle } from '@tiptap/extension-text-style'
 import FontFamily from '@tiptap/extension-font-family'
 import Placeholder from '@tiptap/extension-placeholder'
 import { 
@@ -31,7 +31,8 @@ import {
   Bold,
   Italic,
   Underline,
-  Strikethrough
+  Strikethrough,
+  Edit
 } from 'lucide-react'
 import { Navbar } from '@/components/Navbar'
 
@@ -311,6 +312,9 @@ export default function AdminDashboard() {
   const [thoughtLeadershipBlogsLoading, setThoughtLeadershipBlogsLoading] = useState(true)
   const [showThoughtLeadershipBlogCreateModal, setShowThoughtLeadershipBlogCreateModal] = useState(false)
   const [thoughtLeadershipBlogCreating, setThoughtLeadershipBlogCreating] = useState(false)
+  const [showThoughtLeadershipBlogEditModal, setShowThoughtLeadershipBlogEditModal] = useState(false)
+  const [thoughtLeadershipBlogEditing, setThoughtLeadershipBlogEditing] = useState(false)
+  const [editingBlogId, setEditingBlogId] = useState<string | null>(null)
 
   // Gallery Blogs state
   const [galleryBlogs, setGalleryBlogs] = useState<Blog[]>([])
@@ -354,6 +358,18 @@ export default function AdminDashboard() {
     content: '',
     externalUrl: '',
     image: null as File | null
+  })
+
+  // Thought Leadership Blog edit form state
+  const [thoughtLeadershipBlogEditForm, setThoughtLeadershipBlogEditForm] = useState({
+    title: '',
+    description: '',
+    category: 'ARTICLE' as 'WEBINAR' | 'INTERVIEW' | 'FEATURE' | 'ARTICLE' | 'NEWS',
+    content: '',
+    externalUrl: '',
+    image: null as File | null,
+    existingImageUrl: '',
+    removeImage: false
   })
 
   // Gallery Blog create form state
@@ -649,6 +665,95 @@ export default function AdminDashboard() {
       alert('Failed to create blog')
     } finally {
       setThoughtLeadershipBlogCreating(false)
+    }
+  }
+
+  // Handle opening edit modal
+  const handleThoughtLeadershipBlogEdit = (blog: Blog) => {
+    setEditingBlogId(blog._id)
+    setThoughtLeadershipBlogEditForm({
+      title: blog.title,
+      description: blog.description,
+      category: blog.category,
+      content: blog.content || '',
+      externalUrl: blog.externalUrl || '',
+      image: null,
+      existingImageUrl: blog.imageUrl || '',
+      removeImage: false
+    })
+    setShowThoughtLeadershipBlogEditModal(true)
+  }
+
+  // Handle blog update
+  const handleThoughtLeadershipBlogUpdate = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    if (!thoughtLeadershipBlogEditForm.title) {
+      alert('Please fill in the title field')
+      return
+    }
+
+    if (!thoughtLeadershipBlogEditForm.description) {
+      alert('Please fill in the description field')
+      return
+    }
+
+    if (!thoughtLeadershipBlogEditForm.content && !thoughtLeadershipBlogEditForm.externalUrl) {
+      alert('Please provide either content or external URL')
+      return
+    }
+
+    if (!editingBlogId) {
+      alert('Blog ID is missing')
+      return
+    }
+
+    setThoughtLeadershipBlogEditing(true)
+    try {
+      const formData = new FormData()
+      formData.append('id', editingBlogId)
+      formData.append('title', thoughtLeadershipBlogEditForm.title)
+      formData.append('description', thoughtLeadershipBlogEditForm.description || '')
+      formData.append('category', thoughtLeadershipBlogEditForm.category)
+      formData.append('content', thoughtLeadershipBlogEditForm.content)
+      formData.append('externalUrl', thoughtLeadershipBlogEditForm.externalUrl)
+      formData.append('removeImage', thoughtLeadershipBlogEditForm.removeImage.toString())
+      
+      if (thoughtLeadershipBlogEditForm.image) {
+        formData.append('image', thoughtLeadershipBlogEditForm.image)
+      }
+
+      const response = await fetch('/api/admin/blogs', {
+        method: 'PUT',
+        body: formData
+      })
+
+      if (response.ok) {
+        setShowThoughtLeadershipBlogEditModal(false)
+        setEditingBlogId(null)
+        setThoughtLeadershipBlogEditForm({ 
+          title: '', 
+          description: '', 
+          category: 'ARTICLE', 
+          content: '', 
+          externalUrl: '', 
+          image: null,
+          existingImageUrl: '',
+          removeImage: false
+        })
+        fetchThoughtLeadershipBlogs()
+        setSuccessMessage('Thought Leadership blog updated successfully!')
+        setShowSuccessMessage(true)
+        setTimeout(() => setShowSuccessMessage(false), 3000)
+      } else {
+        const error = await response.json()
+        alert(error.error || 'Failed to update blog')
+      }
+    } catch (error) {
+      console.error('Blog update error:', error)
+      alert('Failed to update blog')
+    } finally {
+      setThoughtLeadershipBlogEditing(false)
     }
   }
 
@@ -1362,6 +1467,13 @@ export default function AdminDashboard() {
                           <div className="flex items-center justify-between mb-4">
                             <div className="flex items-center space-x-2">
                               <button
+                                onClick={() => handleThoughtLeadershipBlogEdit(blog)}
+                                className="p-2 text-gray-400 hover:text-blue-600 transition-colors"
+                                title="Edit"
+                              >
+                                <Edit className="h-4 w-4" />
+                              </button>
+                              <button
                                 onClick={() => handleBlogDelete(blog._id, blog.title)}
                                 className="p-2 text-gray-400 hover:text-red-600 transition-colors"
                                 title="Delete"
@@ -2056,6 +2168,176 @@ export default function AdminDashboard() {
                   className="px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {thoughtLeadershipBlogCreating ? 'Creating...' : 'Create Blog'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Thought Leadership Blog Edit Modal */}
+      {showThoughtLeadershipBlogEditModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-gray-900">Edit Blog Post</h2>
+              <button
+                onClick={() => {
+                  setShowThoughtLeadershipBlogEditModal(false)
+                  setEditingBlogId(null)
+                  setThoughtLeadershipBlogEditForm({ 
+                    title: '', 
+                    description: '', 
+                    category: 'ARTICLE', 
+                    content: '', 
+                    externalUrl: '', 
+                    image: null,
+                    existingImageUrl: '',
+                    removeImage: false
+                  })
+                }}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            
+            <form onSubmit={handleThoughtLeadershipBlogUpdate} className="space-y-6">
+              {/* Title */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Title *
+                </label>
+                <input
+                  type="text"
+                  value={thoughtLeadershipBlogEditForm.title}
+                  onChange={(e) => setThoughtLeadershipBlogEditForm(prev => ({ ...prev, title: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-white text-black"
+                  placeholder="Enter blog title"
+                  required
+                />
+              </div>
+
+              {/* Description */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Description *
+                </label>
+                <textarea
+                  value={thoughtLeadershipBlogEditForm.description}
+                  onChange={(e) => setThoughtLeadershipBlogEditForm(prev => ({ ...prev, description: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-white text-black"
+                  rows={3}
+                  placeholder="Enter blog description"
+                  required
+                />
+              </div>
+
+              {/* Category */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Category*
+                </label>
+                <select
+                  value={thoughtLeadershipBlogEditForm.category}
+                  onChange={(e) => setThoughtLeadershipBlogEditForm(prev => ({ ...prev, category: e.target.value as any }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-white text-black"
+                  required
+                >
+                  <option value="WEBINAR">Webinar</option>
+                  <option value="INTERVIEW">Interview</option>
+                  <option value="FEATURE">Feature</option>
+                  <option value="ARTICLE">Article</option>
+                  <option value="NEWS">News</option>
+                </select>
+              </div>
+
+              {/* Content or External URL */}
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Blog Content
+                  </label>
+                  <RichTextEditor
+                    value={thoughtLeadershipBlogEditForm.content}
+                    onChange={(value) => setThoughtLeadershipBlogEditForm(prev => ({ ...prev, content: value }))}
+                    placeholder="Enter blog content (optional if external URL is provided)"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    External URL
+                  </label>
+                  <input
+                    type="url"
+                    value={thoughtLeadershipBlogEditForm.externalUrl}
+                    onChange={(e) => setThoughtLeadershipBlogEditForm(prev => ({ ...prev, externalUrl: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-white text-black"
+                    placeholder="https://example.com/blog-post (optional if content is provided)"
+                  />
+                </div>
+              </div>
+
+              {/* Featured Image */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Featured Image
+                </label>
+                {thoughtLeadershipBlogEditForm.existingImageUrl && !thoughtLeadershipBlogEditForm.removeImage && (
+                  <div className="mb-3">
+                    <img 
+                      src={thoughtLeadershipBlogEditForm.existingImageUrl} 
+                      alt="Current featured image" 
+                      className="w-full h-32 object-cover rounded-lg mb-2"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setThoughtLeadershipBlogEditForm(prev => ({ ...prev, removeImage: true }))}
+                      className="text-sm text-red-600 hover:text-red-700"
+                    >
+                      Remove Image
+                    </button>
+                  </div>
+                )}
+                {(!thoughtLeadershipBlogEditForm.existingImageUrl || thoughtLeadershipBlogEditForm.removeImage) && (
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => setThoughtLeadershipBlogEditForm(prev => ({ ...prev, image: e.target.files?.[0] || null }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-white text-black"
+                  />
+                )}
+              </div>
+
+              {/* Submit Button */}
+              <div className="flex justify-end space-x-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowThoughtLeadershipBlogEditModal(false)
+                    setEditingBlogId(null)
+                    setThoughtLeadershipBlogEditForm({ 
+                      title: '', 
+                      description: '', 
+                      category: 'ARTICLE', 
+                      content: '', 
+                      externalUrl: '', 
+                      image: null,
+                      existingImageUrl: '',
+                      removeImage: false
+                    })
+                  }}
+                  className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={thoughtLeadershipBlogEditing}
+                  className="px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {thoughtLeadershipBlogEditing ? 'Updating...' : 'Update Blog'}
                 </button>
               </div>
             </form>

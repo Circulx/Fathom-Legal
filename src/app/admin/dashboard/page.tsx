@@ -3,6 +3,11 @@
 import { useState, useEffect } from 'react'
 import { useSession, signOut } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
+import { useEditor, EditorContent } from '@tiptap/react'
+import StarterKit from '@tiptap/starter-kit'
+import TextStyle from '@tiptap/extension-text-style'
+import FontFamily from '@tiptap/extension-font-family'
+import Placeholder from '@tiptap/extension-placeholder'
 import { 
   LayoutDashboard,
   FileText,
@@ -22,7 +27,11 @@ import {
   Trash2,
   X,
   LogOut,
-  ExternalLink
+  ExternalLink,
+  Bold,
+  Italic,
+  Underline,
+  Strikethrough
 } from 'lucide-react'
 import { Navbar } from '@/components/Navbar'
 
@@ -68,6 +77,211 @@ interface Blog {
   isDeleted?: boolean
   createdAt: string
   updatedAt: string
+}
+
+// Rich Text Editor Component with Toolbar
+function RichTextEditor({ 
+  value, 
+  onChange, 
+  placeholder 
+}: { 
+  value: string
+  onChange: (html: string) => void
+  placeholder?: string 
+}) {
+  const editor = useEditor({
+    immediatelyRender: false,
+    extensions: [
+      StarterKit.configure({
+        heading: {
+          levels: [1, 2, 3],
+        },
+      }),
+      TextStyle,
+      FontFamily.configure({
+        types: ['textStyle'],
+      }),
+      Placeholder.configure({
+        placeholder: placeholder || 'Start typing...',
+      }),
+    ],
+    content: value,
+    onUpdate: ({ editor }) => {
+      onChange(editor.getHTML())
+    },
+    editorProps: {
+      attributes: {
+        class: 'prose prose-sm sm:prose lg:prose-lg xl:prose-2xl mx-auto focus:outline-none min-h-[200px] px-4 py-3',
+      },
+    },
+  })
+
+  // Sync editor content when value prop changes externally
+  useEffect(() => {
+    if (editor && value !== editor.getHTML()) {
+      editor.commands.setContent(value, false)
+    }
+  }, [value, editor])
+
+  const fontFamilies = [
+    'Arial',
+    'Times New Roman',
+    'Georgia',
+    'Verdana',
+    'Courier New',
+    'Helvetica',
+    'Comic Sans MS',
+  ]
+
+  if (!editor) {
+    return null
+  }
+
+  return (
+    <div className="border border-gray-300 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-red-500 focus-within:border-red-500 bg-white">
+      {/* Toolbar */}
+      <div className="border-b border-gray-300 bg-gray-50 p-2 flex flex-wrap items-center gap-2">
+        {/* Font Family */}
+        <select
+          value={editor.getAttributes('textStyle').fontFamily || ''}
+          onChange={(e) => {
+            if (e.target.value) {
+              editor.chain().focus().setFontFamily(e.target.value).run()
+            } else {
+              editor.chain().focus().unsetFontFamily().run()
+            }
+          }}
+          className="px-2 py-1 text-sm border border-gray-300 rounded bg-white text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-red-500"
+        >
+          <option value="">Default Font</option>
+          {fontFamilies.map((font) => (
+            <option key={font} value={font} style={{ fontFamily: font }}>
+              {font}
+            </option>
+          ))}
+        </select>
+
+        <div className="w-px h-6 bg-gray-300"></div>
+
+        {/* Text Style Buttons */}
+        <button
+          type="button"
+          onClick={() => editor.chain().focus().toggleBold().run()}
+          className={`p-1.5 rounded hover:bg-gray-200 transition-colors ${
+            editor.isActive('bold') ? 'bg-red-100 text-red-600' : 'text-gray-700'
+          }`}
+          title="Bold"
+        >
+          <Bold size={16} />
+        </button>
+        <button
+          type="button"
+          onClick={() => editor.chain().focus().toggleItalic().run()}
+          className={`p-1.5 rounded hover:bg-gray-200 transition-colors ${
+            editor.isActive('italic') ? 'bg-red-100 text-red-600' : 'text-gray-700'
+          }`}
+          title="Italic"
+        >
+          <Italic size={16} />
+        </button>
+        <button
+          type="button"
+          onClick={() => editor.chain().focus().toggleStrike().run()}
+          className={`p-1.5 rounded hover:bg-gray-200 transition-colors ${
+            editor.isActive('strike') ? 'bg-red-100 text-red-600' : 'text-gray-700'
+          }`}
+          title="Strikethrough"
+        >
+          <Strikethrough size={16} />
+        </button>
+
+        <div className="w-px h-6 bg-gray-300"></div>
+
+        {/* Headings */}
+        <button
+          type="button"
+          onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
+          className={`px-2 py-1 text-sm rounded hover:bg-gray-200 transition-colors ${
+            editor.isActive('heading', { level: 1 }) ? 'bg-red-100 text-red-600' : 'text-gray-700'
+          }`}
+          title="Heading 1"
+        >
+          H1
+        </button>
+        <button
+          type="button"
+          onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+          className={`px-2 py-1 text-sm rounded hover:bg-gray-200 transition-colors ${
+            editor.isActive('heading', { level: 2 }) ? 'bg-red-100 text-red-600' : 'text-gray-700'
+          }`}
+          title="Heading 2"
+        >
+          H2
+        </button>
+        <button
+          type="button"
+          onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+          className={`px-2 py-1 text-sm rounded hover:bg-gray-200 transition-colors ${
+            editor.isActive('heading', { level: 3 }) ? 'bg-red-100 text-red-600' : 'text-gray-700'
+          }`}
+          title="Heading 3"
+        >
+          H3
+        </button>
+
+        <div className="w-px h-6 bg-gray-300"></div>
+
+        {/* Lists */}
+        <button
+          type="button"
+          onClick={() => editor.chain().focus().toggleBulletList().run()}
+          className={`p-1.5 rounded hover:bg-gray-200 transition-colors ${
+            editor.isActive('bulletList') ? 'bg-red-100 text-red-600' : 'text-gray-700'
+          }`}
+          title="Bullet List"
+        >
+          <span className="text-sm font-bold">•</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => editor.chain().focus().toggleOrderedList().run()}
+          className={`p-1.5 rounded hover:bg-gray-200 transition-colors ${
+            editor.isActive('orderedList') ? 'bg-red-100 text-red-600' : 'text-gray-700'
+          }`}
+          title="Numbered List"
+        >
+          <span className="text-sm">1.</span>
+        </button>
+
+        <div className="w-px h-6 bg-gray-300"></div>
+
+        {/* Blockquote */}
+        <button
+          type="button"
+          onClick={() => editor.chain().focus().toggleBlockquote().run()}
+          className={`p-1.5 rounded hover:bg-gray-200 transition-colors ${
+            editor.isActive('blockquote') ? 'bg-red-100 text-red-600' : 'text-gray-700'
+          }`}
+          title="Blockquote"
+        >
+          <span className="text-sm">"</span>
+        </button>
+
+        {/* Clear Formatting */}
+        <button
+          type="button"
+          onClick={() => editor.chain().focus().clearNodes().unsetAllMarks().run()}
+          className="px-2 py-1 text-sm rounded hover:bg-gray-200 transition-colors text-gray-700"
+          title="Clear Formatting"
+        >
+          Clear
+        </button>
+      </div>
+
+      {/* Editor Content */}
+      <EditorContent editor={editor} />
+    </div>
+  )
 }
 
 export default function AdminDashboard() {
@@ -120,7 +334,8 @@ export default function AdminDashboard() {
     description: '',
     price: '',
     category: 'Legal Documents',
-    image: null as File | null
+    image: null as File | null,
+    pdfFile: null as File | null
   })
 
   // Gallery upload form state
@@ -301,12 +516,20 @@ export default function AdminDashboard() {
   // Handle template upload
   const handleTemplateUpload = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!templateUploadForm.image) return
+    if (!templateUploadForm.image) {
+      alert('Please select a preview image')
+      return
+    }
+    if (!templateUploadForm.pdfFile) {
+      alert('Please select a PDF template file')
+      return
+    }
 
     setTemplateUploading(true)
     try {
       const formData = new FormData()
       formData.append('image', templateUploadForm.image)
+      formData.append('pdfFile', templateUploadForm.pdfFile)
       formData.append('description', templateUploadForm.description)
       formData.append('price', templateUploadForm.price)
       formData.append('category', templateUploadForm.category)
@@ -320,13 +543,16 @@ export default function AdminDashboard() {
       if (response.ok) {
         console.log('Template upload successful, refreshing templates...')
         setShowTemplateUploadModal(false)
-        setTemplateUploadForm({ description: '', price: '', category: 'Legal Documents', image: null })
+        setTemplateUploadForm({ description: '', price: '', category: 'Legal Documents', image: null, pdfFile: null })
         fetchTemplates()
       } else {
-        console.error('Template upload failed:', response.status, response.statusText)
+        const errorData = await response.json()
+        console.error('Template upload failed:', response.status, response.statusText, errorData.error)
+        alert(`Upload failed: ${errorData.error || 'Unknown error'}`)
       }
     } catch (error) {
       console.error('Template upload error:', error)
+      alert('Error uploading template')
     } finally {
       setTemplateUploading(false)
     }
@@ -1446,11 +1672,9 @@ export default function AdminDashboard() {
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Blog Content
                   </label>
-                  <textarea
+                  <RichTextEditor
                     value={galleryBlogCreateForm.content}
-                    onChange={(e) => setGalleryBlogCreateForm(prev => ({ ...prev, content: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-white text-black"
-                    rows={6}
+                    onChange={(value) => setGalleryBlogCreateForm(prev => ({ ...prev, content: value }))}
                     placeholder="Enter blog content (optional if external URL is provided)"
                   />
                 </div>
@@ -1568,7 +1792,7 @@ export default function AdminDashboard() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Template Image *
+                  Template Preview Image *
                 </label>
                 <input
                   type="file"
@@ -1583,7 +1807,28 @@ export default function AdminDashboard() {
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-white text-gray-900 file:bg-white file:border file:border-gray-300 file:rounded-lg file:px-3 file:py-2 file:text-gray-700 file:text-sm file:font-medium"
                 />
                 <p className="text-xs text-gray-500 mt-1">
-                  Upload a preview image for your template
+                  Upload a preview image for your template (Max 5MB)
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  PDF Template File *
+                </label>
+                <input
+                  type="file"
+                  required
+                  onChange={(e) => {
+                    const file = e.target.files?.[0]
+                    if (file) {
+                      setTemplateUploadForm(prev => ({ ...prev, pdfFile: file }))
+                    }
+                  }}
+                  accept=".pdf"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-white text-gray-900 file:bg-white file:border file:border-gray-300 file:rounded-lg file:px-3 file:py-2 file:text-gray-700 file:text-sm file:font-medium"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Upload the PDF template file (Max 50MB). This file will be hidden from buyers until purchase.
                 </p>
               </div>
 
@@ -1762,11 +2007,9 @@ export default function AdminDashboard() {
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Blog Content
                   </label>
-                  <textarea
+                  <RichTextEditor
                     value={thoughtLeadershipBlogCreateForm.content}
-                    onChange={(e) => setThoughtLeadershipBlogCreateForm(prev => ({ ...prev, content: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-white text-black"
-                    rows={6}
+                    onChange={(value) => setThoughtLeadershipBlogCreateForm(prev => ({ ...prev, content: value }))}
                     placeholder="Enter blog content (optional if external URL is provided)"
                   />
                 </div>

@@ -399,7 +399,7 @@ select option:checked {
 }
 
 .prose li {
-  margin: 0.5rem 0;
+  margin: 0.25rem 0;
   padding-left: 0.5rem;
   line-height: 1.75;
 }

@@ -488,24 +488,21 @@ export default function Home() {
       <section id="services" className="py-20 bg-gray-100">
   <div className="container mx-auto px-4">
      <div className="mb-16">
-      {/* Two Column Layout: Heading on Left, Button on Right */}
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mb-6">
+      {/* Two Column Layout: Heading on Left, Description on Right */}
+      <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 lg:gap-8 mb-6">
         {/* Left Column: Subtitle and Heading */}
-        <div className="flex-1">
-          <p className="text-sm font-medium text-gray-600 uppercase mb-2 ml-20">OUR SERVICES</p>
-          <h2 className="text-3xl md:text-4xl font-bold ml-20">
+        <div className="flex-1 w-full lg:w-auto">
+          <p className="text-xs sm:text-sm font-medium text-gray-600 uppercase mb-2 lg:mb-3 px-4 sm:px-0 lg:ml-20">OUR SERVICES</p>
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold px-4 sm:px-0 lg:ml-20">
             <span style={{ color: "black" }}>Our Trusted</span> <span style={{ color: "#A5292A" }}>Services</span>
           </h2>
         </div>
         
-        {/* Right Column: Contact Us Button */}
-        <p className="text-base text-gray-800 max-w-3xl mr-20">
-        At <span style={{ color: "#A5292A" }}>Fathom Legal</span>, we specialize in connecting clients with top-tier legal professionals across various practice areas. Our platform facilitates access to expert lawyers who excel in their respective fields.
-      </p>
+        {/* Right Column: Description */}
+        <p className="text-sm sm:text-base text-gray-800 max-w-3xl px-4 sm:px-0 lg:mr-20">
+          At <span style={{ color: "#A5292A" }}>Fathom Legal</span>, we specialize in connecting clients with top-tier legal professionals across various practice areas. Our platform facilitates access to expert lawyers who excel in their respective fields.
+        </p>
       </div>
-      
-      {/* Description */}
-     
     </div>
 
     <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 px-4 sm:px-8 md:px-12 lg:px-20">

@@ -143,7 +143,7 @@ export async function PUT(request: NextRequest) {
     // Update blog
     blog.title = title
     blog.description = description
-    blog.category = category
+    blog.category = category as 'WEBINAR' | 'INTERVIEW' | 'FEATURE' | 'ARTICLE' | 'NEWS'
     blog.content = content || undefined
     blog.externalUrl = externalUrl || undefined
     blog.imageUrl = imageUrl || undefined

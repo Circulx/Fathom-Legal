@@ -65,22 +65,43 @@ export async function POST(request: NextRequest) {
         }, { status: 400 })
       }
 
-      // Create uploads directory if it doesn't exist
-      const uploadsDir = join(process.cwd(), 'public', 'uploads', 'blogs')
-      await mkdir(uploadsDir, { recursive: true })
-
-      // Generate unique filename
-      const timestamp = Date.now()
-      const fileExtension = image.name.split('.').pop()
-      const fileName = `blog-${timestamp}.${fileExtension}`
-      const filePath = join(uploadsDir, fileName)
-
-      // Save image
-      const bytes = await image.arrayBuffer()
-      const buffer = Buffer.from(bytes)
-      await writeFile(filePath, buffer)
-
-      imageUrl = `/uploads/blogs/${fileName}`
+      try {
+        const bytes = await image.arrayBuffer()
+        const buffer = Buffer.from(bytes)
+        
+        // Check if we're on Vercel (serverless environment)
+        const isVercel = process.env.VERCEL === '1'
+        
+        // Always use base64 for production compatibility
+        // This ensures images work on both local and production
+        // NOTE: For better performance with large images, consider using cloud storage (S3, Cloudinary, etc.)
+        const base64 = buffer.toString('base64')
+        imageUrl = `data:${image.type};base64,${base64}`
+        
+        // Also save to filesystem for local development (optional, for easier file management)
+        if (!isVercel) {
+          // Optional: Also save to filesystem for local development
+          try {
+            const uploadsDir = join(process.cwd(), 'public', 'uploads', 'blogs')
+            await mkdir(uploadsDir, { recursive: true })
+            const timestamp = Date.now()
+            const fileExtension = image.name.split('.').pop() || 'jpg'
+            const fileName = `blog-${timestamp}.${fileExtension}`
+            const filePath = join(uploadsDir, fileName)
+            await writeFile(filePath, buffer)
+            // Note: We still use base64 URL above for consistency
+          } catch (fsError) {
+            // Ignore filesystem errors, base64 URL is already set
+            console.warn('Could not save to filesystem, using base64 only:', fsError)
+          }
+        }
+      } catch (fileError) {
+        console.error('File upload error:', fileError)
+        return NextResponse.json({ 
+          error: 'Failed to upload image. Please try again.',
+          details: fileError instanceof Error ? fileError.message : 'Unknown file error'
+        }, { status: 500 })
+      }
     }
 
     // Create blog record

@@ -94,11 +94,11 @@ export default async function BlogPage({ params }: BlogPageProps) {
       {/* Back Button */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
         <Link 
-          href="/gallery" 
+          href="/thoughtleadership" 
           className="inline-flex items-center text-gray-600 hover:text-gray-900 transition-colors mb-6"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Gallery
+          Back to Thought Leadership
         </Link>
       </div>
 
@@ -139,9 +139,9 @@ export default async function BlogPage({ params }: BlogPageProps) {
 
       {/* Blog Content */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-        <div className="prose prose-lg max-w-none">
+        <div className="prose prose-lg max-w-none prose-headings:text-gray-900 prose-p:text-gray-800 prose-p:leading-relaxed">
           <div 
-            className="text-gray-800 leading-relaxed whitespace-pre-wrap"
+            className="text-gray-800 leading-relaxed"
             dangerouslySetInnerHTML={{ __html: blog.content }}
           />
         </div>

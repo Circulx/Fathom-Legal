@@ -415,6 +415,17 @@ export default function AdminDashboard() {
     
     console.log('✅ Authenticated admin:', session.user)
   }, [session, status, router])
+
+  // Load dashboard data when section changes to dashboard
+  useEffect(() => {
+    if (activeSection === 'dashboard' && session && status === 'authenticated') {
+      fetchTemplates()
+      fetchGalleryItems(1, 1000) // Fetch all items for accurate count
+      fetchThoughtLeadershipBlogs()
+      fetchGalleryBlogs()
+      fetchThoughtLeadershipPhotos()
+    }
+  }, [activeSection, session, status])
   
   // Show loading while checking authentication
   if (status === 'loading') {
@@ -457,10 +468,10 @@ export default function AdminDashboard() {
   }
 
   // Fetch gallery items with pagination
-  const fetchGalleryItems = async (page: number = 1) => {
+  const fetchGalleryItems = async (page: number = 1, limit: number = 10) => {
     try {
       setGalleryLoading(true)
-      const response = await fetch(`/api/admin/gallery?page=${page}&limit=10`)
+      const response = await fetch(`/api/admin/gallery?page=${page}&limit=${limit}`)
       if (response.ok) {
         const data = await response.json()
         setGalleryItems(data.galleryItems || [])
@@ -561,6 +572,13 @@ export default function AdminDashboard() {
         setShowTemplateUploadModal(false)
         setTemplateUploadForm({ description: '', price: '', category: 'Legal Documents', image: null, pdfFile: null })
         fetchTemplates()
+        // Refresh dashboard counts if on dashboard
+        if (activeSection === 'dashboard') {
+          fetchGalleryItems(1, 1000)
+          fetchThoughtLeadershipBlogs()
+          fetchGalleryBlogs()
+          fetchThoughtLeadershipPhotos()
+        }
       } else {
         const errorData = await response.json()
         console.error('Template upload failed:', response.status, response.statusText, errorData.error)
@@ -596,7 +614,14 @@ export default function AdminDashboard() {
       if (response.ok) {
         setShowGalleryUploadModal(false)
         setGalleryUploadForm({ title: '', description: '', category: '', image: null })
-        fetchGalleryItems()
+        fetchGalleryItems(1, 1000)
+        // Refresh dashboard counts if on dashboard
+        if (activeSection === 'dashboard') {
+          fetchTemplates()
+          fetchThoughtLeadershipBlogs()
+          fetchGalleryBlogs()
+          fetchThoughtLeadershipPhotos()
+        }
       }
     } catch (error) {
       console.error('Gallery upload error:', error)
@@ -653,6 +678,13 @@ export default function AdminDashboard() {
           image: null
         })
         fetchThoughtLeadershipBlogs()
+        // Refresh dashboard counts if on dashboard
+        if (activeSection === 'dashboard') {
+          fetchTemplates()
+          fetchGalleryItems(1, 1000)
+          fetchGalleryBlogs()
+          fetchThoughtLeadershipPhotos()
+        }
         setSuccessMessage('Thought Leadership blog created successfully!')
         setShowSuccessMessage(true)
         setTimeout(() => setShowSuccessMessage(false), 3000)
@@ -742,6 +774,13 @@ export default function AdminDashboard() {
           removeImage: false
         })
         fetchThoughtLeadershipBlogs()
+        // Refresh dashboard counts if on dashboard
+        if (activeSection === 'dashboard') {
+          fetchTemplates()
+          fetchGalleryItems(1, 1000)
+          fetchGalleryBlogs()
+          fetchThoughtLeadershipPhotos()
+        }
         setSuccessMessage('Thought Leadership blog updated successfully!')
         setShowSuccessMessage(true)
         setTimeout(() => setShowSuccessMessage(false), 3000)
@@ -805,6 +844,13 @@ export default function AdminDashboard() {
           image: null
         })
         fetchGalleryBlogs()
+        // Refresh dashboard counts if on dashboard
+        if (activeSection === 'dashboard') {
+          fetchTemplates()
+          fetchGalleryItems(1, 1000)
+          fetchThoughtLeadershipBlogs()
+          fetchThoughtLeadershipPhotos()
+        }
         setSuccessMessage('Gallery blog created successfully!')
         setShowSuccessMessage(true)
         setTimeout(() => setShowSuccessMessage(false), 3000)
@@ -858,6 +904,13 @@ export default function AdminDashboard() {
           image: null
         })
         fetchThoughtLeadershipPhotos()
+        // Refresh dashboard counts if on dashboard
+        if (activeSection === 'dashboard') {
+          fetchTemplates()
+          fetchGalleryItems(1, 1000)
+          fetchThoughtLeadershipBlogs()
+          fetchGalleryBlogs()
+        }
         setSuccessMessage('Thought leadership photo uploaded successfully!')
         setShowSuccessMessage(true)
         setTimeout(() => setShowSuccessMessage(false), 3000)
@@ -881,6 +934,13 @@ export default function AdminDashboard() {
       })
       if (response.ok) {
         fetchTemplates()
+        // Refresh dashboard counts if on dashboard
+        if (activeSection === 'dashboard') {
+          fetchGalleryItems(1, 1000)
+          fetchThoughtLeadershipBlogs()
+          fetchGalleryBlogs()
+          fetchThoughtLeadershipPhotos()
+        }
       }
     } catch (error) {
       console.error('Template delete error:', error)
@@ -940,7 +1000,15 @@ export default function AdminDashboard() {
         } else if (itemToDelete.type === 'thought-leadership-photo') {
           fetchThoughtLeadershipPhotos()
         } else {
-          fetchGalleryItems()
+          fetchGalleryItems(1, 1000)
+        }
+        // Refresh dashboard counts if on dashboard
+        if (activeSection === 'dashboard') {
+          fetchTemplates()
+          fetchGalleryItems(1, 1000)
+          fetchThoughtLeadershipBlogs()
+          fetchGalleryBlogs()
+          fetchThoughtLeadershipPhotos()
         }
         setShowDeleteConfirm(false)
         setItemToDelete(null)
@@ -961,7 +1029,7 @@ export default function AdminDashboard() {
     if (section === 'dashboard') {
       // Fetch all data for dashboard
       fetchTemplates()
-      fetchGalleryItems()
+      fetchGalleryItems(1, 1000) // Fetch all items for accurate count
       fetchThoughtLeadershipBlogs()
       fetchGalleryBlogs()
       fetchThoughtLeadershipPhotos()

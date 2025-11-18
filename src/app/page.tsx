@@ -487,14 +487,25 @@ export default function Home() {
       {/* Services Section */}
       <section id="services" className="py-20 bg-gray-100">
   <div className="container mx-auto px-4">
-     <div className="text-center mb-16">
-     
-      <h2 className="text-3xl md:text-4xl font-bold text-black mb-4">
-        Our Trusted <span style={{ color: "#A5292A" }}>Services</span>
-      </h2>
-      <p className="text-lg text-gray-800 max-w-3xl mx-auto">
-        At Fathom Legal, we specialize in connecting clients with top-tier legal professionals across various practice areas. Our platform facilitates access to expert lawyers who excel in their respective fields.
+     <div className="mb-16">
+      {/* Two Column Layout: Heading on Left, Button on Right */}
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mb-6">
+        {/* Left Column: Subtitle and Heading */}
+        <div className="flex-1">
+          <p className="text-sm font-medium text-gray-600 uppercase mb-2 ml-20">OUR SERVICES</p>
+          <h2 className="text-3xl md:text-4xl font-bold ml-20">
+            <span style={{ color: "black" }}>Our Trusted</span> <span style={{ color: "#A5292A" }}>Services</span>
+          </h2>
+        </div>
+        
+        {/* Right Column: Contact Us Button */}
+        <p className="text-base text-gray-800 max-w-3xl mr-20">
+        At <span style={{ color: "#A5292A" }}>Fathom Legal</span>, we specialize in connecting clients with top-tier legal professionals across various practice areas. Our platform facilitates access to expert lawyers who excel in their respective fields.
       </p>
+      </div>
+      
+      {/* Description */}
+     
     </div>
 
     <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 px-4 sm:px-8 md:px-12 lg:px-20">
@@ -525,7 +536,7 @@ export default function Home() {
            <div className="absolute inset-0 flex flex-col justify-between p-6">
              {/* Icon and Title */}
              <div className="relative z-10 flex flex-col items-center justify-center">
-               <div className="text-white mb-4">
+               <div className="text-[#A5292A] mb-4 hover:text-[white] ">
                  {service.icon}
                </div>
                <h3 className="text-2xl font-bold text-white text-center ">
@@ -540,7 +551,7 @@ export default function Home() {
                </p>
                <Link
                  href={service.link}
-                 className="inline-flex items-center justify-center w-full px-4 py-2 bg-white text-gray-800 font-semibold rounded-lg hover:bg-[#A5292A] hover:text-white transition-all duration-300"
+                 className="inline-flex items-center justify-center w-full px-4 py-2 bg-[#A5292A] text-white font-semibold rounded-lg hover:bg-[white] hover:text-[#A5292A] transition-all duration-300"
                >
                  Learn More <ChevronRight className="ml-2 w-4 h-4" />
                </Link>
@@ -548,16 +559,6 @@ export default function Home() {
            </div>
         </div>
       ))}
-    </div>
-    
-    {/* Contact Us Button */}
-    <div className="text-center mt-12">
-      <Link
-        href="/contact"
-        className="inline-flex items-center justify-center px-8 py-4 bg-[#A5292A] border-2 border-gray-300 text-white font-semibold rounded-lg hover:border-gray-400 hover:bg-gray-50 hover:text-[#A5292A] transition-all duration-300 group"
-      >
-        Contact Us <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
-      </Link>
     </div>
   </div>
 </section>

@@ -37,6 +37,9 @@ export default function Gallery() {
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const [totalItems, setTotalItems] = useState(0)
+  const [blogCurrentPage, setBlogCurrentPage] = useState(1)
+  const [blogTotalPages, setBlogTotalPages] = useState(1)
+  const [blogTotal, setBlogTotal] = useState(0)
 
   // Fetch gallery items with pagination
   const fetchGalleryItems = async (page: number = 1) => {
@@ -57,15 +60,17 @@ export default function Gallery() {
     }
   }
 
-
-  // Fetch gallery blogs
-  const fetchGalleryBlogs = async () => {
+  // Fetch gallery blogs with pagination
+  const fetchGalleryBlogs = async (page: number = 1) => {
     try {
       setBlogLoading(true)
-      const response = await fetch('/api/gallery-blogs?limit=6')
+      const response = await fetch(`/api/gallery-blogs?page=${page}&limit=6`)
       if (response.ok) {
         const data = await response.json()
         setGalleryBlogs(data.blogs || [])
+        setBlogTotalPages(data.pagination?.pages || 1)
+        setBlogTotal(data.pagination?.total || 0)
+        setBlogCurrentPage(page)
       }
     } catch (error) {
       console.error('Error fetching gallery blogs:', error)
@@ -74,9 +79,37 @@ export default function Gallery() {
     }
   }
 
+  // Handle blog page change
+  const handleBlogPageChange = (page: number) => {
+    if (page >= 1 && page <= blogTotalPages) {
+      fetchGalleryBlogs(page)
+    }
+  }
+
+  // Generate page numbers for blog pagination
+  const getBlogPageNumbers = () => {
+    const pages = []
+    const maxVisiblePages = 5
+    
+    if (blogTotalPages <= maxVisiblePages) {
+      for (let i = 1; i <= blogTotalPages; i++) {
+        pages.push(i)
+      }
+    } else {
+      const start = Math.max(1, blogCurrentPage - 2)
+      const end = Math.min(blogTotalPages, start + maxVisiblePages - 1)
+      
+      for (let i = start; i <= end; i++) {
+        pages.push(i)
+      }
+    }
+    
+    return pages
+  }
+
   useEffect(() => {
     fetchGalleryItems(1)
-    fetchGalleryBlogs()
+    fetchGalleryBlogs(1)
   }, [])
 
   // Handle page change
@@ -291,61 +324,118 @@ export default function Gallery() {
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {galleryBlogs.map((blog: GalleryBlog) => (
-                <div 
-                  key={blog._id}
-                  className="bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden border border-gray-100 group cursor-pointer"
-                  onClick={() => {
-                    if (blog.externalUrl) {
-                      window.open(blog.externalUrl, '_blank')
-                    } else if (blog.slug) {
-                      window.location.href = `/gallery-blog/${blog.slug}`
-                    }
-                  }}
-                >
-                  <div className="flex flex-col md:flex-row">
-                    {/* Image Section */}
-                    <div className="md:w-1/3">
-                      {blog.imageUrl ? (
-                        <img
-                          src={blog.imageUrl}
-                          alt={blog.title}
-                          className="w-full h-48 md:h-64 object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-48 md:h-64 bg-gray-100 flex items-center justify-center">
-                          <span className="text-gray-400 text-xl">No Image</span>
-                        </div>
-                      )}
-                    </div>
-                    
-                    {/* Content Section */}
-                    <div className="md:w-2/3 p-6 md:p-8">
-                      <h3 className="text-2xl font-bold text-gray-900 mb-2 line-clamp-2">
-                        {blog.title}
-                      </h3>
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {galleryBlogs.map((blog: GalleryBlog) => (
+                  <div 
+                    key={blog._id}
+                    className="bg-white shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden border border-gray-100 group cursor-pointer"
+                    onClick={() => {
+                      if (blog.externalUrl) {
+                        window.open(blog.externalUrl, '_blank')
+                      } else if (blog.slug) {
+                        window.location.href = `/gallery-blog/${blog.slug}`
+                      }
+                    }}
+                  >
+                    <div className="flex flex-col">
+                      {/* Image Section */}
+                      <div className="w-full">
+                        {blog.imageUrl ? (
+                          <img
+                            src={blog.imageUrl}
+                            alt={blog.title}
+                            className="w-full h-40 md:h-48 object-cover"
+                          />
+                        ) : blog.logoUrl ? (
+                          <div className="w-full h-40 md:h-48 bg-white flex items-center justify-center p-3">
+                            <img
+                              src={blog.logoUrl}
+                              alt={blog.title}
+                              className="max-w-full max-h-full object-contain"
+                            />
+                          </div>
+                        ) : (
+                          <div className="w-full h-40 md:h-48 bg-gray-100 flex items-center justify-center">
+                            <span className="text-gray-400 text-sm">No Image</span>
+                          </div>
+                        )}
+                      </div>
                       
-                      <p className="text-sm text-blue-600 mb-3">
-                        POSTED ON {new Date(blog.createdAt).toLocaleDateString('en-US', { 
-                          year: 'numeric', 
-                          month: 'long', 
-                          day: 'numeric' 
-                        }).toUpperCase()}
-                      </p>
-                      
-                      <p className="text-gray-700 text-base leading-relaxed mb-4 line-clamp-3">
-                        {blog.description}
-                      </p>
-                      
-                      <button className="inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-gray-700 text-sm font-medium rounded hover:bg-gray-50 transition-colors">
-                        CONTINUE READING →
-                      </button>
+                      {/* Content Section */}
+                      <div className="w-full p-4 md:p-5">
+                        <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2">
+                          {blog.title}
+                        </h3>
+                        
+                        <p className="text-xs text-blue-600 mb-2">
+                          POSTED ON {new Date(blog.createdAt).toLocaleDateString('en-US', { 
+                            year: 'numeric', 
+                            month: 'long', 
+                            day: 'numeric' 
+                          }).toUpperCase()}
+                        </p>
+                        
+                        <p className="text-gray-700 text-sm leading-relaxed mb-3 line-clamp-2">
+                          {blog.description}
+                        </p>
+                        
+                        <button className="inline-flex items-center px-3 py-1.5 border border-gray-300 bg-white text-gray-700 text-xs font-medium hover:bg-gray-50 transition-colors">
+                          CONTINUE READING →
+                        </button>
+                      </div>
                     </div>
                   </div>
+                ))}
+              </div>
+
+              {/* Pagination */}
+              {blogTotalPages > 1 && (
+                <div className="mt-12 flex justify-center">
+                  <nav className="flex items-center space-x-2">
+                    {/* Previous Button */}
+                    <button
+                      onClick={() => handleBlogPageChange(blogCurrentPage - 1)}
+                      disabled={blogCurrentPage === 1}
+                      className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Previous
+                    </button>
+
+                    {/* Page Numbers */}
+                    {getBlogPageNumbers().map((page) => (
+                      <button
+                        key={page}
+                        onClick={() => handleBlogPageChange(page)}
+                        className={`px-3 py-2 text-sm font-medium ${
+                          blogCurrentPage === page
+                            ? 'bg-red-600 text-white'
+                            : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    ))}
+
+                    {/* Next Button */}
+                    <button
+                      onClick={() => handleBlogPageChange(blogCurrentPage + 1)}
+                      disabled={blogCurrentPage === blogTotalPages}
+                      className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Next
+                    </button>
+                  </nav>
                 </div>
-              ))}
-            </div>
+              )}
+
+              {/* Page Info */}
+              {blogTotal > 0 && (
+                <div className="mt-4 text-center text-sm text-gray-600">
+                  Showing page {blogCurrentPage} of {blogTotalPages} ({blogTotal} total articles)
+                </div>
+              )}
+            </>
           )}
         </div>
       </section>

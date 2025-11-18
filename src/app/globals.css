@@ -366,6 +366,21 @@ select option:checked {
   text-decoration: line-through;
 }
 
+/* Blog content paragraph styling */
+.prose p {
+  margin-top: 1rem;
+  margin-bottom: 1.5rem;
+  line-height: 1.75;
+}
+
+.prose p:first-child {
+  margin-top: 0;
+}
+
+.prose p:last-child {
+  margin-bottom: 0;
+}
+
 /* Blog content list styling */
 .prose ul,
 .prose ol {

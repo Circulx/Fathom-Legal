@@ -70,11 +70,7 @@ src/
 
 The application can be deployed to any platform that supports Next.js:
 
-- **Vercel** (recommended)
-- **Netlify**
-- **AWS Amplify**
-- **Railway**
-- **DigitalOcean App Platform**
+- **Vercel** 
 
 ## Environment Variables
 

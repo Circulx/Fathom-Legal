@@ -164,7 +164,7 @@ export default function Gallery() {
         
         <div className="container mx-auto px-4 relative z-10">
           <div className="text-center max-w-4xl mx-auto">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-5xl font-bold text-white mb-6">
               Our <span style={{ color: '#A5292A' }}>Gallery</span>
             </h1>
             <p className="text-base sm:text-lg md:text-xl text-white/90 mb-8">
@@ -299,7 +299,7 @@ export default function Gallery() {
       <section className="py-16 bg-gray-50">
         <div className="container mx-auto px-8 lg:px-16 xl:px-24">
           <div className="text-center mb-12">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-4xl font-bold text-gray-900 mb-4">
               Latest <span style={{ color: '#A5292A' }}>Articles </span>
             </h2>
             <p className="text-base sm:text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
@@ -325,7 +325,7 @@ export default function Gallery() {
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                 {galleryBlogs.map((blog: GalleryBlog) => (
                   <div 
                     key={blog._id}
@@ -345,10 +345,10 @@ export default function Gallery() {
                           <img
                             src={blog.imageUrl}
                             alt={blog.title}
-                            className="w-full h-40 md:h-48 object-cover"
+                            className="w-full h-36 md:h-40 object-cover"
                           />
                         ) : blog.logoUrl ? (
-                          <div className="w-full h-40 md:h-48 bg-white flex items-center justify-center p-3">
+                          <div className="w-full h-36 md:h-40 bg-white flex items-center justify-center p-3">
                             <img
                               src={blog.logoUrl}
                               alt={blog.title}
@@ -356,19 +356,19 @@ export default function Gallery() {
                             />
                           </div>
                         ) : (
-                          <div className="w-full h-40 md:h-48 bg-gray-100 flex items-center justify-center">
+                          <div className="w-full h-36 md:h-40 bg-gray-100 flex items-center justify-center">
                             <span className="text-gray-400 text-sm">No Image</span>
                           </div>
                         )}
                       </div>
                       
                       {/* Content Section */}
-                      <div className="w-full p-4 md:p-5">
-                        <h3 className="text-base sm:text-lg md:text-lg font-bold text-gray-900 mb-2 line-clamp-2">
+                      <div className="w-full p-4">
+                        <h3 className="text-sm sm:text-base md:text-base font-bold text-gray-900 mb-2 line-clamp-2">
                           {blog.title}
                         </h3>
                         
-                        <p className="text-sm sm:text-sm text-blue-600 mb-2">
+                        <p className="text-xs sm:text-xs text-blue-600 mb-2">
                           POSTED ON {new Date(blog.createdAt).toLocaleDateString('en-US', { 
                             year: 'numeric', 
                             month: 'long', 
@@ -376,11 +376,11 @@ export default function Gallery() {
                           }).toUpperCase()}
                         </p>
                         
-                        <p className="text-gray-700 text-sm sm:text-base md:text-lg leading-relaxed mb-3 line-clamp-2">
+                        <p className="text-gray-700 text-sm sm:text-sm leading-relaxed mb-3 line-clamp-2">
                           {blog.description}
                         </p>
                         
-                        <button className="inline-flex items-center px-3 py-1.5 border border-gray-300 bg-white text-gray-700 text-sm sm:text-base font-medium hover:bg-gray-50 transition-colors">
+                        <button className="inline-flex items-center px-3 py-1.5 border border-gray-300 bg-white text-gray-700 text-xs sm:text-sm font-medium hover:bg-gray-50 transition-colors">
                           CONTINUE READING →
                         </button>
                       </div>

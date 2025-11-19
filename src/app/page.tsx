@@ -213,7 +213,7 @@ export default function Home() {
 
         if (currentStep >= steps) {
           clearInterval(timer);
-          setCounters(targets); // Ensure final values are exact
+          setCounters(targets); 
         }
       }, stepDuration);
 
@@ -365,13 +365,13 @@ export default function Home() {
         <div className="w-full lg:w-1/2 flex flex-col justify-center px-4 sm:px-8 lg:px-16 py-12 sm:py-16 lg:py-20 relative z-10">
           
           {/* Tagline */}
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-8 leading-tight text-white animate-fade-in-up animate-delay-200">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-5xl font-bold mb-8 leading-tight text-white animate-fade-in-up animate-delay-200">
             Facilitating commercial<br />
             legal solutions
           </h1>
 
           {/* Description */}
-          <p className="text-base sm:text-lg text-white text-opacity-90 mb-12 max-w-lg leading-relaxed animate-fade-in-up animate-delay-400">
+          <p className="text-base sm:text-lg lg:text-base text-white text-opacity-90 mb-12 max-w-lg leading-relaxed animate-fade-in-up animate-delay-400">
             Our expertise across diverse practice areas and sectors covers varied and nuanced needs. 
             Backed by experienced professionals, delighted clients from across the globe, and topical, 
             commercial and specialised services, we deliver the best legal solutions for our clients.
@@ -516,14 +516,14 @@ export default function Home() {
       <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 lg:gap-8 mb-6">
         {/* Left Column: Subtitle and Heading */}
         <div className="flex-1 w-full lg:w-auto">
-          <p className="text-sm sm:text-base font-medium text-gray-600 uppercase mb-2 lg:mb-3 px-4 sm:px-0 lg:ml-20">OUR SERVICES</p>
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold px-4 sm:px-0 lg:ml-20">
+          <p className="text-sm sm:text-base lg:text-sm font-medium text-gray-600 uppercase mb-2 lg:mb-3 px-4 sm:px-0 lg:ml-20">OUR SERVICES</p>
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-3xl font-bold px-4 sm:px-0 lg:ml-20">
             <span style={{ color: "black" }}>Our Trusted</span> <span style={{ color: "#A5292A" }}>Services</span>
           </h2>
         </div>
         
         {/* Right Column: Description */}
-        <p className="text-base sm:text-lg md:text-xl text-gray-800 max-w-3xl px-4 sm:px-0 lg:mr-20">
+        <p className="text-base sm:text-lg md:text-xl lg:text-base text-gray-800 max-w-3xl px-4 sm:px-0 lg:mr-20">
           At <span style={{ color: "#A5292A" }}>Fathom Legal</span>, we specialize in connecting clients with top-tier legal professionals across various practice areas. Our platform facilitates access to expert lawyers who excel in their respective fields.
         </p>
       </div>
@@ -561,14 +561,14 @@ export default function Home() {
                <div className="text-[#A5292A] mb-4 hover:text-[white] ">
                  {service.icon}
                </div>
-               <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-white text-center ">
+               <h3 className="text-lg sm:text-xl md:text-2xl lg:text-xl font-bold text-white text-center ">
                  {service.title}
                </h3>
              </div>
 
              {/* Description and Learn More Button */}
              <div className="relative z-10">
-               <p className="text-white text-sm sm:text-base md:text-lg mb-4 leading-relaxed">
+               <p className="text-white text-sm sm:text-base md:text-lg lg:text-sm mb-4 leading-relaxed">
                  {service.description}
                </p>
                <Link
@@ -593,8 +593,8 @@ export default function Home() {
       <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 lg:gap-8 mb-6">
         {/* Left Column: Subtitle and Heading */}
         <div className="flex-1 w-full lg:w-auto">
-          <p className="text-sm sm:text-base font-medium text-black uppercase mb-2 lg:mb-3 px-4 sm:px-0 lg:ml-20">WHY CHOOSE US?</p>
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold px-4 sm:px-0 lg:ml-20">
+          <p className="text-sm sm:text-base lg:text-sm font-medium text-black uppercase mb-2 lg:mb-3 px-4 sm:px-0 lg:ml-20">WHY CHOOSE US?</p>
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-3xl font-bold px-4 sm:px-0 lg:ml-20">
             <span style={{ color: "black" }}>What Sets Us </span> <span style={{ color: "#A5292A" }}>Apart?</span>
           </h2>
         </div>
@@ -616,9 +616,9 @@ export default function Home() {
             <div className={`bg-white p-8 rounded-xl shadow-sm border border-gray-100 transition-all duration-700 ease-out hover:shadow-lg hover:-translate-y-2 hover:border-[#A5292A] group cursor-pointer ${whyChooseUsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`} style={{ transitionDelay: '0ms' }}>
               <div className="flex items-center mb-4">
                 <Briefcase className="w-6 h-6 mr-3 group-hover:scale-110 transition-transform duration-300" style={{ color: "#A5292A" }} />
-                <h3 className="text-lg sm:text-xl md:text-xl font-bold text-gray-800 group-hover:text-[#A5292A] transition-colors duration-300">Expert Legal Team</h3>
+                <h3 className="text-lg sm:text-xl md:text-xl lg:text-lg font-bold text-gray-800 group-hover:text-[#A5292A] transition-colors duration-300">Expert Legal Team</h3>
               </div>
-              <p className="text-base sm:text-lg md:text-xl text-gray-600 leading-relaxed group-hover:text-gray-700 transition-colors duration-300">
+              <p className="text-base sm:text-lg md:text-xl lg:text-base text-gray-600 leading-relaxed group-hover:text-gray-700 transition-colors duration-300">
                 Our dedicated team of experienced legal professionals brings decades of combined expertise in corporate law, startup advisory, and dispute resolution to deliver exceptional results for our clients.
               </p>
             </div>
@@ -626,9 +626,9 @@ export default function Home() {
             <div className={`bg-white p-8 rounded-xl shadow-sm border border-gray-100 transition-all duration-700 ease-out hover:shadow-lg hover:-translate-y-2 hover:border-[#A5292A] group cursor-pointer ${whyChooseUsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`} style={{ transitionDelay: '100ms' }}>
               <div className="flex items-center mb-4">
                 <Rocket className="w-6 h-6 mr-3 group-hover:scale-110 transition-transform duration-300" style={{ color: "#A5292A" }} />
-                <h3 className="text-lg sm:text-xl md:text-xl font-bold text-gray-800 group-hover:text-[#A5292A] transition-colors duration-300">Startup Specialization</h3>
+                <h3 className="text-lg sm:text-xl md:text-xl lg:text-lg font-bold text-gray-800 group-hover:text-[#A5292A] transition-colors duration-300">Startup Specialization</h3>
               </div>
-              <p className="text-base sm:text-lg md:text-xl text-gray-600 leading-relaxed group-hover:text-gray-700 transition-colors duration-300">
+              <p className="text-base sm:text-lg md:text-xl lg:text-base text-gray-600 leading-relaxed group-hover:text-gray-700 transition-colors duration-300">
                 We specialize in the startup ecosystem, providing tailored legal solutions for emerging businesses, from incorporation and funding to growth strategies and compliance management.
               </p>
             </div>
@@ -636,9 +636,9 @@ export default function Home() {
             <div className={`bg-white p-8 rounded-xl shadow-sm border border-gray-100 transition-all duration-700 ease-out hover:shadow-lg hover:-translate-y-2 hover:border-[#A5292A] group cursor-pointer ${whyChooseUsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`} style={{ transitionDelay: '200ms' }}>
               <div className="flex items-center mb-4">
                 <Heart className="w-6 h-6 mr-3 group-hover:scale-110 transition-transform duration-300" style={{ color: "#A5292A" }} />
-                <h3 className="text-lg sm:text-xl md:text-xl font-bold text-gray-800 group-hover:text-[#A5292A] transition-colors duration-300">Client-Focused Approach</h3>
+                <h3 className="text-lg sm:text-xl md:text-xl lg:text-lg font-bold text-gray-800 group-hover:text-[#A5292A] transition-colors duration-300">Client-Focused Approach</h3>
               </div>
-              <p className="text-base sm:text-lg md:text-xl text-gray-600 leading-relaxed group-hover:text-gray-700 transition-colors duration-300">
+              <p className="text-base sm:text-lg md:text-xl lg:text-base text-gray-600 leading-relaxed group-hover:text-gray-700 transition-colors duration-300">
                 We prioritize our clients' success with a personalized approach, ethical governance, and transparent communication throughout every legal matter we handle.
               </p>
             </div>
@@ -646,9 +646,9 @@ export default function Home() {
             <div className={`bg-white p-8 rounded-xl shadow-sm border border-gray-100 transition-all duration-700 ease-out hover:shadow-lg hover:-translate-y-2 hover:border-[#A5292A] group cursor-pointer ${whyChooseUsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`} style={{ transitionDelay: '300ms' }}>
               <div className="flex items-center mb-4">
                 <Globe className="w-6 h-6 mr-3 group-hover:scale-110 transition-transform duration-300" style={{ color: "#A5292A" }} />
-                <h3 className="text-lg sm:text-xl md:text-xl font-bold text-gray-800 group-hover:text-[#A5292A] transition-colors duration-300">Global Reach</h3>
+                <h3 className="text-lg sm:text-xl md:text-xl lg:text-lg font-bold text-gray-800 group-hover:text-[#A5292A] transition-colors duration-300">Global Reach</h3>
               </div>
-              <p className="text-base sm:text-lg md:text-xl text-gray-600 leading-relaxed group-hover:text-gray-700 transition-colors duration-300">
+              <p className="text-base sm:text-lg md:text-xl lg:text-base text-gray-600 leading-relaxed group-hover:text-gray-700 transition-colors duration-300">
                 With nationwide and international service delivery capabilities, we provide comprehensive legal support to clients across diverse practice areas and industry verticals.
               </p>
             </div>
@@ -675,7 +675,7 @@ export default function Home() {
         {/* Content */}
         <div className="relative z-10 w-full px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 drop-shadow-lg">Track Record Since 2016</h2>
+            <h2 className="text-3xl md:text-4xl lg:text-3xl font-bold text-white mb-4 drop-shadow-lg">Track Record Since 2016</h2>
           </div>
           
           {/* Key Metrics */}
@@ -744,13 +744,13 @@ export default function Home() {
         {/* Left Column: Subtitle and Heading */}
         <div className="flex-1 w-full lg:w-auto">
           
-          <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold px-4 sm:px-0 lg:ml-20">
+          <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-3xl font-bold px-4 sm:px-0 lg:ml-20">
             <span style={{ color: "white" }}>Featured</span> <span style={{ color: "#A5292A" }}>Content</span>
           </h2>
         </div>
         
         {/* Right Column: Description */}
-        <p className="text-base sm:text-lg md:text-xl text-white max-w-3xl px-4 sm:px-0 lg:mr-6">
+        <p className="text-base sm:text-lg md:text-xl lg:text-base text-white max-w-3xl px-4 sm:px-0 lg:mr-6">
         Discover our latest webinars, interviews, and featured articles that highlight our expertise in immigration law, startup support, and corporate legal services.
         </p>
       </div>
@@ -793,15 +793,15 @@ export default function Home() {
               
               {/* Content Section */}
               <div className="p-6">
-                <h3 className="text-base sm:text-lg md:text-lg font-semibold text-gray-800 mb-3 leading-tight">
+                <h3 className="text-base sm:text-lg md:text-lg lg:text-base font-semibold text-gray-800 mb-3 leading-tight">
                   Behind the Scenes: Building International Legal Careers with Immigration Law Expertise
                 </h3>
-                <div className="flex items-center text-sm sm:text-base text-gray-500 mb-4">
+                <div className="flex items-center text-sm sm:text-base lg:text-sm text-gray-500 mb-4">
                   <span className="font-medium">Fathom Legal Team</span>
                   <span className="mx-2">•</span>
                   <span>15 minute read</span>
                 </div>
-                <p className="text-gray-600 text-sm sm:text-base md:text-lg leading-relaxed">
+                <p className="text-gray-600 text-sm sm:text-base md:text-lg lg:text-sm leading-relaxed">
                   Featured on Lawctopus: "How to Build an International Career as an Immigration Lawyer in the USA"
                 </p>
               </div>
@@ -831,15 +831,15 @@ export default function Home() {
               
               {/* Content Section */}
               <div className="p-6">
-                <h3 className="text-base sm:text-lg md:text-lg font-semibold text-gray-800 mb-3 leading-tight">
+                <h3 className="text-base sm:text-lg md:text-lg lg:text-base font-semibold text-gray-800 mb-3 leading-tight">
                   Enhancing Startup Success Through Unique Legal Support and On-Site Visits
                 </h3>
-                <div className="flex items-center text-sm sm:text-base text-gray-500 mb-4">
+                <div className="flex items-center text-sm sm:text-base lg:text-sm text-gray-500 mb-4">
                   <span className="font-medium">Ishita Sharma</span>
                   <span className="mx-2">•</span>
                   <span>8 minute read</span>
                 </div>
-                <p className="text-gray-600 text-sm sm:text-base md:text-lg leading-relaxed">
+                <p className="text-gray-600 text-sm sm:text-base md:text-lg lg:text-sm leading-relaxed">
                   SuperLawyer interview featuring our unique approach to supporting startups, SMEs, and SMBs
                 </p>
               </div>
@@ -869,15 +869,15 @@ export default function Home() {
               
               {/* Content Section */}
               <div className="p-6">
-                <h3 className="text-base sm:text-lg md:text-lg font-semibold text-gray-800 mb-3 leading-tight">
+                <h3 className="text-base sm:text-lg md:text-lg lg:text-base font-semibold text-gray-800 mb-3 leading-tight">
                   Corporate Legal Excellence: Comprehensive Services for Modern Businesses
                 </h3>
-                <div className="flex items-center text-sm sm:text-base text-gray-500 mb-4">
+                <div className="flex items-center text-sm sm:text-base lg:text-sm text-gray-500 mb-4">
                   <span className="font-medium">Fathom Legal</span>
                   <span className="mx-2">•</span>
                   <span>6 minute read</span>
                 </div>
-                <p className="text-gray-600 text-sm sm:text-base md:text-lg leading-relaxed">
+                <p className="text-gray-600 text-sm sm:text-base md:text-lg lg:text-sm leading-relaxed">
                   Featured on Business Connect India showcasing our corporate legal expertise and services
                 </p>
               </div>
@@ -890,10 +890,10 @@ export default function Home() {
       <section id="testimonials" ref={testimonialsRef} className={`py-20 bg-white overflow-hidden transition-all duration-1000 ${testimonialsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-800 mb-6">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-3xl font-bold text-gray-800 mb-6">
               The <span style={{ color: "#A5292A" }}>Trust</span> we earned
             </h2>
-            <p className="text-lg sm:text-xl md:text-2xl text-[#A5292A]">
+            <p className="text-lg sm:text-xl md:text-2xl lg:text-lg text-[#A5292A]">
               What our clients say about our legal services
             </p>
           </div>
@@ -976,10 +976,10 @@ export default function Home() {
         <div className="container mx-auto px-4 relative z-10">
           {/* Section Header */}
           <div className="text-center mb-10">
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+            <h2 className="text-3xl md:text-4xl lg:text-3xl font-bold text-white mb-4">
               Get in <span style={{ color: "#A5292A" }}>Touch</span> with Us!
             </h2>
-            <p className="text-lg text-white/90 max-w-3xl mx-auto">
+            <p className="text-lg lg:text-base text-white/90 max-w-3xl mx-auto">
               Let our experience pave the path to your success.
             </p>
           </div>

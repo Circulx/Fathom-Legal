@@ -177,7 +177,7 @@ export default function Templates() {
         
         <div className="container mx-auto px-4 relative z-10">
           <div className="text-center max-w-4xl mx-auto">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 sm:mb-6">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-5xl font-bold text-white mb-4 mt-6 sm:mb-6">
              Our <span style={{ color: '#A5292A' }}>Products </span> 
             </h1>
            
@@ -195,8 +195,8 @@ export default function Templates() {
       </section>
 
       {/* Search and Filter */}
-      <section className="py-6 sm:py-8 bg-white border-b border-gray-200">
-        <div className="container mx-auto px-4">
+      <section className="py-8 sm:py-10 lg:py-12 bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col lg:flex-row gap-4 justify-center items-center">
             {/* Search */}
             <div className="relative w-full lg:w-96">
@@ -248,8 +248,8 @@ export default function Templates() {
 
 
       {/* Templates Grid */}
-      <section className="py-12 sm:py-16">
-        <div className="container mx-auto px-4">
+      <section className="py-16 lg:py-20 xl:py-24">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {loading ? (
             <div className="flex justify-center items-center py-12">
               <div className="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-red-600"></div>
@@ -261,15 +261,15 @@ export default function Templates() {
               <p className="text-sm sm:text-base text-gray-500">Try adjusting your search or filter criteria.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 sm:gap-6 justify-items-center">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {templates.map((template) => (
                     <div
                       key={template._id}
-                      className="relative bg-white shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 overflow-hidden w-full max-w-80 flex flex-col"
+                      className="relative bg-white shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 overflow-hidden flex flex-col"
                     >
                   {/* Product Image - Top Section */}
                   <div 
-                    className="h-48 sm:h-56 lg:h-64 xl:h-72 bg-cover bg-center bg-no-repeat relative flex-shrink-0"
+                    className="h-40 bg-cover bg-center bg-no-repeat relative flex-shrink-0"
                     style={{
                       backgroundImage: template.imageUrl ? `url(${template.imageUrl})` : 'none',
                       backgroundColor: template.imageUrl ? 'transparent' : '#f3f4f6'
@@ -297,17 +297,17 @@ export default function Templates() {
                   </div>
                   
                   {/* Content Section - Bottom */}
-                  <div className="p-3 sm:p-4 flex flex-col flex-grow">
+                  <div className="p-5 flex flex-col flex-grow">
                     {/* Title */}
-                    <h3 className="text-xs sm:text-sm font-semibold text-gray-900 mb-2 line-clamp-2 flex-grow">
+                    <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2 flex-grow">
                       {template.title}
                     </h3>
                     
                     {/* Price and Button at Bottom */}
                     <div className="mt-auto">
                       {/* Price */}
-                      <div className="mb-2 sm:mb-3">
-                        <div className="text-base sm:text-lg font-bold text-gray-900">
+                      <div className="mb-3">
+                        <div className="text-lg font-bold text-gray-900">
                           ₹{template.price || 0}
                         </div>
                         <div className="text-xs text-gray-500">+ Taxes</div>
@@ -316,9 +316,9 @@ export default function Templates() {
                       {/* Add to Cart Button */}
                       <button
                         onClick={() => addToCart(template)}
-                        className="w-full flex items-center justify-center px-3 sm:px-4 py-2 sm:py-3 bg-red-600 text-white hover:bg-red-700 transition-colors font-medium text-xs sm:text-sm"
+                        className="w-full flex items-center justify-center px-4 py-2.5 bg-red-600 text-white hover:bg-red-700 transition-colors font-medium text-sm"
                       >
-                        <ShoppingCart className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                        <ShoppingCart className="h-4 w-4 mr-2" />
                         Add to cart
                       </button>
                     </div>

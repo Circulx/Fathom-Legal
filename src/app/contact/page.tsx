@@ -124,7 +124,7 @@ export default function Contact() {
         
         <div className="container mx-auto px-4 relative z-10">
           <div className="text-center max-w-4xl mx-auto">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-5xl font-bold text-white mb-6">
               <span style={{ color: '#A5292A' }}>Contact </span> Us
             </h1>
             <p className="text-base sm:text-lg md:text-xl text-white/90 mb-8">We're here to assist you with any legal queries or challenges you might face. At <span style={{ color: '#A5292A' }}>Fathom Legal</span>, your legal needs are our top priority.

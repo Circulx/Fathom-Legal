@@ -143,10 +143,10 @@ export default function AboutUs() {
         
         <div className="container mx-auto px-4 relative z-10">
           <div className="text-center max-w-4xl mx-auto">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-5xl font-bold text-white mb-6">
             About <span style={{ color: '#A5292A' }}>Fathom Legal</span>
             </h1>
-            <p className="text-lg sm:text-xl md:text-2xl text-white/90 mb-6">
+            <p className="text-lg sm:text-xl md:text-xl lg:text-lg text-white/90 mb-6">
             Excellence in Legal Practice Since Our Inception
             </p>
             <p className="text-sm sm:text-base md:text-lg text-white/90 mb-8">
@@ -171,7 +171,7 @@ export default function AboutUs() {
       <section className="py-20 bg-white">
         <div className="container mx-auto px-4 ">
           <div className="text-center mb-16  ">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-800 mb-4">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-4xl font-bold text-gray-800 mb-4">
               Why Choose <span style={{ color: '#A5292A' }}>Fathom Legal</span>?
             </h2>
             <p className="text-base sm:text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
@@ -248,7 +248,7 @@ export default function AboutUs() {
         <div className="container mx-auto px-4 relative z-10">
           {/* Section Header */}
           <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-5xl font-bold text-white mb-4">
               Our <span style={{ color: '#A5292A' }}>Philosophy</span>
             </h2>
             <div className="w-24 h-1 bg-[#A5292A] mx-auto mb-8"></div>
@@ -322,7 +322,7 @@ export default function AboutUs() {
       <section className="py-20 bg-gray-200">
         <div className="container mx-auto px-4 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-800 mb-4">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-4xl font-bold text-gray-800 mb-4">
               Meet Our <span style={{ color: '#A5292A' }}>Founder</span>
             </h2>
             <p className="text-base sm:text-lg md:text-xl text-gray-600">
@@ -383,10 +383,10 @@ export default function AboutUs() {
               <div className="space-y-6 lg:space-y-8 pr-0 lg:pr-8 mt-8 lg:mt-0">
                 {/* Header */}
                 <div>
-                  <h3 className="text-3xl sm:text-4xl font-bold text-gray-800 mb-2">
+                  <h3 className="text-3xl sm:text-4xl lg:text-3xl font-bold text-gray-800 mb-2">
                     Adv. Ishita Sharma
                   </h3>
-                  <p className="text-xl sm:text-2xl font-semibold mb-6" style={{ color: "#A5292A" }}>
+                  <p className="text-xl sm:text-2xl lg:text-xl font-semibold mb-6" style={{ color: "#A5292A" }}>
                     Founder & Managing Partner
                   </p>
                 </div>
@@ -470,7 +470,7 @@ export default function AboutUs() {
         <div className="container mx-auto px-4 relative z-10">
           {/* Section Header */}
           <div className="text-center mb-10">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-4xl font-bold text-white mb-4">
               Get in <span style={{ color: "#A5292A" }}>Touch</span> with Us!
             </h2>
             <p className="text-base sm:text-lg md:text-xl text-white/90 max-w-3xl mx-auto">

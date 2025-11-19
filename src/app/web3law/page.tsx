@@ -77,10 +77,10 @@ export default function Web3Law() {
         
         <div className="container mx-auto px-4 relative z-10">
           <div className="text-center max-w-4xl mx-auto">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-5xl font-bold text-white mb-4">
               Web3 <span style={{ color: '#A5292A' }}>Legal</span>
             </h1>
-            <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-semibold text-white mb-4">
+            <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-3xl font-semibold text-white mb-4">
               Building Confidence & Mitigating Risk in Web3 Legal Practice
             </h2>
             <p className="text-base sm:text-lg md:text-xl text-white/90 mb-8 max-w-4xl mx-auto">
@@ -111,7 +111,7 @@ export default function Web3Law() {
       <section className="py-20 bg-gray-50">
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-800 mb-12 text-center">Comprehensive <span style={{ color: '#A5292A' }}>Legal Services</span></h1>
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-4xl font-bold text-gray-800 mb-12 text-center">Comprehensive <span style={{ color: '#A5292A' }}>Legal Services</span></h1>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {/* Crypto & Digital Assets */}
               <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-2xl hover:scale-105 hover:-translate-y-2 hover:bg-[#A5292A] hover:text-white transition-all duration-300 border border-gray-100 group cursor-pointer">
@@ -640,7 +640,7 @@ export default function Web3Law() {
        {/* 9. Contact Section */}
        <section className="py-20 text-white" style={{ backgroundColor: "#A5292A" }}>
          <div className="container mx-auto px-4 text-center">
-           <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 text-white">Contact Us</h2>
+           <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-4xl font-bold mb-4 text-white">Contact Us</h2>
            <p className="text-base sm:text-lg md:text-xl mb-4 text-white/90 max-w-4xl mx-auto">
              Ready to discuss your Web3 legal needs? Contact our experienced team for professional legal consultation.
            </p>
@@ -666,7 +666,7 @@ export default function Web3Law() {
       <section className="py-20 bg-gray-50">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 mb-4 text-center">Comprehensive Web3 Legal Solutions</h2>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-3xl font-bold text-gray-800 mb-4 text-center">Comprehensive Web3 Legal Solutions</h2>
             <p className="text-base sm:text-lg md:text-xl text-gray-600 mb-4 text-center">
               Our Web3 legal team provides comprehensive support across all aspects of decentralized technology law:
             </p>
@@ -733,7 +733,7 @@ export default function Web3Law() {
       <section className="py-20 bg-white">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 mb-4 text-center">Frequently Asked Questions</h2>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-3xl font-bold text-gray-800 mb-4 text-center">Frequently Asked Questions</h2>
             
             <div className="space-y-4">
               <div className="border border-gray-200 rounded-lg">

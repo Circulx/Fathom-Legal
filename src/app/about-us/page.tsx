@@ -275,7 +275,7 @@ export default function AboutUs() {
                     <h4 className="text-lg sm:text-xl md:text-xl font-semibold text-gray-800 mb-3 group-hover:text-[#A5292A] transition-colors duration-300">
                       Client Partnership
                     </h4>
-                    <p className="text-gray-600 leading-relaxed text-xs sm:text-sm md:text-base">
+                    <p className="text-gray-600 leading-relaxed text-sm sm:text-base md:text-lg">
                       We view ourselves as partners in our clients' success,
                       working collaboratively to achieve their goals.
                     </p>
@@ -290,7 +290,7 @@ export default function AboutUs() {
                     <h4 className="text-lg sm:text-xl md:text-xl font-semibold text-gray-800 mb-3 group-hover:text-[#A5292A] transition-colors duration-300">
                       Innovation & Excellence
                     </h4>
-                    <p className="text-gray-600 leading-relaxed text-xs sm:text-sm md:text-base">
+                    <p className="text-gray-600 leading-relaxed text-sm sm:text-base md:text-lg">
                       We continuously evolve our practices to provide
                       cutting-edge legal solutions that meet modern business
                       needs.
@@ -306,7 +306,7 @@ export default function AboutUs() {
                     <h4 className="text-lg sm:text-xl md:text-xl font-semibold text-gray-800 mb-3 group-hover:text-[#A5292A] transition-colors duration-300">
                       Ethical Leadership
                     </h4>
-                    <p className="text-gray-600 leading-relaxed text-xs sm:text-sm md:text-base">
+                    <p className="text-gray-600 leading-relaxed text-sm sm:text-base md:text-lg">
                       We maintain the highest ethical standards and serve as
                       trusted advisors in all our professional relationships.
                     </p>
@@ -423,7 +423,7 @@ export default function AboutUs() {
                     {practiceAreas.map((area, index) => (
                       <div 
                         key={index} 
-                        className="bg-gray-200 border border-black rounded-full px-3 sm:px-4 py-2 text-gray-700 text-xs sm:text-sm font-medium hover:bg-[#A5292A] hover:text-white hover:border-[#A5292A] transition-colors duration-200"
+                        className="bg-gray-200 border border-black rounded-full px-3 sm:px-4 py-2 text-gray-700 text-sm sm:text-base font-medium hover:bg-[#A5292A] hover:text-white hover:border-[#A5292A] transition-colors duration-200"
                       >
                         {area}
                       </div>

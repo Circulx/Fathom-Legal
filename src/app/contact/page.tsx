@@ -168,18 +168,18 @@ export default function Contact() {
                       <div className="space-y-2">
                         <div className="flex items-start">
                           <MapPin className="w-4 h-4 text-gray-500 mr-2 mt-1 flex-shrink-0" />
-                          <p className="text-xs sm:text-sm md:text-base text-gray-600">{office.address}</p>
+                          <p className="text-sm sm:text-base md:text-lg text-gray-600">{office.address}</p>
                         </div>
                         {office.phone && (
                           <div className="flex items-center">
                             <Phone className="w-4 h-4 text-gray-500 mr-2" />
-                            <p className="text-xs sm:text-sm md:text-base text-gray-600">{office.phone}</p>
+                            <p className="text-sm sm:text-base md:text-lg text-gray-600">{office.phone}</p>
                           </div>
                         )}
                         {office.email && (
                           <div className="flex items-center">
                             <Mail className="w-4 h-4 text-gray-500 mr-2" />
-                            <p className="text-xs sm:text-sm md:text-base text-gray-600">{office.email}</p>
+                            <p className="text-sm sm:text-base md:text-lg text-gray-600">{office.email}</p>
                           </div>
                         )}
                       </div>

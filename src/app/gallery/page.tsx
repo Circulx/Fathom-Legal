@@ -235,7 +235,7 @@ export default function Gallery() {
                         {item.title}
                       </h3>
                       
-                      <p className="text-xs sm:text-sm md:text-base text-gray-600 mb-4 line-clamp-3">
+                      <p className="text-sm sm:text-base md:text-lg text-gray-600 mb-4 line-clamp-3">
                         {item.description}
                       </p>
 
@@ -368,7 +368,7 @@ export default function Gallery() {
                           {blog.title}
                         </h3>
                         
-                        <p className="text-xs sm:text-xs text-blue-600 mb-2">
+                        <p className="text-sm sm:text-sm text-blue-600 mb-2">
                           POSTED ON {new Date(blog.createdAt).toLocaleDateString('en-US', { 
                             year: 'numeric', 
                             month: 'long', 
@@ -376,11 +376,11 @@ export default function Gallery() {
                           }).toUpperCase()}
                         </p>
                         
-                        <p className="text-gray-700 text-xs sm:text-sm md:text-base leading-relaxed mb-3 line-clamp-2">
+                        <p className="text-gray-700 text-sm sm:text-base md:text-lg leading-relaxed mb-3 line-clamp-2">
                           {blog.description}
                         </p>
                         
-                        <button className="inline-flex items-center px-3 py-1.5 border border-gray-300 bg-white text-gray-700 text-xs sm:text-sm font-medium hover:bg-gray-50 transition-colors">
+                        <button className="inline-flex items-center px-3 py-1.5 border border-gray-300 bg-white text-gray-700 text-sm sm:text-base font-medium hover:bg-gray-50 transition-colors">
                           CONTINUE READING →
                         </button>
                       </div>
@@ -431,7 +431,7 @@ export default function Gallery() {
 
               {/* Page Info */}
               {blogTotal > 0 && (
-                <div className="mt-4 text-center text-xs sm:text-sm text-gray-600">
+                <div className="mt-4 text-center text-sm sm:text-base text-gray-600">
                   Showing page {blogCurrentPage} of {blogTotalPages} ({blogTotal} total articles)
                 </div>
               )}

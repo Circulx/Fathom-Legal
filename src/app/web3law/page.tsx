@@ -123,25 +123,25 @@ export default function Web3Law() {
                   We help digital-asset ventures navigate the complex regulatory landscape by securing necessary licenses, ensuring full compliance, and building frameworks that align innovation with enforceable law.
                 </p>
                 <ul className="space-y-2">
-                  <li className="flex items-center text-xs sm:text-sm text-gray-600 group-hover:text-white">
+                  <li className="flex items-center text-sm sm:text-base text-gray-600 group-hover:text-white">
                     <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
                       <span className="text-white text-xs">✓</span>
                     </span>
                     License structuring across jurisdictions
                   </li>
-                  <li className="flex items-center text-xs sm:text-sm text-gray-600 group-hover:text-white">
+                  <li className="flex items-center text-sm sm:text-base text-gray-600 group-hover:text-white">
                     <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
                       <span className="text-white text-xs">✓</span>
                     </span>
                     Regulatory gap analysis & compliance roadmap
                   </li>
-                  <li className="flex items-center text-xs sm:text-sm text-gray-600 group-hover:text-white">
+                  <li className="flex items-center text-sm sm:text-base text-gray-600 group-hover:text-white">
                     <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
                       <span className="text-white text-xs">✓</span>
                     </span>
                     AML / KYC / CFT policy drafting
                   </li>
-                  <li className="flex items-center text-xs sm:text-sm text-gray-600 group-hover:text-white">
+                  <li className="flex items-center text-sm sm:text-base text-gray-600 group-hover:text-white">
                     <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
                       <span className="text-white text-xs">✓</span>
                     </span>
@@ -160,25 +160,25 @@ export default function Web3Law() {
                   We issue authoritative opinions assessing whether a token qualifies as a security, commodity, or utility, thereby providing clarity and defensibility to issuers and investors.
                 </p>
                 <ul className="space-y-2">
-                  <li className="flex items-center text-xs sm:text-sm text-gray-600 group-hover:text-white">
+                  <li className="flex items-center text-sm sm:text-base text-gray-600 group-hover:text-white">
                     <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
                       <span className="text-white text-xs">✓</span>
                     </span>
                     Token classification analysis
                   </li>
-                  <li className="flex items-center text-xs sm:text-sm text-gray-600 group-hover:text-white">
+                  <li className="flex items-center text-sm sm:text-base text-gray-600 group-hover:text-white">
                     <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
                       <span className="text-white text-xs">✓</span>
                     </span>
                     Jurisdictional risk & legal exposure review
                   </li>
-                  <li className="flex items-center text-xs sm:text-sm text-gray-600 group-hover:text-white">
+                  <li className="flex items-center text-sm sm:text-base text-gray-600 group-hover:text-white">
                     <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
                       <span className="text-white text-xs">✓</span>
                     </span>
                     Regulatory alignment & disclosure requirements
                   </li>
-                  <li className="flex items-center text-xs sm:text-sm text-gray-600 group-hover:text-white">
+                  <li className="flex items-center text-sm sm:text-base text-gray-600 group-hover:text-white">
                     <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
                       <span className="text-white text-xs">✓</span>
                     </span>
@@ -197,25 +197,25 @@ export default function Web3Law() {
                   For blockchain firms eyeing global reach, we design corporate structures that optimize taxation, regulatory burden, and capital flows across jurisdictions.
                 </p>
                 <ul className="space-y-2">
-                  <li className="flex items-center text-xs sm:text-sm text-gray-600 group-hover:text-white">
+                  <li className="flex items-center text-sm sm:text-base text-gray-600 group-hover:text-white">
                     <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
                       <span className="text-white text-xs">✓</span>
                     </span>
                     Holding / operating / licensing entity design
                   </li>
-                  <li className="flex items-center text-xs sm:text-sm text-gray-600 group-hover:text-white">
+                  <li className="flex items-center text-sm sm:text-base text-gray-600 group-hover:text-white">
                     <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
                       <span className="text-white text-xs">✓</span>
                     </span>
                     Tax-efficient cross-border models
                   </li>
-                  <li className="flex items-center text-xs sm:text-sm text-gray-600 group-hover:text-white">
+                  <li className="flex items-center text-sm sm:text-base text-gray-600 group-hover:text-white">
                     <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
                       <span className="text-white text-xs">✓</span>
                     </span>
                     Regulatory compliance per jurisdiction
                   </li>
-                  <li className="flex items-center text-xs sm:text-sm text-gray-600 group-hover:text-white">
+                  <li className="flex items-center text-sm sm:text-base text-gray-600 group-hover:text-white">
                     <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
                       <span className="text-white text-xs">✓</span>
                     </span>
@@ -234,25 +234,25 @@ export default function Web3Law() {
                   We draft and tailor investment instruments (SAFEs, SAFTs, warrants) that balance founder interests, investor protections, and regulatory compliance.
                 </p>
                 <ul className="space-y-2">
-                  <li className="flex items-center text-xs sm:text-sm text-gray-600 group-hover:text-white">
+                  <li className="flex items-center text-sm sm:text-base text-gray-600 group-hover:text-white">
                     <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
                       <span className="text-white text-xs">✓</span>
                     </span>
                     Drafting token sale & investment agreements
                   </li>
-                  <li className="flex items-center text-xs sm:text-sm text-gray-600 group-hover:text-white">
+                  <li className="flex items-center text-sm sm:text-base text-gray-600 group-hover:text-white">
                     <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
                       <span className="text-white text-xs">✓</span>
                     </span>
                     Risk allocation & indemnity clauses
                   </li>
-                  <li className="flex items-center text-xs sm:text-sm text-gray-600 group-hover:text-white">
+                  <li className="flex items-center text-sm sm:text-base text-gray-600 group-hover:text-white">
                     <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
                       <span className="text-white text-xs">✓</span>
                     </span>
                     Vesting, anti-dilution & conversion mechanisms
                   </li>
-                  <li className="flex items-center text-xs sm:text-sm text-gray-600 group-hover:text-white">
+                  <li className="flex items-center text-sm sm:text-base text-gray-600 group-hover:text-white">
                     <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
                       <span className="text-white text-xs">✓</span>
                     </span>
@@ -271,25 +271,25 @@ export default function Web3Law() {
                   We help clients tokenize intellectual property, manage licensing in Web3 environments, and protect rights in decentralized contexts.
                 </p>
                 <ul className="space-y-2">
-                  <li className="flex items-center text-xs sm:text-sm text-gray-600 group-hover:text-white">
+                  <li className="flex items-center text-sm sm:text-base text-gray-600 group-hover:text-white">
                     <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
                       <span className="text-white text-xs">✓</span>
                     </span>
                     Tokenization of copyrights, patents & trade marks
                   </li>
-                  <li className="flex items-center text-xs sm:text-sm text-gray-600 group-hover:text-white">
+                  <li className="flex items-center text-sm sm:text-base text-gray-600 group-hover:text-white">
                     <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
                       <span className="text-white text-xs">✓</span>
                     </span>
                     Licensing & royalty frameworks on-chain
                   </li>
-                  <li className="flex items-center text-xs sm:text-sm text-gray-600 group-hover:text-white">
+                  <li className="flex items-center text-sm sm:text-base text-gray-600 group-hover:text-white">
                     <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
                       <span className="text-white text-xs">✓</span>
                     </span>
                     Enforcement in decentralized settings
                   </li>
-                  <li className="flex items-center text-xs sm:text-sm text-gray-600 group-hover:text-white">
+                  <li className="flex items-center text-sm sm:text-base text-gray-600 group-hover:text-white">
                     <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
                       <span className="text-white text-xs">✓</span>
                     </span>
@@ -308,25 +308,25 @@ export default function Web3Law() {
                   We design employee token incentive plans that respect securities regulation, labor law, and taxation, while fostering alignment and retention.
                 </p>
                 <ul className="space-y-2">
-                  <li className="flex items-center text-xs sm:text-sm text-gray-600 group-hover:text-white">
+                  <li className="flex items-center text-sm sm:text-base text-gray-600 group-hover:text-white">
                     <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
                       <span className="text-white text-xs">✓</span>
                     </span>
                     Structuring employee token allocation schemes
                   </li>
-                  <li className="flex items-center text-xs sm:text-sm text-gray-600 group-hover:text-white">
+                  <li className="flex items-center text-sm sm:text-base text-gray-600 group-hover:text-white">
                     <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
                       <span className="text-white text-xs">✓</span>
                     </span>
                     Vesting schedules, performance triggers & lock-ups
                   </li>
-                  <li className="flex items-center text-xs sm:text-sm text-gray-600 group-hover:text-white">
+                  <li className="flex items-center text-sm sm:text-base text-gray-600 group-hover:text-white">
                     <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
                       <span className="text-white text-xs">✓</span>
                     </span>
                     Compliance with labor & securities laws
                   </li>
-                  <li className="flex items-center text-xs sm:text-sm text-gray-600 group-hover:text-white">
+                  <li className="flex items-center text-sm sm:text-base text-gray-600 group-hover:text-white">
                     <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
                       <span className="text-white text-xs">✓</span>
                     </span>
@@ -345,25 +345,25 @@ export default function Web3Law() {
                   We perform a legal audit of smart contracts to identify risks, gaps, and compliance issues, working alongside technical audits to strengthen legal defensibility.
                 </p>
                 <ul className="space-y-2">
-                  <li className="flex items-center text-xs sm:text-sm text-gray-600 group-hover:text-white">
+                  <li className="flex items-center text-sm sm:text-base text-gray-600 group-hover:text-white">
                     <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
                       <span className="text-white text-xs">✓</span>
                     </span>
                     Review of contract terms & logic flows
                   </li>
-                  <li className="flex items-center text-xs sm:text-sm text-gray-600 group-hover:text-white">
+                  <li className="flex items-center text-sm sm:text-base text-gray-600 group-hover:text-white">
                     <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
                       <span className="text-white text-xs">✓</span>
                     </span>
                     Liability & indemnity assessment
                   </li>
-                  <li className="flex items-center text-xs sm:text-sm text-gray-600 group-hover:text-white">
+                  <li className="flex items-center text-sm sm:text-base text-gray-600 group-hover:text-white">
                     <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
                       <span className="text-white text-xs">✓</span>
                     </span>
                     Regulatory compliance checks
                   </li>
-                  <li className="flex items-center text-xs sm:text-sm text-gray-600 group-hover:text-white">
+                  <li className="flex items-center text-sm sm:text-base text-gray-600 group-hover:text-white">
                     <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
                       <span className="text-white text-xs">✓</span>
                     </span>
@@ -382,25 +382,25 @@ export default function Web3Law() {
                   We assist Virtual Asset Service Providers (VASPs) in India with registration before the Financial Intelligence Unit (FIU-IND), setting up compliance structures per local law.
                 </p>
                 <ul className="space-y-2">
-                  <li className="flex items-center text-xs sm:text-sm text-gray-600 group-hover:text-white">
+                  <li className="flex items-center text-sm sm:text-base text-gray-600 group-hover:text-white">
                     <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
                       <span className="text-white text-xs">✓</span>
                     </span>
                     Application preparation & liaison
                   </li>
-                  <li className="flex items-center text-xs sm:text-sm text-gray-600 group-hover:text-white">
+                  <li className="flex items-center text-sm sm:text-base text-gray-600 group-hover:text-white">
                     <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
                       <span className="text-white text-xs">✓</span>
                     </span>
                     AML / CFT program design
                   </li>
-                  <li className="flex items-center text-xs sm:text-sm text-gray-600 group-hover:text-white">
+                  <li className="flex items-center text-sm sm:text-base text-gray-600 group-hover:text-white">
                     <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
                       <span className="text-white text-xs">✓</span>
                     </span>
                     Reporting systems & audit trails
                   </li>
-                  <li className="flex items-center text-xs sm:text-sm text-gray-600 group-hover:text-white">
+                  <li className="flex items-center text-sm sm:text-base text-gray-600 group-hover:text-white">
                     <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
                       <span className="text-white text-xs">✓</span>
                     </span>
@@ -418,25 +418,25 @@ export default function Web3Law() {
                   We specialize in taxation of Virtual Digital Assets (VDAs), helping clients classify, compute, plan, and comply with domestic and cross-border tax obligations.
                 </p>
                 <ul className="space-y-2">
-                  <li className="flex items-center text-xs sm:text-sm text-gray-600 group-hover:text-white">
+                  <li className="flex items-center text-sm sm:text-base text-gray-600 group-hover:text-white">
                     <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
                       <span className="text-white text-xs">✓</span>
                     </span>
                     Tax classification & event mapping
                   </li>
-                  <li className="flex items-center text-xs sm:text-sm text-gray-600 group-hover:text-white">
+                  <li className="flex items-center text-sm sm:text-base text-gray-600 group-hover:text-white">
                     <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
                       <span className="text-white text-xs">✓</span>
                     </span>
                     Income tax, capital gains & GST treatment
                   </li>
-                  <li className="flex items-center text-xs sm:text-sm text-gray-600 group-hover:text-white">
+                  <li className="flex items-center text-sm sm:text-base text-gray-600 group-hover:text-white">
                     <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
                       <span className="text-white text-xs">✓</span>
                     </span>
                     Cross-border tax planning
                   </li>
-                  <li className="flex items-center text-xs sm:text-sm text-gray-600 group-hover:text-white">
+                  <li className="flex items-center text-sm sm:text-base text-gray-600 group-hover:text-white">
                     <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
                       <span className="text-white text-xs">✓</span>
                     </span>
@@ -454,25 +454,25 @@ export default function Web3Law() {
                   We guide traditional Web2 firms in legally transitioning into the Web3 space — migrating assets, contracts, governance, and compliance frameworks.
                 </p>
                 <ul className="space-y-2">
-                  <li className="flex items-center text-xs sm:text-sm text-gray-600 group-hover:text-white">
+                  <li className="flex items-center text-sm sm:text-base text-gray-600 group-hover:text-white">
                     <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
                       <span className="text-white text-xs">✓</span>
                     </span>
                     Contractual migration & amendments
                   </li>
-                  <li className="flex items-center text-xs sm:text-sm text-gray-600 group-hover:text-white">
+                  <li className="flex items-center text-sm sm:text-base text-gray-600 group-hover:text-white">
                     <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
                       <span className="text-white text-xs">✓</span>
                     </span>
                     IP re-licensing & tokenization strategy
                   </li>
-                  <li className="flex items-center text-xs sm:text-sm text-gray-600 group-hover:text-white">
+                  <li className="flex items-center text-sm sm:text-base text-gray-600 group-hover:text-white">
                     <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
                       <span className="text-white text-xs">✓</span>
                     </span>
                     Compliance transformation roadmap
                   </li>
-                  <li className="flex items-center text-xs sm:text-sm text-gray-600 group-hover:text-white">
+                  <li className="flex items-center text-sm sm:text-base text-gray-600 group-hover:text-white">
                     <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
                       <span className="text-white text-xs">✓</span>
                     </span>
@@ -490,25 +490,25 @@ export default function Web3Law() {
                   We help crypto & blockchain businesses comply with India's foreign exchange (FEMA) rules when dealing with cross-border flows, investments, or token transfers.
                 </p>
                 <ul className="space-y-2">
-                  <li className="flex items-center text-xs sm:text-sm text-gray-600 group-hover:text-white">
+                  <li className="flex items-center text-sm sm:text-base text-gray-600 group-hover:text-white">
                     <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
                       <span className="text-white text-xs">✓</span>
                     </span>
                     Structuring foreign inward / outward remittances
                   </li>
-                  <li className="flex items-center text-xs sm:text-sm text-gray-600 group-hover:text-white">
+                  <li className="flex items-center text-sm sm:text-base text-gray-600 group-hover:text-white">
                     <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
                       <span className="text-white text-xs">✓</span>
                     </span>
                     Reporting & approvals under FEMA
                   </li>
-                  <li className="flex items-center text-xs sm:text-sm text-gray-600 group-hover:text-white">
+                  <li className="flex items-center text-sm sm:text-base text-gray-600 group-hover:text-white">
                     <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
                       <span className="text-white text-xs">✓</span>
                     </span>
                     RBI coordination & regulatory advisory
                   </li>
-                  <li className="flex items-center text-xs sm:text-sm text-gray-600 group-hover:text-white">
+                  <li className="flex items-center text-sm sm:text-base text-gray-600 group-hover:text-white">
                     <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
                       <span className="text-white text-xs">✓</span>
                     </span>
@@ -526,32 +526,32 @@ export default function Web3Law() {
                   We draft legally robust whitepapers that combine technical clarity with regulatory disclosures, risk statements, and investor protections.
                 </p>
                 <ul className="space-y-2">
-                  <li className="flex items-center text-xs sm:text-sm text-gray-600 group-hover:text-white">
+                  <li className="flex items-center text-sm sm:text-base text-gray-600 group-hover:text-white">
                     <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
                       <span className="text-white text-xs">✓</span>
                     </span>
                     Market, technical & legal narrative balance
                   </li>
 
-                  <li className="flex items-center text-xs sm:text-sm text-gray-600 group-hover:text-white">
+                  <li className="flex items-center text-sm sm:text-base text-gray-600 group-hover:text-white">
                     <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
                       <span className="text-white text-xs">✓</span>
                     </span>
                     Review and vetting
                   </li>
-                  <li className="flex items-center text-xs sm:text-sm text-gray-600 group-hover:text-white">
+                  <li className="flex items-center text-sm sm:text-base text-gray-600 group-hover:text-white">
                     <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
                       <span className="text-white text-xs">✓</span>
                     </span>
                     Risk & compliance disclosures
                   </li>
-                  <li className="flex items-center text-xs sm:text-sm text-gray-600 group-hover:text-white">
+                  <li className="flex items-center text-sm sm:text-base text-gray-600 group-hover:text-white">
                     <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
                       <span className="text-white text-xs">✓</span>
                     </span>
                     Tokenomics & governance explanation
                   </li>
-                  <li className="flex items-center text-xs sm:text-sm text-gray-600 group-hover:text-white">
+                  <li className="flex items-center text-sm sm:text-base text-gray-600 group-hover:text-white">
                     <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
                       <span className="text-white text-xs">✓</span>
                     </span>
@@ -569,25 +569,25 @@ export default function Web3Law() {
                   We assist DAOs, protocols, and blockchain platforms to design governance rules, policy frameworks, and liability shields that are legally resilient and operationally coherent.
                 </p>
                 <ul className="space-y-2">
-                  <li className="flex items-center text-xs sm:text-sm text-gray-600 group-hover:text-white">
+                  <li className="flex items-center text-sm sm:text-base text-gray-600 group-hover:text-white">
                     <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
                       <span className="text-white text-xs">✓</span>
                     </span>
                     DAO constitutional design & rules
                   </li>
-                  <li className="flex items-center text-xs sm:text-sm text-gray-600 group-hover:text-white">
+                  <li className="flex items-center text-sm sm:text-base text-gray-600 group-hover:text-white">
                     <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
                       <span className="text-white text-xs">✓</span>
                     </span>
                     Voting mechanisms & dispute resolution
                   </li>
-                  <li className="flex items-center text-xs sm:text-sm text-gray-600 group-hover:text-white">
+                  <li className="flex items-center text-sm sm:text-base text-gray-600 group-hover:text-white">
                     <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
                       <span className="text-white text-xs">✓</span>
                     </span>
                     Liability limiting frameworks
                   </li>
-                  <li className="flex items-center text-xs sm:text-sm text-gray-600 group-hover:text-white">
+                  <li className="flex items-center text-sm sm:text-base text-gray-600 group-hover:text-white">
                     <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
                       <span className="text-white text-xs">✓</span>
                     </span>
@@ -605,25 +605,25 @@ export default function Web3Law() {
                   We support Indian blockchain ventures in expanding overseas — structuring international legal presence, ensuring compliance abroad, and facilitating global fundraising.
                 </p>
                 <ul className="space-y-2">
-                  <li className="flex items-center text-xs sm:text-sm text-gray-600 group-hover:text-white">
+                  <li className="flex items-center text-sm sm:text-base text-gray-600 group-hover:text-white">
                     <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
                       <span className="text-white text-xs">✓</span>
                     </span>
                     Jurisdiction selection & entity setup
                   </li>
-                  <li className="flex items-center text-xs sm:text-sm text-gray-600 group-hover:text-white">
+                  <li className="flex items-center text-sm sm:text-base text-gray-600 group-hover:text-white">
                     <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
                       <span className="text-white text-xs">✓</span>
                     </span>
                     Cross-border regulatory & tax compliance
                   </li>
-                  <li className="flex items-center text-xs sm:text-sm text-gray-600 group-hover:text-white">
+                  <li className="flex items-center text-sm sm:text-base text-gray-600 group-hover:text-white">
                     <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
                       <span className="text-white text-xs">✓</span>
                     </span>
                     Global investor onboarding
                   </li>
-                  <li className="flex items-center text-xs sm:text-sm text-gray-600 group-hover:text-white">
+                  <li className="flex items-center text-sm sm:text-base text-gray-600 group-hover:text-white">
                     <span className="w-4 h-4 rounded-full flex items-center justify-center mr-2" style={{ backgroundColor: "#A5292A" }}>
                       <span className="text-white text-xs">✓</span>
                     </span>

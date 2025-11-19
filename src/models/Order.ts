@@ -14,10 +14,10 @@ export interface ICustomer {
   name: string
   email: string
   phone: string
-  address: string
-  city: string
-  state: string
-  pincode: string
+  address?: string
+  city?: string
+  state?: string
+  pincode?: string
 }
 
 export interface IOrder extends Document {
@@ -63,22 +63,26 @@ const OrderSchema = new Schema<IOrder>({
     },
     address: {
       type: String,
-      required: true,
+      required: false,
+      default: undefined,
       trim: true
     },
     city: {
       type: String,
-      required: true,
+      required: false,
+      default: undefined,
       trim: true
     },
     state: {
       type: String,
-      required: true,
+      required: false,
+      default: undefined,
       trim: true
     },
     pincode: {
       type: String,
-      required: true,
+      required: false,
+      default: undefined,
       trim: true
     }
   },
@@ -171,7 +175,12 @@ OrderSchema.pre('save', function(next) {
   next()
 })
 
-export default mongoose.models.Order || mongoose.model<IOrder>('Order', OrderSchema)
+// Clear the model cache if it exists to ensure fresh schema
+if (mongoose.models.Order) {
+  delete mongoose.models.Order
+}
+
+export default mongoose.model<IOrder>('Order', OrderSchema)
 
 
 

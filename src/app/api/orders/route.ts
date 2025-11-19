@@ -4,7 +4,20 @@ import connectDB from '@/lib/mongodb'
 
 export async function POST(request: NextRequest) {
   try {
-    await connectDB()
+    // Connect to database
+    try {
+      await connectDB()
+      console.log('✅ Database connected')
+    } catch (dbError: any) {
+      console.error('❌ Database connection failed:', dbError)
+      return NextResponse.json(
+        { 
+          error: 'Database connection failed',
+          details: dbError.message || 'Unable to connect to database'
+        },
+        { status: 500 }
+      )
+    }
     
     const body = await request.json()
     const { customer, items, subtotal, total, paymentMethod } = body
@@ -32,11 +45,11 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Validate customer fields
-    if (!customer.name || !customer.email || !customer.phone || !customer.address || !customer.city || !customer.state || !customer.pincode) {
+    // Validate customer fields (only name, email, phone required for digital products)
+    if (!customer.name || !customer.email || !customer.phone) {
       console.error('❌ Invalid customer data:', customer)
       return NextResponse.json(
-        { error: 'Invalid customer information' },
+        { error: 'Invalid customer information. Name, email, and phone are required.' },
         { status: 400 }
       )
     }
@@ -44,16 +57,59 @@ export async function POST(request: NextRequest) {
     console.log('✅ Customer data validated:', {
       name: customer.name,
       email: customer.email,
-      phone: customer.phone,
-      address: customer.address,
-      city: customer.city,
-      state: customer.state,
-      pincode: customer.pincode
+      phone: customer.phone
     })
 
+    // Validate items array
+    if (!Array.isArray(items) || items.length === 0) {
+      return NextResponse.json(
+        { error: 'Items array is required and must not be empty' },
+        { status: 400 }
+      )
+    }
+
+    // Validate each item has required fields
+    for (const item of items) {
+      if (!item.templateId || !item.title || item.price === undefined || !item.quantity) {
+        return NextResponse.json(
+          { error: `Invalid item data: ${JSON.stringify(item)}` },
+          { status: 400 }
+        )
+      }
+    }
+
     // Create new order
+    console.log('📝 Creating order with validated data:', {
+      customer: { name: customer.name, email: customer.email, phone: customer.phone },
+      itemsCount: items.length,
+      subtotal,
+      total,
+      paymentMethod
+    })
+
+    // Build customer object - only include address fields if they exist and are not empty
+    const customerData: any = {
+      name: customer.name,
+      email: customer.email,
+      phone: customer.phone
+    }
+    
+    // Only add address fields if they exist (for backward compatibility)
+    if (customer.address && customer.address.trim()) {
+      customerData.address = customer.address.trim()
+    }
+    if (customer.city && customer.city.trim()) {
+      customerData.city = customer.city.trim()
+    }
+    if (customer.state && customer.state.trim()) {
+      customerData.state = customer.state.trim()
+    }
+    if (customer.pincode && customer.pincode.trim()) {
+      customerData.pincode = customer.pincode.trim()
+    }
+
     const order = new Order({
-      customer,
+      customer: customerData,
       items,
       subtotal,
       total,
@@ -61,6 +117,20 @@ export async function POST(request: NextRequest) {
       paymentStatus: 'pending',
       status: 'pending'
     })
+
+    // Validate before saving
+    const validationError = order.validateSync()
+    if (validationError) {
+      console.error('❌ Validation error before save:', validationError)
+      return NextResponse.json(
+        { 
+          error: 'Validation error',
+          details: validationError.message,
+          errors: validationError.errors
+        },
+        { status: 400 }
+      )
+    }
 
     await order.save()
 
@@ -87,12 +157,40 @@ export async function POST(request: NextRequest) {
     console.error('Error details:', {
       message: error.message,
       name: error.name,
-      stack: error.stack
+      stack: error.stack,
+      errors: error.errors || error._message || 'No additional error details'
     })
+    
+    // Check if it's a validation error
+    if (error.name === 'ValidationError') {
+      const validationErrors = Object.values(error.errors || {}).map((err: any) => err.message).join(', ')
+      return NextResponse.json(
+        { 
+          error: 'Validation error',
+          details: validationErrors || error.message,
+          message: 'Please check your order data and try again.'
+        },
+        { status: 400 }
+      )
+    }
+    
+    // Check if it's a duplicate key error (orderNumber)
+    if (error.code === 11000) {
+      return NextResponse.json(
+        { 
+          error: 'Duplicate order number',
+          details: 'An order with this number already exists. Please try again.',
+          message: 'Order creation failed due to duplicate order number.'
+        },
+        { status: 409 }
+      )
+    }
+    
     return NextResponse.json(
       { 
         error: 'Failed to create order',
-        details: process.env.NODE_ENV === 'development' ? error.message : undefined
+        details: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error',
+        message: error.message || 'An unexpected error occurred while creating the order.'
       },
       { status: 500 }
     )

@@ -35,7 +35,6 @@ build/
 GO_LIVE_GUIDE.md
 RAZORPAY_SETUP.md
 
-# Google Cloud Service Account Keys (sensitive credentials)
 *-service-account*.json
 gcs-credentials.json
 google-credentials.json

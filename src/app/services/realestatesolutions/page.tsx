@@ -61,7 +61,7 @@ const RealEstateSolutions = () => {
       <Navbar page="services" />
 
        {/* Hero Section */}
-     <section className="py-20 relative overflow-hidden">
+     <section className="pt-28 pb-20 relative overflow-hidden">
         {/* Background Image */}
         <div
           className="absolute inset-0"

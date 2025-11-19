@@ -11,31 +11,20 @@ export const Navbar = ({ page }) => {
   const [isValueServicesOpen, setIsValueServicesOpen] = useState(false);
 
   return (
-    <header className="bg-white shadow-sm border-b border-gray-100 sticky top-0 z-50">
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16">
-          <div className="flex items-center">
+    <header className="bg-white shadow-sm border-b border-gray-100 fixed top-0 left-0 right-0 z-50">
+      <div className="container mx-auto px-8 lg:px-12">
+        <div className="flex items-center justify-between h-20">
+          <Link href="/" className="flex items-center hover:opacity-80 transition-opacity">
             <div className="w-12 h-12">
               <Image src={logo} alt="Fathom Legal Logo" width={48} height={48} />
             </div>
             <div className="text-2xl font-bold text-gray-800">
               Fathom <span style={{ color: "#A5292A" }}>Legal</span>
             </div>
-          </div>
+          </Link>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
-            <Link
-              href="/"
-              className={
-                page === "home"
-                  ? "text-[#A5292A] hover:text-[#A5292A] font-bold flex items-center"
-                  : "text-gray-900 hover:text-[#A5292A] font-bold flex items-center"
-              }
-            >
-              Home
-            </Link>
-
             <Link
               className={
                 page === "aboutus"
@@ -58,36 +47,40 @@ export const Navbar = ({ page }) => {
               >
                 Services <ChevronDown className="ml-1 w-4 h-4 font-bold" />
               </Link>
-              <div className="absolute top-full left-0 bg-white shadow-lg rounded-lg py-2 w-48 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+              <div className="absolute top-full left-0 bg-white shadow-lg py-3 w-64 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 border-b-2" style={{ borderBottomColor: "#A5292A" }}>
                 <Link
                   href="/services/generalcorporateadvisory"
-                  className="block px-4 py-2 text-gray-900 hover:bg-[#FAFAFA] hover:text-[#A5292A]"
+                  className="block px-5 py-3 text-gray-900 hover:bg-[#FAFAFA] hover:text-[#A5292A] relative"
                 >
                   General Corporate Advisory
+                  <div className="absolute bottom-0 left-5 right-5 h-px bg-gray-200"></div>
                 </Link>
                 
                 <Link
                   href="/services/disputeresolution"
-                  className="block px-4 py-2 text-gray-900 hover:bg-[#FAFAFA] hover:text-[#A5292A]"
+                  className="block px-5 py-3 text-gray-900 hover:bg-[#FAFAFA] hover:text-[#A5292A] relative"
                 >
                   Dispute Resolution
+                  <div className="absolute bottom-0 left-5 right-5 h-px bg-gray-200"></div>
                 </Link>
                 <Link
                   href="/services/intellectualproperty"
-                  className="block px-4 py-2 text-gray-900 hover:bg-[#FAFAFA] hover:text-[#A5292A]"
+                  className="block px-5 py-3 text-gray-900 hover:bg-[#FAFAFA] hover:text-[#A5292A] relative"
                 >
                   Intellectual Property Services
+                  <div className="absolute bottom-0 left-5 right-5 h-px bg-gray-200"></div>
                 </Link>
                 
                 <Link
                   href="/services/realestatesolutions"
-                  className="block px-4 py-2 text-gray-900 hover:bg-[#FAFAFA] hover:text-[#A5292A]"
+                  className="block px-5 py-3 text-gray-900 hover:bg-[#FAFAFA] hover:text-[#A5292A] relative"
                 >
                   Real Estate Solution
+                  <div className="absolute bottom-0 left-5 right-5 h-px bg-gray-200"></div>
                 </Link>
                 <Link
                   href="/services/reitsolutions"
-                  className="block px-4 py-2 text-gray-900 hover:bg-[#FAFAFA] hover:text-[#A5292A]"
+                  className="block px-5 py-3 text-gray-900 hover:bg-[#FAFAFA] hover:text-[#A5292A]"
                 >
                   REIT Solution
                 </Link>
@@ -142,34 +135,38 @@ export const Navbar = ({ page }) => {
               >
                 Value Services <ChevronDown className="ml-1 w-4 h-4 font-bold" />
               </Link>
-              <div className="absolute top-full left-0 bg-white shadow-lg rounded-lg py-2 w-48 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 border border-gray-100">
+              <div className="absolute top-full left-0 bg-white shadow-lg py-3 w-64 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 border border-gray-100 border-b-2" style={{ borderBottomColor: "#A5292A" }}>
                 <Link
                   href="/valueboostingsolutions/chieflegalofficerservice"
-                  className="block px-4 py-2 text-gray-900 hover:bg-[#FAFAFA] hover:text-[#A5292A]"
+                  className="block px-5 py-3 text-gray-900 hover:bg-[#FAFAFA] hover:text-[#A5292A] relative"
                 >
                   Chief Legal Officer Service
+                  <div className="absolute bottom-0 left-5 right-5 h-px bg-gray-200"></div>
                 </Link>
                 <Link
                   href="/valueboostingsolutions/techlegalblueprint"
-                  className="block px-4 py-2 text-gray-900 hover:bg-[#FAFAFA] hover:text-[#A5292A]"
+                  className="block px-5 py-3 text-gray-900 hover:bg-[#FAFAFA] hover:text-[#A5292A] relative"
                 >
                   Tech Legal Blueprint
+                  <div className="absolute bottom-0 left-5 right-5 h-px bg-gray-200"></div>
                 </Link>
                 <Link
                   href="/valueboostingsolutions/vcfundingsupport"
-                  className="block px-4 py-2 text-gray-900 hover:bg-[#FAFAFA] hover:text-[#A5292A]"
+                  className="block px-5 py-3 text-gray-900 hover:bg-[#FAFAFA] hover:text-[#A5292A] relative"
                 >
                   VC Funding Support
+                  <div className="absolute bottom-0 left-5 right-5 h-px bg-gray-200"></div>
                 </Link>
                 <Link
                   href="/valueboostingsolutions/pitchdeckservices"
-                  className="block px-4 py-2 text-gray-900 hover:bg-[#FAFAFA] hover:text-[#A5292A]"
+                  className="block px-5 py-3 text-gray-900 hover:bg-[#FAFAFA] hover:text-[#A5292A] relative"
                 >
                   Pitch Deck Services
+                  <div className="absolute bottom-0 left-5 right-5 h-px bg-gray-200"></div>
                 </Link>
                 <Link
                   href="/valueboostingsolutions/cybersecurityservices"
-                  className="block px-4 py-2 text-gray-900 hover:bg-[#FAFAFA] hover:text-[#A5292A]"
+                  className="block px-5 py-3 text-gray-900 hover:bg-[#FAFAFA] hover:text-[#A5292A]"
                 >
                   Cybersecurity Compliance Services
                 </Link>
@@ -228,18 +225,6 @@ export const Navbar = ({ page }) => {
         {isMenuOpen && (
           <div className="md:hidden bg-white border-t border-gray-100">
             <div className="px-2 pt-2 pb-3 space-y-1">
-              <Link
-                className={`block px-3 py-2 font-bold ${
-                  page === "home"
-                    ? "text-[#A5292A]"
-                    : "text-gray-900 hover:text-[#A5292A]"
-                }`}
-                href="/"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Home
-              </Link>
-
               <Link
                 className={`block px-3 py-2 font-bold ${
                   page === "aboutus"

@@ -7,6 +7,7 @@ export interface IOrderItem {
   quantity: number
   fileName?: string
   fileSize?: number
+  downloadExpiresAt?: Date  // Expiration timestamp for download link (24 hours from payment)
 }
 
 export interface ICustomer {
@@ -40,7 +41,7 @@ export interface IOrder extends Document {
 const OrderSchema = new Schema<IOrder>({
   orderNumber: {
     type: String,
-    required: true,
+    required: false, // Auto-generated, not required in schema
     unique: true
   },
   customer: {
@@ -171,6 +172,8 @@ OrderSchema.pre('save', function(next) {
 })
 
 export default mongoose.models.Order || mongoose.model<IOrder>('Order', OrderSchema)
+
+
 
 
 

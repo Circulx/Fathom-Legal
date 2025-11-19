@@ -126,7 +126,7 @@ export default function AboutUs() {
       <Navbar page="aboutus" />
 
        {/* Hero Section */}
-       <section className="py-20 relative overflow-hidden">
+       <section className="pt-28 pb-20 relative overflow-hidden">
         {/* Background Image */}
         <div
           className="absolute inset-0"
@@ -143,13 +143,13 @@ export default function AboutUs() {
         
         <div className="container mx-auto px-4 relative z-10">
           <div className="text-center max-w-4xl mx-auto">
-            <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6">
             About <span style={{ color: '#A5292A' }}>Fathom Legal</span>
             </h1>
-            <p className="text-xl text-white/90 mb-6">
+            <p className="text-lg sm:text-xl md:text-2xl text-white/90 mb-6">
             Excellence in Legal Practice Since Our Inception
             </p>
-            <p className="text-base  text-white/90 mb-8">
+            <p className="text-sm sm:text-base md:text-lg text-white/90 mb-8">
             We are a full-service law firm committed to providing exceptional legal services with integrity, expertise, and a client-first approach that sets us apart in the legal landscape.
             </p>
             
@@ -171,10 +171,10 @@ export default function AboutUs() {
       <section className="py-20 bg-white">
         <div className="container mx-auto px-4 ">
           <div className="text-center mb-16  ">
-            <h2 className="text-4xl font-bold text-gray-800 mb-4">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-800 mb-4">
               Why Choose <span style={{ color: '#A5292A' }}>Fathom Legal</span>?
             </h2>
-            <p className="text-lg  text-gray-600 max-w-3xl mx-auto">
+            <p className="text-base sm:text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
               Our commitment to excellence and client satisfaction makes us the
               preferred choice for businesses and individuals seeking reliable
               legal counsel.
@@ -210,14 +210,14 @@ export default function AboutUs() {
                 }`}>
                   {item.icon}
                 </div>
-                <h3 className={`text-xl font-semibold mb-4 ${
+                <h3 className={`text-lg sm:text-xl md:text-xl font-semibold mb-4 ${
                   index % 2 === 0 
                     ? 'text-white' 
                     : 'text-[#A5292A]'
                 }`}>
                   {item.title}
                 </h3>
-                <p className={`${
+                <p className={`text-sm sm:text-base ${
                   index % 2 === 0 
                     ? 'text-white' 
                     : 'text-gray-600'
@@ -248,7 +248,7 @@ export default function AboutUs() {
         <div className="container mx-auto px-4 relative z-10">
           {/* Section Header */}
           <div className="text-center mb-16">
-            <h2 className="text-5xl font-bold text-white mb-4">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4">
               Our <span style={{ color: '#A5292A' }}>Philosophy</span>
             </h2>
             <div className="w-24 h-1 bg-[#A5292A] mx-auto mb-8"></div>
@@ -258,7 +258,7 @@ export default function AboutUs() {
             {/* Content Cards */}
             <div className="space-y-8">
               <div>
-                <p className="text-lg text-white leading-relaxed">
+                <p className="text-base sm:text-lg md:text-xl text-white leading-relaxed">
                   At Fathom Legal, we believe that exceptional legal service
                   stems from a deep understanding of our clients' businesses,
                   challenges, and aspirations. Our philosophy is built on three
@@ -272,10 +272,10 @@ export default function AboutUs() {
                     <div className="flex-shrink-0 w-16 h-16 bg-[#A5292A] rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
                       <Users className="w-8 h-8 text-white" />
                     </div>
-                    <h4 className="text-xl font-semibold text-gray-800 mb-3 group-hover:text-[#A5292A] transition-colors duration-300">
+                    <h4 className="text-lg sm:text-xl md:text-xl font-semibold text-gray-800 mb-3 group-hover:text-[#A5292A] transition-colors duration-300">
                       Client Partnership
                     </h4>
-                    <p className="text-gray-600 leading-relaxed text-sm">
+                    <p className="text-gray-600 leading-relaxed text-xs sm:text-sm md:text-base">
                       We view ourselves as partners in our clients' success,
                       working collaboratively to achieve their goals.
                     </p>
@@ -287,10 +287,10 @@ export default function AboutUs() {
                     <div className="flex-shrink-0 w-16 h-16 bg-[#A5292A] rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
                       <Target className="w-8 h-8 text-white" />
                     </div>
-                    <h4 className="text-xl font-semibold text-gray-800 mb-3 group-hover:text-[#A5292A] transition-colors duration-300">
+                    <h4 className="text-lg sm:text-xl md:text-xl font-semibold text-gray-800 mb-3 group-hover:text-[#A5292A] transition-colors duration-300">
                       Innovation & Excellence
                     </h4>
-                    <p className="text-gray-600 leading-relaxed text-sm">
+                    <p className="text-gray-600 leading-relaxed text-xs sm:text-sm md:text-base">
                       We continuously evolve our practices to provide
                       cutting-edge legal solutions that meet modern business
                       needs.
@@ -303,10 +303,10 @@ export default function AboutUs() {
                     <div className="flex-shrink-0 w-16 h-16 bg-[#A5292A] rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
                       <Shield className="w-8 h-8 text-white" />
                     </div>
-                    <h4 className="text-xl font-semibold text-gray-800 mb-3 group-hover:text-[#A5292A] transition-colors duration-300">
+                    <h4 className="text-lg sm:text-xl md:text-xl font-semibold text-gray-800 mb-3 group-hover:text-[#A5292A] transition-colors duration-300">
                       Ethical Leadership
                     </h4>
-                    <p className="text-gray-600 leading-relaxed text-sm">
+                    <p className="text-gray-600 leading-relaxed text-xs sm:text-sm md:text-base">
                       We maintain the highest ethical standards and serve as
                       trusted advisors in all our professional relationships.
                     </p>
@@ -322,10 +322,10 @@ export default function AboutUs() {
       <section className="py-20 bg-gray-200">
         <div className="container mx-auto px-4 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-800 mb-4">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-800 mb-4">
               Meet Our <span style={{ color: '#A5292A' }}>Founder</span>
             </h2>
-            <p className="text-lg text-gray-600">
+            <p className="text-base sm:text-lg md:text-xl text-gray-600">
               Leadership that drives excellence and innovation
             </p>
           </div>
@@ -347,22 +347,22 @@ export default function AboutUs() {
                 
                 {/* Get in Touch Box */}
                 <div className="mt-8 bg-white p-6 shadow-lg border-l-4 w-80 sm:w-96 mx-auto lg:mx-0" >
-                  <h4 className="text-xl font-bold text-gray-800 mb-4">Get In Touch</h4>
-                  <p className="text-gray-600 mb-4">
+                  <h4 className="text-lg sm:text-xl md:text-xl font-bold text-gray-800 mb-4">Get In Touch</h4>
+                  <p className="text-sm sm:text-base text-gray-600 mb-4">
                     Please feel free to contact us. We will get back to you with 1-2 business days.
                   </p>
                   <div className="space-y-3">
                     <div className="flex items-center">
                       <Mail className="w-5 h-5 text-[#A5292A] mr-3" />
-                      <span className="text-gray-700">assist@fathomlegal.com</span>
+                      <span className="text-sm sm:text-base text-gray-700">assist@fathomlegal.com</span>
                     </div>
                     <div className="flex items-center">
                       <Phone className="w-5 h-5 text-[#A5292A] mr-3" />
-                      <span className="text-gray-700">+919625206671</span>
+                      <span className="text-sm sm:text-base text-gray-700">+919625206671</span>
                     </div>
                     <div className="flex items-center">
                       <MapPin className="w-5 h-5 text-[#A5292A] mr-3" />
-                      <span className="text-gray-700">27th main road, 1st sector, HSR Layout, Bangalore, 560102</span>
+                      <span className="text-sm sm:text-base text-gray-700">27th main road, 1st sector, HSR Layout, Bangalore, 560102</span>
                     </div>
                   </div>
 
@@ -396,19 +396,19 @@ export default function AboutUs() {
                  
                   
                   <div className="  space-y-4 text-gray-700 ">
-                    <p className="text-base">
+                    <p className="text-sm sm:text-base md:text-lg">
                       With over a decade of experience in corporate law and business advisory, Adv. Ishita Sharma founded Fathom Legal with a vision to provide comprehensive legal solutions that truly understand and support business growth.
                     </p>
 
-                    <p className="text-base">
+                    <p className="text-sm sm:text-base md:text-lg">
                       She specializes in corporate structuring, startup ecosystem guidance, and strategic legal planning. Her expertise spans across various industries, making her a trusted advisor for businesses at every stage of their growth journey.
                     </p>
 
-                    <p className="text-base">
+                    <p className="text-sm sm:text-base md:text-lg">
                       Adv. Ishita is skilled at drafting and negotiating key agreements such as Shareholders' Agreements, Joint Venture Agreements, Technology Licensing Agreements, and Employment Contracts. She has guided companies through compliance and regulatory challenges across India and advised on matters under various corporate laws, helping businesses establish a strong foothold in the market.
                     </p>
 
-                    <p className="text-base">
+                    <p className="text-sm sm:text-base md:text-lg">
                       Her expertise extends to employment law, where she advises businesses on workplace policies, contracts, and dispute resolution. She has worked across diverse industries, including automotive, FMCG, manufacturing, real estate, healthcare, education, insurance, and financial services.
                     </p>
                   </div>
@@ -416,14 +416,14 @@ export default function AboutUs() {
 
                 {/* Practice Areas */}
                 <div>
-                  <h4 className="text-xl sm:text-2xl font-bold text-gray-800 mb-6 border-b-2 pb-2" style={{ borderColor: "#A5292A" }}>
+                  <h4 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 mb-6 border-b-2 pb-2" style={{ borderColor: "#A5292A" }}>
                     Practice Areas
                   </h4>
                   <div className="flex flex-wrap gap-4 gap-y-4">
                     {practiceAreas.map((area, index) => (
                       <div 
                         key={index} 
-                        className="bg-gray-200 border border-black rounded-full px-4 py-2 text-gray-700 text-sm font-medium hover:bg-[#A5292A] hover:text-white hover:border-[#A5292A] transition-colors duration-200"
+                        className="bg-gray-200 border border-black rounded-full px-3 sm:px-4 py-2 text-gray-700 text-xs sm:text-sm font-medium hover:bg-[#A5292A] hover:text-white hover:border-[#A5292A] transition-colors duration-200"
                       >
                         {area}
                       </div>
@@ -433,14 +433,14 @@ export default function AboutUs() {
 
                 {/* Qualifications */}
                 <div>
-                  <h4 className="text-xl sm:text-2xl font-bold text-gray-800 mb-6 border-b-2 pb-2" style={{ borderColor: "#A5292A" }}>
+                  <h4 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 mb-6 border-b-2 pb-2" style={{ borderColor: "#A5292A" }}>
                     Qualifications
                   </h4>
                   <ul className="space-y-3 text-gray-700">
-                    <li className="text-base">• LL.B. from National Law University</li>
-                    <li className="text-base">• LL.M. in Corporate Law</li>
-                    <li className="text-base">• Member, Bar Council of India</li>
-                    <li className="text-base">• Certified Corporate Legal Advisor</li>
+                    <li className="text-sm sm:text-base md:text-lg">• LL.B. from National Law University</li>
+                    <li className="text-sm sm:text-base md:text-lg">• LL.M. in Corporate Law</li>
+                    <li className="text-sm sm:text-base md:text-lg">• Member, Bar Council of India</li>
+                    <li className="text-sm sm:text-base md:text-lg">• Certified Corporate Legal Advisor</li>
                   </ul>
                 </div>
               </div>
@@ -470,10 +470,10 @@ export default function AboutUs() {
         <div className="container mx-auto px-4 relative z-10">
           {/* Section Header */}
           <div className="text-center mb-10">
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
               Get in <span style={{ color: "#A5292A" }}>Touch</span> with Us!
             </h2>
-            <p className="text-lg text-white/90 max-w-3xl mx-auto">
+            <p className="text-base sm:text-lg md:text-xl text-white/90 max-w-3xl mx-auto">
               Let our experience pave the path to your success.
             </p>
           </div>
@@ -483,55 +483,55 @@ export default function AboutUs() {
             <div className="space-y-8">
               {/* Corporate Office */}
               <div>
-                <h3 className="text-xl font-bold text-white mb-4" style={{ color: "#A5292A" }}>
+                <h3 className="text-lg sm:text-xl md:text-xl font-bold text-white mb-4" style={{ color: "#A5292A" }}>
                   Corporate Office
                 </h3>
                 <div className="space-y-3 text-white/90">
                   <div className="flex items-start space-x-3">
                     <MapPin className="w-5 h-5 text-white mt-1 flex-shrink-0" />
-                    <p>27th main road, 1st sector, HSR Layout, Bangalore, 560102</p>
+                    <p className="text-sm sm:text-base">27th main road, 1st sector, HSR Layout, Bangalore, 560102</p>
                   </div>
                   <div className="flex items-center space-x-3">
                     <Phone className="w-5 h-5 text-white flex-shrink-0" />
-                    <a href="tel:+919625206671" className="hover:text-white transition-colors duration-300">+919625206671</a>
+                    <a href="tel:+919625206671" className="text-sm sm:text-base hover:text-white transition-colors duration-300">+919625206671</a>
                   </div>
                   <div className="flex items-center space-x-3">
                     <Mail className="w-5 h-5 text-white flex-shrink-0" />
-                    <a href="https://mail.google.com/mail/?view=cm&fs=1&to=assist@fathomlegal.com" target="_blank" rel="noopener noreferrer" className="hover:text-[#A5292A] transition-colors duration-300">assist@fathomlegal.com</a>
+                    <a href="https://mail.google.com/mail/?view=cm&fs=1&to=assist@fathomlegal.com" target="_blank" rel="noopener noreferrer" className="text-sm sm:text-base hover:text-[#A5292A] transition-colors duration-300">assist@fathomlegal.com</a>
                   </div>
                 </div>
               </div>
 
               {/* Dubai Office */}
               <div>
-                <h3 className="text-xl font-bold text-white mb-4" style={{ color: "#A5292A" }}>
+                <h3 className="text-lg sm:text-xl md:text-xl font-bold text-white mb-4" style={{ color: "#A5292A" }}>
                   Dubai Office
                 </h3>
                 <div className="space-y-3 text-white/90">
                   <div className="flex items-start space-x-3">
                     <MapPin className="w-5 h-5 text-white mt-1 flex-shrink-0" />
-                    <p> Dubai, UAE</p>
+                    <p className="text-sm sm:text-base"> Dubai, UAE</p>
                   </div>
                   <div className="flex items-center space-x-3">
                     <Mail className="w-5 h-5 text-white flex-shrink-0" />
-                    <a href="https://mail.google.com/mail/?view=cm&fs=1&to=assist@fathomlegal.com" target="_blank" rel="noopener noreferrer" className="hover:text-[#A5292A] transition-colors duration-300">assist@fathomlegal.com</a>
+                    <a href="https://mail.google.com/mail/?view=cm&fs=1&to=assist@fathomlegal.com" target="_blank" rel="noopener noreferrer" className="text-sm sm:text-base hover:text-[#A5292A] transition-colors duration-300">assist@fathomlegal.com</a>
                   </div>
                 </div>
               </div>
 
               {/* Dallas Office */}
               <div>
-                <h3 className="text-xl font-bold text-white mb-4" style={{ color: "#A5292A" }}>
+                <h3 className="text-lg sm:text-xl md:text-xl font-bold text-white mb-4" style={{ color: "#A5292A" }}>
                   Dallas Office
                 </h3>
                 <div className="space-y-3 text-white/90">
                   <div className="flex items-start space-x-3">
                     <MapPin className="w-5 h-5 text-white mt-1 flex-shrink-0" />
-                    <p>Dallas, Texas, USA</p>
+                    <p className="text-sm sm:text-base">Dallas, Texas, USA</p>
                   </div>
                   <div className="flex items-center space-x-3">
                     <Mail className="w-5 h-5 text-white flex-shrink-0" />
-                    <a href="https://mail.google.com/mail/?view=cm&fs=1&to=assist@fathomlegal.com" target="_blank" rel="noopener noreferrer" className="hover:text-[#A5292A] transition-colors duration-300">assist@fathomlegal.com</a>
+                    <a href="https://mail.google.com/mail/?view=cm&fs=1&to=assist@fathomlegal.com" target="_blank" rel="noopener noreferrer" className="text-sm sm:text-base hover:text-[#A5292A] transition-colors duration-300">assist@fathomlegal.com</a>
                   </div>
                 </div>
               </div>
@@ -552,7 +552,7 @@ export default function AboutUs() {
 
             {/* Contact Form */}
             <div className="bg-white/95 backdrop-blur-md p-6 rounded-lg shadow-2xl border border-white/30">
-              <h3 className="text-xl font-bold text-gray-800 mb-4">Contact Form</h3>
+              <h3 className="text-lg sm:text-xl md:text-xl font-bold text-gray-800 mb-4">Contact Form</h3>
               <form onSubmit={handleSubmit} className="space-y-3">
                 <div>
                   <input

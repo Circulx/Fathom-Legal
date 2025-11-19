@@ -81,10 +81,53 @@ The application can be deployed to any platform that supports Next.js:
 Create a `.env.local` file for environment variables:
 
 ```env
+# EmailJS Configuration
 NEXT_PUBLIC_EMAILJS_SERVICE_ID=your_service_id
 NEXT_PUBLIC_EMAILJS_TEMPLATE_ID=your_template_id
 NEXT_PUBLIC_EMAILJS_PUBLIC_KEY=your_public_key
+
+# Database Configuration
+MONGODB_URI=your_mongodb_connection_string
+
+# Razorpay Payment Gateway
+RAZORPAY_KEY_ID=your_razorpay_key_id
+RAZORPAY_KEY_SECRET=your_razorpay_key_secret
+RAZORPAY_WEBHOOK_SECRET=your_razorpay_webhook_secret
+
+# Google Cloud Storage (GCS) Configuration
+# Option 1: Use service account JSON file path
+GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account-key.json
+
+# Option 2: Use service account JSON as environment variable (for platforms like Vercel)
+# GOOGLE_SERVICE_ACCOUNT_JSON={"type":"service_account","project_id":"...","private_key_id":"...","private_key":"...","client_email":"...","client_id":"...","auth_uri":"...","token_uri":"...","auth_provider_x509_cert_url":"...","client_x509_cert_url":"..."}
+
+# GCS Bucket Name
+GCS_BUCKET_NAME=your-gcs-bucket-name
 ```
+
+### Google Cloud Storage Setup
+
+To enable PDF uploads to Google Cloud Storage:
+
+1. **Create a GCS Bucket:**
+   - Go to [Google Cloud Console](https://console.cloud.google.com/)
+   - Create a new bucket or use an existing one
+   - Note the bucket name
+
+2. **Create a Service Account:**
+   - Go to IAM & Admin > Service Accounts
+   - Create a new service account
+   - Grant it "Storage Object Admin" role for the bucket
+   - Create a JSON key and download it
+
+3. **Configure Environment Variables:**
+   - **Option A (Local Development):** Set `GOOGLE_APPLICATION_CREDENTIALS` to the path of your service account JSON file
+   - **Option B (Production/Cloud):** Set `GOOGLE_SERVICE_ACCOUNT_JSON` to the entire JSON content as a string (useful for platforms like Vercel)
+
+4. **Set Bucket Name:**
+   - Set `GCS_BUCKET_NAME` to your bucket name
+
+**Note:** If GCS is not configured, the system will automatically fall back to local file storage for backward compatibility.
 
 ## License
 

@@ -135,7 +135,7 @@ export default function ThoughtLeadership() {
       <Navbar page="thoughtleadership" />
 
        {/* Hero Section */}
-       <section className="py-20 relative overflow-hidden">
+       <section className="pt-28 pb-20 relative overflow-hidden">
         {/* Background Image */}
         <div
           className="absolute inset-0"
@@ -152,7 +152,7 @@ export default function ThoughtLeadership() {
         
         <div className="container mx-auto px-4 relative z-10">
           <div className="text-center max-w-4xl mx-auto">
-            <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6">
              <span style={{ color: '#A5292A' }}>Thought Leadership</span>
             </h1>
             
@@ -174,10 +174,10 @@ export default function ThoughtLeadership() {
       <section className="py-16 bg-white">
         <div className="container mx-auto px-8 lg:px-16 xl:px-24">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               Featured <span style={{ color: '#A5292A' }}>Photos</span>
             </h2>
-            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+            <p className="text-base sm:text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
               Explore our collection of featured photos showcasing our team, events, and achievements.
             </p>
           </div>
@@ -191,10 +191,10 @@ export default function ThoughtLeadership() {
               <div className="w-24 h-24 mx-auto mb-6 rounded-full flex items-center justify-center" style={{ backgroundColor: '#A5292A' }}>
                 <ExternalLink className="h-12 w-12 text-white" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              <h3 className="text-lg sm:text-xl md:text-xl font-semibold text-gray-900 mb-2">
                 No photos yet
               </h3>
-              <p className="text-gray-600">
+              <p className="text-sm sm:text-base text-gray-600">
                 Thought leadership photos will appear here once uploaded.
               </p>
             </div>
@@ -216,7 +216,7 @@ export default function ThoughtLeadership() {
                   {/* Overlay */}
                   <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all duration-300 flex items-end">
                     <div className="p-4 text-white transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-                      <h3 className="font-semibold text-sm mb-1 line-clamp-2">
+                      <h3 className="font-semibold text-xs sm:text-sm mb-1 line-clamp-2">
                         {photo.title}
                       </h3>
                       {photo.description && (
@@ -242,10 +242,10 @@ export default function ThoughtLeadership() {
       <section className="py-16 bg-gray-50">
         <div className="container mx-auto px-8 lg:px-16 xl:px-24">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               Latest <span style={{ color: '#A5292A' }}>Articles </span>
             </h2>
-            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+            <p className="text-base sm:text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
               Stay updated with our latest insights, interviews, and features across various legal publications and platforms.
             </p>
           </div>
@@ -259,10 +259,10 @@ export default function ThoughtLeadership() {
               <div className="w-24 h-24 mx-auto mb-6 rounded-full flex items-center justify-center" style={{ backgroundColor: '#A5292A' }}>
                 <ExternalLink className="h-12 w-12 text-white" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              <h3 className="text-lg sm:text-xl md:text-xl font-semibold text-gray-900 mb-2">
                 No articles yet
               </h3>
-              <p className="text-gray-600">
+              <p className="text-sm sm:text-base text-gray-600">
                 Articles and features will appear here once published.
               </p>
             </div>
@@ -307,11 +307,11 @@ export default function ThoughtLeadership() {
                       
                       {/* Content Section */}
                       <div className="w-full p-4 md:p-5">
-                        <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2">
+                        <h3 className="text-base sm:text-lg md:text-lg font-bold text-gray-900 mb-2 line-clamp-2">
                           {blog.title}
                         </h3>
                         
-                        <p className="text-xs text-blue-600 mb-2">
+                        <p className="text-xs sm:text-xs text-blue-600 mb-2">
                           POSTED ON {new Date(blog.createdAt).toLocaleDateString('en-US', { 
                             year: 'numeric', 
                             month: 'long', 
@@ -319,11 +319,11 @@ export default function ThoughtLeadership() {
                           }).toUpperCase()}
                         </p>
                         
-                        <p className="text-gray-700 text-sm leading-relaxed mb-3 line-clamp-2">
+                        <p className="text-gray-700 text-xs sm:text-sm md:text-base leading-relaxed mb-3 line-clamp-2">
                           {blog.description}
                         </p>
                         
-                        <button className="inline-flex items-center px-3 py-1.5 border border-gray-300 bg-white text-gray-700 text-xs font-medium hover:bg-gray-50 transition-colors">
+                        <button className="inline-flex items-center px-3 py-1.5 border border-gray-300 bg-white text-gray-700 text-xs sm:text-sm font-medium hover:bg-gray-50 transition-colors">
                           CONTINUE READING →
                         </button>
                       </div>
@@ -374,7 +374,7 @@ export default function ThoughtLeadership() {
 
               {/* Page Info */}
               {blogTotal > 0 && (
-                <div className="mt-4 text-center text-sm text-gray-600">
+                <div className="mt-4 text-center text-xs sm:text-sm text-gray-600">
                   Showing page {blogCurrentPage} of {blogTotalPages} ({blogTotal} total articles)
                 </div>
               )}

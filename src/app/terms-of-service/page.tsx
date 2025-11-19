@@ -12,7 +12,7 @@ export default function TermsOfService() {
 
       {/* Hero Section */}
       <section
-        className="text-gray-800 py-20 relative"
+        className="text-gray-800 pt-28 pb-20 relative"
         style={{ backgroundColor: "#FAFAFA" }}
       >
         {/* Background Image Layer with Blur */}

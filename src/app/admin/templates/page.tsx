@@ -44,7 +44,9 @@ export default function TemplatesPage() {
     description: '',
     category: 'Legal Documents',
     tags: '',
-    file: null as File | null
+    price: '',
+    image: null as File | null,
+    pdfFile: null as File | null
   })
 
   useEffect(() => {
@@ -73,18 +75,35 @@ export default function TemplatesPage() {
     }
   }
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
-      setUploadForm(prev => ({ ...prev, file }))
+      setUploadForm(prev => ({ ...prev, image: file }))
+    }
+  }
+
+  const handlePdfChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      setUploadForm(prev => ({ ...prev, pdfFile: file }))
     }
   }
 
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    if (!uploadForm.file) {
-      alert('Please select a file')
+    if (!uploadForm.image) {
+      alert('Please select a preview image')
+      return
+    }
+
+    if (!uploadForm.pdfFile) {
+      alert('Please select a PDF template file')
+      return
+    }
+
+    if (!uploadForm.price) {
+      alert('Please enter a price')
       return
     }
 
@@ -92,11 +111,13 @@ export default function TemplatesPage() {
       setUploading(true)
       
       const formData = new FormData()
-      formData.append('file', uploadForm.file)
+      formData.append('image', uploadForm.image)
+      formData.append('pdfFile', uploadForm.pdfFile)
       formData.append('title', uploadForm.title)
       formData.append('description', uploadForm.description)
       formData.append('category', uploadForm.category)
       formData.append('tags', uploadForm.tags)
+      formData.append('price', uploadForm.price)
       formData.append('uploadedBy', 'admin') // You can get this from session
 
       const response = await fetch('/api/admin/templates/upload', {
@@ -114,7 +135,9 @@ export default function TemplatesPage() {
           description: '',
           category: 'Legal Documents',
           tags: '',
-          file: null
+          price: '',
+          image: null,
+          pdfFile: null
         })
         fetchTemplates()
       } else {
@@ -346,6 +369,22 @@ export default function TemplatesPage() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Price (₹) *
+                  </label>
+                  <input
+                    type="number"
+                    required
+                    value={uploadForm.price}
+                    onChange={(e) => setUploadForm(prev => ({ ...prev, price: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                    placeholder="0"
+                    min="0"
+                    step="0.01"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     Tags (comma-separated)
                   </label>
                   <input
@@ -359,17 +398,33 @@ export default function TemplatesPage() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    File *
+                    Preview Image *
                   </label>
                   <input
                     type="file"
                     required
-                    onChange={handleFileChange}
-                    accept=".pdf,.doc,.docx,.txt"
+                    onChange={handleImageChange}
+                    accept="image/*"
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
                   />
                   <p className="text-xs text-gray-500 mt-1">
-                    Supported formats: PDF, DOC, DOCX, TXT (Max 10MB)
+                    Upload a preview image for your template (Max 5MB)
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    PDF Template File *
+                  </label>
+                  <input
+                    type="file"
+                    required
+                    onChange={handlePdfChange}
+                    accept=".pdf"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Upload the PDF template file (Max 50MB). This file will be hidden from buyers until purchase.
                   </p>
                 </div>
 
@@ -397,6 +452,8 @@ export default function TemplatesPage() {
     </div>
   )
 }
+
+
 
 
 

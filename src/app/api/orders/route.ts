@@ -9,13 +9,47 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { customer, items, subtotal, total, paymentMethod } = body
 
+    console.log('📦 Creating order with data:', {
+      customer: customer ? { name: customer.name, email: customer.email } : null,
+      itemsCount: items?.length,
+      subtotal,
+      total,
+      paymentMethod
+    })
+
     // Validate required fields
     if (!customer || !items || !subtotal || !total || !paymentMethod) {
+      console.error('❌ Missing required fields:', {
+        hasCustomer: !!customer,
+        hasItems: !!items,
+        hasSubtotal: subtotal !== undefined,
+        hasTotal: total !== undefined,
+        hasPaymentMethod: !!paymentMethod
+      })
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
       )
     }
+
+    // Validate customer fields
+    if (!customer.name || !customer.email || !customer.phone || !customer.address || !customer.city || !customer.state || !customer.pincode) {
+      console.error('❌ Invalid customer data:', customer)
+      return NextResponse.json(
+        { error: 'Invalid customer information' },
+        { status: 400 }
+      )
+    }
+
+    console.log('✅ Customer data validated:', {
+      name: customer.name,
+      email: customer.email,
+      phone: customer.phone,
+      address: customer.address,
+      city: customer.city,
+      state: customer.state,
+      pincode: customer.pincode
+    })
 
     // Create new order
     const order = new Order({
@@ -30,6 +64,14 @@ export async function POST(request: NextRequest) {
 
     await order.save()
 
+    console.log('✅ Order created successfully:', {
+      id: order._id,
+      orderNumber: order.orderNumber,
+      customer: order.customer, // Log the saved customer data
+      customerName: order.customer?.name,
+      customerEmail: order.customer?.email
+    })
+
     return NextResponse.json({
       success: true,
       order: {
@@ -40,10 +82,18 @@ export async function POST(request: NextRequest) {
       }
     })
 
-  } catch (error) {
-    console.error('Error creating order:', error)
+  } catch (error: any) {
+    console.error('❌ Error creating order:', error)
+    console.error('Error details:', {
+      message: error.message,
+      name: error.name,
+      stack: error.stack
+    })
     return NextResponse.json(
-      { error: 'Failed to create order' },
+      { 
+        error: 'Failed to create order',
+        details: process.env.NODE_ENV === 'development' ? error.message : undefined
+      },
       { status: 500 }
     )
   }
@@ -54,8 +104,24 @@ export async function GET(request: NextRequest) {
     await connectDB()
     
     const { searchParams } = new URL(request.url)
+    const orderId = searchParams.get('orderId')
     const orderNumber = searchParams.get('orderNumber')
     const email = searchParams.get('email')
+
+    // If orderId is provided, fetch single order
+    if (orderId) {
+      const order = await Order.findById(orderId)
+      if (!order) {
+        return NextResponse.json(
+          { error: 'Order not found' },
+          { status: 404 }
+        )
+      }
+      return NextResponse.json({
+        success: true,
+        order
+      })
+    }
 
     let query = {}
     

@@ -19,43 +19,59 @@ import {
   ArrowRight,
   Star,
   ChevronRight,
+  Briefcase,
+  Rocket,
+  Heart,
+  Globe,
 } from "lucide-react";
 import emailjs from '@emailjs/browser';
 
 // Custom hook for scroll animations
 const useScrollAnimation = (delay = 0) => {
   const [isVisible, setIsVisible] = useState(false);
-  const ref = useRef(null);
+  const ref = useRef<HTMLElement>(null);
+  const hasAnimated = useRef(false);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
+        if (entry.isIntersecting && !hasAnimated.current) {
           setTimeout(() => {
             setIsVisible(true);
+            hasAnimated.current = true;
           }, delay);
-        } else {
-          setIsVisible(false);
         }
       },
       {
-        threshold: 0.15,
-        rootMargin: '0px 0px -100px 0px'
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
       }
     );
 
-    if (ref.current) {
-      observer.observe(ref.current);
+    const currentRef = ref.current;
+    if (currentRef) {
+      // Check if element is already visible on mount
+      const rect = currentRef.getBoundingClientRect();
+      const isAlreadyVisible = rect.top < window.innerHeight && rect.bottom > 0;
+      
+      if (isAlreadyVisible && !hasAnimated.current) {
+        setTimeout(() => {
+          setIsVisible(true);
+          hasAnimated.current = true;
+        }, delay);
+      } else {
+        observer.observe(currentRef);
+      }
     }
 
     return () => {
-      if (ref.current) {
-        observer.unobserve(ref.current);
+      if (currentRef) {
+        observer.unobserve(currentRef);
       }
     };
   }, [delay]);
 
-  return [ref, isVisible];
+  return [ref, isVisible] as const;
 };
 
 const DisclaimerPopup = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
@@ -109,7 +125,14 @@ export default function Home() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState('');
   
-  // Scroll animation hooks removed
+  // Scroll animation hooks for sections
+  const [servicesRef, servicesVisible] = useScrollAnimation(0);
+  const [whyChooseUsRef, whyChooseUsVisible] = useScrollAnimation(100);
+  const [trackRecordRef, trackRecordVisible] = useScrollAnimation(200);
+  const [featuredContentRef, featuredContentVisible] = useScrollAnimation(100);
+  const [testimonialsRef, testimonialsVisible] = useScrollAnimation(100);
+  const [contactRef, contactVisible] = useScrollAnimation(100);
+  
   const [counters, setCounters] = useState({
     years: 0,
     cases: 0,
@@ -315,7 +338,7 @@ export default function Home() {
       {/* Hero Section */}
       <section
         id="home"
-        className="min-h-screen flex flex-col lg:flex-row relative"
+        className="min-h-screen flex flex-col lg:flex-row relative pt-20"
       >
         {/* Full Screen Background Image */}
         <div
@@ -326,6 +349,7 @@ export default function Home() {
             backgroundPosition: "center",
             backgroundRepeat: "no-repeat",
             backgroundAttachment: "fixed",
+            backgroundColor: "#1a1a1a", // Dark fallback color if image doesn't load
           }}
         ></div>
         
@@ -485,7 +509,7 @@ export default function Home() {
       </section>
 
       {/* Services Section */}
-      <section id="services" className="py-20 bg-gray-100">
+      <section id="services" ref={servicesRef} className={`py-20 bg-gray-100 transition-all duration-1000 ${servicesVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
   <div className="container mx-auto px-4">
      <div className="mb-16">
       {/* Two Column Layout: Heading on Left, Description on Right */}
@@ -509,7 +533,8 @@ export default function Home() {
       {services.map((service, index) => (
          <div
            key={index}
-           className="relative h-80 rounded-xl overflow-hidden group cursor-pointer"
+           className={`relative h-80 rounded-xl overflow-hidden group cursor-pointer transition-all duration-700 ${servicesVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
+           style={{ transitionDelay: `${index * 100}ms` }}
          >
           {/* Background Image */}
           <div
@@ -536,14 +561,14 @@ export default function Home() {
                <div className="text-[#A5292A] mb-4 hover:text-[white] ">
                  {service.icon}
                </div>
-               <h3 className="text-2xl font-bold text-white text-center ">
+               <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-white text-center ">
                  {service.title}
                </h3>
              </div>
 
              {/* Description and Learn More Button */}
              <div className="relative z-10">
-               <p className="text-white text-sm mb-4 leading-relaxed">
+               <p className="text-white text-xs sm:text-sm md:text-base mb-4 leading-relaxed">
                  {service.description}
                </p>
                <Link
@@ -561,51 +586,69 @@ export default function Home() {
 </section>
 
       {/* Why Choose Us Section */}
-      <section className="py-10 bg-white">
-        <div className="container mx-auto">
-          <div className="text-center mb-16 ">
-            <h2 className="text-3xl text-black md:text-4xl font-bold mb-2" >
-              <span style={{ color: "#A5292A" }}>Why</span> Choose Us?
-            </h2>
-          </div>
+      <section id="services" ref={whyChooseUsRef} className={`py-20 bg-white transition-all duration-1000 ${whyChooseUsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+  <div className="container mx-auto px-4">
+     <div className="mb-16">
+      {/* Two Column Layout: Heading on Left, Description on Right */}
+      <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 lg:gap-8 mb-6">
+        {/* Left Column: Subtitle and Heading */}
+        <div className="flex-1 w-full lg:w-auto">
+          <p className="text-xs sm:text-sm font-medium text-black uppercase mb-2 lg:mb-3 px-4 sm:px-0 lg:ml-20">WHY CHOOSE US?</p>
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold px-4 sm:px-0 lg:ml-20">
+            <span style={{ color: "black" }}>What Sets Us </span> <span style={{ color: "#A5292A" }}>Apart?</span>
+          </h2>
+        </div>
+        
+        {/* Right Column: Contact Us Button */}
+        <div className="flex justify-end px-4 sm:px-0 lg:mr-20">
+          <Link
+            href="/contact"
+            className="flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 bg-[#A5292A] text-white font-semibold rounded-lg hover:bg-[white] hover:text-[#A5292A] transition-all duration-300 group text-sm sm:text-base shadow-md hover:shadow-lg"
+          >
+            Contact Us
+            <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+          </Link>
+        </div>
+      </div>
+    </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-2 gap-8 px-4 sm:px-8 md:px-12 lg:px-20">
-            <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100 transition-all duration-500 ease-out hover:shadow-lg hover:-translate-y-2 hover:border-[#A5292A] group cursor-pointer">
+            <div className={`bg-white p-8 rounded-xl shadow-sm border border-gray-100 transition-all duration-700 ease-out hover:shadow-lg hover:-translate-y-2 hover:border-[#A5292A] group cursor-pointer ${whyChooseUsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`} style={{ transitionDelay: '0ms' }}>
               <div className="flex items-center mb-4">
-                <ArrowRight className="w-6 h-6 mr-3 group-hover:translate-x-1 transition-transform duration-300" style={{ color: "#A5292A" }} />
-                <h3 className="text-xl font-bold text-gray-800 group-hover:text-[#A5292A] transition-colors duration-300">Expert Legal Team</h3>
+                <Briefcase className="w-6 h-6 mr-3 group-hover:scale-110 transition-transform duration-300" style={{ color: "#A5292A" }} />
+                <h3 className="text-lg sm:text-xl md:text-xl font-bold text-gray-800 group-hover:text-[#A5292A] transition-colors duration-300">Expert Legal Team</h3>
               </div>
-              <p className="text-gray-600 leading-relaxed group-hover:text-gray-700 transition-colors duration-300">
+              <p className="text-sm sm:text-base text-gray-600 leading-relaxed group-hover:text-gray-700 transition-colors duration-300">
                 Our dedicated team of experienced legal professionals brings decades of combined expertise in corporate law, startup advisory, and dispute resolution to deliver exceptional results for our clients.
               </p>
             </div>
 
-            <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100 transition-all duration-500 ease-out hover:shadow-lg hover:-translate-y-2 hover:border-[#A5292A] group cursor-pointer">
+            <div className={`bg-white p-8 rounded-xl shadow-sm border border-gray-100 transition-all duration-700 ease-out hover:shadow-lg hover:-translate-y-2 hover:border-[#A5292A] group cursor-pointer ${whyChooseUsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`} style={{ transitionDelay: '100ms' }}>
               <div className="flex items-center mb-4">
-                <ArrowRight className="w-6 h-6 mr-3 group-hover:translate-x-1 transition-transform duration-300" style={{ color: "#A5292A" }} />
-                <h3 className="text-xl font-bold text-gray-800 group-hover:text-[#A5292A] transition-colors duration-300">Startup Specialization</h3>
+                <Rocket className="w-6 h-6 mr-3 group-hover:scale-110 transition-transform duration-300" style={{ color: "#A5292A" }} />
+                <h3 className="text-lg sm:text-xl md:text-xl font-bold text-gray-800 group-hover:text-[#A5292A] transition-colors duration-300">Startup Specialization</h3>
               </div>
-              <p className="text-gray-600 leading-relaxed group-hover:text-gray-700 transition-colors duration-300">
+              <p className="text-sm sm:text-base text-gray-600 leading-relaxed group-hover:text-gray-700 transition-colors duration-300">
                 We specialize in the startup ecosystem, providing tailored legal solutions for emerging businesses, from incorporation and funding to growth strategies and compliance management.
               </p>
             </div>
 
-            <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100 transition-all duration-500 ease-out hover:shadow-lg hover:-translate-y-2 hover:border-[#A5292A] group cursor-pointer">
+            <div className={`bg-white p-8 rounded-xl shadow-sm border border-gray-100 transition-all duration-700 ease-out hover:shadow-lg hover:-translate-y-2 hover:border-[#A5292A] group cursor-pointer ${whyChooseUsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`} style={{ transitionDelay: '200ms' }}>
               <div className="flex items-center mb-4">
-                <ArrowRight className="w-6 h-6 mr-3 group-hover:translate-x-1 transition-transform duration-300" style={{ color: "#A5292A" }} />
-                <h3 className="text-xl font-bold text-gray-800 group-hover:text-[#A5292A] transition-colors duration-300">Client-Focused Approach</h3>
+                <Heart className="w-6 h-6 mr-3 group-hover:scale-110 transition-transform duration-300" style={{ color: "#A5292A" }} />
+                <h3 className="text-lg sm:text-xl md:text-xl font-bold text-gray-800 group-hover:text-[#A5292A] transition-colors duration-300">Client-Focused Approach</h3>
               </div>
-              <p className="text-gray-600 leading-relaxed group-hover:text-gray-700 transition-colors duration-300">
+              <p className="text-sm sm:text-base text-gray-600 leading-relaxed group-hover:text-gray-700 transition-colors duration-300">
                 We prioritize our clients' success with a personalized approach, ethical governance, and transparent communication throughout every legal matter we handle.
               </p>
             </div>
 
-            <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100 transition-all duration-500 ease-out hover:shadow-lg hover:-translate-y-2 hover:border-[#A5292A] group cursor-pointer">
+            <div className={`bg-white p-8 rounded-xl shadow-sm border border-gray-100 transition-all duration-700 ease-out hover:shadow-lg hover:-translate-y-2 hover:border-[#A5292A] group cursor-pointer ${whyChooseUsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`} style={{ transitionDelay: '300ms' }}>
               <div className="flex items-center mb-4">
-                <ArrowRight className="w-6 h-6 mr-3 group-hover:translate-x-1 transition-transform duration-300" style={{ color: "#A5292A" }} />
-                <h3 className="text-xl font-bold text-gray-800 group-hover:text-[#A5292A] transition-colors duration-300">Global Reach</h3>
+                <Globe className="w-6 h-6 mr-3 group-hover:scale-110 transition-transform duration-300" style={{ color: "#A5292A" }} />
+                <h3 className="text-lg sm:text-xl md:text-xl font-bold text-gray-800 group-hover:text-[#A5292A] transition-colors duration-300">Global Reach</h3>
               </div>
-              <p className="text-gray-600 leading-relaxed group-hover:text-gray-700 transition-colors duration-300">
+              <p className="text-sm sm:text-base text-gray-600 leading-relaxed group-hover:text-gray-700 transition-colors duration-300">
                 With nationwide and international service delivery capabilities, we provide comprehensive legal support to clients across diverse practice areas and industry verticals.
               </p>
             </div>
@@ -614,7 +657,7 @@ export default function Home() {
       </section>
 
       {/* Track Record Section */}
-      <section id="track-record" className="py-16 relative overflow-hidden">
+      <section id="track-record" ref={trackRecordRef} className={`py-16 relative overflow-hidden transition-all duration-1000 ${trackRecordVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
         {/* Background Image */}
         <div
           className="absolute inset-0"
@@ -627,7 +670,7 @@ export default function Home() {
         ></div>
         
         {/* Dark Overlay */}
-        <div className="absolute inset-0 bg-black/65"></div>
+        <div className="absolute inset-0 bg-black/50"></div>
         
         {/* Content */}
         <div className="relative z-10 w-full px-4">
@@ -693,17 +736,36 @@ export default function Home() {
       </section>
 
       {/* Featured Content */}
-      <section className="py-16 bg-black">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-white mb-4">
-              <span style={{ color: "#A5292A" }}>Featured</span> Content
-            </h2>
-            <p className="text-lg text-left text-white max-w-2xl mx-auto">
-              Discover our latest webinars, interviews, and featured articles that highlight 
-              our expertise in immigration law, startup support, and corporate legal services.
-            </p>
-          </div>
+      <section id="services" ref={featuredContentRef} className={`py-20 bg-black transition-all duration-1000 ${featuredContentVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+  <div className="container mx-auto px-4">
+     <div className="mb-16">
+      {/* Two Column Layout: Heading on Left, Description on Right */}
+      <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 lg:gap-8 mb-6">
+        {/* Left Column: Subtitle and Heading */}
+        <div className="flex-1 w-full lg:w-auto">
+          
+          <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold px-4 sm:px-0 lg:ml-20">
+            <span style={{ color: "white" }}>Featured</span> <span style={{ color: "#A5292A" }}>Content</span>
+          </h2>
+        </div>
+        
+        {/* Right Column: Description */}
+        <p className="text-sm sm:text-base text-white max-w-3xl px-4 sm:px-0 lg:mr-6">
+        Discover our latest webinars, interviews, and featured articles that highlight our expertise in immigration law, startup support, and corporate legal services.
+        </p>
+      </div>
+    </div>
+
+
+
+
+
+
+
+
+
+
+
           
           {/* Featured Content Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-4 sm:px-8 md:px-12 lg:px-20">
@@ -712,7 +774,8 @@ export default function Home() {
               href="https://www.lawctopus.com/webinar-fathom-legal/"
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-white rounded-lg shadow-md hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer overflow-hidden border border-gray-100"
+              className={`bg-white rounded-lg shadow-md hover:shadow-xl transition-all duration-700 hover:scale-105 cursor-pointer overflow-hidden border border-gray-100 ${featuredContentVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
+              style={{ transitionDelay: '0ms' }}
             >
               {/* Image/Visual Section */}
               <div className="h-48 relative overflow-hidden">
@@ -730,15 +793,15 @@ export default function Home() {
               
               {/* Content Section */}
               <div className="p-6">
-                <h3 className="text-lg font-semibold text-gray-800 mb-3 leading-tight">
+                <h3 className="text-base sm:text-lg md:text-lg font-semibold text-gray-800 mb-3 leading-tight">
                   Behind the Scenes: Building International Legal Careers with Immigration Law Expertise
                 </h3>
-                <div className="flex items-center text-sm text-gray-500 mb-4">
+                <div className="flex items-center text-xs sm:text-sm text-gray-500 mb-4">
                   <span className="font-medium">Fathom Legal Team</span>
                   <span className="mx-2">•</span>
                   <span>15 minute read</span>
                 </div>
-                <p className="text-gray-600 text-sm leading-relaxed">
+                <p className="text-gray-600 text-xs sm:text-sm md:text-base leading-relaxed">
                   Featured on Lawctopus: "How to Build an International Career as an Immigration Lawyer in the USA"
                 </p>
               </div>
@@ -749,7 +812,8 @@ export default function Home() {
               href="https://superlawyer.in/witness-ishitas-unique-approach-to-supporting-startups-smes-and-smbs-where-legal-challenges-are-met-with-a-combination-of-intersectional-learning-and-on-site-visits-to-comprehend-the-intricacies"
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-white rounded-lg shadow-md hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer overflow-hidden border border-gray-100"
+              className={`bg-white rounded-lg shadow-md hover:shadow-xl transition-all duration-700 hover:scale-105 cursor-pointer overflow-hidden border border-gray-100 ${featuredContentVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
+              style={{ transitionDelay: '100ms' }}
             >
               {/* Image/Visual Section */}
               <div className="h-48 relative overflow-hidden">
@@ -767,15 +831,15 @@ export default function Home() {
               
               {/* Content Section */}
               <div className="p-6">
-                <h3 className="text-lg font-semibold text-gray-800 mb-3 leading-tight">
+                <h3 className="text-base sm:text-lg md:text-lg font-semibold text-gray-800 mb-3 leading-tight">
                   Enhancing Startup Success Through Unique Legal Support and On-Site Visits
                 </h3>
-                <div className="flex items-center text-sm text-gray-500 mb-4">
+                <div className="flex items-center text-xs sm:text-sm text-gray-500 mb-4">
                   <span className="font-medium">Ishita Sharma</span>
                   <span className="mx-2">•</span>
                   <span>8 minute read</span>
                 </div>
-                <p className="text-gray-600 text-sm leading-relaxed">
+                <p className="text-gray-600 text-xs sm:text-sm md:text-base leading-relaxed">
                   SuperLawyer interview featuring our unique approach to supporting startups, SMEs, and SMBs
                 </p>
               </div>
@@ -786,7 +850,8 @@ export default function Home() {
               href="https://businessconnectindia.in/fathom-legal-advocates-corporate/"
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-white rounded-lg shadow-md hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer overflow-hidden border border-gray-100"
+              className={`bg-white rounded-lg shadow-md hover:shadow-xl transition-all duration-700 hover:scale-105 cursor-pointer overflow-hidden border border-gray-100 ${featuredContentVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
+              style={{ transitionDelay: '200ms' }}
             >
                {/* Image/Visual Section */}
                <div className="h-48 relative overflow-hidden">
@@ -804,15 +869,15 @@ export default function Home() {
               
               {/* Content Section */}
               <div className="p-6">
-                <h3 className="text-lg font-semibold text-gray-800 mb-3 leading-tight">
+                <h3 className="text-base sm:text-lg md:text-lg font-semibold text-gray-800 mb-3 leading-tight">
                   Corporate Legal Excellence: Comprehensive Services for Modern Businesses
                 </h3>
-                <div className="flex items-center text-sm text-gray-500 mb-4">
+                <div className="flex items-center text-xs sm:text-sm text-gray-500 mb-4">
                   <span className="font-medium">Fathom Legal</span>
                   <span className="mx-2">•</span>
                   <span>6 minute read</span>
                 </div>
-                <p className="text-gray-600 text-sm leading-relaxed">
+                <p className="text-gray-600 text-xs sm:text-sm md:text-base leading-relaxed">
                   Featured on Business Connect India showcasing our corporate legal expertise and services
                 </p>
               </div>
@@ -822,13 +887,13 @@ export default function Home() {
       </section>
 
       {/* Testimonials */}
-      <section id="testimonials" className="py-20 bg-white overflow-hidden">
+      <section id="testimonials" ref={testimonialsRef} className={`py-20 bg-white overflow-hidden transition-all duration-1000 ${testimonialsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-6">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-800 mb-6">
               The <span style={{ color: "#A5292A" }}>Trust</span> we earned
             </h2>
-            <p className="text-xl md:text-2xl text-[#A5292A]">
+            <p className="text-lg sm:text-xl md:text-2xl text-[#A5292A]">
               What our clients say about our legal services
             </p>
           </div>
@@ -892,7 +957,8 @@ export default function Home() {
       {/* Contact Section */}
       <section 
         id="contact" 
-        className="py-12 relative overflow-hidden"
+        ref={contactRef}
+        className={`py-12 relative overflow-hidden transition-all duration-1000 ${contactVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
         style={{
           backgroundImage: `url('/contactusbg.jpg')`,
           backgroundSize: "cover",
@@ -902,7 +968,7 @@ export default function Home() {
         }}
       >
         {/* Black Background Overlay */}
-        <div className="absolute inset-0 bg-black/60"></div>
+        <div className="absolute inset-0 bg-black/40"></div>
         
         {/* Gradient Overlay */}
         <div className="absolute inset-0 bg-gradient-to-br from-black/60 via-gray-900/50 to-black/70"></div>

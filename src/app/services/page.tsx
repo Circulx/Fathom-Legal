@@ -197,7 +197,7 @@ export default function Services() {
 
       {/* Hero Section with Services Catalogue */}
       <section
-        className="text-white py-20 relative"
+        className="text-white pt-28 pb-20 relative"
         style={{ minHeight: "70vh" }}
       >
         {/* Background Image Layer */}
@@ -220,13 +220,8 @@ export default function Services() {
         <div className="container mx-auto px-4 relative z-10">
           {/* Hero Content */}
           <div className="text-center mb-16">
-            <p
-              className="text-lg font-semibold mb-4 text-white"
-              style={{ color: "#A5292A" }}
-            >
-              END-TO-END
-            </p>
-            <h1 className="text-4xl md:text-5xl font-bold mb-8 text-white">
+           
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-8 text-white">
               Legal Solutions,{" "}
               <span style={{ color: "#A5292A" }}>Tailored for You</span>
             </h1>
@@ -253,10 +248,10 @@ export default function Services() {
                   <div className="text-[#A5292A] mb-6 group-hover:opacity-80 transition-opacity">
                     {service.icon}
                   </div>
-                  <h3 className="text-xl font-semibold text-gray-800 mb-4">
+                  <h3 className="text-lg sm:text-xl md:text-xl font-semibold text-gray-800 mb-4">
                     {service.title}
                   </h3>
-                  <p className="text-gray-600 mb-6 leading-relaxed">
+                  <p className="text-sm sm:text-base text-gray-600 mb-6 leading-relaxed">
                     {service.description}
                   </p>
                   <button className="text-[#A5292A] font-semibold hover:opacity-80 flex items-center group-hover:translate-x-1 transition-transform">
@@ -275,16 +270,16 @@ export default function Services() {
           <div className="grid lg:grid-cols-2 gap-12 items-center px-4 sm:px-8 md:px-12 lg:px-20">
             <div>
               <p
-                className="text-3xl font-semibold mb-2"
+                className="text-2xl sm:text-3xl md:text-4xl font-semibold mb-2"
                 style={{ color: "#A5292A" }}
               >
                 Stress-Free Legal Solutions
               </p>
-              <h2 className="text-2xl font-bold text-gray-800 mb-6">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 mb-6">
                 from start to finish
               </h2>
 
-              <p className="text-base text-gray-800 mb-8 leading-relaxed">
+              <p className="text-sm sm:text-base md:text-lg text-gray-800 mb-8 leading-relaxed">
                 At Fathom Legal, we handle all your legal needs with precision
                 and care. Our team of experts provides end-to-end solutions,
                 ensuring your business thrives in a complex legal landscape.
@@ -305,7 +300,7 @@ export default function Services() {
                     className="w-2 h-2 rounded-full mr-4"
                     style={{ backgroundColor: "#A5292A" }}
                   ></div>
-                  <span className="text-gray-700 font-medium">
+                  <span className="text-sm sm:text-base text-gray-700 font-medium">
                     8+ Years of Collective Experience
                   </span>
                 </div>
@@ -314,7 +309,7 @@ export default function Services() {
                     className="w-2 h-2 rounded-full mr-4"
                     style={{ backgroundColor: "#A5292A" }}
                   ></div>
-                  <span className="text-gray-700 font-medium">
+                  <span className="text-sm sm:text-base text-gray-700 font-medium">
                     Personalized Legal Strategies
                   </span>
                 </div>
@@ -323,7 +318,7 @@ export default function Services() {
                     className="w-2 h-2 rounded-full mr-4"
                     style={{ backgroundColor: "#A5292A" }}
                   ></div>
-                  <span className="text-gray-700 font-medium">
+                  <span className="text-sm sm:text-base text-gray-700 font-medium">
                     Full Confidentiality and Safety
                   </span>
                 </div>
@@ -332,7 +327,7 @@ export default function Services() {
                     className="w-2 h-2 rounded-full mr-4"
                     style={{ backgroundColor: "#A5292A" }}
                   ></div>
-                  <span className="text-gray-700 font-medium">
+                  <span className="text-sm sm:text-base text-gray-700 font-medium">
                     24/7 Expert Assistance
                   </span>
                 </div>
@@ -360,10 +355,10 @@ export default function Services() {
       <section id="testimonials" className="py-20 bg-white overflow-hidden">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-6">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-800 mb-6">
               The <span style={{ color: "#A5292A" }}>Trust</span> we earned
             </h2>
-            <p className="text-xl md:text-2xl text-[#A5292A]">
+            <p className="text-lg sm:text-xl md:text-2xl text-[#A5292A]">
               What our clients say about our legal services
             </p>
           </div>

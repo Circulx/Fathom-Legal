@@ -84,7 +84,7 @@ export default function ValueBoostingSolutions() {
 
       {/* Hero Section */}
       <section
-        className="text-white py-20 relative"
+        className="text-white pt-28 pb-20 relative"
         style={{ minHeight: "70vh" }}
       >
         {/* Background Image Layer */}

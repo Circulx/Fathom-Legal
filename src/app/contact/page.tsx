@@ -107,7 +107,7 @@ export default function Contact() {
     <div className="min-h-screen bg-white">
       <Navbar page="contact" />
        {/* Hero Section */}
-       <section className="py-20 relative overflow-hidden">
+       <section className="pt-28 pb-20 relative overflow-hidden">
         {/* Background Image */}
         <div
           className="absolute inset-0"
@@ -124,10 +124,10 @@ export default function Contact() {
         
         <div className="container mx-auto px-4 relative z-10">
           <div className="text-center max-w-4xl mx-auto">
-            <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6">
               <span style={{ color: '#A5292A' }}>Contact </span> Us
             </h1>
-            <p className="text-lg text-white/90 mb-8">We're here to assist you with any legal queries or challenges you might face. At <span style={{ color: '#A5292A' }}>Fathom Legal</span>, your legal needs are our top priority.
+            <p className="text-base sm:text-lg md:text-xl text-white/90 mb-8">We're here to assist you with any legal queries or challenges you might face. At <span style={{ color: '#A5292A' }}>Fathom Legal</span>, your legal needs are our top priority.
             Get in touch with us to discover how we can help you navigate the complexities of the legal landscape with confidence and clarity.</p>
           </div>
           {/* Breadcrumb */}
@@ -150,10 +150,10 @@ export default function Contact() {
               {/* Left Side - Contact Information */}
               <div className="bg-gray-50 p-8 rounded-xl">
                 <div className="mb-8">
-                  <h2 className="text-3xl font-bold mb-2 text-gray-800">
+                  <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2 text-gray-800">
                     <span className="text-[#A5292A]">Get in</span> Touch with Us!
                   </h2>
-                  <p className="text-gray-600 text-lg">
+                  <p className="text-base sm:text-lg md:text-xl text-gray-600">
                     Let our experience pave the path to your success.
                   </p>
                 </div>
@@ -162,24 +162,24 @@ export default function Contact() {
                 <div className="space-y-6">
                   {offices.map((office, index) => (
                     <div key={index} className="bg-white p-6 rounded-lg shadow-sm">
-                      <h3 className="text-lg font-bold text-[#A5292A] mb-3">
+                      <h3 className="text-base sm:text-lg md:text-lg font-bold text-[#A5292A] mb-3">
                         {office.title}
                       </h3>
                       <div className="space-y-2">
                         <div className="flex items-start">
                           <MapPin className="w-4 h-4 text-gray-500 mr-2 mt-1 flex-shrink-0" />
-                          <p className="text-gray-600 text-sm">{office.address}</p>
+                          <p className="text-xs sm:text-sm md:text-base text-gray-600">{office.address}</p>
                         </div>
                         {office.phone && (
                           <div className="flex items-center">
                             <Phone className="w-4 h-4 text-gray-500 mr-2" />
-                            <p className="text-gray-600 text-sm">{office.phone}</p>
+                            <p className="text-xs sm:text-sm md:text-base text-gray-600">{office.phone}</p>
                           </div>
                         )}
                         {office.email && (
                           <div className="flex items-center">
                             <Mail className="w-4 h-4 text-gray-500 mr-2" />
-                            <p className="text-gray-600 text-sm">{office.email}</p>
+                            <p className="text-xs sm:text-sm md:text-base text-gray-600">{office.email}</p>
                           </div>
                         )}
                       </div>
@@ -190,7 +190,7 @@ export default function Contact() {
 
               {/* Right Side - Contact Form */}
               <div className="bg-white p-8 rounded-xl shadow-lg">
-                <h3 className="text-2xl font-bold text-gray-800 mb-6">
+                <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 mb-6">
                   Send us a <span className="text-[#A5292A]">Message</span>
                 </h3>
                 
@@ -199,10 +199,10 @@ export default function Contact() {
                     <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
                       <CheckCircle className="w-8 h-8 text-green-600" />
                     </div>
-                    <h3 className="text-xl font-semibold text-gray-800 mb-2">
+                    <h3 className="text-lg sm:text-xl md:text-xl font-semibold text-gray-800 mb-2">
                       Message Sent Successfully!
                     </h3>
-                    <p className="text-gray-600 text-sm">
+                    <p className="text-sm sm:text-base text-gray-600">
                       Thank you for contacting us. We'll get back to you within 24 hours.
                     </p>
                   </div>

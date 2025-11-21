@@ -27,26 +27,33 @@ const Footer = () => {
           <div>
             <h4 className="text-lg font-semibold mb-2 text-white">Services</h4>
             <ul className="space-y-2 text-gray-300 text-sm">
-              <li>
-                <a href="#" className="hover:text-white transition-colors">
-                  Corporate Law
+            <li>
+                <a href="/web3law" className="hover:text-white transition-colors">
+                  Web3 Law
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-white transition-colors">
-                  Startup Services
+                <a href="/services/generalcorporateadvisory" className="hover:text-white transition-colors">
+                  General Corporate Advisory
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-white transition-colors">
+                <a href="/services/disputeresolution" className="hover:text-white transition-colors">
                   Dispute Resolution
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-white transition-colors">
-                  NGO & NPO
+                <a href="/services/intellectualproperty" className="hover:text-white transition-colors">
+                  Intellectual Property
                 </a>
               </li>
+              <li>
+                <a href="/services/realestate" className="hover:text-white transition-colors">
+                  Real Estate
+                </a>
+              </li>
+             
+              
             </ul>
           </div>
 
@@ -54,22 +61,18 @@ const Footer = () => {
             <h4 className="text-lg font-semibold mb-2 text-white">Company</h4>
             <ul className="space-y-2 text-gray-300 text-sm">
               <li>
-                <a href="#" className="hover:text-white transition-colors">
+                <a href="/about-us" className="hover:text-white transition-colors">
                   About Us
                 </a>
               </li>
+             
               <li>
-                <a href="#" className="hover:text-white transition-colors">
-                  Our Team
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-white transition-colors">
+                <a href="/careers" className="hover:text-white transition-colors">
                   Careers
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-white transition-colors">
+                <a href="/contact" className="hover:text-white transition-colors">
                   Contact
                 </a>
               </li>

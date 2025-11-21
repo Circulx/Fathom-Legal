@@ -170,73 +170,7 @@ export default function ThoughtLeadership() {
         </div>
       </section>
 
-      {/* Photo Gallery Section */}
-      <section className="py-16 bg-white">
-        <div className="container mx-auto px-8 lg:px-16 xl:px-24">
-          <div className="text-center mb-12">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Featured <span style={{ color: '#A5292A' }}>Photos</span>
-            </h2>
-            <p className="text-base sm:text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
-              Explore our collection of featured photos showcasing our team, events, and achievements.
-            </p>
-          </div>
-
-          {photoLoading ? (
-            <div className="flex justify-center items-center py-20">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2" style={{ borderColor: '#A5292A' }}></div>
-            </div>
-          ) : photos.length === 0 ? (
-            <div className="text-center py-20">
-              <div className="w-24 h-24 mx-auto mb-6 rounded-full flex items-center justify-center" style={{ backgroundColor: '#A5292A' }}>
-                <ExternalLink className="h-12 w-12 text-white" />
-              </div>
-              <h3 className="text-lg sm:text-xl md:text-xl font-semibold text-gray-900 mb-2">
-                No photos yet
-              </h3>
-              <p className="text-sm sm:text-base text-gray-600">
-                Thought leadership photos will appear here once uploaded.
-              </p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {photos.map((photo) => (
-                <div 
-                  key={photo._id}
-                  className="group relative overflow-hidden rounded-lg shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer"
-                >
-                  <div className="aspect-square overflow-hidden">
-                    <img
-                      src={photo.imageUrl}
-                      alt={photo.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                  </div>
-                  
-                  {/* Overlay */}
-                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all duration-300 flex items-end">
-                    <div className="p-4 text-white transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-                      <h3 className="font-semibold text-sm sm:text-base mb-1 line-clamp-2">
-                        {photo.title}
-                      </h3>
-                      {photo.description && (
-                        <p className="text-sm text-gray-200 line-clamp-2">
-                          {photo.description}
-                        </p>
-                      )}
-                      {photo.category && (
-                        <span className="inline-block px-2 py-1 text-xs bg-white bg-opacity-20 rounded-full mt-2">
-                          {photo.category}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
+      
 
       {/* Blog Section */}
       <section className="py-16 bg-gray-50">

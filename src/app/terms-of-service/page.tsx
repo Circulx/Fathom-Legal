@@ -10,33 +10,27 @@ export default function TermsOfService() {
       {/* Header */}
       <Navbar page="terms" />
 
+      
       {/* Hero Section */}
-      <section
-        className="text-gray-800 pt-28 pb-20 relative"
-        style={{ backgroundColor: "#FAFAFA" }}
-      >
-        {/* Background Image Layer with Blur */}
+      <section className="pt-28 pb-20 relative overflow-hidden">
+        {/* Background Image */}
         <div
           className="absolute inset-0"
           style={{
-            backgroundImage: `url('https://images.unsplash.com/photo-1672380135241-c024f7fbfa13?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D')`,
+            backgroundImage: `url('/contactusbg.jpg')`,
             backgroundSize: "cover",
             backgroundPosition: "center",
             backgroundRepeat: "no-repeat",
-            filter: "blur(2px)",
           }}
         ></div>
-
-        {/* Overlay */}
-        <div
-          className="absolute inset-0"
-          style={{ backgroundColor: "rgba(250, 250, 250, 0.6)" }}
-        ></div>
-
+        
+        {/* Dark Overlay */}
+        <div className="absolute inset-0 bg-black/60"></div>
+        
         <div className="container mx-auto px-4 relative z-10">
-          <div className="max-w-4xl mx-auto text-center">
+          <div className="text-center max-w-4xl mx-auto">
             <h1 className="text-5xl md:text-6xl font-bold mb-6">
-              Terms of <span style={{ color: "#A5292A" }}>Service</span>
+              <span style={{ color: '#A5292A' }}>Terms of Service</span>
             </h1>
           </div>
         </div>
@@ -49,7 +43,7 @@ export default function TermsOfService() {
             {/* Section 1: GENERAL */}
             <div className="mb-16">
               <h2 className="text-3xl font-bold text-gray-800 mb-8">
-                1. GENERAL
+                1. General
               </h2>
               <div className="prose prose-lg max-w-none text-gray-600 leading-relaxed">
                 <p className="mb-6">
@@ -145,7 +139,7 @@ export default function TermsOfService() {
             {/* Section 2: COLLECTION OF PERSONAL AND OTHER INFORMATION */}
             <div className="mb-16">
               <h2 className="text-3xl font-bold text-gray-800 mb-8">
-                2. COLLECTION OF PERSONAL AND OTHER INFORMATION
+                2. Collection of Personal and Other Information
               </h2>
               <div className="prose prose-lg max-w-none text-gray-600 leading-relaxed">
                 <p className="mb-6">
@@ -192,7 +186,7 @@ export default function TermsOfService() {
             {/* Section 3: COOKIES */}
             <div className="mb-16">
               <h2 className="text-3xl font-bold text-gray-800 mb-8">
-                3. COOKIES
+                3. Cookies
               </h2>
               <div className="prose prose-lg max-w-none text-gray-600 leading-relaxed">
                 <p className="mb-6">
@@ -221,7 +215,7 @@ export default function TermsOfService() {
             {/* Section 4: DIVULGING/SHARING OF PERSONAL INFORMATION */}
             <div className="mb-16">
               <h2 className="text-3xl font-bold text-gray-800 mb-8">
-                4. DIVULGING/SHARING OF PERSONAL INFORMATION
+                4. Divulging/Sharing of Personal Information
               </h2>
               <div className="prose prose-lg max-w-none text-gray-600 leading-relaxed">
                 <p className="mb-6">
@@ -248,7 +242,7 @@ export default function TermsOfService() {
             {/* Section 5: SECURITY */}
             <div className="mb-16">
               <h2 className="text-3xl font-bold text-gray-800 mb-8">
-                5. SECURITY
+                5. Security
               </h2>
               <div className="prose prose-lg max-w-none text-gray-600 leading-relaxed">
                 <p className="mb-6">
@@ -264,7 +258,7 @@ export default function TermsOfService() {
             {/* Section 6: THIRD PARTY ADVERTISEMENTS / PROMOTIONS */}
             <div className="mb-16">
               <h2 className="text-3xl font-bold text-gray-800 mb-8">
-                6. THIRD PARTY ADVERTISEMENTS / PROMOTIONS
+                6. Third Party Advertisements / Promotions
               </h2>
               <div className="prose prose-lg max-w-none text-gray-600 leading-relaxed">
                 <p className="mb-6">
@@ -280,7 +274,7 @@ export default function TermsOfService() {
             {/* Section 7: USER'S CONSENT */}
             <div className="mb-16">
               <h2 className="text-3xl font-bold text-gray-800 mb-8">
-                7. USER'S CONSENT
+                7. User's Consent
               </h2>
               <div className="prose prose-lg max-w-none text-gray-600 leading-relaxed">
                 <p className="mb-6">
@@ -295,7 +289,7 @@ export default function TermsOfService() {
             {/* Section 8: GRIEVANCE OFFICER */}
             <div className="mb-16">
               <h2 className="text-3xl font-bold text-gray-800 mb-8">
-                8. GRIEVANCE OFFICER
+                8. Grievance Officer
               </h2>
               <div className="prose prose-lg max-w-none text-gray-600 leading-relaxed">
                 <p className="mb-6">
@@ -309,7 +303,7 @@ export default function TermsOfService() {
             {/* Section 9: DISPUTE RESOLUTION AND JURISDICTION */}
             <div className="mb-16">
               <h2 className="text-3xl font-bold text-gray-800 mb-8">
-                9. DISPUTE RESOLUTION AND JURISDICTION
+                9. Dispute Resolution and Jurisdiction
               </h2>
               <div className="prose prose-lg max-w-none text-gray-600 leading-relaxed">
                 <p className="mb-6">

@@ -203,7 +203,7 @@ const ResizableImageComponent = ({ node, updateAttributes, selected }: any) => {
 export const ResizableImage = Image.extend({
   addAttributes() {
     return {
-      ...this.parent(),
+      ...this.parent?.(),
       width: {
         default: null,
         parseHTML: element => {

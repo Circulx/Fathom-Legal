@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import { Navbar } from '@/components/Navbar'
 import Footer from '@/components/Footer'
+import { BlogContent } from '@/components/BlogContent'
 import { Calendar, Clock, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import connectDB from '@/lib/mongodb'
@@ -139,12 +140,7 @@ export default async function BlogPage({ params }: BlogPageProps) {
 
       {/* Blog Content */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-        <div className="prose prose-lg max-w-none prose-headings:text-gray-900 prose-p:text-gray-800 prose-p:leading-relaxed">
-          <div 
-            className="text-gray-800 leading-relaxed"
-            dangerouslySetInnerHTML={{ __html: blog.content }}
-          />
-        </div>
+        <BlogContent content={blog.content} />
       </div>
 
       <Footer />

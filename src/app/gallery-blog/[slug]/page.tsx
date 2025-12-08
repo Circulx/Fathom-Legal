@@ -5,6 +5,7 @@ import connectDB from '@/lib/mongodb'
 import GalleryBlog from '@/models/GalleryBlog'
 import { Navbar } from '@/components/Navbar'
 import Footer from '@/components/Footer'
+import { BlogContent } from '@/components/BlogContent'
 
 interface GalleryBlogPageProps {
   params: Promise<{ slug: string }>
@@ -129,17 +130,13 @@ export default async function GalleryBlogPage({ params }: GalleryBlogPageProps) 
             <div className="flex items-center text-sm text-gray-500 mb-8">
               <span>Published on {formatDate(blog.publishedAt)}</span>
             </div>
-
-            {/* Content */}
-            <div className="prose prose-lg max-w-none">
-              <div className="text-gray-800 leading-relaxed whitespace-pre-wrap">
-                {blog.content ? blog.content.split('\n').map((line, index) => (
-                  <p key={index} className="mb-4">{line}</p>
-                )) : 'No content available'}
-              </div>
-            </div>
           </div>
         </div>
+      </div>
+
+      {/* Blog Content */}
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+        <BlogContent content={blog.content} />
       </div>
 
       <Footer />

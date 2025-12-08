@@ -305,9 +305,9 @@ select option:checked {
 .ProseMirror {
   outline: none;
   min-height: 200px;
-  font-size: 16px;
+  font-size: 14px;
   color: #000;
-  line-height: 1.6;
+  line-height: 1.4;
 }
 
 .ProseMirror p.is-editor-empty:first-child::before {
@@ -319,7 +319,7 @@ select option:checked {
 }
 
 .ProseMirror p {
-  margin: 0.5em 0;
+  margin: 0.25em 0;
 }
 
 .ProseMirror h1 {
@@ -368,9 +368,9 @@ select option:checked {
 
 /* Blog content paragraph styling */
 .prose p {
-  margin-top: 1rem;
-  margin-bottom: 1.5rem;
-  line-height: 1.75;
+  margin-top: 0.75rem;
+  margin-bottom: 1rem;
+  line-height: 1.5;
 }
 
 .prose p:first-child {
@@ -396,6 +396,24 @@ select option:checked {
 .prose ol {
   list-style-type: decimal;
   list-style-position: outside;
+}
+
+/* Bordered Paragraph Styling */
+.prose p[data-bordered="true"] {
+  border: 2px solid #A5292A;
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  margin: 1.5rem 0;
+  background-color: #fef2f2;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Image styling in blog content */
+.prose img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 2rem auto;
 }
 
 .prose li {

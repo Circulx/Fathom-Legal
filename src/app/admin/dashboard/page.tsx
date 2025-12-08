@@ -8,10 +8,13 @@ import StarterKit from '@tiptap/starter-kit'
 import { TextStyle } from '@tiptap/extension-text-style'
 import FontFamily from '@tiptap/extension-font-family'
 import Placeholder from '@tiptap/extension-placeholder'
+import { ResizableImage } from '@/lib/tiptap-extensions/ResizableImage'
+import { BorderedParagraph } from '@/lib/tiptap-extensions/BorderedParagraph'
+import { FontSize } from '@/lib/tiptap-extensions/FontSize'
 import { 
   LayoutDashboard,
   FileText,
-  Image,
+  Image as ImageIcon,
   Newspaper,
   Camera,
   Users,
@@ -102,9 +105,17 @@ function RichTextEditor({
       FontFamily.configure({
         types: ['textStyle'],
       }),
-      Placeholder.configure({
-        placeholder: placeholder || 'Start typing...',
+      FontSize.configure({
+        types: ['textStyle'],
       }),
+      Placeholder.configure({
+        placeholder: '',
+      }),
+      ResizableImage.configure({
+        inline: true,
+        allowBase64: true,
+      }),
+      BorderedParagraph,
     ],
     content: value,
     onUpdate: ({ editor }) => {
@@ -116,6 +127,31 @@ function RichTextEditor({
       },
     },
   })
+
+  // Handle image upload
+  const handleImageUpload = () => {
+    const input = document.createElement('input')
+    input.setAttribute('type', 'file')
+    input.setAttribute('accept', 'image/*')
+    input.click()
+
+    input.onchange = async (e: any) => {
+      const file = e.target.files[0]
+      if (!file) return
+
+      // Convert to base64
+      const reader = new FileReader()
+      reader.onload = (event: any) => {
+        const base64 = event.target.result
+        if (editor) {
+          editor.chain().focus().setImage({ src: base64 }).run()
+        }
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+
 
   // Sync editor content when value prop changes externally
   useEffect(() => {
@@ -132,6 +168,21 @@ function RichTextEditor({
     'Courier New',
     'Helvetica',
     'Comic Sans MS',
+  ]
+
+  const fontSizes = [
+    { label: '8px', value: '8' },
+    { label: '10px', value: '10' },
+    { label: '12px', value: '12' },
+    { label: '14px', value: '14' },
+    { label: '16px', value: '16' },
+    { label: '18px', value: '18' },
+    { label: '20px', value: '20' },
+    { label: '24px', value: '24' },
+    { label: '28px', value: '28' },
+    { label: '32px', value: '32' },
+    { label: '36px', value: '36' },
+    { label: '48px', value: '48' },
   ]
 
   if (!editor) {
@@ -158,6 +209,27 @@ function RichTextEditor({
           {fontFamilies.map((font) => (
             <option key={font} value={font} style={{ fontFamily: font }}>
               {font}
+            </option>
+          ))}
+        </select>
+
+        {/* Font Size */}
+        <select
+          value={editor.getAttributes('textStyle').fontSize || ''}
+          onChange={(e) => {
+            if (e.target.value) {
+              editor.chain().focus().setFontSize(e.target.value).run()
+            } else {
+              editor.chain().focus().unsetFontSize().run()
+            }
+          }}
+          className="px-2 py-1 text-sm border border-gray-300 rounded bg-white text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-red-500"
+          title="Font Size"
+        >
+          <option value="">Size</option>
+          {fontSizes.map((size) => (
+            <option key={size.value} value={size.value}>
+              {size.label}
             </option>
           ))}
         </select>
@@ -266,6 +338,32 @@ function RichTextEditor({
           title="Blockquote"
         >
           <span className="text-sm">"</span>
+        </button>
+
+        <div className="w-px h-6 bg-gray-300"></div>
+
+        {/* Image Upload */}
+        <button
+          type="button"
+          onClick={handleImageUpload}
+          className="p-1.5 rounded hover:bg-gray-200 transition-colors text-gray-700"
+          title="Insert Image (Upload)"
+        >
+          <ImageIcon size={16} />
+        </button>
+
+        <div className="w-px h-6 bg-gray-300"></div>
+
+        {/* Bordered Paragraph */}
+        <button
+          type="button"
+          onClick={() => editor.chain().focus().toggleBorderedParagraph().run()}
+          className={`p-1.5 rounded hover:bg-gray-200 transition-colors ${
+            editor.isActive('borderedParagraph') ? 'bg-red-100 text-red-600' : 'text-gray-700'
+          }`}
+          title="Bordered Paragraph"
+        >
+          <span className="text-xs font-bold">□</span>
         </button>
 
         {/* Clear Formatting */}
@@ -439,7 +537,7 @@ export default function AdminDashboard() {
   const sidebarItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'templates', label: 'Templates', icon: FileText },
-    { id: 'gallery', label: 'Gallery', icon: Image },
+    { id: 'gallery', label: 'Gallery', icon: ImageIcon },
     { id: 'thought-leadership-blogs', label: 'Thought Leadership', icon: Newspaper },
     { id: 'gallery-blogs', label: 'Gallery Blogs', icon: Newspaper },
     { id: 'thought-leadership-photos', label: 'Thought Leadership Photos', icon: Camera },
@@ -1069,7 +1167,7 @@ export default function AdminDashboard() {
       `}</style>
       
       {/* Main Layout with Sidebar */}
-      <div className="flex min-h-screen">
+      <div className="flex min-h-screen pt-20">
         {/* Left Sidebar */}
         <div className="w-64 bg-white border-r border-gray-200 flex-shrink-0 flex flex-col">
           <div className="p-6 flex-1">
@@ -1178,7 +1276,7 @@ export default function AdminDashboard() {
                         <p className="text-sm text-gray-500">Gallery images</p>
                       </div>
                       <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ backgroundColor: '#A5292A' }}>
-                        <Image className="w-6 h-6 text-white" />
+                        <ImageIcon className="w-6 h-6 text-white" />
                       </div>
                     </div>
                   </div>
@@ -1192,7 +1290,7 @@ export default function AdminDashboard() {
                         <p className="text-sm text-gray-500">Currently visible</p>
                       </div>
                       <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ backgroundColor: '#A5292A' }}>
-                        <Image className="w-6 h-6 text-white" />
+                        <ImageIcon className="w-6 h-6 text-white" />
                       </div>
                     </div>
                   </div>
@@ -1321,7 +1419,7 @@ export default function AdminDashboard() {
                         <p className="text-sm text-gray-500">Gallery images uploaded</p>
                       </div>
                       <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ backgroundColor: '#A5292A' }}>
-                        <Image className="w-6 h-6 text-white" />
+                        <ImageIcon className="w-6 h-6 text-white" />
                       </div>
                     </div>
                   </div>
@@ -1334,7 +1432,7 @@ export default function AdminDashboard() {
                         <p className="text-sm text-gray-500">Currently visible</p>
                       </div>
                       <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ backgroundColor: '#A5292A' }}>
-                        <Image className="w-6 h-6 text-white" />
+                        <ImageIcon className="w-6 h-6 text-white" />
                       </div>
                     </div>
                   </div>
@@ -1866,7 +1964,7 @@ export default function AdminDashboard() {
                     type="url"
                     value={galleryBlogCreateForm.externalUrl}
                     onChange={(e) => setGalleryBlogCreateForm(prev => ({ ...prev, externalUrl: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-white text-black"
+                    className="w-full px-3 py-2 border border-black rounded-lg focus:ring-2 focus:ring-gray-400 focus:border-black bg-white text-black"
                     placeholder="https://example.com/blog-post (optional if content is provided)"
                   />
                 </div>
@@ -1930,7 +2028,7 @@ export default function AdminDashboard() {
                   required
                   value={templateUploadForm.description}
                   onChange={(e) => setTemplateUploadForm(prev => ({ ...prev, description: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-white text-gray-900"
+                  className="w-full px-3 py-2 border border-black rounded-lg focus:ring-2 focus:ring-gray-400 focus:border-black bg-white text-gray-900"
                   rows={4}
                   placeholder="Template description"
                 />
@@ -1945,7 +2043,7 @@ export default function AdminDashboard() {
                   required
                   value={templateUploadForm.price}
                   onChange={(e) => setTemplateUploadForm(prev => ({ ...prev, price: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-white text-gray-900"
+                  className="w-full px-3 py-2 border border-black rounded-lg focus:ring-2 focus:ring-gray-400 focus:border-black bg-white text-gray-900"
                   placeholder="0"
                   min="0"
                   step="0.01"
@@ -1960,7 +2058,7 @@ export default function AdminDashboard() {
                   required
                   value={templateUploadForm.category}
                   onChange={(e) => setTemplateUploadForm(prev => ({ ...prev, category: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-white text-gray-900"
+                  className="w-full px-3 py-2 border border-black rounded-lg focus:ring-2 focus:ring-gray-400 focus:border-black bg-white text-gray-900"
                 >
                   <option value="Legal Documents">Legal Documents</option>
                   <option value="Contracts">Contracts</option>
@@ -2058,7 +2156,7 @@ export default function AdminDashboard() {
                   required
                   value={galleryUploadForm.title}
                   onChange={(e) => setGalleryUploadForm(prev => ({ ...prev, title: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-white text-gray-900"
+                  className="w-full px-3 py-2 border border-black rounded-lg focus:ring-2 focus:ring-gray-400 focus:border-black bg-white text-gray-900"
                   placeholder="One line description of the photo"
                 />
               </div>
@@ -2070,7 +2168,7 @@ export default function AdminDashboard() {
                 <textarea
                   value={galleryUploadForm.description}
                   onChange={(e) => setGalleryUploadForm(prev => ({ ...prev, description: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-white text-gray-900"
+                  className="w-full px-3 py-2 border border-black rounded-lg focus:ring-2 focus:ring-gray-400 focus:border-black bg-white text-gray-900"
                   rows={4}
                   placeholder="Write a short article about this photo (optional)"
                 />
@@ -2202,7 +2300,7 @@ export default function AdminDashboard() {
                     type="url"
                     value={thoughtLeadershipBlogCreateForm.externalUrl}
                     onChange={(e) => setThoughtLeadershipBlogCreateForm(prev => ({ ...prev, externalUrl: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-white text-black"
+                    className="w-full px-3 py-2 border border-black rounded-lg focus:ring-2 focus:ring-gray-400 focus:border-black bg-white text-black"
                     placeholder="https://example.com/blog-post (optional if content is provided)"
                   />
                 </div>
@@ -2341,7 +2439,7 @@ export default function AdminDashboard() {
                     type="url"
                     value={thoughtLeadershipBlogEditForm.externalUrl}
                     onChange={(e) => setThoughtLeadershipBlogEditForm(prev => ({ ...prev, externalUrl: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-white text-black"
+                    className="w-full px-3 py-2 border border-black rounded-lg focus:ring-2 focus:ring-gray-400 focus:border-black bg-white text-black"
                     placeholder="https://example.com/blog-post (optional if content is provided)"
                   />
                 </div>
@@ -2373,7 +2471,7 @@ export default function AdminDashboard() {
                     type="file"
                     accept="image/*"
                     onChange={(e) => setThoughtLeadershipBlogEditForm(prev => ({ ...prev, image: e.target.files?.[0] || null }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-white text-black"
+                    className="w-full px-3 py-2 border border-black rounded-lg focus:ring-2 focus:ring-gray-400 focus:border-black bg-white text-black"
                   />
                 )}
               </div>
@@ -2510,7 +2608,7 @@ export default function AdminDashboard() {
                   required
                   value={thoughtLeadershipPhotoUploadForm.title}
                   onChange={(e) => setThoughtLeadershipPhotoUploadForm(prev => ({ ...prev, title: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-white text-gray-900"
+                  className="w-full px-3 py-2 border border-black rounded-lg focus:ring-2 focus:ring-gray-400 focus:border-black bg-white text-gray-900"
                   placeholder="Photo title"
                 />
               </div>
@@ -2523,7 +2621,7 @@ export default function AdminDashboard() {
                 <textarea
                   value={thoughtLeadershipPhotoUploadForm.description}
                   onChange={(e) => setThoughtLeadershipPhotoUploadForm(prev => ({ ...prev, description: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-white text-gray-900"
+                  className="w-full px-3 py-2 border border-black rounded-lg focus:ring-2 focus:ring-gray-400 focus:border-black bg-white text-gray-900"
                   rows={3}
                   placeholder="Photo description (optional)"
                 />
@@ -2537,7 +2635,7 @@ export default function AdminDashboard() {
                 <select
                   value={thoughtLeadershipPhotoUploadForm.category}
                   onChange={(e) => setThoughtLeadershipPhotoUploadForm(prev => ({ ...prev, category: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-white text-gray-900"
+                  className="w-full px-3 py-2 border border-black rounded-lg focus:ring-2 focus:ring-gray-400 focus:border-black bg-white text-gray-900"
                 >
                   <option value="General">General</option>
                   <option value="Team">Team</option>
@@ -2557,7 +2655,7 @@ export default function AdminDashboard() {
                   type="number"
                   value={thoughtLeadershipPhotoUploadForm.displayOrder}
                   onChange={(e) => setThoughtLeadershipPhotoUploadForm(prev => ({ ...prev, displayOrder: parseInt(e.target.value) || 0 }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-white text-gray-900"
+                  className="w-full px-3 py-2 border border-black rounded-lg focus:ring-2 focus:ring-gray-400 focus:border-black bg-white text-gray-900"
                   placeholder="0"
                   min="0"
                 />
@@ -2574,7 +2672,7 @@ export default function AdminDashboard() {
                   accept="image/*"
                   required
                   onChange={(e) => setThoughtLeadershipPhotoUploadForm(prev => ({ ...prev, image: e.target.files?.[0] || null }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-white text-gray-900"
+                  className="w-full px-3 py-2 border border-black rounded-lg focus:ring-2 focus:ring-gray-400 focus:border-black bg-white text-gray-900"
                 />
                 <p className="text-xs text-gray-500 mt-1">Max size: 5MB. Supported formats: JPEG, PNG, GIF, WebP</p>
               </div>

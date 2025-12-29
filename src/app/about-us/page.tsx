@@ -174,7 +174,7 @@ export default function AboutUs() {
             <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-4xl font-bold text-gray-800 mb-4">
               Why Choose <span style={{ color: '#A5292A' }}>Fathom Legal</span>?
             </h2>
-            <p className="text-base sm:text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-base sm:text-lg md:text-lg text-gray-600 max-w-3xl mx-auto">
               Our commitment to excellence and client satisfaction makes us the
               preferred choice for businesses and individuals seeking reliable
               legal counsel.
@@ -258,7 +258,7 @@ export default function AboutUs() {
             {/* Content Cards */}
             <div className="space-y-8">
               <div>
-                <p className="text-base sm:text-lg md:text-xl text-white leading-relaxed">
+                <p className="text-base sm:text-lg md:text-lg text-white leading-relaxed">
                   At Fathom Legal, we believe that exceptional legal service
                   stems from a deep understanding of our clients' businesses,
                   challenges, and aspirations. Our philosophy is built on three
@@ -360,10 +360,7 @@ export default function AboutUs() {
                       <Phone className="w-5 h-5 text-[#A5292A] mr-3" />
                       <span className="text-sm sm:text-base text-gray-700">+919625206671</span>
                     </div>
-                    <div className="flex items-center">
-                      <MapPin className="w-5 h-5 text-[#A5292A] mr-3" />
-                      <span className="text-sm sm:text-base text-gray-700">27th main road, 1st sector, HSR Layout, Bangalore, 560102</span>
-                    </div>
+                   
                   </div>
 
                   <div className="mt-8">
@@ -470,68 +467,110 @@ export default function AboutUs() {
         <div className="container mx-auto px-4 relative z-10">
           {/* Section Header */}
           <div className="text-center mb-10">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-4xl font-bold text-white mb-4">
+            <h2 className="text-3xl md:text-4xl lg:text-3xl font-bold text-white mb-4">
               Get in <span style={{ color: "#A5292A" }}>Touch</span> with Us!
             </h2>
-            <p className="text-base sm:text-lg md:text-xl text-white/90 max-w-3xl mx-auto">
+            <p className="text-base sm:text-lg lg:text-base text-white/90 max-w-3xl mx-auto">
               Let our experience pave the path to your success.
             </p>
           </div>
 
-          <div className="grid lg:grid-cols-2 gap-8 px-4 sm:px-8 md:px-12 lg:px-20">
+          <div className="grid lg:grid-cols-2 gap-8 px-4 sm:px-8 md:px-12 lg:px-20 items-start">
             {/* Contact Information */}
             <div className="space-y-8">
-              {/* Corporate Office */}
+              {/* Bangalore Office */}
               <div>
-                <h3 className="text-lg sm:text-xl md:text-xl font-bold text-white mb-4" style={{ color: "#A5292A" }}>
-                  Corporate Office
+                <h3 className="text-xl font-bold text-white mb-4" style={{ color: "#A5292A" }}>
+                  Bangalore Office
                 </h3>
-                <div className="space-y-3 text-white/90">
+                <div className="space-y-1 text-white/90">
                   <div className="flex items-start space-x-3">
                     <MapPin className="w-5 h-5 text-white mt-1 flex-shrink-0" />
-                    <p className="text-sm sm:text-base">27th main road, 1st sector, HSR Layout, Bangalore, 560102</p>
+                    <p>27th main road, 1st sector, HSR Layout, Bangalore, 560102</p>
                   </div>
                   <div className="flex items-center space-x-3">
                     <Phone className="w-5 h-5 text-white flex-shrink-0" />
-                    <a href="tel:+919625206671" className="text-sm sm:text-base hover:text-white transition-colors duration-300">+919625206671</a>
+                    <a href="tel:+919625206671" className="hover:text-white transition-colors duration-300">+919625206671</a>
                   </div>
                   <div className="flex items-center space-x-3">
                     <Mail className="w-5 h-5 text-white flex-shrink-0" />
-                    <a href="https://mail.google.com/mail/?view=cm&fs=1&to=assist@fathomlegal.com" target="_blank" rel="noopener noreferrer" className="text-sm sm:text-base hover:text-[#A5292A] transition-colors duration-300">assist@fathomlegal.com</a>
+                    <a href="https://mail.google.com/mail/?view=cm&fs=1&to=assist@fathomlegal.com" target="_blank" rel="noopener noreferrer" className="hover:text-[#A5292A] transition-colors duration-300">assist@fathomlegal.com</a>
                   </div>
                 </div>
               </div>
 
-              {/* Dubai Office */}
+              {/* Delhi Office */}
               <div>
-                <h3 className="text-lg sm:text-xl md:text-xl font-bold text-white mb-4" style={{ color: "#A5292A" }}>
-                  Dubai Office
+                <h3 className="text-xl font-bold text-white mb-4" style={{ color: "#A5292A" }}>
+                  Delhi Office
                 </h3>
-                <div className="space-y-3 text-white/90">
+                <div className="space-y-1 text-white/90">
                   <div className="flex items-start space-x-3">
                     <MapPin className="w-5 h-5 text-white mt-1 flex-shrink-0" />
-                    <p className="text-sm sm:text-base"> Dubai, UAE</p>
+                    <p>Delhi, India</p>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <Phone className="w-5 h-5 text-white flex-shrink-0" />
+                    <a href="tel:+919625206671" className="hover:text-white transition-colors duration-300">+919625206671</a>
                   </div>
                   <div className="flex items-center space-x-3">
                     <Mail className="w-5 h-5 text-white flex-shrink-0" />
-                    <a href="https://mail.google.com/mail/?view=cm&fs=1&to=assist@fathomlegal.com" target="_blank" rel="noopener noreferrer" className="text-sm sm:text-base hover:text-[#A5292A] transition-colors duration-300">assist@fathomlegal.com</a>
+                    <a href="https://mail.google.com/mail/?view=cm&fs=1&to=assist@fathomlegal.com" target="_blank" rel="noopener noreferrer" className="hover:text-[#A5292A] transition-colors duration-300">assist@fathomlegal.com</a>
                   </div>
                 </div>
               </div>
 
-              {/* Dallas Office */}
+              {/* Pune Office */}
               <div>
-                <h3 className="text-lg sm:text-xl md:text-xl font-bold text-white mb-4" style={{ color: "#A5292A" }}>
-                  Dallas Office
+                <h3 className="text-xl font-bold text-white mb-4" style={{ color: "#A5292A" }}>
+                  Pune Office
                 </h3>
-                <div className="space-y-3 text-white/90">
+                <div className="space-y-1 text-white/90">
                   <div className="flex items-start space-x-3">
                     <MapPin className="w-5 h-5 text-white mt-1 flex-shrink-0" />
-                    <p className="text-sm sm:text-base">Dallas, Texas, USA</p>
+                    <p>Unit no. 403, Tower 3, Kohinoor World Towers, Old Mumbai - Pune Hwy, opp. Empire Estate, Pimpri Colony, Pune, Maharashtra 411018</p>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <Phone className="w-5 h-5 text-white flex-shrink-0" />
+                    <a href="tel:+919625206671" className="hover:text-white transition-colors duration-300">+919625206671</a>
                   </div>
                   <div className="flex items-center space-x-3">
                     <Mail className="w-5 h-5 text-white flex-shrink-0" />
-                    <a href="https://mail.google.com/mail/?view=cm&fs=1&to=assist@fathomlegal.com" target="_blank" rel="noopener noreferrer" className="text-sm sm:text-base hover:text-[#A5292A] transition-colors duration-300">assist@fathomlegal.com</a>
+                    <a href="https://mail.google.com/mail/?view=cm&fs=1&to=assist@fathomlegal.com" target="_blank" rel="noopener noreferrer" className="hover:text-[#A5292A] transition-colors duration-300">assist@fathomlegal.com</a>
+                  </div>
+                </div>
+              </div>
+
+              {/* USA Office */}
+              <div>
+                <h3 className="text-xl font-bold text-white mb-4" style={{ color: "#A5292A" }}>
+                  USA Office
+                </h3>
+                <div className="space-y-1 text-white/90">
+                  <div className="flex items-start space-x-3">
+                    <MapPin className="w-5 h-5 text-white mt-1 flex-shrink-0" />
+                    <p>3817 Trails End Rd, Aubrey, TX 76227</p>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <Mail className="w-5 h-5 text-white flex-shrink-0" />
+                    <a href="https://mail.google.com/mail/?view=cm&fs=1&to=assist@fathomlegal.com" target="_blank" rel="noopener noreferrer" className="hover:text-[#A5292A] transition-colors duration-300">assist@fathomlegal.com</a>
+                  </div>
+                </div>
+              </div>
+
+              {/* UAE Office */}
+              <div>
+                <h3 className="text-xl font-bold text-white mb-4" style={{ color: "#A5292A" }}>
+                  UAE Office
+                </h3>
+                <div className="space-y-1 text-white/90">
+                  <div className="flex items-start space-x-3">
+                    <MapPin className="w-5 h-5 text-white mt-1 flex-shrink-0" />
+                    <p>Sheikh Zayed Rd - Al Barsha First - Al Barsha - Dubai - United Arab Emirates</p>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <Mail className="w-5 h-5 text-white flex-shrink-0" />
+                    <a href="https://mail.google.com/mail/?view=cm&fs=1&to=assist@fathomlegal.com" target="_blank" rel="noopener noreferrer" className="hover:text-[#A5292A] transition-colors duration-300">assist@fathomlegal.com</a>
                   </div>
                 </div>
               </div>
@@ -551,9 +590,9 @@ export default function AboutUs() {
              
 
             {/* Contact Form */}
-            <div className="bg-white/95 backdrop-blur-md p-6 rounded-lg shadow-2xl border border-white/30">
-              <h3 className="text-lg sm:text-xl md:text-xl font-bold text-gray-800 mb-4">Contact Form</h3>
-              <form onSubmit={handleSubmit} className="space-y-3">
+            <div className="bg-white/95 backdrop-blur-md pt-6 px-6 pb-4 rounded-lg shadow-2xl border border-white/30 overflow-hidden">
+              <h3 className="text-xl font-bold text-[#A5292A] mb-4">Contact Form</h3>
+              <form onSubmit={handleSubmit} className="space-y-3 mb-0">
                 <div>
                   <input
                     type="text"
@@ -562,7 +601,7 @@ export default function AboutUs() {
                     value={formData.name}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#A5292A] focus:border-[#A5292A] outline-none transition-all duration-300"
+                    className="w-full px-4 py-3 border border-gray-200 bg-white rounded-lg focus:ring-2 focus:ring-[#A5292A] focus:border-[#A5292A] outline-none transition-all duration-300"
                   />
                 </div>
                 <div>
@@ -573,7 +612,7 @@ export default function AboutUs() {
                     value={formData.phone}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#A5292A] focus:border-[#A5292A] outline-none transition-all duration-300"
+                    className="w-full px-4 py-3 border bg-white border-gray-200 rounded-lg focus:ring-2 focus:ring-[#A5292A] focus:border-[#A5292A] outline-none transition-all duration-300"
                   />
                 </div>
                 <div>
@@ -584,7 +623,7 @@ export default function AboutUs() {
                     value={formData.email}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#A5292A] focus:border-[#A5292A] outline-none transition-all duration-300"
+                    className="w-full px-4 py-3  bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#A5292A] focus:border-[#A5292A] outline-none transition-all duration-300"
                   />
                 </div>
                 <div>
@@ -595,7 +634,7 @@ export default function AboutUs() {
                     value={formData.message}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#A5292A] focus:border-[#A5292A] outline-none transition-all duration-300 resize-none"
+                    className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#A5292A] focus:border-[#A5292A] outline-none transition-all duration-300 resize-none"
                   ></textarea>
                 </div>
                 
@@ -614,7 +653,7 @@ export default function AboutUs() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full bg-[#A5292A] text-white py-3 px-6 rounded-lg font-semibold hover:opacity-90 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full bg-[#A5292A] text-white py-3 px-6 rounded-lg font-semibold hover:opacity-90 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed mb-0"
                 >
                   {isSubmitting ? 'Sending...' : 'Send Message'}
                 </button>

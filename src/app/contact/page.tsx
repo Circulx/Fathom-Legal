@@ -82,22 +82,36 @@ export default function Contact() {
   const offices = [
     {
       icon: <Building className="w-8 h-8 text-[#A5292A]" />,
-      title: "Corporate Office",
+      title: "Bangalore Office",
       address: "27th main road, 1st sector, HSR Layout, Bangalore, 560102",
       phone: "+91-9625206671",
       email: "assist@fathomlegal.com"
     },
     {
-      icon: <Globe className="w-8 h-8 text-[#A5292A]" />,
-      title: "Dubai Office",
-      address: "Dubai, UAE",
-      
+      icon: <Building className="w-8 h-8 text-[#A5292A]" />,
+      title: "Delhi Office",
+      address: "Delhi, India",
+      phone: "+91-9625206671",
+      email: "assist@fathomlegal.com"
+    },
+    {
+      icon: <Building className="w-8 h-8 text-[#A5292A]" />,
+      title: "Pune Office",
+      address: "Unit no. 403, Tower 3, Kohinoor World Towers, Old Mumbai - Pune Hwy, opp. Empire Estate, Pimpri Colony, Pune, Maharashtra 411018",
+      phone: "+91-9625206671",
+      email: "assist@fathomlegal.com"
     },
     {
       icon: <Globe className="w-8 h-8 text-[#A5292A]" />,
-      title: "Dallas Office",
-      address: "Dallas, Texas, USA",
-     
+      title: "USA Office",
+      address: "3817 Trails End Rd, Aubrey, TX 76227",
+      email: "assist@fathomlegal.com"
+    },
+    {
+      icon: <Globe className="w-8 h-8 text-[#A5292A]" />,
+      title: "UAE Office",
+      address: "Sheikh Zayed Rd - Al Barsha First - Al Barsha - Dubai - United Arab Emirates",
+      email: "assist@fathomlegal.com"
     }
   ];
 
@@ -146,7 +160,7 @@ export default function Contact() {
       <section className="py-20 bg-white">
         <div className="container mx-auto px-4">
           <div className="max-w-7xl mx-auto">
-            <div className="grid lg:grid-cols-2 gap-12">
+            <div className="grid lg:grid-cols-[7fr_3fr] gap-12">
               {/* Left Side - Contact Information */}
               <div className="bg-gray-50 p-8 rounded-xl">
                 <div className="mb-8">
@@ -165,7 +179,7 @@ export default function Contact() {
                       <h3 className="text-base sm:text-lg md:text-lg font-bold text-[#A5292A] mb-3">
                         {office.title}
                       </h3>
-                      <div className="space-y-2">
+                      <div className="space-y-1">
                         <div className="flex items-start">
                           <MapPin className="w-4 h-4 text-gray-500 mr-2 mt-1 flex-shrink-0" />
                           <p className="text-sm sm:text-base md:text-lg text-gray-600">{office.address}</p>
@@ -189,7 +203,7 @@ export default function Contact() {
               </div>
 
               {/* Right Side - Contact Form */}
-              <div className="bg-white p-8 rounded-xl shadow-lg">
+              <div className="bg-white pt-8 px-8 pb-0 rounded-xl shadow-lg flex flex-col h-full">
                 <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 mb-6">
                   Send us a <span className="text-[#A5292A]">Message</span>
                 </h3>
@@ -207,7 +221,7 @@ export default function Contact() {
                     </p>
                   </div>
                 ) : (
-                  <form onSubmit={handleSubmit} className="space-y-6">
+                  <form onSubmit={handleSubmit} className="space-y-8 flex flex-col flex-grow">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         Your Name <span className="text-red-500">*</span>
@@ -219,7 +233,7 @@ export default function Contact() {
                         value={formData.name}
                         onChange={handleInputChange}
                         required
-                        className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#A5292A] focus:border-[#A5292A] outline-none transition-all duration-300"
+                        className="w-full px-5 py-4 text-base bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#A5292A] focus:border-[#A5292A] outline-none transition-all duration-300"
                       />
                     </div>
                     
@@ -234,7 +248,7 @@ export default function Contact() {
                         value={formData.email}
                         onChange={handleInputChange}
                         required
-                        className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#A5292A] focus:border-[#A5292A] outline-none transition-all duration-300"
+                        className="w-full px-5 py-4 text-base bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#A5292A] focus:border-[#A5292A] outline-none transition-all duration-300"
                       />
                     </div>
                     
@@ -249,7 +263,7 @@ export default function Contact() {
                         value={formData.phone}
                         onChange={handleInputChange}
                         required
-                        className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#A5292A] focus:border-[#A5292A] outline-none transition-all duration-300"
+                        className="w-full px-5 py-4 text-base bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#A5292A] focus:border-[#A5292A] outline-none transition-all duration-300"
                       />
                     </div>
                     
@@ -266,7 +280,7 @@ export default function Contact() {
                         value={formData.message}
                         onChange={handleInputChange}
                         required
-                        className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#A5292A] focus:border-[#A5292A] outline-none transition-all duration-300 resize-none"
+                        className="w-full px-4 py-3 text-base bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#A5292A] focus:border-[#A5292A] outline-none transition-all duration-300 resize-none"
                       ></textarea>
                     </div>
                     
@@ -280,7 +294,7 @@ export default function Contact() {
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="w-full bg-[#A5292A] text-white py-4 px-8 rounded-lg font-semibold hover:bg-[#8B1E1E] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wide"
+                      className="w-full bg-[#A5292A] text-white py-4 px-8 rounded-lg font-semibold hover:bg-[#8B1E1E] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wide mt-auto"
                     >
                       {isSubmitting ? (
                         <>

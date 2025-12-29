@@ -984,13 +984,13 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="grid lg:grid-cols-2 gap-8 px-4 sm:px-8 md:px-12 lg:px-20">
+          <div className="grid lg:grid-cols-2 gap-8 px-4 sm:px-8 md:px-12 lg:px-20 items-start">
             {/* Contact Information */}
             <div className="space-y-8">
-              {/* Corporate Office */}
+              {/* Bangalore Office */}
               <div>
                 <h3 className="text-xl font-bold text-white mb-4" style={{ color: "#A5292A" }}>
-                  Corporate Office
+                  Bangalore Office
                 </h3>
                 <div className="space-y-3 text-white/90">
                   <div className="flex items-start space-x-3">
@@ -1008,15 +1008,19 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Dubai Office */}
+              {/* Delhi Office */}
               <div>
                 <h3 className="text-xl font-bold text-white mb-4" style={{ color: "#A5292A" }}>
-                  Dubai Office
+                  Delhi Office
                 </h3>
                 <div className="space-y-3 text-white/90">
                   <div className="flex items-start space-x-3">
                     <MapPin className="w-5 h-5 text-white mt-1 flex-shrink-0" />
-                    <p> Dubai, UAE</p>
+                    <p>Delhi, India</p>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <Phone className="w-5 h-5 text-white flex-shrink-0" />
+                    <a href="tel:+919625206671" className="hover:text-white transition-colors duration-300">+919625206671</a>
                   </div>
                   <div className="flex items-center space-x-3">
                     <Mail className="w-5 h-5 text-white flex-shrink-0" />
@@ -1025,15 +1029,53 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Dallas Office */}
+              {/* Pune Office */}
               <div>
                 <h3 className="text-xl font-bold text-white mb-4" style={{ color: "#A5292A" }}>
-                  Dallas Office
+                  Pune Office
                 </h3>
                 <div className="space-y-3 text-white/90">
                   <div className="flex items-start space-x-3">
                     <MapPin className="w-5 h-5 text-white mt-1 flex-shrink-0" />
-                    <p>Dallas, Texas, USA</p>
+                    <p>Unit no. 403, Tower 3, Kohinoor World Towers, Old Mumbai - Pune Hwy, opp. Empire Estate, Pimpri Colony, Pune, Maharashtra 411018</p>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <Phone className="w-5 h-5 text-white flex-shrink-0" />
+                    <a href="tel:+919625206671" className="hover:text-white transition-colors duration-300">+919625206671</a>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <Mail className="w-5 h-5 text-white flex-shrink-0" />
+                    <a href="https://mail.google.com/mail/?view=cm&fs=1&to=assist@fathomlegal.com" target="_blank" rel="noopener noreferrer" className="hover:text-[#A5292A] transition-colors duration-300">assist@fathomlegal.com</a>
+                  </div>
+                </div>
+              </div>
+
+              {/* USA Office */}
+              <div>
+                <h3 className="text-xl font-bold text-white mb-4" style={{ color: "#A5292A" }}>
+                  USA Office
+                </h3>
+                <div className="space-y-3 text-white/90">
+                  <div className="flex items-start space-x-3">
+                    <MapPin className="w-5 h-5 text-white mt-1 flex-shrink-0" />
+                    <p>3817 Trails End Rd, Aubrey, TX 76227</p>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <Mail className="w-5 h-5 text-white flex-shrink-0" />
+                    <a href="https://mail.google.com/mail/?view=cm&fs=1&to=assist@fathomlegal.com" target="_blank" rel="noopener noreferrer" className="hover:text-[#A5292A] transition-colors duration-300">assist@fathomlegal.com</a>
+                  </div>
+                </div>
+              </div>
+
+              {/* UAE Office */}
+              <div>
+                <h3 className="text-xl font-bold text-white mb-4" style={{ color: "#A5292A" }}>
+                  UAE Office
+                </h3>
+                <div className="space-y-3 text-white/90">
+                  <div className="flex items-start space-x-3">
+                    <MapPin className="w-5 h-5 text-white mt-1 flex-shrink-0" />
+                    <p>Sheikh Zayed Rd - Al Barsha First - Al Barsha - Dubai - United Arab Emirates</p>
                   </div>
                   <div className="flex items-center space-x-3">
                     <Mail className="w-5 h-5 text-white flex-shrink-0" />
@@ -1044,9 +1086,9 @@ export default function Home() {
             </div>
 
             {/* Contact Form */}
-            <div className="bg-white/95 backdrop-blur-md p-6 rounded-lg shadow-2xl border border-white/30">
+            <div className="bg-white/95 backdrop-blur-md pt-6 px-6 pb-4 rounded-lg shadow-2xl border border-white/30 overflow-hidden">
               <h3 className="text-xl font-bold text-[#A5292A] mb-4">Contact Form</h3>
-              <form onSubmit={handleSubmit} className="space-y-3">
+              <form onSubmit={handleSubmit} className="space-y-3 mb-0">
                 <div>
                   <input
                     type="text"
@@ -1107,7 +1149,7 @@ export default function Home() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full bg-[#A5292A] text-white py-3 px-6 rounded-lg font-semibold hover:cursor-pointer transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full bg-[#A5292A] text-white py-3 px-6 rounded-lg font-semibold hover:cursor-pointer transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed mb-0"
                 >
                   {isSubmitting ? 'Sending...' : 'Send Message'}
                 </button>

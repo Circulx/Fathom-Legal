@@ -97,7 +97,8 @@ GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account-key.json
 # Option 2: Use service account JSON as environment variable (for platforms like Vercel)
 # GOOGLE_SERVICE_ACCOUNT_JSON={"type":"service_account","project_id":"...","private_key_id":"...","private_key":"...","client_email":"...","client_id":"...","auth_uri":"...","token_uri":"...","auth_provider_x509_cert_url":"...","client_x509_cert_url":"..."}
 
-# GCS Bucket Name
+# GCS Bucket Name (for template documents only)
+# Template preview images are stored in MongoDB as base64
 GCS_BUCKET_NAME=your-gcs-bucket-name
 ```
 
@@ -121,9 +122,13 @@ To enable template uploads to Google Cloud Storage:
    - **Option B (Production/Cloud):** Set `GOOGLE_SERVICE_ACCOUNT_JSON` to the entire JSON content as a string (useful for platforms like Vercel)
 
 4. **Set Bucket Name:**
-   - Set `GCS_BUCKET_NAME` to your bucket name
+   - Set `GCS_BUCKET_NAME` to your bucket name (for template documents only)
+   - Template preview images are stored in MongoDB as base64 data URLs (no GCS needed for images)
 
-**Note:** If GCS is not configured, the system will automatically fall back to local file storage for backward compatibility.
+**Note:** 
+- Template documents (PDF/DOCX files) are uploaded to GCS
+- Template preview images are stored in MongoDB as base64 data URLs (similar to gallery images)
+- This approach simplifies deployment and avoids the need for public bucket configuration
 
 ## License
 

@@ -24,7 +24,8 @@ interface Template {
   fileName: string
   fileSize: number
   fileType: string
-  imageUrl?: string
+  imageUrl?: string // Legacy field
+  imageData?: string // Base64 data URL (preferred)
   price: number
   tags: string[]
   downloadCount: number
@@ -101,7 +102,7 @@ export default function Templates() {
         title: template.title,
         description: template.description,
         price: template.price,
-        imageUrl: template.imageUrl,
+        imageUrl: template.imageData || template.imageUrl,
         category: template.category,
         fileName: template.fileName,
         fileSize: template.fileSize,
@@ -376,8 +377,8 @@ export default function Templates() {
                   <div 
                     className="h-40 bg-cover bg-center bg-no-repeat relative flex-shrink-0"
                     style={{
-                      backgroundImage: template.imageUrl ? `url(${template.imageUrl})` : 'none',
-                      backgroundColor: template.imageUrl ? 'transparent' : '#f3f4f6'
+                      backgroundImage: (template.imageData || template.imageUrl) ? `url(${template.imageData || template.imageUrl})` : 'none',
+                      backgroundColor: (template.imageData || template.imageUrl) ? 'transparent' : '#f3f4f6'
                     }}
                   >
                     {/* Overlay for better text readability */}
@@ -394,7 +395,7 @@ export default function Templates() {
                     )}
                     
                     {/* Fallback Icon if no image */}
-                    {!template.imageUrl && (
+                    {!(template.imageData || template.imageUrl) && (
                       <div className="h-full flex items-center justify-center">
                         <FileText className="h-12 w-12 sm:h-16 sm:w-16 text-gray-400" />
                       </div>

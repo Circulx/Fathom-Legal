@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import connectDB from '@/lib/mongodb'
 import Template from '@/models/Template'
-import { writeFile, mkdir } from 'fs/promises'
-import { join } from 'path'
 import { uploadToGCS, isGCSConfigured } from '@/lib/gcs'
 
 export async function POST(request: NextRequest) {
@@ -89,24 +87,17 @@ export async function POST(request: NextRequest) {
     const pdfExtension = pdfFile.name.split('.').pop()
     const pdfFileName = `${timestamp}-${pdfFile.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`
 
-    // Convert files to buffers
+    // Convert image to Base64 for MongoDB storage
     const imageBytes = await image.arrayBuffer()
     const imageBuffer = Buffer.from(imageBytes)
+    const base64Data = imageBuffer.toString('base64')
+    const imageDataUrl = `data:${image.type};base64,${base64Data}`
 
+    // Convert PDF file to buffer for GCS upload
     const pdfBytes = await pdfFile.arrayBuffer()
     const pdfBuffer = Buffer.from(pdfBytes)
 
-    // Create uploads directory for images only (images stay local for public access)
-    const imagesDir = join(process.cwd(), 'public', 'uploads', 'templates')
-    await mkdir(imagesDir, { recursive: true })
-
-    const imagePath = join(imagesDir, imageFileName)
-
-    // Save image (publicly accessible) - keep local storage for images
-    await writeFile(imagePath, imageBuffer)
-    const imageUrl = `/uploads/templates/${imageFileName}`
-
-    // Upload template file to Google Cloud Storage (REQUIRED - no fallback)
+    // Upload template file to Google Cloud Storage (required for serverless environments)
     if (!isGCSConfigured()) {
       return NextResponse.json({ 
         error: 'Google Cloud Storage is not configured. Please configure GCS credentials and bucket name.' 
@@ -159,7 +150,7 @@ export async function POST(request: NextRequest) {
       fileName: pdfFile.name,
       fileSize: pdfFile.size,
       fileType: pdfFile.type, // Store actual file type (PDF or DOCX)
-      imageUrl: imageUrl, // Local path
+      imageData: imageDataUrl, // Base64 data URL stored in MongoDB
       price: parseFloat(price),
       uploadedBy,
       tags: tagsArray,
@@ -182,7 +173,8 @@ export async function POST(request: NextRequest) {
         fileName: template.fileName,
         fileSize: template.fileSize,
         fileType: template.fileType,
-        imageUrl: template.imageUrl,
+        imageUrl: template.imageUrl, // Legacy field
+        imageData: template.imageData, // Base64 data URL
         price: template.price,
         tags: template.tags,
         createdAt: template.createdAt

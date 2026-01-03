@@ -28,7 +28,8 @@ export async function GET(
         fileName: template.fileName,
         fileSize: template.fileSize,
         fileType: template.fileType,
-        imageUrl: template.imageUrl,
+        imageUrl: template.imageUrl, // Legacy field
+        imageData: template.imageData, // Base64 data URL (preferred)
         price: template.price,
         downloadCount: template.downloadCount,
         createdAt: template.createdAt,

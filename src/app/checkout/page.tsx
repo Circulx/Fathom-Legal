@@ -30,7 +30,8 @@ interface CartItem {
   title: string;
   description: string;
   price: number;
-  imageUrl?: string;
+  imageUrl?: string; // Legacy field
+  imageData?: string; // Base64 data URL (preferred)
   category: string;
   fileName?: string;
   fileSize?: number;
@@ -184,7 +185,7 @@ function CheckoutContent() {
               price: item.price,
               quantity: item.quantity,
               category: item.category || 'Legal Documents',
-              imageUrl: item.imageUrl,
+              imageUrl: item.imageData || item.imageUrl,
               fileName: item.fileName,
               fileSize: item.fileSize
             }));
@@ -715,9 +716,9 @@ function CheckoutContent() {
                         className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200 hover:border-[#A5292A] transition-colors"
                       >
                         <div className="flex items-center space-x-4 flex-1">
-                          {item.imageUrl ? (
+                          {(item.imageData || item.imageUrl) ? (
                             <img
-                              src={item.imageUrl}
+                              src={item.imageData || item.imageUrl}
                               alt={item.title}
                               className="w-16 h-16 object-cover rounded"
                             />
@@ -1386,9 +1387,9 @@ function CheckoutContent() {
          <div className="space-y-4 mb-6">
            {cartItems.map((item) => (
              <div key={item._id} className="flex items-center space-x-4">
-               {item.imageUrl ? (
+               {(item.imageData || item.imageUrl) ? (
                  <img
-                   src={item.imageUrl}
+                   src={item.imageData || item.imageUrl}
                    alt={item.title}
                    className="w-16 h-16 object-cover cursor-pointer hover:opacity-80 transition-opacity"
                    onClick={() => window.open(`/templates/${item._id}`, '_blank')}

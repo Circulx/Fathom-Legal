@@ -116,27 +116,18 @@ export async function PUT(request: NextRequest) {
       const maxSize = 5 * 1024 * 1024 // 5MB
       if (image.size > maxSize) {
         return NextResponse.json({ 
-          error: 'Image size too large. Maximum size is 5MB.' 
+          error: 'Image size too large. Maximum size is 5MB for database storage.' 
         }, { status: 400 })
       }
 
-      // Use local storage for images (keep same as upload route)
-      const { writeFile, mkdir } = await import('fs/promises')
-      const { join } = await import('path')
-      
-      const uploadsDir = join(process.cwd(), 'public', 'uploads', 'templates')
-      await mkdir(uploadsDir, { recursive: true })
-      
-      const timestamp = Date.now()
-      const imageExtension = image.name.split('.').pop()
-      const imageFileName = `${timestamp}-image-${image.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`
-      const imagePath = join(uploadsDir, imageFileName)
-      
+      // Convert image to Base64 for MongoDB storage
       const imageBytes = await image.arrayBuffer()
       const imageBuffer = Buffer.from(imageBytes)
-      await writeFile(imagePath, imageBuffer)
+      const base64Data = imageBuffer.toString('base64')
+      const imageDataUrl = `data:${image.type};base64,${base64Data}`
       
-      template.imageUrl = `/uploads/templates/${imageFileName}`
+      template.imageData = imageDataUrl
+      console.log(`✅ Template image stored in MongoDB as base64`)
     }
 
     // Handle PDF file update if provided

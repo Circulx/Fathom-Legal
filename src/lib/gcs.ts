@@ -29,9 +29,14 @@ try {
 }
 
 const BUCKET_NAME = process.env.GCS_BUCKET_NAME || ''
+const PUBLIC_IMAGES_BUCKET = process.env.GCS_PUBLIC_IMAGES_BUCKET || process.env.GCS_BUCKET_NAME || ''
 
 if (!BUCKET_NAME) {
   console.warn('⚠️ GCS_BUCKET_NAME not set in environment variables')
+}
+
+if (!PUBLIC_IMAGES_BUCKET) {
+  console.warn('⚠️ GCS_PUBLIC_IMAGES_BUCKET not set, will use GCS_BUCKET_NAME for images')
 }
 
 /**
@@ -148,6 +153,58 @@ export async function deleteFromGCS(filePath: string): Promise<void> {
   const file = bucket.file(filePath)
 
   await file.delete()
+}
+
+/**
+ * Upload an image to Google Cloud Storage (for template preview images)
+ * Images are uploaded to a separate public bucket for public access
+ * @param fileBuffer - Buffer containing the image data
+ * @param fileName - Name of the file to store in GCS
+ * @param contentType - MIME type of the image
+ * @returns Promise<string> - Public URL for the image
+ */
+export async function uploadImageToGCS(
+  fileBuffer: Buffer,
+  fileName: string,
+  contentType: string = 'image/jpeg'
+): Promise<string> {
+  if (!storage) {
+    throw new Error('GCS client not initialized. Please configure GCS credentials.')
+  }
+
+  if (!PUBLIC_IMAGES_BUCKET) {
+    throw new Error('GCS_PUBLIC_IMAGES_BUCKET not configured in environment variables')
+  }
+
+  // Use separate public bucket for images
+  const bucket = storage.bucket(PUBLIC_IMAGES_BUCKET)
+  const file = bucket.file(`template-images/${fileName}`)
+
+  // Upload file
+  await file.save(fileBuffer, {
+    metadata: {
+      contentType,
+      cacheControl: 'public, max-age=31536000' // 1 year cache
+    }
+  })
+
+  // Make file publicly accessible (this will work if bucket is configured for public access)
+  try {
+    await file.makePublic()
+    console.log(`✅ Image made public: template-images/${fileName}`)
+  } catch (error: any) {
+    // If uniform bucket-level access is enabled, makePublic() will fail
+    // The bucket IAM must allow allUsers to have Storage Object Viewer role
+    if (error.message?.includes('uniform bucket-level access')) {
+      console.warn('⚠️ Uniform bucket-level access enabled. Ensure public bucket IAM allows allUsers Storage Object Viewer role')
+    } else {
+      console.warn('⚠️ Could not make file public:', error.message)
+    }
+  }
+
+  // Return public URL
+  const publicUrl = `https://storage.googleapis.com/${PUBLIC_IMAGES_BUCKET}/template-images/${fileName}`
+  return publicUrl
 }
 
 /**

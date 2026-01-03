@@ -17,7 +17,8 @@ export interface ITemplate extends Document {
   fileName?: string
   fileSize?: number
   fileType?: string
-  imageUrl?: string
+  imageUrl?: string // Legacy field - kept for backward compatibility
+  imageData?: string // Base64 data URL for image (preferred)
   price: number
   uploadedBy: string
   isActive: boolean
@@ -64,6 +65,10 @@ const TemplateSchema = new Schema<ITemplate>({
     required: false
   },
   imageUrl: {
+    type: String,
+    required: false
+  },
+  imageData: {
     type: String,
     required: false
   },

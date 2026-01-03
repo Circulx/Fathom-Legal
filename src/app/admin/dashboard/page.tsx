@@ -51,7 +51,8 @@ interface Template {
   tags: string[]
   downloadCount: number
   price: number
-  imageUrl?: string
+  imageUrl?: string // Legacy field
+  imageData?: string // Base64 data URL (preferred)
   createdAt: string
   uploadedBy: {
     name: string
@@ -1237,7 +1238,7 @@ export default function AdminDashboard() {
       category: template.category,
       image: null,
       pdfFile: null,
-      existingImageUrl: template.imageUrl || '',
+      existingImageUrl: template.imageData || template.imageUrl || '',
       customOptions: template.customOptions?.map(opt => ({
         name: opt.name,
         price: opt.price.toString(),
@@ -1659,9 +1660,9 @@ export default function AdminDashboard() {
                     {templates.map((template) => (
                       <div key={template._id} className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-shadow border border-gray-100 overflow-hidden">
                         <div className="aspect-w-16 aspect-h-9">
-                          {template.imageUrl ? (
+                          {(template.imageData || template.imageUrl) ? (
                             <img
-                              src={template.imageUrl}
+                              src={template.imageData || template.imageUrl}
                               alt={template.title}
                               className="w-full h-64 object-cover"
                             />

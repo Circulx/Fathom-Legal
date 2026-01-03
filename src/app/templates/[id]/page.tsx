@@ -28,7 +28,8 @@ interface Template {
   fileName: string
   fileSize: number
   fileType: string
-  imageUrl?: string
+  imageUrl?: string // Legacy field
+  imageData?: string // Base64 data URL (preferred)
   price: number
   downloadCount: number
   createdAt: string
@@ -135,7 +136,7 @@ export default function TemplateDetails() {
           title: template.title,
           description: template.description,
           price: selectedCustomOption.price,
-          imageUrl: template.imageUrl,
+          imageUrl: template.imageData || template.imageUrl,
           category: template.category,
           fileName: template.fileName,
           fileSize: template.fileSize,
@@ -152,7 +153,7 @@ export default function TemplateDetails() {
           title: template.title,
           description: template.description,
           price: template.price,
-          imageUrl: template.imageUrl,
+          imageUrl: template.imageData || template.imageUrl,
           category: template.category,
           fileName: template.fileName,
           fileSize: template.fileSize,
@@ -222,9 +223,9 @@ export default function TemplateDetails() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Template Image */}
           <div className="aspect-square bg-gray-100 rounded-xl overflow-hidden">
-            {template.imageUrl ? (
+            {(template.imageData || template.imageUrl) ? (
               <img 
-                src={template.imageUrl} 
+                src={template.imageData || template.imageUrl} 
                 alt={template.title}
                 className="w-full h-full object-cover"
               />

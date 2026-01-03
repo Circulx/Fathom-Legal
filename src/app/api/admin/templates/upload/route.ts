@@ -96,38 +96,34 @@ export async function POST(request: NextRequest) {
     const pdfBytes = await pdfFile.arrayBuffer()
     const pdfBuffer = Buffer.from(pdfBytes)
 
-    // Create uploads directories if they don't exist
+    // Create uploads directory for images only (images stay local for public access)
     const imagesDir = join(process.cwd(), 'public', 'uploads', 'templates')
-    const documentsDir = join(process.cwd(), 'uploads', 'templates', 'documents') // Outside public for security
-    
     await mkdir(imagesDir, { recursive: true })
-    await mkdir(documentsDir, { recursive: true })
 
     const imagePath = join(imagesDir, imageFileName)
-    const documentPath = join(documentsDir, pdfFileName)
 
     // Save image (publicly accessible) - keep local storage for images
     await writeFile(imagePath, imageBuffer)
     const imageUrl = `/uploads/templates/${imageFileName}`
 
-    // Upload template file to Google Cloud Storage
+    // Upload template file to Google Cloud Storage (REQUIRED - no fallback)
+    if (!isGCSConfigured()) {
+      return NextResponse.json({ 
+        error: 'Google Cloud Storage is not configured. Please configure GCS credentials and bucket name.' 
+      }, { status: 500 })
+    }
+
     let pdfFileUrl: string
-    if (isGCSConfigured()) {
-      try {
-        // Upload file to GCS with actual content type
-        pdfFileUrl = await uploadToGCS(pdfBuffer, pdfFileName, pdfFile.type)
-        console.log(`✅ Template file uploaded to GCS: ${pdfFileUrl}`)
-      } catch (gcsError) {
-        console.error('❌ GCS upload failed, falling back to local storage:', gcsError)
-        // Fallback to local storage if GCS upload fails
-        await writeFile(documentPath, pdfBuffer)
-        pdfFileUrl = pdfFileName
-      }
-    } else {
-      // Fallback to local storage if GCS is not configured
-      console.warn('⚠️ GCS not configured, using local storage for template file')
-      await writeFile(documentPath, pdfBuffer)
-      pdfFileUrl = pdfFileName
+    try {
+      // Upload file to GCS with actual content type
+      pdfFileUrl = await uploadToGCS(pdfBuffer, pdfFileName, pdfFile.type)
+      console.log(`✅ Template file uploaded to GCS: ${pdfFileUrl}`)
+    } catch (gcsError) {
+      console.error('❌ GCS upload failed:', gcsError)
+      return NextResponse.json({ 
+        error: 'Failed to upload template file to Google Cloud Storage. Please check GCS configuration and try again.',
+        details: gcsError instanceof Error ? gcsError.message : 'Unknown error'
+      }, { status: 500 })
     }
 
     // Parse tags if provided

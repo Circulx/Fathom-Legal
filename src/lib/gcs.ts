@@ -65,8 +65,9 @@ export async function uploadToGCS(
     }
   })
 
-  // Make file private (only accessible via signed URLs or service account)
-  await file.makePrivate()
+  // Note: With uniform bucket-level access enabled, we cannot set individual object permissions.
+  // Access is controlled at the bucket level via IAM policies.
+  // Files are private by default if the bucket has appropriate IAM settings.
 
   // Return the GCS path
   return `templates/${fileName}`

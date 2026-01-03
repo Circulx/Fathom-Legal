@@ -103,7 +103,7 @@ GCS_BUCKET_NAME=your-gcs-bucket-name
 
 ### Google Cloud Storage Setup
 
-To enable PDF uploads to Google Cloud Storage:
+To enable template uploads to Google Cloud Storage:
 
 1. **Create a GCS Bucket:**
    - Go to [Google Cloud Console](https://console.cloud.google.com/)

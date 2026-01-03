@@ -78,13 +78,13 @@ export default function Templates() {
   };
 
   const addToCart = (template: Template) => {
-    // Always show modal if template has custom options, otherwise show modal with just normal option
-    // This allows users to see all available options (normal + custom)
+    // Always show modal if template has custom options, otherwise show modal with just standard option
+    // This allows users to see all available options (standard + custom)
     setSelectedTemplate(template);
     setShowCustomModal(true);
   };
 
-  const addNormalTemplateToCart = (template: Template) => {
+  const addStandardTemplateToCart = (template: Template) => {
     const existingCart = JSON.parse(localStorage.getItem('fathom_cart') || '[]');
     
     // Check if item already exists in cart
@@ -119,11 +119,11 @@ export default function Templates() {
     setShowNotification(true);
   };
 
-  const handleOptionSelect = (option: CustomOption | 'normal') => {
+  const handleOptionSelect = (option: CustomOption | 'standard') => {
     if (!selectedTemplate) return;
     
-    if (option === 'normal') {
-      setSelectedCustomOption(null); // Mark as normal
+    if (option === 'standard') {
+      setSelectedCustomOption(null); // Mark as standard
     } else {
       setSelectedCustomOption(option);
     }
@@ -145,7 +145,7 @@ export default function Templates() {
         item.customOptionName === selectedCustomOption.name
       );
     } else {
-      // For normal options, check by template ID and that it's not custom
+      // For standard options, check by template ID and that it's not custom
       existingItemIndex = existingCart.findIndex((item: any) => 
         item._id === selectedTemplate._id && 
         item.isCustom === false
@@ -177,7 +177,7 @@ export default function Templates() {
           contactEmail: selectedCustomOption.contactEmail || selectedTemplate.defaultContactEmail
         };
       } else {
-        // Normal option selected
+        // Standard option selected
         cartItem = {
           _id: selectedTemplate._id,
           title: selectedTemplate.title,
@@ -480,7 +480,7 @@ export default function Templates() {
         </div>
       )}
 
-      {/* Template Options Modal - Shows Normal + Custom Options */}
+      {/* Template Options Modal - Shows Standard + Custom Options */}
       {showCustomModal && selectedTemplate && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
           <div className="bg-white rounded-lg shadow-xl max-w-6xl w-full max-h-[90vh] overflow-y-auto">
@@ -510,18 +510,18 @@ export default function Templates() {
                 </div>
               )}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-                {/* Normal Option - Always First Column */}
+                {/* Standard Option - Always First Column */}
                 <div
                   className={`border-2 rounded-lg p-4 cursor-pointer transition-all flex flex-col ${
                     selectedCustomOption === null
                       ? 'border-[#A5292A] bg-red-50'
                       : 'border-gray-200 hover:border-gray-300'
                   }`}
-                  onClick={() => handleOptionSelect('normal')}
+                  onClick={() => handleOptionSelect('standard')}
                 >
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
-                      <h3 className="text-lg font-bold text-gray-900">Normal</h3>
+                      <h3 className="text-lg font-bold text-gray-900">Standard</h3>
                       {selectedCustomOption === null && (
                         <span className="bg-[#A5292A] text-white text-xs px-2 py-1 rounded">Selected</span>
                       )}
@@ -532,7 +532,7 @@ export default function Templates() {
                     </div>
                     <p className="text-sm text-gray-600 mb-3">Instant download</p>
                     
-                    {/* Default Features for Normal Option */}
+                    {/* Default Features for Standard Option */}
                     <div className="mb-3">
                       <ul className="space-y-1">
                         <li className="flex items-start text-sm text-gray-700">

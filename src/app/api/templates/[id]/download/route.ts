@@ -81,7 +81,7 @@ export async function GET(
     })
 
     // Check if this purchased item is a custom option - return contact info instead of file
-    // Only normal template purchases should allow file download
+    // Only standard template purchases should allow file download
     // Custom option purchases should only show contact information
     // A purchase is custom ONLY if ALL of these are true:
     // 1. Template actually has custom options (template.isCustom === true AND template.customOptions exists)
@@ -110,7 +110,7 @@ export async function GET(
       customOptionNameType: typeof purchasedItem.customOptionName,
       orderItemIsCustom: orderItemIsCustom,
       isCustomPurchase,
-      decision: isCustomPurchase ? 'CUSTOM - return contact info' : 'NORMAL - allow download'
+      decision: isCustomPurchase ? 'CUSTOM - return contact info' : 'STANDARD - allow download'
     })
     
     if (isCustomPurchase) {

@@ -36,11 +36,24 @@ export default function AdminLogin() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    e.stopPropagation()
+    
+    console.log('🔵 Form submitted', { email, password: '***', isFirstUser })
+    
+    // Validate inputs
+    if (!email || !password) {
+      setError('Please enter both email and password')
+      return
+    }
+    
     setIsLoading(true)
     setError('')
 
     try {
+      console.log('🟡 Starting login process...')
+      
       if (isFirstUser) {
+        console.log('🟡 Creating first admin user...')
         // Create first admin user
         const response = await fetch('/api/admin/create-first-admin', {
           method: 'POST',
@@ -54,47 +67,74 @@ export default function AdminLogin() {
           }),
         })
 
+        console.log('🟡 Create first admin response:', response.status)
+
         if (response.ok) {
           // After creating first admin, sign them in with NextAuth
-          const result = await signIn('credentials', {
+          console.log('🟡 Signing in with NextAuth...')
+          const signInPromise = signIn('credentials', {
             email,
             password,
             redirect: false,
           })
           
+          // Add timeout to prevent hanging
+          const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Login request timed out. Please check your connection and try again.')), 10000)
+          )
+          
+          const result = await Promise.race([signInPromise, timeoutPromise]) as any
+          
+          console.log('🟡 SignIn result:', result)
+          
           if (result?.ok) {
+            console.log('✅ Login successful, redirecting to dashboard')
             router.push('/admin/dashboard')
           } else {
-            setError('Account created but login failed. Please try logging in.')
+            console.error('❌ Login failed after account creation:', result?.error)
+            setError(result?.message || 'Account created but login failed. Please try logging in.')
           }
         } else {
-          const errorData = await response.json()
+          const errorData = await response.json().catch(() => ({ error: 'Failed to create admin' }))
+          console.error('❌ Failed to create admin:', errorData)
           setError(errorData.error || 'Failed to create admin')
         }
       } else {
-        // Login existing admin using NextAuth
-        const result = await signIn('credentials', {
+        console.log('🟡 Logging in existing admin...')
+        // Login existing admin using NextAuth with timeout
+        const signInPromise = signIn('credentials', {
           email,
           password,
           redirect: false,
         })
+        
+        // Add timeout to prevent hanging
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Login request timed out. Please check your connection and try again.')), 10000)
+        )
+        
+        const result = await Promise.race([signInPromise, timeoutPromise]) as any
+
+        console.log('🟡 SignIn result:', result)
 
         if (result?.ok) {
-          console.log('Login successful, redirecting to dashboard')
+          console.log('✅ Login successful, redirecting to dashboard')
           router.push('/admin/dashboard')
         } else {
-          console.error('Login failed:', result?.error)
+          console.error('❌ Login failed:', result?.error)
           // Map NextAuth error codes to user-friendly messages
           if (result?.error === 'CredentialsSignin') {
-            setError('Invalid credentials')
+            setError('Invalid email or password. Please check your credentials and try again. If this is your first time, make sure no admin accounts exist yet.')
+          } else if (result?.message) {
+            setError(result.message)
           } else {
-            setError(result?.error || 'Invalid credentials')
+            setError(result?.error || 'Invalid email or password')
           }
         }
       }
     } catch (error) {
-      console.error('Login error:', error)
-      setError('An error occurred. Please try again.')
+      console.error('❌ Login error:', error)
+      setError(error instanceof Error ? error.message : 'An error occurred. Please try again.')
     } finally {
       setIsLoading(false)
     }
@@ -223,7 +263,11 @@ export default function AdminLogin() {
             <div>
               <button
                 type="submit"
-                disabled={isLoading}
+                disabled={isLoading || isCheckingFirstUser}
+                onClick={(e) => {
+                  console.log('🔵 Button clicked')
+                  // Let the form handle submission
+                }}
                 className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed transition duration-200 shadow-lg hover:shadow-xl"
               >
                 {isLoading ? (

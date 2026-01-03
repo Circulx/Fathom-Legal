@@ -16,6 +16,7 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
+          console.log('❌ Missing credentials')
           return null
         }
 
@@ -48,18 +49,27 @@ export const authOptions: NextAuthOptions = {
           }
           
           // Regular authentication for existing admins
-          console.log('🔍 Looking up existing admin...')
+          console.log('🔍 Looking up existing admin with email:', credentials.email.toLowerCase())
           const admin = await Admin.findOne({ 
-            email: credentials.email.toLowerCase(),
-            isActive: true 
+            email: credentials.email.toLowerCase()
           })
 
           if (!admin) {
-            console.log('❌ Admin not found or inactive')
+            console.log('❌ Admin not found with email:', credentials.email.toLowerCase())
+            // Check if any admins exist
+            const adminCount = await Admin.countDocuments()
+            console.log('📊 Total admins in database:', adminCount)
             return null
           }
 
-          console.log('👤 Admin found:', admin.name)
+          console.log('👤 Admin found:', admin.name, 'isActive:', admin.isActive)
+          
+          if (!admin.isActive) {
+            console.log('❌ Admin account is inactive')
+            return null
+          }
+
+          console.log('🔐 Comparing password...')
           const isPasswordValid = await admin.comparePassword(credentials.password)
           console.log('🔐 Password valid:', isPasswordValid)
           
@@ -76,10 +86,14 @@ export const authOptions: NextAuthOptions = {
             }
           }
           
-          console.log('❌ Invalid password')
+          console.log('❌ Invalid password for admin:', admin.email)
           return null
         } catch (error) {
           console.error('❌ Auth error:', error)
+          if (error instanceof Error) {
+            console.error('❌ Error message:', error.message)
+            console.error('❌ Error stack:', error.stack)
+          }
           return null
         }
       }

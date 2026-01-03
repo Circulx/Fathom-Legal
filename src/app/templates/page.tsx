@@ -102,7 +102,8 @@ export default function Templates() {
         title: template.title,
         description: template.description,
         price: template.price,
-        imageUrl: template.imageData || template.imageUrl,
+        imageData: template.imageData, // Store base64 data separately
+        imageUrl: template.imageUrl, // Legacy URL field
         category: template.category,
         fileName: template.fileName,
         fileSize: template.fileSize,
@@ -167,7 +168,8 @@ export default function Templates() {
           title: selectedTemplate.title,
           description: selectedTemplate.description,
           price: selectedCustomOption.price,
-          imageUrl: selectedTemplate.imageUrl,
+          imageData: selectedTemplate.imageData, // Store base64 data separately
+          imageUrl: selectedTemplate.imageUrl, // Legacy URL field
           category: selectedTemplate.category,
           fileName: selectedTemplate.fileName,
           fileSize: selectedTemplate.fileSize,
@@ -184,7 +186,8 @@ export default function Templates() {
           title: selectedTemplate.title,
           description: selectedTemplate.description,
           price: selectedTemplate.price,
-          imageUrl: selectedTemplate.imageUrl,
+          imageData: selectedTemplate.imageData, // Store base64 data separately
+          imageUrl: selectedTemplate.imageUrl, // Legacy URL field
           category: selectedTemplate.category,
           fileName: selectedTemplate.fileName,
           fileSize: selectedTemplate.fileSize,

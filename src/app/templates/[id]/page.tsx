@@ -136,7 +136,8 @@ export default function TemplateDetails() {
           title: template.title,
           description: template.description,
           price: selectedCustomOption.price,
-          imageUrl: template.imageData || template.imageUrl,
+          imageData: template.imageData, // Store base64 data separately
+          imageUrl: template.imageUrl, // Legacy URL field
           category: template.category,
           fileName: template.fileName,
           fileSize: template.fileSize,
@@ -153,7 +154,8 @@ export default function TemplateDetails() {
           title: template.title,
           description: template.description,
           price: template.price,
-          imageUrl: template.imageData || template.imageUrl,
+          imageData: template.imageData, // Store base64 data separately
+          imageUrl: template.imageUrl, // Legacy URL field
           category: template.category,
           fileName: template.fileName,
           fileSize: template.fileSize,

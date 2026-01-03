@@ -1391,7 +1391,7 @@ function CheckoutContent() {
                  <img
                    src={item.imageData || item.imageUrl}
                    alt={item.title}
-                   className="w-16 h-16 object-cover cursor-pointer hover:opacity-80 transition-opacity"
+                   className="w-16 h-16 object-cover cursor-pointer hover:opacity-80 transition-opacity rounded"
                    onClick={() => window.open(`/templates/${item._id}`, '_blank')}
                  />
                ) : (

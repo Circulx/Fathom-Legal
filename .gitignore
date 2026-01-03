@@ -39,3 +39,9 @@ RAZORPAY_SETUP.md
 gcs-credentials.json
 google-credentials.json
 service-account*.json
+
+# Windows reserved device names (accidentally created files)
+nul
+con
+prn
+aux

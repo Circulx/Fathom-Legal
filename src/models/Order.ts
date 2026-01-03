@@ -8,6 +8,10 @@ export interface IOrderItem {
   fileName?: string
   fileSize?: number
   downloadExpiresAt?: Date  // Expiration timestamp for download link (24 hours from payment)
+  isCustom?: boolean
+  customOptionName?: string
+  calendlyLink?: string
+  contactEmail?: string
 }
 
 export interface ICustomer {
@@ -111,6 +115,26 @@ const OrderSchema = new Schema<IOrder>({
     fileSize: {
       type: Number,
       required: false
+    },
+    isCustom: {
+      type: Boolean,
+      required: false,
+      default: false
+    },
+    customOptionName: {
+      type: String,
+      required: false,
+      trim: true
+    },
+    calendlyLink: {
+      type: String,
+      required: false,
+      trim: true
+    },
+    contactEmail: {
+      type: String,
+      required: false,
+      trim: true
     }
   }],
   subtotal: {

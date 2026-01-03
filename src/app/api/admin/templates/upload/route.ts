@@ -18,6 +18,10 @@ export async function POST(request: NextRequest) {
     const category = formData.get('category') as string
     const tags = formData.get('tags') as string
     const uploadedBy = formData.get('uploadedBy') as string
+    const isCustom = formData.get('isCustom') === 'true'
+    const customOptionsJson = formData.get('customOptions') as string
+    const defaultCalendlyLink = formData.get('defaultCalendlyLink') as string
+    const defaultContactEmail = formData.get('defaultContactEmail') as string
 
     // Validate required fields
     if (!image) {
@@ -25,11 +29,18 @@ export async function POST(request: NextRequest) {
     }
 
     if (!pdfFile) {
-      return NextResponse.json({ error: 'PDF template file is required' }, { status: 400 })
+      return NextResponse.json({ error: 'Template file is required' }, { status: 400 })
     }
 
     if (!description || !price) {
       return NextResponse.json({ error: 'Missing required fields (description, price)' }, { status: 400 })
+    }
+
+    // Validate required contact fields
+    if (!defaultCalendlyLink || !defaultContactEmail) {
+      return NextResponse.json({ 
+        error: 'Default Calendly Link and Contact Email are required' 
+      }, { status: 400 })
     }
 
     // Validate image type
@@ -47,11 +58,10 @@ export async function POST(request: NextRequest) {
       }, { status: 400 })
     }
 
-    // Validate PDF type
-    const allowedPdfTypes = ['application/pdf']
-    if (!allowedPdfTypes.includes(pdfFile.type)) {
+    // Validate that a file type is present (allow all file types)
+    if (!pdfFile.type) {
       return NextResponse.json({ 
-        error: 'Invalid PDF file type. Only PDF files are allowed.' 
+        error: 'Invalid file. Please ensure the file has a valid type.' 
       }, { status: 400 })
     }
 
@@ -63,11 +73,11 @@ export async function POST(request: NextRequest) {
       }, { status: 400 })
     }
 
-    // Validate PDF size (50MB limit)
-    const maxPdfSize = 50 * 1024 * 1024 // 50MB
-    if (pdfFile.size > maxPdfSize) {
+    // Validate template file size (50MB limit)
+    const maxFileSize = 50 * 1024 * 1024 // 50MB
+    if (pdfFile.size > maxFileSize) {
       return NextResponse.json({ 
-        error: 'PDF file size too large. Maximum size is 50MB.' 
+        error: 'Template file size too large. Maximum size is 50MB.' 
       }, { status: 400 })
     }
 
@@ -88,40 +98,61 @@ export async function POST(request: NextRequest) {
 
     // Create uploads directories if they don't exist
     const imagesDir = join(process.cwd(), 'public', 'uploads', 'templates')
-    const pdfsDir = join(process.cwd(), 'uploads', 'templates', 'pdfs') // Outside public for security
+    const documentsDir = join(process.cwd(), 'uploads', 'templates', 'documents') // Outside public for security
     
     await mkdir(imagesDir, { recursive: true })
-    await mkdir(pdfsDir, { recursive: true })
+    await mkdir(documentsDir, { recursive: true })
 
     const imagePath = join(imagesDir, imageFileName)
-    const pdfPath = join(pdfsDir, pdfFileName)
+    const documentPath = join(documentsDir, pdfFileName)
 
     // Save image (publicly accessible) - keep local storage for images
     await writeFile(imagePath, imageBuffer)
     const imageUrl = `/uploads/templates/${imageFileName}`
 
-    // Upload PDF to Google Cloud Storage
+    // Upload template file to Google Cloud Storage
     let pdfFileUrl: string
     if (isGCSConfigured()) {
       try {
-        // Upload PDF to GCS
-        pdfFileUrl = await uploadToGCS(pdfBuffer, pdfFileName, 'application/pdf')
-        console.log(`✅ PDF uploaded to GCS: ${pdfFileUrl}`)
+        // Upload file to GCS with actual content type
+        pdfFileUrl = await uploadToGCS(pdfBuffer, pdfFileName, pdfFile.type)
+        console.log(`✅ Template file uploaded to GCS: ${pdfFileUrl}`)
       } catch (gcsError) {
         console.error('❌ GCS upload failed, falling back to local storage:', gcsError)
         // Fallback to local storage if GCS upload fails
-        await writeFile(pdfPath, pdfBuffer)
+        await writeFile(documentPath, pdfBuffer)
         pdfFileUrl = pdfFileName
       }
     } else {
       // Fallback to local storage if GCS is not configured
-      console.warn('⚠️ GCS not configured, using local storage for PDF')
-      await writeFile(pdfPath, pdfBuffer)
+      console.warn('⚠️ GCS not configured, using local storage for template file')
+      await writeFile(documentPath, pdfBuffer)
       pdfFileUrl = pdfFileName
     }
 
     // Parse tags if provided
     const tagsArray = tags ? tags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0) : []
+
+    // Parse custom options if provided
+    let customOptions = []
+    if (isCustom && customOptionsJson) {
+      try {
+        customOptions = JSON.parse(customOptionsJson)
+        
+        // Validate custom options have required fields
+        for (let i = 0; i < customOptions.length; i++) {
+          const option = customOptions[i]
+          if (!option.calendlyLink || !option.contactEmail) {
+            return NextResponse.json({ 
+              error: `Custom Option ${i + 1} must have both Calendly Link and Contact Email` 
+            }, { status: 400 })
+          }
+        }
+      } catch (error) {
+        console.error('Error parsing custom options:', error)
+        return NextResponse.json({ error: 'Invalid custom options JSON format' }, { status: 400 })
+      }
+    }
 
     // Create template record
     const template = new Template({
@@ -131,11 +162,15 @@ export async function POST(request: NextRequest) {
       fileUrl: pdfFileUrl, // Filename for local storage
       fileName: pdfFile.name,
       fileSize: pdfFile.size,
-      fileType: 'application/pdf',
+      fileType: pdfFile.type, // Store actual file type (PDF or DOCX)
       imageUrl: imageUrl, // Local path
       price: parseFloat(price),
       uploadedBy,
-      tags: tagsArray
+      tags: tagsArray,
+      isCustom: isCustom,
+      customOptions: customOptions.length > 0 ? customOptions : undefined,
+      defaultCalendlyLink: defaultCalendlyLink,
+      defaultContactEmail: defaultContactEmail
     })
 
     await template.save()

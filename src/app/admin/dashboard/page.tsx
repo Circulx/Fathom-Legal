@@ -57,6 +57,17 @@ interface Template {
     name: string
     email: string
   }
+  isCustom?: boolean
+  customOptions?: Array<{
+    name: string
+    price: number
+    description: string
+    features: string[]
+    calendlyLink?: string
+    contactEmail?: string
+  }>
+  defaultCalendlyLink?: string
+  defaultContactEmail?: string
 }
 
 interface GalleryItem {
@@ -745,6 +756,7 @@ export default function AdminDashboard() {
         console.log('Template upload successful, refreshing templates...')
         setShowTemplateUploadModal(false)
         setTemplateUploadForm({ 
+          title: '',
           description: '', 
           price: '', 
           category: 'Legal Documents', 
@@ -2702,6 +2714,7 @@ export default function AdminDashboard() {
                   setShowTemplateEditModal(false)
                   setEditingTemplateId(null)
                   setTemplateEditForm({
+                    title: '',
                     description: '',
                     price: '',
                     category: 'Legal Documents',
@@ -3045,6 +3058,7 @@ export default function AdminDashboard() {
                       setShowTemplateEditModal(false)
                       setEditingTemplateId(null)
                       setTemplateEditForm({
+                        title: '',
                         description: '',
                         price: '',
                         category: 'Legal Documents',

@@ -18,9 +18,12 @@ import {
   ArrowLeft,
   CheckCircle,
   AlertCircle,
-  Download
+  Download, 
+  Calendar,
+  X
 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
+import emailjs from '@emailjs/browser';
 
 interface CartItem {
   _id: string;
@@ -32,6 +35,12 @@ interface CartItem {
   fileName?: string;
   fileSize?: number;
   quantity?: number;
+  isCustom?: boolean;
+  customOptionName?: string;
+  calendlyLink?: string;
+  contactEmail?: string;
+  defaultCalendlyLink?: string;
+  defaultContactEmail?: string;
 }
 
 interface CustomerInfo {
@@ -57,6 +66,20 @@ function CheckoutContent() {
   const [customerEmail, setCustomerEmail] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [currentStep, setCurrentStep] = useState(1);
+  const [showContactModal, setShowContactModal] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState<CartItem | null>(null);
+  const [contactFormData, setContactFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    message: ''
+  });
+  const [isSendingEmail, setIsSendingEmail] = useState(false);
+  const [emailStatus, setEmailStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [downloadingTemplateId, setDownloadingTemplateId] = useState<string | null>(null);
+  const [showDownloadNotification, setShowDownloadNotification] = useState(false);
+  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [emailModalData, setEmailModalData] = useState<{ recipientEmail: string; templateTitle: string } | null>(null);
   
   // Quantity management functions
   const updateQuantity = (itemId: string, newQuantity: number) => {
@@ -286,7 +309,11 @@ function CheckoutContent() {
           price: Number(item.price), // Ensure it's a number
           quantity: Number(item.quantity || 1), // Ensure it's a number
           fileName: item.fileName,
-          fileSize: item.fileSize ? Number(item.fileSize) : undefined
+          fileSize: item.fileSize ? Number(item.fileSize) : undefined,
+          isCustom: item.isCustom === true ? true : false, // Explicitly set to false if not true
+          customOptionName: item.isCustom === true && item.customOptionName ? item.customOptionName : undefined, // Only include if actually custom
+          calendlyLink: item.calendlyLink,
+          contactEmail: item.contactEmail
         })),
         subtotal: Number(calculateSubtotal()), // Ensure it's a number
         total: Number(calculateTotal()), // Ensure it's a number
@@ -501,16 +528,172 @@ function CheckoutContent() {
     }
   };
 
-  const handleDownload = (templateId: string) => {
-    const downloadUrl = `/api/templates/${templateId}/download?email=${encodeURIComponent(customerEmail)}`;
-    window.open(downloadUrl, '_blank');
+  const handleDownload = async (templateId: string) => {
+    // Show download notification
+    setDownloadingTemplateId(templateId);
+    setShowDownloadNotification(true);
+    
+    try {
+      // Create download URL
+      const downloadUrl = `/api/templates/${templateId}/download?email=${encodeURIComponent(customerEmail)}`;
+      
+      // Fetch the file as a blob
+      const response = await fetch(downloadUrl);
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Download failed' }));
+        throw new Error(errorData.error || 'Download failed');
+      }
+      
+      // Check if response is JSON (custom template response)
+      const contentType = response.headers.get('Content-Type') || '';
+      if (contentType.includes('application/json')) {
+        // This is a custom template - get the JSON data
+        const jsonData = await response.json();
+        console.error('Custom template detected, cannot download file:', jsonData);
+        alert(`This is a custom template. Please use the "Schedule" or "Email" button to contact us for customization.\n\nCustom Option: ${jsonData.customOptionName || 'N/A'}`);
+        setShowDownloadNotification(false);
+        setDownloadingTemplateId(null);
+        return;
+      }
+      
+      // Get the filename from Content-Disposition header or use default
+      const contentDisposition = response.headers.get('Content-Disposition');
+      let filename = 'template'; // Generic fallback without extension
+      
+      if (contentDisposition) {
+        // Try to extract filename from Content-Disposition header
+        // Handle both quoted and unquoted filenames
+        const filenameMatch = contentDisposition.match(/filename\*?=['"]?([^'";\n]+)['"]?/i);
+        if (filenameMatch && filenameMatch[1]) {
+          // Decode URI-encoded filename if present (filename*=UTF-8''encoded)
+          let extractedFilename = filenameMatch[1];
+          if (extractedFilename.includes("''")) {
+            // Handle RFC 5987 encoded filename (filename*=UTF-8''encoded)
+            const parts = extractedFilename.split("''");
+            if (parts.length > 1) {
+              extractedFilename = decodeURIComponent(parts[parts.length - 1]);
+            }
+          } else {
+            // Regular filename, decode if needed
+            extractedFilename = decodeURIComponent(extractedFilename);
+          }
+          filename = extractedFilename;
+        } else {
+          // Try alternative format: filename="value"
+          const altMatch = contentDisposition.match(/filename="([^"]+)"/);
+          if (altMatch && altMatch[1]) {
+            filename = altMatch[1];
+          }
+        }
+      }
+      
+      // If still no extension, try to infer from Content-Type header
+      if (!filename.includes('.')) {
+        if (contentType) {
+          const mimeToExt: { [key: string]: string } = {
+            'application/pdf': '.pdf',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document': '.docx',
+            'application/msword': '.doc',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': '.xlsx',
+            'application/vnd.ms-excel': '.xls',
+            'text/plain': '.txt',
+            'application/zip': '.zip',
+            'application/x-rar-compressed': '.rar'
+          };
+          const ext = mimeToExt[contentType.split(';')[0].trim()] || '';
+          filename = filename + ext;
+        }
+      }
+      
+      // Convert response to blob
+      const blob = await response.blob();
+      
+      // Create a temporary URL for the blob
+      const blobUrl = window.URL.createObjectURL(blob);
+      
+      // Create a temporary anchor element to trigger download
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = filename; // Force download with filename
+      link.style.display = 'none';
+      document.body.appendChild(link);
+      link.click();
+      
+      // Clean up
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
+      
+      // Hide notification after a delay
+      setTimeout(() => {
+        setShowDownloadNotification(false);
+        setDownloadingTemplateId(null);
+      }, 3000);
+    } catch (error) {
+      console.error('Download error:', error);
+      alert(`Download failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      setShowDownloadNotification(false);
+      setDownloadingTemplateId(null);
+    }
+  };
+
+  const handleContactClick = (item: CartItem) => {
+    setSelectedTemplate(item);
+    setContactFormData({
+      name: customerInfo.name || '',
+      email: customerInfo.email || customerEmail || '',
+      phone: customerInfo.phone || '',
+      message: `I would like to discuss customization for: ${item.title}${item.customOptionName ? ` (${item.customOptionName})` : ''}`
+    });
+    setShowContactModal(true);
+    setEmailStatus('idle');
+  };
+
+  const handleContactSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedTemplate) return;
+
+    setIsSendingEmail(true);
+    setEmailStatus('idle');
+
+    try {
+      // EmailJS configuration
+      const serviceId = 'service_hrntxm5';
+      const templateId = 'template_kq2l3yk';
+      const publicKey = '5suuijzXCHnnvG_YW';
+
+      const templateParams = {
+        from_name: contactFormData.name,
+        from_email: contactFormData.email,
+        phone: contactFormData.phone,
+        message: contactFormData.message,
+        to_email: selectedTemplate.contactEmail || selectedTemplate.defaultContactEmail || 'assist@fathomlegal.com',
+        template_title: selectedTemplate.title,
+        template_category: selectedTemplate.category,
+        custom_option: selectedTemplate.customOptionName || 'Normal',
+        calendly_link: selectedTemplate.calendlyLink || selectedTemplate.defaultCalendlyLink || ''
+      };
+
+      await emailjs.send(serviceId, templateId, templateParams, publicKey);
+      
+      setEmailStatus('success');
+      setTimeout(() => {
+        setShowContactModal(false);
+        setEmailStatus('idle');
+      }, 2000);
+    } catch (error) {
+      console.error('Error sending email:', error);
+      setEmailStatus('error');
+    } finally {
+      setIsSendingEmail(false);
+    }
   };
 
   if (orderSuccess) {
     return (
       <div className="min-h-screen bg-gray-50">
         <Navbar page="checkout" />
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto px-4 py-8 pt-24">
           <div className="max-w-3xl mx-auto">
             <div className="bg-white rounded-lg shadow-lg p-8">
               <div className="text-center mb-8">
@@ -546,18 +729,76 @@ function CheckoutContent() {
                           <div className="flex-1">
                             <h3 className="font-semibold text-gray-900">{item.title}</h3>
                             <p className="text-sm text-gray-600">{item.category}</p>
+                            {item.isCustom && item.customOptionName && (
+                              <p className="text-xs text-blue-600 font-medium">Custom: {item.customOptionName}</p>
+                            )}
                             {item.quantity && item.quantity > 1 && (
                               <p className="text-xs text-gray-500">Quantity: {item.quantity}</p>
                             )}
                           </div>
                         </div>
-                        <button
-                          onClick={() => handleDownload(item._id)}
-                          className="flex items-center space-x-2 px-4 py-2 bg-[#A5292A] text-white rounded-lg hover:bg-red-700 transition-colors font-medium"
-                        >
-                          <Download className="w-4 h-4" />
-                          <span>Download</span>
-                        </button>
+                        <div className="flex gap-2">
+                          {!item.isCustom && (
+                            <button
+                              onClick={() => handleDownload(item._id)}
+                              className="flex items-center space-x-2 px-4 py-2 bg-[#A5292A] text-white rounded-lg hover:bg-red-700 transition-colors font-medium"
+                            >
+                              <Download className="w-4 h-4" />
+                              <span>Download</span>
+                            </button>
+                          )}
+                          {(item.isCustom || item.calendlyLink || item.contactEmail || item.defaultCalendlyLink || item.defaultContactEmail) && (
+                            <div className="flex gap-2">
+                              {item.calendlyLink || item.defaultCalendlyLink ? (
+                                <button
+                                  onClick={() => {
+                                    const calendlyLink = item.calendlyLink || item.defaultCalendlyLink
+                                    if (calendlyLink) {
+                                      window.open(calendlyLink, '_blank')
+                                    }
+                                  }}
+                                  className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                                >
+                                  <Calendar className="w-4 h-4" />
+                                  <span>Schedule</span>
+                                </button>
+                              ) : null}
+                              {item.contactEmail || item.defaultContactEmail ? (
+                                <button
+                                  onClick={() => {
+                                    const contactEmail = item.contactEmail || item.defaultContactEmail
+                                    if (contactEmail) {
+                                      setEmailModalData({
+                                        recipientEmail: contactEmail,
+                                        templateTitle: item.title
+                                      })
+                                      setContactFormData({
+                                        name: customerInfo.name || '',
+                                        email: customerInfo.email || customerEmail || '',
+                                        phone: customerInfo.phone || '',
+                                        message: ''
+                                      })
+                                      setShowEmailModal(true)
+                                    }
+                                  }}
+                                  className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
+                                >
+                                  <Mail className="w-4 h-4" />
+                                  <span>Email</span>
+                                </button>
+                              ) : null}
+                              {(!item.calendlyLink && !item.defaultCalendlyLink && !item.contactEmail && !item.defaultContactEmail) && (
+                                <button
+                                  onClick={() => handleContactClick(item)}
+                                  className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                                >
+                                  <Mail className="w-4 h-4" />
+                                  <span>Contact</span>
+                                </button>
+                              )}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -566,6 +807,289 @@ function CheckoutContent() {
                       <strong>Note:</strong> Download links are valid for your purchased templates. 
                       Make sure to save your files after downloading.
                     </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Contact Modal */}
+              {showContactModal && selectedTemplate && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                  <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+                    <div className="flex justify-between items-center mb-4">
+                      <h3 className="text-xl font-bold text-gray-900">Contact Template Owner</h3>
+                      <button
+                        onClick={() => {
+                          setShowContactModal(false);
+                          setEmailStatus('idle');
+                        }}
+                        className="text-gray-400 hover:text-gray-600"
+                      >
+                        <X className="w-6 h-6" />
+                      </button>
+                    </div>
+                    
+                    <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+                      <p className="text-sm text-gray-600 mb-1">Template:</p>
+                      <p className="font-semibold text-gray-900">{selectedTemplate.title}</p>
+                      {selectedTemplate.customOptionName && (
+                        <p className="text-sm text-blue-600 mt-1">Option: {selectedTemplate.customOptionName}</p>
+                      )}
+                    </div>
+
+                    <form onSubmit={handleContactSubmit} className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Your Name <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          value={contactFormData.name}
+                          onChange={(e) => setContactFormData(prev => ({ ...prev, name: e.target.value }))}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          placeholder="Enter your name"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Your Email <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="email"
+                          required
+                          value={contactFormData.email}
+                          onChange={(e) => setContactFormData(prev => ({ ...prev, email: e.target.value }))}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          placeholder="Enter your email"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Your Phone <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="tel"
+                          required
+                          value={contactFormData.phone}
+                          onChange={(e) => setContactFormData(prev => ({ ...prev, phone: e.target.value }))}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          placeholder="Enter your phone number"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Message <span className="text-red-500">*</span>
+                        </label>
+                        <textarea
+                          required
+                          rows={4}
+                          value={contactFormData.message}
+                          onChange={(e) => setContactFormData(prev => ({ ...prev, message: e.target.value }))}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          placeholder="Describe your customization requirements..."
+                        />
+                      </div>
+
+                      {emailStatus === 'success' && (
+                        <div className="p-3 bg-green-50 border border-green-200 rounded-lg flex items-center gap-2">
+                          <CheckCircle className="w-5 h-5 text-green-600" />
+                          <p className="text-sm text-green-800">Email sent successfully! We'll get back to you soon.</p>
+                        </div>
+                      )}
+
+                      {emailStatus === 'error' && (
+                        <div className="p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2">
+                          <AlertCircle className="w-5 h-5 text-red-600" />
+                          <p className="text-sm text-red-800">Failed to send email. Please try again.</p>
+                        </div>
+                      )}
+
+                      <div className="flex gap-3 pt-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowContactModal(false);
+                            setEmailStatus('idle');
+                          }}
+                          className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                          disabled={isSendingEmail}
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="submit"
+                          className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          disabled={isSendingEmail}
+                        >
+                          {isSendingEmail ? 'Sending...' : 'Send Email'}
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              )}
+
+              {/* Email Modal */}
+              {showEmailModal && emailModalData && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                  <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+                    <div className="flex justify-between items-center mb-4">
+                      <h3 className="text-xl font-bold text-gray-900">Send Email</h3>
+                      <button
+                        onClick={() => {
+                          setShowEmailModal(false);
+                          setEmailModalData(null);
+                          setEmailStatus('idle');
+                        }}
+                        className="text-gray-400 hover:text-gray-600"
+                      >
+                        <X className="w-6 h-6" />
+                      </button>
+                    </div>
+                    
+                    <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+                      <p className="text-sm text-gray-600 mb-1">To:</p>
+                      <p className="font-semibold text-gray-900">{emailModalData.recipientEmail}</p>
+                      <p className="text-sm text-gray-600 mt-1">Template: {emailModalData.templateTitle}</p>
+                    </div>
+
+                    <form onSubmit={async (e) => {
+                      e.preventDefault();
+                      setIsSendingEmail(true);
+                      setEmailStatus('idle');
+
+                      try {
+                        const serviceId = 'service_hrntxm5';
+                        const templateId = 'template_kq2l3yk';
+                        const publicKey = '5suuijzXCHnnvG_YW';
+
+                        const templateParams = {
+                          from_name: contactFormData.name,
+                          from_email: contactFormData.email,
+                          phone: contactFormData.phone,
+                          message: contactFormData.message,
+                          to_email: emailModalData.recipientEmail,
+                          template_title: emailModalData.templateTitle,
+                          custom_option: 'Normal',
+                          calendly_link: ''
+                        };
+
+                        await emailjs.send(serviceId, templateId, templateParams, publicKey);
+                        
+                        setEmailStatus('success');
+                        setTimeout(() => {
+                          setShowEmailModal(false);
+                          setEmailModalData(null);
+                          setEmailStatus('idle');
+                          setContactFormData({
+                            name: '',
+                            email: '',
+                            phone: '',
+                            message: ''
+                          });
+                        }, 2000);
+                      } catch (error) {
+                        console.error('Error sending email:', error);
+                        setEmailStatus('error');
+                      } finally {
+                        setIsSendingEmail(false);
+                      }
+                    }} className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Your Name <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          value={contactFormData.name}
+                          onChange={(e) => setContactFormData(prev => ({ ...prev, name: e.target.value }))}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                          placeholder="Enter your name"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Your Email <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="email"
+                          required
+                          value={contactFormData.email}
+                          onChange={(e) => setContactFormData(prev => ({ ...prev, email: e.target.value }))}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                          placeholder="Enter your email"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Your Phone <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="tel"
+                          required
+                          value={contactFormData.phone}
+                          onChange={(e) => setContactFormData(prev => ({ ...prev, phone: e.target.value }))}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                          placeholder="Enter your phone number"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Message <span className="text-red-500">*</span>
+                        </label>
+                        <textarea
+                          required
+                          rows={4}
+                          value={contactFormData.message}
+                          onChange={(e) => setContactFormData(prev => ({ ...prev, message: e.target.value }))}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                          placeholder="Enter your message..."
+                        />
+                      </div>
+
+                      {emailStatus === 'success' && (
+                        <div className="p-3 bg-green-50 border border-green-200 rounded-lg flex items-center gap-2">
+                          <CheckCircle className="w-5 h-5 text-green-600" />
+                          <p className="text-sm text-green-800">Email sent successfully! We'll get back to you soon.</p>
+                        </div>
+                      )}
+
+                      {emailStatus === 'error' && (
+                        <div className="p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2">
+                          <AlertCircle className="w-5 h-5 text-red-600" />
+                          <p className="text-sm text-red-800">Failed to send email. Please try again.</p>
+                        </div>
+                      )}
+
+                      <div className="flex gap-3 pt-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowEmailModal(false);
+                            setEmailModalData(null);
+                            setEmailStatus('idle');
+                          }}
+                          className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                          disabled={isSendingEmail}
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="submit"
+                          className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          disabled={isSendingEmail}
+                        >
+                          {isSendingEmail ? 'Sending...' : 'Send Email'}
+                        </button>
+                      </div>
+                    </form>
                   </div>
                 </div>
               )}
@@ -603,7 +1127,7 @@ function CheckoutContent() {
     return (
       <div className="min-h-screen bg-gray-50">
         <Navbar page="checkout" />
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto px-4 py-8 pt-24">
           <div className="max-w-2xl mx-auto">
             <div className="bg-white rounded-lg shadow-lg p-8 text-center">
               <ShoppingCart className="w-16 h-16 text-gray-400 mx-auto mb-4" />
@@ -836,7 +1360,7 @@ function CheckoutContent() {
     <div className="min-h-screen">
         <Navbar page="checkout" />
       
-      <div className="container bg-white mx-auto px-4 py-8">
+      <div className="container bg-white mx-auto px-4 py-8 pt-24">
       
        
        
@@ -957,6 +1481,34 @@ function CheckoutContent() {
       </div>
 
       <Footer />
+
+      {/* Download Notification */}
+      {showDownloadNotification && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl p-6 max-w-md w-full animate-popup">
+            <div className="flex items-center space-x-4">
+              <div className="flex-shrink-0">
+                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                  <Download className="w-6 h-6 text-blue-600 animate-bounce" />
+                </div>
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-semibold text-gray-900">Downloading Template</h3>
+                <p className="text-sm text-gray-600 mt-1">Your template is being downloaded. Please check your downloads folder.</p>
+              </div>
+              <button
+                onClick={() => {
+                  setShowDownloadNotification(false);
+                  setDownloadingTemplateId(null);
+                }}
+                className="flex-shrink-0 text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

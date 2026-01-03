@@ -6,6 +6,15 @@ import Footer from "@/components/Footer";
 import Breadcrumb from "@/components/Breadcrumb";
 import { FileText, Download, Eye, Search, Filter, Trash2, ShoppingCart } from "lucide-react";
 
+interface CustomOption {
+  name: string
+  price: number
+  description?: string
+  features: string[]
+  calendlyLink?: string
+  contactEmail?: string
+}
+
 interface Template {
   _id: string
   title: string
@@ -20,6 +29,10 @@ interface Template {
   tags: string[]
   downloadCount: number
   createdAt: string
+  isCustom?: boolean
+  customOptions?: CustomOption[]
+  defaultCalendlyLink?: string
+  defaultContactEmail?: string
 }
 
 export default function Templates() {
@@ -31,6 +44,9 @@ export default function Templates() {
   const [cartItems, setCartItems] = useState<any[]>([]);
   const [showNotification, setShowNotification] = useState(false);
   const [notificationMessage, setNotificationMessage] = useState('');
+  const [showCustomModal, setShowCustomModal] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
+  const [selectedCustomOption, setSelectedCustomOption] = useState<CustomOption | null>(null);
 
   const categories = [
     { value: 'all', label: 'All' },
@@ -62,6 +78,13 @@ export default function Templates() {
   };
 
   const addToCart = (template: Template) => {
+    // Always show modal if template has custom options, otherwise show modal with just normal option
+    // This allows users to see all available options (normal + custom)
+    setSelectedTemplate(template);
+    setShowCustomModal(true);
+  };
+
+  const addNormalTemplateToCart = (template: Template) => {
     const existingCart = JSON.parse(localStorage.getItem('fathom_cart') || '[]');
     
     // Check if item already exists in cart
@@ -70,7 +93,7 @@ export default function Templates() {
     if (existingItemIndex !== -1) {
       // Item exists, increment quantity
       existingCart[existingItemIndex].quantity += 1;
-      setNotificationMessage(`${template.title} quantity updated!`);
+      setNotificationMessage('Successfully added to cart!');
     } else {
       // Item doesn't exist, add new item
       const cartItem = {
@@ -82,10 +105,11 @@ export default function Templates() {
         category: template.category,
         fileName: template.fileName,
         fileSize: template.fileSize,
-        quantity: 1
+        quantity: 1,
+        isCustom: false
       };
       existingCart.push(cartItem);
-      setNotificationMessage(`${template.title} added to cart!`);
+      setNotificationMessage('Successfully added to cart!');
     }
     
     localStorage.setItem('fathom_cart', JSON.stringify(existingCart));
@@ -93,11 +117,92 @@ export default function Templates() {
     
     // Show notification
     setShowNotification(true);
+  };
+
+  const handleOptionSelect = (option: CustomOption | 'normal') => {
+    if (!selectedTemplate) return;
     
-    // Hide notification after 3 seconds
-    setTimeout(() => {
-      setShowNotification(false);
-    }, 3000);
+    if (option === 'normal') {
+      setSelectedCustomOption(null); // Mark as normal
+    } else {
+      setSelectedCustomOption(option);
+    }
+  };
+
+  const addSelectedOptionToCart = () => {
+    if (!selectedTemplate) return;
+    
+    const existingCart = JSON.parse(localStorage.getItem('fathom_cart') || '[]');
+    
+    // Check if the same item already exists in cart
+    let existingItemIndex = -1;
+    
+    if (selectedCustomOption) {
+      // For custom options, check by template ID and custom option name
+      existingItemIndex = existingCart.findIndex((item: any) => 
+        item._id === selectedTemplate._id && 
+        item.isCustom === true && 
+        item.customOptionName === selectedCustomOption.name
+      );
+    } else {
+      // For normal options, check by template ID and that it's not custom
+      existingItemIndex = existingCart.findIndex((item: any) => 
+        item._id === selectedTemplate._id && 
+        item.isCustom === false
+      );
+    }
+    
+    if (existingItemIndex !== -1) {
+      // Item exists, increment quantity
+      existingCart[existingItemIndex].quantity = (existingCart[existingItemIndex].quantity || 1) + 1;
+    } else {
+      // Item doesn't exist, add new item
+      let cartItem;
+      
+      if (selectedCustomOption) {
+        // Custom option selected
+        cartItem = {
+          _id: selectedTemplate._id,
+          title: selectedTemplate.title,
+          description: selectedTemplate.description,
+          price: selectedCustomOption.price,
+          imageUrl: selectedTemplate.imageUrl,
+          category: selectedTemplate.category,
+          fileName: selectedTemplate.fileName,
+          fileSize: selectedTemplate.fileSize,
+          quantity: 1,
+          isCustom: true,
+          customOptionName: selectedCustomOption.name,
+          calendlyLink: selectedCustomOption.calendlyLink || selectedTemplate.defaultCalendlyLink,
+          contactEmail: selectedCustomOption.contactEmail || selectedTemplate.defaultContactEmail
+        };
+      } else {
+        // Normal option selected
+        cartItem = {
+          _id: selectedTemplate._id,
+          title: selectedTemplate.title,
+          description: selectedTemplate.description,
+          price: selectedTemplate.price,
+          imageUrl: selectedTemplate.imageUrl,
+          category: selectedTemplate.category,
+          fileName: selectedTemplate.fileName,
+          fileSize: selectedTemplate.fileSize,
+          quantity: 1,
+          isCustom: false
+        };
+      }
+      
+      existingCart.push(cartItem);
+    }
+    
+    localStorage.setItem('fathom_cart', JSON.stringify(existingCart));
+    setCartItems(existingCart);
+    
+    setNotificationMessage('Successfully added to cart!');
+    setShowNotification(true);
+    setShowCustomModal(false);
+    setSelectedTemplate(null);
+    setSelectedCustomOption(null);
   };
 
   const goToCheckout = () => {
@@ -310,7 +415,6 @@ export default function Templates() {
                         <div className="text-lg font-bold text-gray-900">
                           ₹{template.price || 0}
                         </div>
-                        <div className="text-xs text-gray-500">+ Taxes</div>
                       </div>
                       
                       {/* Add to Cart Button */}
@@ -334,7 +438,7 @@ export default function Templates() {
       {showNotification && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white rounded-lg shadow-xl p-4 sm:p-6 max-w-md w-full mx-4 animate-popup">
-            <div className="flex items-center space-x-3 sm:space-x-4">
+            <div className="flex items-center space-x-3 sm:space-x-4 mb-4">
               <div className="flex-shrink-0">
                 <div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-100 rounded-full flex items-center justify-center">
                   <svg className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -355,12 +459,172 @@ export default function Templates() {
                 </svg>
               </button>
             </div>
-            <div className="mt-4 flex justify-end">
+            <div className="flex justify-end gap-3">
               <button
                 onClick={() => setShowNotification(false)}
+                className="px-3 sm:px-4 py-1.5 sm:py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium text-sm sm:text-base"
+              >
+                Continue Shopping
+              </button>
+              <button
+                onClick={() => {
+                  setShowNotification(false);
+                  window.location.href = '/checkout';
+                }}
                 className="px-3 sm:px-4 py-1.5 sm:py-2 bg-[#A5292A] text-white rounded-lg hover:bg-red-700 transition-colors font-medium text-sm sm:text-base"
               >
-                OK
+                View Cart
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Template Options Modal - Shows Normal + Custom Options */}
+      {showCustomModal && selectedTemplate && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-6xl w-full max-h-[90vh] overflow-y-auto">
+            {/* Modal Header */}
+            <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center">
+              <div>
+                <h2 className="text-xl font-bold text-gray-900">Select Template Option</h2>
+              </div>
+              <button
+                onClick={() => {
+                  setShowCustomModal(false);
+                  setSelectedTemplate(null);
+                  setSelectedCustomOption(null);
+                }}
+                className="text-gray-400 hover:text-gray-600 text-2xl"
+              >
+                ×
+              </button>
+            </div>
+
+            {/* Modal Body - Options in Columns */}
+            <div className="p-6">
+              {/* Template Description */}
+              {selectedTemplate.description && (
+                <div className="mb-6 pb-4 border-b border-gray-200">
+                  <p className="text-gray-700 whitespace-pre-line">{selectedTemplate.description}</p>
+                </div>
+              )}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+                {/* Normal Option - Always First Column */}
+                <div
+                  className={`border-2 rounded-lg p-4 cursor-pointer transition-all flex flex-col ${
+                    selectedCustomOption === null
+                      ? 'border-[#A5292A] bg-red-50'
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                  onClick={() => handleOptionSelect('normal')}
+                >
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-2">
+                      <h3 className="text-lg font-bold text-gray-900">Normal</h3>
+                      {selectedCustomOption === null && (
+                        <span className="bg-[#A5292A] text-white text-xs px-2 py-1 rounded">Selected</span>
+                      )}
+                    </div>
+                    <div className="text-2xl font-bold text-[#A5292A] mb-2">
+                      ₹{selectedTemplate.price.toLocaleString()}
+                      <span className="text-sm font-normal text-gray-600"> per template</span>
+                    </div>
+                    <p className="text-sm text-gray-600 mb-3">Instant download</p>
+                    
+                    {/* Default Features for Normal Option */}
+                    <div className="mb-3">
+                      <ul className="space-y-1">
+                        <li className="flex items-start text-sm text-gray-700">
+                          <span className="text-green-500 mr-2">✓</span>
+                          <span>Instant Download</span>
+                        </li>
+                        <li className="flex items-start text-sm text-gray-700">
+                          <span className="text-green-500 mr-2">✓</span>
+                          <span>Editable File</span>
+                        </li>
+                        <li className="flex items-start text-sm text-gray-700">
+                          <span className="text-green-500 mr-2">✓</span>
+                          <span>No Customization</span>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Custom Options - Columns 2-5 */}
+                {selectedTemplate.customOptions && selectedTemplate.customOptions.map((option, index) => (
+                  <div
+                    key={index}
+                    className={`border-2 rounded-lg p-4 cursor-pointer transition-all flex flex-col ${
+                      selectedCustomOption?.name === option.name
+                        ? 'border-[#A5292A] bg-red-50'
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                    onClick={() => handleOptionSelect(option)}
+                  >
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <h3 className="text-lg font-bold text-gray-900">{option.name}</h3>
+                        {selectedCustomOption?.name === option.name && (
+                          <span className="bg-[#A5292A] text-white text-xs px-2 py-1 rounded">Selected</span>
+                        )}
+                      </div>
+                      <div className="text-2xl font-bold text-[#A5292A] mb-2">
+                        ₹{option.price.toLocaleString()}
+                        <span className="text-sm font-normal text-gray-600"> per template</span>
+                      </div>
+                      {option.description && (
+                        <p className="text-sm text-gray-600 mb-3">{option.description}</p>
+                      )}
+                      
+                      {/* Features List */}
+                      {option.features && option.features.length > 0 && (
+                        <div className="mb-3">
+                          <ul className="space-y-1">
+                            {option.features.map((feature, idx) => (
+                              <li key={idx} className="flex items-start text-sm text-gray-700">
+                                <span className="text-green-500 mr-2">✓</span>
+                                <span>{feature}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+
+                      {/* Contact Information */}
+                      <div className="mt-auto pt-3 border-t border-gray-200">
+                        <p className="text-xs text-gray-500">
+                          {option.calendlyLink || selectedTemplate.defaultCalendlyLink
+                            ? 'Schedule via Calendly'
+                            : option.contactEmail || selectedTemplate.defaultContactEmail
+                            ? 'Contact via Email'
+                            : 'Contact after purchase'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="sticky bottom-0 bg-white border-t border-gray-200 px-6 py-4 flex justify-end gap-3">
+              <button
+                onClick={() => {
+                  setShowCustomModal(false);
+                  setSelectedTemplate(null);
+                  setSelectedCustomOption(null);
+                }}
+                className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={addSelectedOptionToCart}
+                className="px-6 py-2 bg-[#A5292A] text-white rounded-lg hover:bg-red-700 transition-colors"
+              >
+                Add to Cart
               </button>
             </div>
           </div>

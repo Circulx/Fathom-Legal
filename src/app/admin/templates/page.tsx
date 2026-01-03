@@ -414,17 +414,16 @@ export default function TemplatesPage() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    PDF Template File *
+                    Template File *
                   </label>
                   <input
                     type="file"
                     required
                     onChange={handlePdfChange}
-                    accept=".pdf"
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
                   />
                   <p className="text-xs text-gray-500 mt-1">
-                    Upload the PDF template file (Max 50MB). This file will be hidden from buyers until purchase.
+                    Upload the template file (Any file type, Max 50MB). This file will be hidden from buyers until purchase.
                   </p>
                 </div>
 

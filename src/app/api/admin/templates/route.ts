@@ -52,6 +52,184 @@ export async function GET(request: NextRequest) {
   }
 }
 
+export async function PUT(request: NextRequest) {
+  try {
+    await connectDB()
+    
+    const formData = await request.formData()
+    const id = formData.get('id') as string
+    const title = formData.get('title') as string
+    const description = formData.get('description') as string
+    const price = formData.get('price') as string
+    const category = formData.get('category') as string
+    const image = formData.get('image') as File | null
+    const pdfFile = formData.get('pdfFile') as File | null
+    const isCustom = formData.get('isCustom') === 'true'
+    const customOptionsJson = formData.get('customOptions') as string
+    const defaultCalendlyLink = formData.get('defaultCalendlyLink') as string
+    const defaultContactEmail = formData.get('defaultContactEmail') as string
+
+    if (!id) {
+      return NextResponse.json({ error: 'Template ID is required' }, { status: 400 })
+    }
+
+    if (!title || !description || !price) {
+      return NextResponse.json({ error: 'Missing required fields (title, description, price)' }, { status: 400 })
+    }
+
+    if (!defaultCalendlyLink || !defaultContactEmail) {
+      return NextResponse.json({ 
+        error: 'Default Calendly Link and Contact Email are required' 
+      }, { status: 400 })
+    }
+
+    const template = await Template.findById(id)
+    
+    if (!template) {
+      return NextResponse.json({ error: 'Template not found' }, { status: 404 })
+    }
+
+    // Update basic fields
+    template.title = title
+    template.description = description
+    template.price = parseFloat(price)
+    template.category = category || 'Legal Documents'
+    template.defaultCalendlyLink = defaultCalendlyLink
+    template.defaultContactEmail = defaultContactEmail
+
+    // Handle image update if provided
+    if (image && image.size > 0) {
+      const allowedImageTypes = [
+        'image/jpeg',
+        'image/jpg', 
+        'image/png',
+        'image/gif',
+        'image/webp'
+      ]
+
+      if (!allowedImageTypes.includes(image.type)) {
+        return NextResponse.json({ 
+          error: 'Invalid image type. Only JPEG, PNG, GIF, and WebP images are allowed.' 
+        }, { status: 400 })
+      }
+
+      const maxSize = 5 * 1024 * 1024 // 5MB
+      if (image.size > maxSize) {
+        return NextResponse.json({ 
+          error: 'Image size too large. Maximum size is 5MB.' 
+        }, { status: 400 })
+      }
+
+      // Use local storage for images (keep same as upload route)
+      const { writeFile, mkdir } = await import('fs/promises')
+      const { join } = await import('path')
+      
+      const uploadsDir = join(process.cwd(), 'public', 'uploads', 'templates')
+      await mkdir(uploadsDir, { recursive: true })
+      
+      const timestamp = Date.now()
+      const imageExtension = image.name.split('.').pop()
+      const imageFileName = `${timestamp}-image-${image.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`
+      const imagePath = join(uploadsDir, imageFileName)
+      
+      const imageBytes = await image.arrayBuffer()
+      const imageBuffer = Buffer.from(imageBytes)
+      await writeFile(imagePath, imageBuffer)
+      
+      template.imageUrl = `/uploads/templates/${imageFileName}`
+    }
+
+    // Handle PDF file update if provided
+    if (pdfFile && pdfFile.size > 0) {
+      const maxSize = 50 * 1024 * 1024 // 50MB
+      if (pdfFile.size > maxSize) {
+        return NextResponse.json({ 
+          error: 'File size too large. Maximum size is 50MB.' 
+        }, { status: 400 })
+      }
+
+      // Use GCS if configured, otherwise use local storage (same as upload route)
+      const { uploadToGCS, isGCSConfigured } = await import('@/lib/gcs')
+      const { writeFile, mkdir } = await import('fs/promises')
+      const { join } = await import('path')
+      
+      const timestamp = Date.now()
+      const pdfExtension = pdfFile.name.split('.').pop()
+      const pdfFileName = `${timestamp}-${pdfFile.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`
+      
+      const pdfBytes = await pdfFile.arrayBuffer()
+      const pdfBuffer = Buffer.from(pdfBytes)
+      
+      // Upload template file to Google Cloud Storage
+      let pdfFileUrl: string
+      if (isGCSConfigured()) {
+        try {
+          // Upload file to GCS with actual content type
+          pdfFileUrl = await uploadToGCS(pdfBuffer, pdfFileName, pdfFile.type)
+          console.log(`✅ Template file uploaded to GCS: ${pdfFileUrl}`)
+        } catch (gcsError) {
+          console.error('❌ GCS upload failed, falling back to local storage:', gcsError)
+          // Fallback to local storage if GCS upload fails
+          const documentsDir = join(process.cwd(), 'uploads', 'templates', 'documents')
+          await mkdir(documentsDir, { recursive: true })
+          const documentPath = join(documentsDir, pdfFileName)
+          await writeFile(documentPath, pdfBuffer)
+          pdfFileUrl = pdfFileName
+        }
+      } else {
+        // Fallback to local storage if GCS is not configured
+        console.warn('⚠️ GCS not configured, using local storage for template file')
+        const documentsDir = join(process.cwd(), 'uploads', 'templates', 'documents')
+        await mkdir(documentsDir, { recursive: true })
+        const documentPath = join(documentsDir, pdfFileName)
+        await writeFile(documentPath, pdfBuffer)
+        pdfFileUrl = pdfFileName
+      }
+      
+      template.fileUrl = pdfFileUrl
+      template.fileName = pdfFile.name
+      template.fileSize = pdfFile.size
+      template.fileType = pdfFile.type
+    }
+
+    // Handle custom options
+    if (isCustom && customOptionsJson) {
+      try {
+        const customOptions = JSON.parse(customOptionsJson)
+        template.isCustom = true
+        template.customOptions = customOptions.map((opt: any) => ({
+          ...opt,
+          calendlyLink: defaultCalendlyLink,
+          contactEmail: defaultContactEmail
+        }))
+      } catch (error) {
+        console.error('Error parsing custom options:', error)
+        return NextResponse.json({ error: 'Invalid custom options format' }, { status: 400 })
+      }
+    } else {
+      template.isCustom = false
+      template.customOptions = undefined
+    }
+
+    await template.save()
+
+    return NextResponse.json({ 
+      message: 'Template updated successfully',
+      template: {
+        id: template._id,
+        title: template.title,
+        description: template.description,
+        price: template.price,
+        category: template.category
+      }
+    })
+
+  } catch (error) {
+    console.error('Update template error:', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
+}
+
 export async function DELETE(request: NextRequest) {
   try {
     await connectDB()

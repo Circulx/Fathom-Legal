@@ -1,5 +1,14 @@
 import mongoose, { Document, Schema } from 'mongoose'
 
+export interface ICustomOption {
+  name: string
+  price: number
+  description: string
+  features: string[]
+  calendlyLink?: string
+  contactEmail?: string
+}
+
 export interface ITemplate extends Document {
   title: string
   description: string
@@ -14,6 +23,10 @@ export interface ITemplate extends Document {
   isActive: boolean
   tags: string[]
   downloadCount?: number
+  isCustom?: boolean
+  customOptions?: ICustomOption[]
+  defaultCalendlyLink?: string
+  defaultContactEmail?: string
   createdAt: Date
   updatedAt: Date
 }
@@ -75,7 +88,52 @@ const TemplateSchema = new Schema<ITemplate>({
   tags: [{
     type: String,
     trim: true
-  }]
+  }],
+  isCustom: {
+    type: Boolean,
+    default: false
+  },
+  customOptions: [{
+    name: {
+      type: String,
+      required: true,
+      trim: true
+    },
+    price: {
+      type: Number,
+      required: true,
+      min: 0
+    },
+    description: {
+      type: String,
+      required: false,
+      trim: true
+    },
+    features: [{
+      type: String,
+      trim: true
+    }],
+    calendlyLink: {
+      type: String,
+      required: [true, 'Calendly link is required for custom options'],
+      trim: true
+    },
+    contactEmail: {
+      type: String,
+      required: [true, 'Contact email is required for custom options'],
+      trim: true
+    }
+  }],
+  defaultCalendlyLink: {
+    type: String,
+    required: [true, 'Default Calendly link is required'],
+    trim: true
+  },
+  defaultContactEmail: {
+    type: String,
+    required: [true, 'Default contact email is required'],
+    trim: true
+  }
 }, {
   timestamps: true
 })

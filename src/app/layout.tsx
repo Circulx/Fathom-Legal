@@ -36,7 +36,7 @@ export default function RootLayout({
       <body className={`${inter.variable} ${playfair.variable} font-inter antialiased`}>
         <Script
           id="microsoft-clarity"
-          strategy="afterInteractive"
+          strategy="lazyOnload"
           dangerouslySetInnerHTML={{
             __html: `
               (function(c,l,a,r,i,t,y){

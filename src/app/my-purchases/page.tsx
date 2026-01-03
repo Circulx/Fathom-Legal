@@ -12,8 +12,10 @@ import {
   Package,
   CheckCircle,
   AlertCircle,
-  Search
+  Search,
+  X
 } from "lucide-react";
+import emailjs from '@emailjs/browser';
 
 interface OrderItem {
   templateId: string;
@@ -22,6 +24,10 @@ interface OrderItem {
   quantity: number;
   fileName?: string;
   fileSize?: number;
+  isCustom?: boolean;
+  customOptionName?: string;
+  calendlyLink?: string;
+  contactEmail?: string;
 }
 
 interface Order {
@@ -51,6 +57,20 @@ export default function MyPurchases() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [searched, setSearched] = useState(false);
+  const [showContactModal, setShowContactModal] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<OrderItem | null>(null);
+  const [contactFormData, setContactFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    message: ''
+  });
+  const [isSendingEmail, setIsSendingEmail] = useState(false);
+  const [emailStatus, setEmailStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [downloadingTemplateId, setDownloadingTemplateId] = useState<string | null>(null);
+  const [showDownloadNotification, setShowDownloadNotification] = useState(false);
+  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [emailModalData, setEmailModalData] = useState<{ recipientEmail: string; templateTitle: string } | null>(null);
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -94,9 +114,182 @@ export default function MyPurchases() {
     }
   };
 
-  const handleDownload = (templateId: string) => {
-    const downloadUrl = `/api/templates/${templateId}/download?email=${encodeURIComponent(email)}`;
-    window.open(downloadUrl, '_blank');
+  const handleDownload = async (templateId: string, isCustom?: boolean, calendlyLink?: string, contactEmail?: string) => {
+    if (isCustom && !calendlyLink) {
+      // For custom templates without Calendly, show contact modal
+      const order = orders.find(o => o.items.some(i => i.templateId === templateId))
+      const item = order?.items.find(i => i.templateId === templateId)
+      if (item) {
+        handleContactClick(item)
+      }
+      return
+    }
+    
+    if (isCustom && calendlyLink) {
+      // Open Calendly link
+      window.open(calendlyLink, '_blank')
+      return
+    }
+    
+    // Regular download
+    // Show download notification
+    setDownloadingTemplateId(templateId);
+    setShowDownloadNotification(true);
+    
+    try {
+      // Create download URL
+      const downloadUrl = `/api/templates/${templateId}/download?email=${encodeURIComponent(email)}`;
+      
+      // Fetch the file as a blob
+      const response = await fetch(downloadUrl);
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Download failed' }));
+        throw new Error(errorData.error || 'Download failed');
+      }
+      
+      // Check if response is JSON (custom template response)
+      const contentType = response.headers.get('Content-Type') || '';
+      if (contentType.includes('application/json')) {
+        // This is a custom template - get the JSON data
+        const jsonData = await response.json();
+        console.error('Custom template detected, cannot download file:', jsonData);
+        alert(`This is a custom template. Please use the "Schedule" or "Email" button to contact us for customization.\n\nCustom Option: ${jsonData.customOptionName || 'N/A'}`);
+        setShowDownloadNotification(false);
+        setDownloadingTemplateId(null);
+        return;
+      }
+      
+      // Get the filename from Content-Disposition header or use default
+      const contentDisposition = response.headers.get('Content-Disposition');
+      let filename = 'template'; // Generic fallback without extension
+      
+      if (contentDisposition) {
+        // Try to extract filename from Content-Disposition header
+        // Handle both quoted and unquoted filenames
+        const filenameMatch = contentDisposition.match(/filename\*?=['"]?([^'";\n]+)['"]?/i);
+        if (filenameMatch && filenameMatch[1]) {
+          // Decode URI-encoded filename if present (filename*=UTF-8''encoded)
+          let extractedFilename = filenameMatch[1];
+          if (extractedFilename.includes("''")) {
+            // Handle RFC 5987 encoded filename (filename*=UTF-8''encoded)
+            const parts = extractedFilename.split("''");
+            if (parts.length > 1) {
+              extractedFilename = decodeURIComponent(parts[parts.length - 1]);
+            }
+          } else {
+            // Regular filename, decode if needed
+            extractedFilename = decodeURIComponent(extractedFilename);
+          }
+          filename = extractedFilename;
+        } else {
+          // Try alternative format: filename="value"
+          const altMatch = contentDisposition.match(/filename="([^"]+)"/);
+          if (altMatch && altMatch[1]) {
+            filename = altMatch[1];
+          }
+        }
+      }
+      
+      // If still no extension, try to infer from Content-Type header
+      if (!filename.includes('.')) {
+        if (contentType) {
+          const mimeToExt: { [key: string]: string } = {
+            'application/pdf': '.pdf',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document': '.docx',
+            'application/msword': '.doc',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': '.xlsx',
+            'application/vnd.ms-excel': '.xls',
+            'text/plain': '.txt',
+            'application/zip': '.zip',
+            'application/x-rar-compressed': '.rar'
+          };
+          const ext = mimeToExt[contentType.split(';')[0].trim()] || '';
+          filename = filename + ext;
+        }
+      }
+      
+      // Convert response to blob
+      const blob = await response.blob();
+      
+      // Create a temporary URL for the blob
+      const blobUrl = window.URL.createObjectURL(blob);
+      
+      // Create a temporary anchor element to trigger download
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = filename; // Force download with filename
+      link.style.display = 'none';
+      document.body.appendChild(link);
+      link.click();
+      
+      // Clean up
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
+      
+      // Hide notification after a delay
+      setTimeout(() => {
+        setShowDownloadNotification(false);
+        setDownloadingTemplateId(null);
+      }, 3000);
+    } catch (error) {
+      console.error('Download error:', error);
+      alert(`Download failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      setShowDownloadNotification(false);
+      setDownloadingTemplateId(null);
+    }
+  };
+
+  const handleContactClick = (item: OrderItem) => {
+    setSelectedItem(item);
+    const order = orders.find(o => o.items.some(i => i.templateId === item.templateId))
+    setContactFormData({
+      name: order?.customer.name || '',
+      email: email || order?.customer.email || '',
+      phone: order?.customer.phone || '',
+      message: `I would like to discuss customization for: ${item.title}${item.customOptionName ? ` (${item.customOptionName})` : ''}`
+    });
+    setShowContactModal(true);
+    setEmailStatus('idle');
+  };
+
+  const handleContactSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedItem) return;
+
+    setIsSendingEmail(true);
+    setEmailStatus('idle');
+
+    try {
+      // EmailJS configuration
+      const serviceId = 'service_hrntxm5';
+      const templateId = 'template_kq2l3yk';
+      const publicKey = '5suuijzXCHnnvG_YW';
+
+      const templateParams = {
+        from_name: contactFormData.name,
+        from_email: contactFormData.email,
+        phone: contactFormData.phone,
+        message: contactFormData.message,
+        to_email: selectedItem.contactEmail || 'assist@fathomlegal.com',
+        template_title: selectedItem.title,
+        custom_option: selectedItem.customOptionName || 'Normal',
+        calendly_link: selectedItem.calendlyLink || ''
+      };
+
+      await emailjs.send(serviceId, templateId, templateParams, publicKey);
+      
+      setEmailStatus('success');
+      setTimeout(() => {
+        setShowContactModal(false);
+        setEmailStatus('idle');
+      }, 2000);
+    } catch (error) {
+      console.error('Error sending email:', error);
+      setEmailStatus('error');
+    } finally {
+      setIsSendingEmail(false);
+    }
   };
 
   const formatDate = (dateString: string) => {
@@ -307,13 +500,60 @@ export default function MyPurchases() {
                               </div>
                             </div>
                           </div>
-                          <button
-                            onClick={() => handleDownload(item.templateId)}
-                            className="flex items-center space-x-2 px-4 py-2 bg-[#A5292A] text-white rounded-lg hover:bg-red-700 transition-colors font-medium"
-                          >
-                            <Download className="w-4 h-4" />
-                            <span>Download</span>
-                          </button>
+                          <div className="flex gap-2">
+                            {!item.isCustom && (
+                              <button
+                                onClick={() => handleDownload(item.templateId)}
+                                className="flex items-center space-x-2 px-4 py-2 bg-[#A5292A] text-white rounded-lg hover:bg-red-700 transition-colors font-medium"
+                              >
+                                <Download className="w-4 h-4" />
+                                <span>Download</span>
+                              </button>
+                            )}
+                            {(item.isCustom || item.calendlyLink || item.contactEmail) && (
+                              <div className="flex gap-2">
+                                {item.calendlyLink ? (
+                                  <button
+                                    onClick={() => window.open(item.calendlyLink, '_blank')}
+                                    className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                                  >
+                                    <Calendar className="w-4 h-4" />
+                                    <span>Schedule</span>
+                                  </button>
+                                ) : null}
+                                {item.contactEmail ? (
+                                  <button
+                                    onClick={() => {
+                                      setEmailModalData({
+                                        recipientEmail: item.contactEmail!,
+                                        templateTitle: item.title
+                                      })
+                                      setContactFormData({
+                                        name: '',
+                                        email: email || '',
+                                        phone: '',
+                                        message: ''
+                                      })
+                                      setShowEmailModal(true)
+                                    }}
+                                    className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
+                                  >
+                                    <Mail className="w-4 h-4" />
+                                    <span>Email</span>
+                                  </button>
+                                ) : null}
+                                {(!item.calendlyLink && !item.contactEmail) && (
+                                  <button
+                                    onClick={() => handleContactClick(item)}
+                                    className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                                  >
+                                    <Mail className="w-4 h-4" />
+                                    <span>Contact</span>
+                                  </button>
+                                )}
+                              </div>
+                            )}
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -347,13 +587,47 @@ export default function MyPurchases() {
                         </p>
                       </div>
                     </div>
-                    <button
-                      onClick={() => handleDownload(item.templateId)}
-                      className="w-full flex items-center justify-center space-x-2 px-4 py-2 bg-[#A5292A] text-white rounded-lg hover:bg-red-700 transition-colors font-medium text-sm"
-                    >
-                      <Download className="w-4 h-4" />
-                      <span>Download</span>
-                    </button>
+                    {!item.isCustom ? (
+                      <button
+                        onClick={() => handleDownload(item.templateId)}
+                        className="w-full flex items-center justify-center space-x-2 px-4 py-2 bg-[#A5292A] text-white rounded-lg hover:bg-red-700 transition-colors font-medium text-sm"
+                      >
+                        <Download className="w-4 h-4" />
+                        <span>Download</span>
+                      </button>
+                    ) : (
+                      <div className="flex gap-2">
+                        {item.calendlyLink ? (
+                          <button
+                            onClick={() => window.open(item.calendlyLink, '_blank')}
+                            className="flex-1 flex items-center justify-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm"
+                          >
+                            <Calendar className="w-4 h-4" />
+                            <span>Schedule</span>
+                          </button>
+                        ) : null}
+                        {item.contactEmail ? (
+                          <button
+                            onClick={() => {
+                              window.location.href = `mailto:${item.contactEmail}?subject=Template Inquiry: ${item.title}`
+                            }}
+                            className="flex-1 flex items-center justify-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium text-sm"
+                          >
+                            <Mail className="w-4 h-4" />
+                            <span>Email</span>
+                          </button>
+                        ) : null}
+                        {(!item.calendlyLink && !item.contactEmail) && (
+                          <button
+                            onClick={() => handleContactClick(item)}
+                            className="flex-1 flex items-center justify-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm"
+                          >
+                            <Mail className="w-4 h-4" />
+                            <span>Contact</span>
+                          </button>
+                        )}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -362,7 +636,156 @@ export default function MyPurchases() {
         </section>
       )}
 
+      {/* Contact Modal */}
+      {showContactModal && selectedItem && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-bold text-gray-900">Contact Template Owner</h3>
+              <button
+                onClick={() => {
+                  setShowContactModal(false);
+                  setEmailStatus('idle');
+                }}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            
+            <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+              <p className="text-sm text-gray-600 mb-1">Template:</p>
+              <p className="font-semibold text-gray-900">{selectedItem.title}</p>
+              {selectedItem.customOptionName && (
+                <p className="text-sm text-blue-600 mt-1">Option: {selectedItem.customOptionName}</p>
+              )}
+            </div>
+
+            <form onSubmit={handleContactSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Your Name <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={contactFormData.name}
+                  onChange={(e) => setContactFormData(prev => ({ ...prev, name: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Enter your name"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Your Email <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="email"
+                  required
+                  value={contactFormData.email}
+                  onChange={(e) => setContactFormData(prev => ({ ...prev, email: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Enter your email"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Your Phone <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="tel"
+                  required
+                  value={contactFormData.phone}
+                  onChange={(e) => setContactFormData(prev => ({ ...prev, phone: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Enter your phone number"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Message <span className="text-red-500">*</span>
+                </label>
+                <textarea
+                  required
+                  rows={4}
+                  value={contactFormData.message}
+                  onChange={(e) => setContactFormData(prev => ({ ...prev, message: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Describe your customization requirements..."
+                />
+              </div>
+
+              {emailStatus === 'success' && (
+                <div className="p-3 bg-green-50 border border-green-200 rounded-lg flex items-center gap-2">
+                  <CheckCircle className="w-5 h-5 text-green-600" />
+                  <p className="text-sm text-green-800">Email sent successfully! We'll get back to you soon.</p>
+                </div>
+              )}
+
+              {emailStatus === 'error' && (
+                <div className="p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2">
+                  <AlertCircle className="w-5 h-5 text-red-600" />
+                  <p className="text-sm text-red-800">Failed to send email. Please try again.</p>
+                </div>
+              )}
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowContactModal(false);
+                    setEmailStatus('idle');
+                  }}
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                  disabled={isSendingEmail}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={isSendingEmail}
+                >
+                  {isSendingEmail ? 'Sending...' : 'Send Email'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       <Footer />
+
+      {/* Download Notification */}
+      {showDownloadNotification && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl p-6 max-w-md w-full animate-popup">
+            <div className="flex items-center space-x-4">
+              <div className="flex-shrink-0">
+                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                  <Download className="w-6 h-6 text-blue-600 animate-bounce" />
+                </div>
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-semibold text-gray-900">Downloading Template</h3>
+                <p className="text-sm text-gray-600 mt-1">Your template is being downloaded. Please check your downloads folder.</p>
+              </div>
+              <button
+                onClick={() => {
+                  setShowDownloadNotification(false);
+                  setDownloadingTemplateId(null);
+                }}
+                className="flex-shrink-0 text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

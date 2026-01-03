@@ -63,7 +63,7 @@ interface GalleryItem {
   _id: string
   title: string
   description: string
-  imageData: string
+  imageData: string | string[] // Can be string (legacy) or array (new)
   imageType: string
   isActive: boolean
 }
@@ -395,12 +395,18 @@ export default function AdminDashboard() {
   const [templatesLoading, setTemplatesLoading] = useState(true)
   const [showTemplateUploadModal, setShowTemplateUploadModal] = useState(false)
   const [templateUploading, setTemplateUploading] = useState(false)
+  const [showTemplateEditModal, setShowTemplateEditModal] = useState(false)
+  const [templateEditing, setTemplateEditing] = useState(false)
+  const [editingTemplateId, setEditingTemplateId] = useState<string | null>(null)
 
   // Gallery state
   const [galleryItems, setGalleryItems] = useState<GalleryItem[]>([])
   const [galleryLoading, setGalleryLoading] = useState(true)
   const [showGalleryUploadModal, setShowGalleryUploadModal] = useState(false)
   const [galleryUploading, setGalleryUploading] = useState(false)
+  const [showGalleryEditModal, setShowGalleryEditModal] = useState(false)
+  const [galleryEditing, setGalleryEditing] = useState(false)
+  const [editingGalleryId, setEditingGalleryId] = useState<string | null>(null)
   const [galleryCurrentPage, setGalleryCurrentPage] = useState(1)
   const [galleryTotalPages, setGalleryTotalPages] = useState(1)
   const [galleryTotalItems, setGalleryTotalItems] = useState(0)
@@ -433,11 +439,35 @@ export default function AdminDashboard() {
 
   // Template upload form state
   const [templateUploadForm, setTemplateUploadForm] = useState({
+    title: '',
     description: '',
     price: '',
     category: 'Legal Documents',
     image: null as File | null,
-    pdfFile: null as File | null
+    pdfFile: null as File | null,
+    customOptions: [] as Array<{
+      name: string
+      price: string
+      description: string
+      features: string[]
+    }>
+  })
+
+  // Template edit form state
+  const [templateEditForm, setTemplateEditForm] = useState({
+    title: '',
+    description: '',
+    price: '',
+    category: 'Legal Documents',
+    image: null as File | null,
+    pdfFile: null as File | null,
+    existingImageUrl: '',
+    customOptions: [] as Array<{
+      name: string
+      price: string
+      description: string
+      features: string[]
+    }>
   })
 
   // Gallery upload form state
@@ -445,7 +475,15 @@ export default function AdminDashboard() {
     title: '',
     description: '',
     category: '',
-    image: null as File | null
+    images: [] as File[]
+  })
+
+  // Gallery edit form state
+  const [galleryEditForm, setGalleryEditForm] = useState({
+    title: '',
+    description: '',
+    image: null as File | null,
+    existingImageData: [] as string[]
   })
 
   // Thought Leadership Blog create form state
@@ -649,16 +687,54 @@ export default function AdminDashboard() {
       alert('Please select a PDF template file')
       return
     }
+    if (!templateUploadForm.title) {
+      alert('Please fill in the title field')
+      return
+    }
+    if (!templateUploadForm.description) {
+      alert('Please fill in the description field')
+      return
+    }
+    if (!templateUploadForm.price) {
+      alert('Please fill in the price field')
+      return
+    }
 
     setTemplateUploading(true)
     try {
       const formData = new FormData()
       formData.append('image', templateUploadForm.image)
       formData.append('pdfFile', templateUploadForm.pdfFile)
+      formData.append('title', templateUploadForm.title)
       formData.append('description', templateUploadForm.description)
       formData.append('price', templateUploadForm.price)
       formData.append('category', templateUploadForm.category)
       formData.append('uploadedBy', session?.user?.id || 'admin')
+      
+      // Set default contact info automatically (from website defaults)
+      const defaultCalendlyLink = 'https://calendly.com/ishita-fathomlegal/free-20-mins-consultation'
+      const defaultContactEmail = 'assist@fathomlegal.com'
+      
+      formData.append('defaultCalendlyLink', defaultCalendlyLink)
+      formData.append('defaultContactEmail', defaultContactEmail)
+
+      // Add custom template options if any
+      if (templateUploadForm.customOptions.length > 0) {
+        formData.append('isCustom', 'true')
+        
+        // Convert custom options to JSON (use default contact info)
+        const customOptionsJson = JSON.stringify(
+          templateUploadForm.customOptions.map(opt => ({
+            name: opt.name,
+            price: parseFloat(opt.price) || 0,
+            description: opt.description,
+            features: opt.features.filter(f => f.trim() !== ''),
+            calendlyLink: defaultCalendlyLink,
+            contactEmail: defaultContactEmail
+          }))
+        )
+        formData.append('customOptions', customOptionsJson)
+      }
 
       const response = await fetch('/api/admin/templates/upload', {
         method: 'POST',
@@ -668,7 +744,14 @@ export default function AdminDashboard() {
       if (response.ok) {
         console.log('Template upload successful, refreshing templates...')
         setShowTemplateUploadModal(false)
-        setTemplateUploadForm({ description: '', price: '', category: 'Legal Documents', image: null, pdfFile: null })
+        setTemplateUploadForm({ 
+          description: '', 
+          price: '', 
+          category: 'Legal Documents', 
+          image: null, 
+          pdfFile: null,
+          customOptions: []
+        })
         fetchTemplates()
         // Refresh dashboard counts if on dashboard
         if (activeSection === 'dashboard') {
@@ -693,25 +776,126 @@ export default function AdminDashboard() {
   // Handle gallery upload
   const handleGalleryUpload = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!galleryUploadForm.image) return
+    if (!galleryUploadForm.images || galleryUploadForm.images.length === 0) {
+      alert('Please select at least one image')
+      return
+    }
 
     setGalleryUploading(true)
     try {
       const formData = new FormData()
-      formData.append('image', galleryUploadForm.image)
+      // Append all images with the same key 'image'
+      galleryUploadForm.images.forEach((image) => {
+        formData.append('image', image)
+      })
       formData.append('title', galleryUploadForm.title)
       formData.append('description', galleryUploadForm.description)
       formData.append('category', galleryUploadForm.category)
       formData.append('uploadedBy', session?.user?.id || 'admin')
+
+      console.log('Uploading gallery images:', {
+        imageCount: galleryUploadForm.images.length,
+        title: galleryUploadForm.title
+      })
 
       const response = await fetch('/api/admin/gallery/upload', {
         method: 'POST',
         body: formData
       })
 
+      console.log('Upload response status:', response.status)
+
+      if (!response.ok) {
+        let errorMessage = 'Upload failed'
+        try {
+          const errorData = await response.json()
+          errorMessage = errorData.error || errorData.message || 'Upload failed'
+          console.error('Upload error response:', errorData)
+        } catch (parseError) {
+          const text = await response.text()
+          console.error('Failed to parse error response:', text)
+          errorMessage = `Upload failed with status ${response.status}: ${text}`
+        }
+        throw new Error(errorMessage)
+      }
+
+      const result = await response.json()
+      console.log('Upload successful:', result)
+
+      setShowGalleryUploadModal(false)
+      setGalleryUploadForm({ title: '', description: '', category: '', images: [] })
+      fetchGalleryItems(1, 1000)
+      // Refresh dashboard counts if on dashboard
+      if (activeSection === 'dashboard') {
+        fetchTemplates()
+        fetchThoughtLeadershipBlogs()
+        fetchGalleryBlogs()
+        fetchThoughtLeadershipPhotos()
+      }
+      setSuccessMessage(`Successfully uploaded ${galleryUploadForm.images.length} photo(s)!`)
+      setShowSuccessMessage(true)
+      setTimeout(() => setShowSuccessMessage(false), 3000)
+    } catch (error) {
+      console.error('Gallery upload error:', error)
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
+      alert(`Upload failed: ${errorMessage}`)
+    } finally {
+      setGalleryUploading(false)
+    }
+  }
+
+  // Handle opening gallery edit modal
+  const handleGalleryEdit = (item: GalleryItem) => {
+    setEditingGalleryId(item._id)
+    // Handle both array (new) and string (legacy) imageData
+    const existingImages = Array.isArray(item.imageData) ? item.imageData : [item.imageData]
+    setGalleryEditForm({
+      title: item.title,
+      description: item.description || '',
+      image: null,
+      existingImageData: existingImages
+    })
+    setShowGalleryEditModal(true)
+  }
+
+  // Handle gallery update
+  const handleGalleryUpdate = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!galleryEditForm.title) {
+      alert('Please fill in the photo description')
+      return
+    }
+
+    if (!editingGalleryId) {
+      alert('Gallery item ID is missing')
+      return
+    }
+
+    setGalleryEditing(true)
+    try {
+      const formData = new FormData()
+      formData.append('id', editingGalleryId)
+      formData.append('title', galleryEditForm.title)
+      formData.append('description', galleryEditForm.description || '')
+      
+      if (galleryEditForm.image) {
+        formData.append('image', galleryEditForm.image)
+      }
+
+      const response = await fetch('/api/admin/gallery', {
+        method: 'PUT',
+        body: formData
+      })
+
       if (response.ok) {
-        setShowGalleryUploadModal(false)
-        setGalleryUploadForm({ title: '', description: '', category: '', image: null })
+        setShowGalleryEditModal(false)
+        setEditingGalleryId(null)
+        setGalleryEditForm({ 
+          title: '', 
+          description: '', 
+          image: null,
+          existingImageData: []
+        })
         fetchGalleryItems(1, 1000)
         // Refresh dashboard counts if on dashboard
         if (activeSection === 'dashboard') {
@@ -720,11 +904,18 @@ export default function AdminDashboard() {
           fetchGalleryBlogs()
           fetchThoughtLeadershipPhotos()
         }
+        setSuccessMessage('Gallery item updated successfully!')
+        setShowSuccessMessage(true)
+        setTimeout(() => setShowSuccessMessage(false), 3000)
+      } else {
+        const error = await response.json()
+        alert(error.error || 'Failed to update gallery item')
       }
     } catch (error) {
-      console.error('Gallery upload error:', error)
+      console.error('Gallery update error:', error)
+      alert('Failed to update gallery item')
     } finally {
-      setGalleryUploading(false)
+      setGalleryEditing(false)
     }
   }
 
@@ -1025,6 +1216,120 @@ export default function AdminDashboard() {
   }
 
   // Handle template deletion
+  const handleTemplateEdit = (template: Template) => {
+    setEditingTemplateId(template._id)
+    setTemplateEditForm({
+      title: template.title,
+      description: template.description,
+      price: template.price.toString(),
+      category: template.category,
+      image: null,
+      pdfFile: null,
+      existingImageUrl: template.imageUrl || '',
+      customOptions: template.customOptions?.map(opt => ({
+        name: opt.name,
+        price: opt.price.toString(),
+        description: opt.description || '',
+        features: opt.features || []
+      })) || []
+    })
+    setShowTemplateEditModal(true)
+  }
+
+  const handleTemplateUpdate = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!editingTemplateId) {
+      alert('Template ID is missing')
+      return
+    }
+
+    if (!templateEditForm.title || !templateEditForm.description || !templateEditForm.price) {
+      alert('Please fill in all required fields')
+      return
+    }
+
+    setTemplateEditing(true)
+    try {
+      const formData = new FormData()
+      formData.append('id', editingTemplateId)
+      formData.append('title', templateEditForm.title)
+      formData.append('description', templateEditForm.description)
+      formData.append('price', templateEditForm.price)
+      formData.append('category', templateEditForm.category)
+      
+      if (templateEditForm.image) {
+        formData.append('image', templateEditForm.image)
+      }
+      
+      if (templateEditForm.pdfFile) {
+        formData.append('pdfFile', templateEditForm.pdfFile)
+      }
+
+      // Set default contact info automatically
+      const defaultCalendlyLink = 'https://calendly.com/ishita-fathomlegal/free-20-mins-consultation'
+      const defaultContactEmail = 'assist@fathomlegal.com'
+      
+      formData.append('defaultCalendlyLink', defaultCalendlyLink)
+      formData.append('defaultContactEmail', defaultContactEmail)
+
+      // Add custom options if any
+      if (templateEditForm.customOptions.length > 0) {
+        formData.append('isCustom', 'true')
+        
+        const customOptionsJson = JSON.stringify(
+          templateEditForm.customOptions.map(opt => ({
+            name: opt.name,
+            price: parseFloat(opt.price) || 0,
+            description: opt.description,
+            features: opt.features.filter(f => f.trim() !== ''),
+            calendlyLink: defaultCalendlyLink,
+            contactEmail: defaultContactEmail
+          }))
+        )
+        formData.append('customOptions', customOptionsJson)
+      }
+
+      const response = await fetch('/api/admin/templates', {
+        method: 'PUT',
+        body: formData
+      })
+
+      if (response.ok) {
+        setShowTemplateEditModal(false)
+        setEditingTemplateId(null)
+        setTemplateEditForm({
+          title: '',
+          description: '',
+          price: '',
+          category: 'Legal Documents',
+          image: null,
+          pdfFile: null,
+          existingImageUrl: '',
+          customOptions: []
+        })
+        fetchTemplates()
+        // Refresh dashboard counts if on dashboard
+        if (activeSection === 'dashboard') {
+          fetchGalleryItems(1, 1000)
+          fetchThoughtLeadershipBlogs()
+          fetchGalleryBlogs()
+          fetchThoughtLeadershipPhotos()
+        }
+        setSuccessMessage('Template updated successfully!')
+        setShowSuccessMessage(true)
+        setTimeout(() => setShowSuccessMessage(false), 3000)
+      } else {
+        const error = await response.json()
+        alert(error.error || 'Failed to update template')
+      }
+    } catch (error) {
+      console.error('Template update error:', error)
+      alert('Failed to update template')
+    } finally {
+      setTemplateEditing(false)
+    }
+  }
+
   const handleTemplateDelete = async (templateId: string) => {
     try {
       const response = await fetch(`/api/admin/templates?id=${templateId}`, {
@@ -1375,6 +1680,13 @@ export default function AdminDashboard() {
                             <span className="text-sm font-bold text-gray-900">₹{template.price || 0}</span>
                             <div className="flex items-center space-x-2">
                               <button
+                                onClick={() => handleTemplateEdit(template)}
+                                className="p-2 text-gray-400 hover:text-blue-600 transition-colors"
+                                title="Edit"
+                              >
+                                <Edit className="h-4 w-4" />
+                              </button>
+                              <button
                                 onClick={() => handleTemplateDelete(template._id)}
                                 className="p-2 text-gray-400 hover:text-red-600 transition-colors"
                                 title="Delete"
@@ -1470,13 +1782,22 @@ export default function AdminDashboard() {
                                 </div>
                               </div>
                               {item.isActive && (
-                              <button
-                                onClick={() => handleGalleryDelete(item._id, item.title)}
-                                className="text-red-600 hover:text-red-800 transition-colors p-2 hover:bg-red-50 rounded-lg"
-                                title="Delete image"
-                              >
+                              <div className="flex items-center space-x-2">
+                                <button
+                                  onClick={() => handleGalleryEdit(item)}
+                                  className="text-blue-600 hover:text-blue-800 transition-colors p-2 hover:bg-blue-50 rounded-lg"
+                                  title="Edit image"
+                                >
+                                  <Edit className="h-4 w-4" />
+                                </button>
+                                <button
+                                  onClick={() => handleGalleryDelete(item._id, item.title)}
+                                  className="text-red-600 hover:text-red-800 transition-colors p-2 hover:bg-red-50 rounded-lg"
+                                  title="Delete image"
+                                >
                                   <Trash2 className="h-4 w-4" />
                                 </button>
+                              </div>
                               )}
                             </div>
                           ))}
@@ -2007,8 +2328,8 @@ export default function AdminDashboard() {
 
       {/* Template Upload Modal */}
       {showTemplateUploadModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-6 w-full max-w-md mx-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+          <div className="bg-white rounded-xl p-6 w-full max-w-4xl mx-auto my-8 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold text-gray-900">Upload Template</h2>
               <button
@@ -2022,13 +2343,119 @@ export default function AdminDashboard() {
             <form onSubmit={handleTemplateUpload} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Title *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={templateUploadForm.title}
+                  onChange={(e) => setTemplateUploadForm(prev => ({ ...prev, title: e.target.value }))}
+                  className="w-full px-3 py-2 border border-black rounded-lg focus:ring-2 focus:ring-gray-400 focus:border-black bg-white text-gray-900"
+                  placeholder="Template title (e.g., Mutual Non-Disclosure Agreement)"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
                   Description *
                 </label>
                 <textarea
                   required
                   value={templateUploadForm.description}
                   onChange={(e) => setTemplateUploadForm(prev => ({ ...prev, description: e.target.value }))}
-                  className="w-full px-3 py-2 border border-black rounded-lg focus:ring-2 focus:ring-gray-400 focus:border-black bg-white text-gray-900"
+                  onPaste={(e) => {
+                    e.preventDefault()
+                    const htmlText = e.clipboardData.getData('text/html')
+                    const plainText = e.clipboardData.getData('text/plain')
+                    let processedText = ''
+                    
+                    if (htmlText) {
+                      // Create a temporary div to parse HTML
+                      const tempDiv = document.createElement('div')
+                      tempDiv.innerHTML = htmlText
+                      
+                      // Process the HTML to preserve formatting
+                      const processNode = (node: Node): string => {
+                        if (node.nodeType === Node.TEXT_NODE) {
+                          return node.textContent || ''
+                        }
+                        
+                        if (node.nodeType === Node.ELEMENT_NODE) {
+                          const element = node as HTMLElement
+                          const tagName = element.tagName.toLowerCase()
+                          let content = ''
+                          
+                          // Process child nodes
+                          for (let i = 0; i < node.childNodes.length; i++) {
+                            content += processNode(node.childNodes[i])
+                          }
+                          
+                          // Handle different HTML elements
+                          switch (tagName) {
+                            case 'p':
+                              return content.trim() + '\n\n'
+                            case 'br':
+                              return '\n'
+                            case 'li':
+                              // Preserve bullet point with proper spacing
+                              return '• ' + content.trim() + '\n'
+                            case 'ul':
+                            case 'ol':
+                              return content
+                            case 'strong':
+                            case 'b':
+                              // Preserve bold markers
+                              return '**' + content + '**'
+                            case 'em':
+                            case 'i':
+                              return '*' + content + '*'
+                            default:
+                              return content
+                          }
+                        }
+                        
+                        return ''
+                      }
+                      
+                      // Process all nodes
+                      processedText = Array.from(tempDiv.childNodes)
+                        .map(node => processNode(node))
+                        .join('')
+                        .replace(/\n{3,}/g, '\n\n') // Remove excessive line breaks
+                        .trim()
+                      
+                      // If we got empty result, fall back to plain text
+                      if (!processedText) {
+                        processedText = plainText
+                      }
+                    } else {
+                      // No HTML, use plain text but preserve bullets
+                      processedText = plainText
+                        .replace(/[•◦▪▫‣⁃]\s*/g, '• ')
+                        .replace(/[-*]\s+/g, '• ')
+                    }
+                    
+                    // Normalize line endings
+                    processedText = processedText
+                      .replace(/\r\n/g, '\n')
+                      .replace(/\r/g, '\n')
+                    
+                    // Insert the processed text at cursor position
+                    const textarea = e.currentTarget
+                    const start = textarea.selectionStart
+                    const end = textarea.selectionEnd
+                    const currentValue = templateUploadForm.description
+                    const newValue = currentValue.substring(0, start) + processedText + currentValue.substring(end)
+                    
+                    setTemplateUploadForm(prev => ({ ...prev, description: newValue }))
+                    
+                    // Set cursor position after pasted text
+                    setTimeout(() => {
+                      textarea.selectionStart = textarea.selectionEnd = start + processedText.length
+                      textarea.focus()
+                    }, 0)
+                  }}
+                  className="w-full px-3 py-2 border border-black rounded-lg focus:ring-2 focus:ring-gray-400 focus:border-black bg-white text-gray-900 whitespace-pre-wrap"
                   rows={4}
                   placeholder="Template description"
                 />
@@ -2091,7 +2518,7 @@ export default function AdminDashboard() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  PDF Template File *
+                  Template File *
                 </label>
                 <input
                   type="file"
@@ -2102,12 +2529,144 @@ export default function AdminDashboard() {
                       setTemplateUploadForm(prev => ({ ...prev, pdfFile: file }))
                     }
                   }}
-                  accept=".pdf"
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-white text-gray-900 file:bg-white file:border file:border-gray-300 file:rounded-lg file:px-3 file:py-2 file:text-gray-700 file:text-sm file:font-medium"
                 />
                 <p className="text-xs text-gray-500 mt-1">
-                  Upload the PDF template file (Max 50MB). This file will be hidden from buyers until purchase.
+                  Upload the template file (Any file type, Max 50MB). This file will be hidden from buyers until purchase.
                 </p>
+              </div>
+
+              {/* Custom Template Options Section */}
+              <div className="border-t border-gray-200 pt-4 mt-4">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900">Custom Template Options (Optional)</h3>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setTemplateUploadForm(prev => ({
+                        ...prev,
+                        customOptions: [...prev.customOptions, {
+                          name: '',
+                          price: '',
+                          description: '',
+                          features: [],
+                        }]
+                      }))
+                    }}
+                    className="px-3 py-1 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    + Add Option
+                  </button>
+                </div>
+                <p className="text-xs text-gray-500 mb-4">
+                  Add custom template variants. Users will see these options when adding to cart. First column will always be "Normal" (downloadable).
+                </p>
+
+
+                {/* Custom Options List */}
+                {templateUploadForm.customOptions.map((option, index) => (
+                  <div key={index} className="border border-gray-200 rounded-lg p-4 mb-4 bg-gray-50">
+                    <div className="flex justify-between items-center mb-3">
+                      <h4 className="font-medium text-gray-900">Option {index + 1}</h4>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setTemplateUploadForm(prev => ({
+                            ...prev,
+                            customOptions: prev.customOptions.filter((_, i) => i !== index)
+                          }))
+                        }}
+                        className="text-red-600 hover:text-red-700 text-sm"
+                      >
+                        Remove
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Option Name *
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          value={option.name}
+                          onChange={(e) => {
+                            const newOptions = [...templateUploadForm.customOptions]
+                            newOptions[index].name = e.target.value
+                            setTemplateUploadForm(prev => ({ ...prev, customOptions: newOptions }))
+                          }}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-white text-gray-900"
+                          placeholder="e.g., Basic Custom, Premium Custom"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Price (₹) *
+                        </label>
+                        <input
+                          type="number"
+                          required
+                          value={option.price}
+                          onChange={(e) => {
+                            const newOptions = [...templateUploadForm.customOptions]
+                            newOptions[index].price = e.target.value
+                            setTemplateUploadForm(prev => ({ ...prev, customOptions: newOptions }))
+                          }}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-white text-gray-900"
+                          placeholder="0"
+                          min="0"
+                          step="0.01"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="mb-3">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Description
+                      </label>
+                      <textarea
+                        value={option.description}
+                        onChange={(e) => {
+                          const newOptions = [...templateUploadForm.customOptions]
+                          newOptions[index].description = e.target.value
+                          setTemplateUploadForm(prev => ({ ...prev, customOptions: newOptions }))
+                        }}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-white text-gray-900"
+                        rows={2}
+                        placeholder="Brief description of this option"
+                      />
+                    </div>
+
+                    <div className="mb-3">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Features (one per line) *
+                      </label>
+                      <textarea
+                        required
+                        value={option.features.join('\n')}
+                        onChange={(e) => {
+                          const newOptions = [...templateUploadForm.customOptions]
+                          newOptions[index].features = e.target.value.split('\n').filter(f => f.trim())
+                          setTemplateUploadForm(prev => ({ ...prev, customOptions: newOptions }))
+                        }}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-white text-gray-900"
+                        rows={4}
+                        placeholder="Feature 1&#10;Feature 2&#10;Feature 3"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">Enter each feature on a new line</p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    </div>
+                  </div>
+                ))}
+
+                {templateUploadForm.customOptions.length === 0 && (
+                  <p className="text-sm text-gray-500 text-center py-4">
+                    No custom options added. Click "+ Add Option" to create custom template variants.
+                  </p>
+                )}
               </div>
 
               <div className="flex space-x-3 pt-4">
@@ -2125,6 +2684,387 @@ export default function AdminDashboard() {
                     style={{ backgroundColor: '#A5292A', color: 'white' }}
                   >
                     {templateUploading ? 'Uploading...' : 'Upload'}
+                  </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Template Edit Modal */}
+      {showTemplateEditModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+          <div className="bg-white rounded-xl p-6 w-full max-w-4xl mx-auto my-8 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-gray-900">Edit Template</h2>
+              <button
+                onClick={() => {
+                  setShowTemplateEditModal(false)
+                  setEditingTemplateId(null)
+                  setTemplateEditForm({
+                    description: '',
+                    price: '',
+                    category: 'Legal Documents',
+                    image: null,
+                    pdfFile: null,
+                    existingImageUrl: '',
+                    customOptions: []
+                  })
+                }}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            
+            <form onSubmit={handleTemplateUpdate} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Title *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={templateEditForm.title}
+                  onChange={(e) => setTemplateEditForm(prev => ({ ...prev, title: e.target.value }))}
+                  className="w-full px-3 py-2 border border-black rounded-lg focus:ring-2 focus:ring-gray-400 focus:border-black bg-white text-gray-900"
+                  placeholder="Template title (e.g., Mutual Non-Disclosure Agreement)"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Description *
+                </label>
+                <textarea
+                  required
+                  value={templateEditForm.description}
+                  onChange={(e) => setTemplateEditForm(prev => ({ ...prev, description: e.target.value }))}
+                  onPaste={(e) => {
+                    e.preventDefault()
+                    const htmlText = e.clipboardData.getData('text/html')
+                    const plainText = e.clipboardData.getData('text/plain')
+                    let processedText = ''
+                    
+                    if (htmlText) {
+                      const tempDiv = document.createElement('div')
+                      tempDiv.innerHTML = htmlText
+                      
+                      const processNode = (node: Node): string => {
+                        if (node.nodeType === Node.TEXT_NODE) {
+                          return node.textContent || ''
+                        }
+                        
+                        if (node.nodeType === Node.ELEMENT_NODE) {
+                          const element = node as HTMLElement
+                          const tagName = element.tagName.toLowerCase()
+                          let content = ''
+                          
+                          for (let i = 0; i < node.childNodes.length; i++) {
+                            content += processNode(node.childNodes[i])
+                          }
+                          
+                          switch (tagName) {
+                            case 'p':
+                              return content.trim() + '\n\n'
+                            case 'br':
+                              return '\n'
+                            case 'li':
+                              return '• ' + content.trim() + '\n'
+                            case 'ul':
+                            case 'ol':
+                              return content
+                            case 'strong':
+                            case 'b':
+                              return '**' + content + '**'
+                            case 'em':
+                            case 'i':
+                              return '*' + content + '*'
+                            default:
+                              return content
+                          }
+                        }
+                        
+                        return ''
+                      }
+                      
+                      processedText = Array.from(tempDiv.childNodes)
+                        .map(node => processNode(node))
+                        .join('')
+                        .replace(/\n{3,}/g, '\n\n')
+                        .trim()
+                      
+                      if (!processedText) {
+                        processedText = plainText
+                      }
+                    } else {
+                      processedText = plainText
+                        .replace(/[•◦▪▫‣⁃]\s*/g, '• ')
+                        .replace(/[-*]\s+/g, '• ')
+                    }
+                    
+                    processedText = processedText
+                      .replace(/\r\n/g, '\n')
+                      .replace(/\r/g, '\n')
+                    
+                    const textarea = e.currentTarget
+                    const start = textarea.selectionStart
+                    const end = textarea.selectionEnd
+                    const currentValue = templateEditForm.description
+                    const newValue = currentValue.substring(0, start) + processedText + currentValue.substring(end)
+                    
+                    setTemplateEditForm(prev => ({ ...prev, description: newValue }))
+                    
+                    setTimeout(() => {
+                      textarea.selectionStart = textarea.selectionEnd = start + processedText.length
+                      textarea.focus()
+                    }, 0)
+                  }}
+                  className="w-full px-3 py-2 border border-black rounded-lg focus:ring-2 focus:ring-gray-400 focus:border-black bg-white text-gray-900 whitespace-pre-wrap"
+                  rows={4}
+                  placeholder="Template description"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Price (₹) *
+                </label>
+                <input
+                  type="number"
+                  required
+                  value={templateEditForm.price}
+                  onChange={(e) => setTemplateEditForm(prev => ({ ...prev, price: e.target.value }))}
+                  className="w-full px-3 py-2 border border-black rounded-lg focus:ring-2 focus:ring-gray-400 focus:border-black bg-white text-gray-900"
+                  placeholder="0"
+                  min="0"
+                  step="0.01"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Category *
+                </label>
+                <select
+                  required
+                  value={templateEditForm.category}
+                  onChange={(e) => setTemplateEditForm(prev => ({ ...prev, category: e.target.value }))}
+                  className="w-full px-3 py-2 border border-black rounded-lg focus:ring-2 focus:ring-gray-400 focus:border-black bg-white text-gray-900"
+                >
+                  <option value="Legal Documents">Legal Documents</option>
+                  <option value="Contracts">Contracts</option>
+                  <option value="Agreements">Agreements</option>
+                  <option value="Forms">Forms</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Template Preview Image
+                </label>
+                {templateEditForm.existingImageUrl && (
+                  <div className="mb-2">
+                    <p className="text-xs text-gray-500 mb-1">Current image:</p>
+                    <img
+                      src={templateEditForm.existingImageUrl}
+                      alt="Current preview"
+                      className="w-32 h-32 object-cover rounded-lg border border-gray-300"
+                    />
+                  </div>
+                )}
+                <input
+                  type="file"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0]
+                    if (file) {
+                      setTemplateEditForm(prev => ({ ...prev, image: file }))
+                    }
+                  }}
+                  accept="image/*"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-white text-gray-900 file:bg-white file:border file:border-gray-300 file:rounded-lg file:px-3 file:py-2 file:text-gray-700 file:text-sm file:font-medium"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  {templateEditForm.existingImageUrl ? 'Leave empty to keep current image' : 'Upload a preview image for your template (Max 5MB)'}
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Template File
+                </label>
+                <input
+                  type="file"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0]
+                    if (file) {
+                      setTemplateEditForm(prev => ({ ...prev, pdfFile: file }))
+                    }
+                  }}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-white text-gray-900 file:bg-white file:border file:border-gray-300 file:rounded-lg file:px-3 file:py-2 file:text-gray-700 file:text-sm file:font-medium"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Leave empty to keep current file. Upload a new template file (Any file type, Max 50MB).
+                </p>
+              </div>
+
+              {/* Custom Template Options Section */}
+              <div className="border-t border-gray-200 pt-4 mt-4">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900">Custom Template Options (Optional)</h3>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setTemplateEditForm(prev => ({
+                        ...prev,
+                        customOptions: [...prev.customOptions, {
+                          name: '',
+                          price: '',
+                          description: '',
+                          features: [],
+                        }]
+                      }))
+                    }}
+                    className="px-3 py-1 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    + Add Option
+                  </button>
+                </div>
+                <p className="text-xs text-gray-500 mb-4">
+                  Add custom template variants. Users will see these options when adding to cart. First column will always be "Normal" (downloadable).
+                </p>
+
+                {/* Custom Options List */}
+                {templateEditForm.customOptions.map((option, index) => (
+                  <div key={index} className="border border-gray-200 rounded-lg p-4 mb-4 bg-gray-50">
+                    <div className="flex justify-between items-center mb-3">
+                      <h4 className="font-medium text-gray-900">Option {index + 1}</h4>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setTemplateEditForm(prev => ({
+                            ...prev,
+                            customOptions: prev.customOptions.filter((_, i) => i !== index)
+                          }))
+                        }}
+                        className="text-red-600 hover:text-red-700 text-sm"
+                      >
+                        Remove
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Option Name *
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          value={option.name}
+                          onChange={(e) => {
+                            const newOptions = [...templateEditForm.customOptions]
+                            newOptions[index].name = e.target.value
+                            setTemplateEditForm(prev => ({ ...prev, customOptions: newOptions }))
+                          }}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-white text-gray-900"
+                          placeholder="e.g., Basic Custom, Premium Custom"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Price (₹) *
+                        </label>
+                        <input
+                          type="number"
+                          required
+                          value={option.price}
+                          onChange={(e) => {
+                            const newOptions = [...templateEditForm.customOptions]
+                            newOptions[index].price = e.target.value
+                            setTemplateEditForm(prev => ({ ...prev, customOptions: newOptions }))
+                          }}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-white text-gray-900"
+                          placeholder="0"
+                          min="0"
+                          step="0.01"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="mb-3">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Description
+                      </label>
+                      <textarea
+                        value={option.description}
+                        onChange={(e) => {
+                          const newOptions = [...templateEditForm.customOptions]
+                          newOptions[index].description = e.target.value
+                          setTemplateEditForm(prev => ({ ...prev, customOptions: newOptions }))
+                        }}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-white text-gray-900"
+                        rows={2}
+                        placeholder="Brief description of this option"
+                      />
+                    </div>
+
+                    <div className="mb-3">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Features (one per line) *
+                      </label>
+                      <textarea
+                        required
+                        value={option.features.join('\n')}
+                        onChange={(e) => {
+                          const newOptions = [...templateEditForm.customOptions]
+                          newOptions[index].features = e.target.value.split('\n').filter(f => f.trim())
+                          setTemplateEditForm(prev => ({ ...prev, customOptions: newOptions }))
+                        }}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-white text-gray-900"
+                        rows={4}
+                        placeholder="Feature 1&#10;Feature 2&#10;Feature 3"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">Enter each feature on a new line</p>
+                    </div>
+                  </div>
+                ))}
+
+                {templateEditForm.customOptions.length === 0 && (
+                  <p className="text-sm text-gray-500 text-center py-4">
+                    No custom options added. Click "+ Add Option" to create custom template variants.
+                  </p>
+                )}
+              </div>
+
+              <div className="flex space-x-3 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowTemplateEditModal(false)
+                      setEditingTemplateId(null)
+                      setTemplateEditForm({
+                        description: '',
+                        price: '',
+                        category: 'Legal Documents',
+                        image: null,
+                        pdfFile: null,
+                        existingImageUrl: '',
+                        customOptions: []
+                      })
+                    }}
+                    className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={templateEditing}
+                    className="flex-1 px-4 py-2 rounded-lg transition-colors disabled:opacity-50"
+                    style={{ backgroundColor: '#A5292A', color: 'white' }}
+                  >
+                    {templateEditing ? 'Updating...' : 'Update Template'}
                   </button>
               </div>
             </form>
@@ -2177,20 +3117,37 @@ export default function AdminDashboard() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Image *
+                  Images * (Select multiple - all will share the same title & description)
                 </label>
                 <input
                   type="file"
                   required
+                  multiple
                   onChange={(e) => {
-                    const file = e.target.files?.[0]
-                    if (file) {
-                      setGalleryUploadForm(prev => ({ ...prev, image: file }))
+                    const files = Array.from(e.target.files || [])
+                    if (files.length > 0) {
+                      setGalleryUploadForm(prev => ({ ...prev, images: files }))
                     }
                   }}
                   accept="image/*"
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-white text-gray-900 file:bg-white file:border file:border-gray-300 file:rounded-lg file:px-3 file:py-2 file:text-gray-700 file:text-sm file:font-medium"
                 />
+                {galleryUploadForm.images.length > 0 && (
+                  <div className="mt-2">
+                    <p className="text-xs text-gray-600 mb-2 font-medium">
+                      {galleryUploadForm.images.length} file(s) selected - all will be uploaded together:
+                    </p>
+                    <div className="max-h-32 overflow-y-auto border border-gray-200 rounded p-2 bg-gray-50">
+                      <ul className="text-xs text-gray-600 space-y-1">
+                        {galleryUploadForm.images.map((file, index) => (
+                          <li key={index} className="truncate">
+                            • {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="flex space-x-3 pt-4">
@@ -2208,6 +3165,118 @@ export default function AdminDashboard() {
                   style={{ backgroundColor: '#A5292A', color: 'white' }}
                 >
                   {galleryUploading ? 'Uploading...' : 'Upload'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Gallery Edit Modal */}
+      {showGalleryEditModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 w-full max-w-md mx-4">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-gray-900">Edit Gallery Image</h2>
+              <button
+                onClick={() => {
+                  setShowGalleryEditModal(false)
+                  setEditingGalleryId(null)
+                  setGalleryEditForm({ title: '', description: '', image: null, existingImageData: [] })
+                }}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            
+            <form onSubmit={handleGalleryUpdate} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Photo Description *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={galleryEditForm.title}
+                  onChange={(e) => setGalleryEditForm(prev => ({ ...prev, title: e.target.value }))}
+                  className="w-full px-3 py-2 border border-black rounded-lg focus:ring-2 focus:ring-gray-400 focus:border-black bg-white text-gray-900"
+                  placeholder="One line description of the photo"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Short Article (Optional)
+                </label>
+                <textarea
+                  value={galleryEditForm.description}
+                  onChange={(e) => setGalleryEditForm(prev => ({ ...prev, description: e.target.value }))}
+                  className="w-full px-3 py-2 border border-black rounded-lg focus:ring-2 focus:ring-gray-400 focus:border-black bg-white text-gray-900"
+                  rows={4}
+                  placeholder="Write a short article about this photo (optional)"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Current Images ({galleryEditForm.existingImageData.length})
+                </label>
+                {galleryEditForm.existingImageData.length > 0 && (
+                  <div className="mb-2 grid grid-cols-2 gap-2 max-h-64 overflow-y-auto">
+                    {galleryEditForm.existingImageData.map((img, index) => (
+                      <div key={index} className="relative">
+                        <img 
+                          src={img} 
+                          alt={`Image ${index + 1}`} 
+                          className="w-full h-32 object-cover border border-gray-200 rounded-lg"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Add More Images (Optional)
+                </label>
+                <input
+                  type="file"
+                  multiple
+                  onChange={(e) => {
+                    const file = e.target.files?.[0]
+                    if (file) {
+                      setGalleryEditForm(prev => ({ ...prev, image: file }))
+                    }
+                  }}
+                  accept="image/*"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-white text-gray-900 file:bg-white file:border file:border-gray-300 file:rounded-lg file:px-3 file:py-2 file:text-gray-700 file:text-sm file:font-medium"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Select an image to add to the existing photos
+                </p>
+              </div>
+
+              <div className="flex space-x-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowGalleryEditModal(false)
+                    setEditingGalleryId(null)
+                    setGalleryEditForm({ title: '', description: '', image: null, existingImageData: [] })
+                  }}
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={galleryEditing}
+                  className="flex-1 px-4 py-2 rounded-lg transition-colors disabled:opacity-50"
+                  style={{ backgroundColor: '#A5292A', color: 'white' }}
+                >
+                  {galleryEditing ? 'Updating...' : 'Update'}
                 </button>
               </div>
             </form>

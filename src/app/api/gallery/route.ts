@@ -27,11 +27,24 @@ export async function GET(request: NextRequest) {
       .sort({ _id: -1 })
       .skip(skip)
       .limit(limit)
+      .lean() // Use lean() to get plain JavaScript objects
 
     const total = await GalleryItem.countDocuments(query)
 
+    // Ensure imageData is always an array
+    const normalizedGalleryItems = galleryItems.map((item: any) => {
+      let imageData = item.imageData
+      if (!Array.isArray(imageData)) {
+        imageData = typeof imageData === 'string' ? [imageData] : []
+      }
+      return {
+        ...item,
+        imageData: imageData
+      }
+    })
+
     return NextResponse.json({
-      galleryItems,
+      galleryItems: normalizedGalleryItems,
       pagination: {
         page,
         limit,

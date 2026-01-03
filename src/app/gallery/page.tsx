@@ -10,7 +10,7 @@ interface GalleryItem {
   _id: string
   title: string
   description: string
-  imageData: string
+  imageData: string | string[] // Can be string (legacy) or array (new)
   imageType: string
 }
 
@@ -34,6 +34,8 @@ export default function Gallery() {
   const [loading, setLoading] = useState(true)
   const [blogLoading, setBlogLoading] = useState(true)
   const [selectedImage, setSelectedImage] = useState<GalleryItem | null>(null)
+  const [currentImageIndex, setCurrentImageIndex] = useState(0)
+  const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set())
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const [totalItems, setTotalItems] = useState(0)
@@ -48,6 +50,16 @@ export default function Gallery() {
       const response = await fetch(`/api/gallery?page=${page}&limit=8`)
       if (response.ok) {
         const data = await response.json()
+        // Log to debug imageData structure
+        if (data.galleryItems && data.galleryItems.length > 0) {
+          console.log('Fetched gallery items:', data.galleryItems.map((item: GalleryItem) => ({
+            id: item._id,
+            title: item.title,
+            imageDataIsArray: Array.isArray(item.imageData),
+            imageDataLength: Array.isArray(item.imageData) ? item.imageData.length : 1,
+            imageDataType: typeof item.imageData
+          })))
+        }
         setGalleryItems(data.galleryItems || [])
         setTotalPages(data.pagination?.pages || 1)
         setTotalItems(data.pagination?.total || 0)
@@ -111,6 +123,63 @@ export default function Gallery() {
     fetchGalleryItems(1)
     fetchGalleryBlogs(1)
   }, [])
+
+  // Preload images when selectedImage changes
+  useEffect(() => {
+    if (selectedImage) {
+      const images = Array.isArray(selectedImage.imageData) ? selectedImage.imageData : [selectedImage.imageData]
+      const newLoadedImages = new Set<number>()
+      
+      // Preload all images
+      images.forEach((img, index) => {
+        const imgElement = new Image()
+        imgElement.src = img
+        imgElement.onload = () => {
+          newLoadedImages.add(index)
+          setLoadedImages(new Set(newLoadedImages))
+        }
+        imgElement.onerror = () => {
+          console.error('Failed to preload image at index', index)
+        }
+      })
+      
+      // Reset loaded images when modal closes
+      return () => {
+        setLoadedImages(new Set())
+      }
+    } else {
+      setLoadedImages(new Set())
+    }
+  }, [selectedImage])
+
+  // Preload images when selectedImage changes
+  useEffect(() => {
+    if (selectedImage) {
+      const images = Array.isArray(selectedImage.imageData) ? selectedImage.imageData : [selectedImage.imageData]
+      const newLoadedImages = new Set<number>()
+      
+      // Preload all images
+      images.forEach((img, index) => {
+        const imgElement = new Image()
+        imgElement.src = img
+        imgElement.onload = () => {
+          newLoadedImages.add(index)
+          setLoadedImages(new Set(newLoadedImages))
+        }
+        imgElement.onerror = () => {
+          console.error('Failed to preload image at index', index)
+        }
+      })
+      
+      // Reset loaded images when modal closes
+      return () => {
+        setLoadedImages(new Set())
+      }
+    } else {
+      setLoadedImages(new Set())
+    }
+  }, [selectedImage])
+
 
   // Handle page change
   const handlePageChange = (page: number) => {
@@ -207,41 +276,56 @@ export default function Gallery() {
             <>
               {/* Gallery Grid */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                {galleryItems.map((item) => (
-                  <div 
-                    key={item._id} 
-                    className="group bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden border border-gray-100 cursor-pointer"
-                    onClick={() => setSelectedImage(item)}
-                  >
-                    {/* Image */}
-                    <div className="aspect-w-16 aspect-h-12 relative overflow-hidden">
-                      <img
-                        src={item.imageData}
-                        alt={item.title}
-                        className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                      <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity duration-300 flex items-center justify-center">
-                        <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                          <div className="bg-white/90 rounded-full p-3">
-                            <ImageIcon className="h-6 w-6 text-gray-700" />
+                {galleryItems.map((item) => {
+                  // Handle both string (legacy) and array (new) imageData
+                  const images = Array.isArray(item.imageData) ? item.imageData : [item.imageData]
+                  const firstImage = images[0]
+                  const imageCount = images.length
+                  
+                  return (
+                    <div 
+                      key={item._id} 
+                      className="group bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden border border-gray-100 cursor-pointer"
+                      onClick={() => {
+                      setSelectedImage(item)
+                      setCurrentImageIndex(0)
+                    }}
+                    >
+                      {/* Image */}
+                      <div className="aspect-w-16 aspect-h-12 relative overflow-hidden">
+                        <img
+                          src={firstImage}
+                          alt={item.title}
+                          className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                        {imageCount > 1 && (
+                          <div className="absolute top-2 right-2 bg-black/70 text-white px-2 py-1 rounded text-xs font-medium">
+                            {imageCount} photos
+                          </div>
+                        )}
+                        <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity duration-300 flex items-center justify-center">
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <div className="bg-white/90 rounded-full p-3">
+                              <ImageIcon className="h-6 w-6 text-gray-700" />
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
 
-                    {/* Content */}
-                    <div className="p-6">
-                      <h3 className="text-base sm:text-lg md:text-lg font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-red-600 transition-colors">
-                        {item.title}
-                      </h3>
-                      
-                      <p className="text-sm sm:text-base md:text-lg text-gray-600 mb-4 line-clamp-3">
-                        {item.description}
-                      </p>
+                      {/* Content */}
+                      <div className="p-6">
+                        <h3 className="text-base sm:text-lg md:text-lg font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-red-600 transition-colors">
+                          {item.title}
+                        </h3>
+                        
+                        <p className="text-sm sm:text-base md:text-lg text-gray-600 mb-4 line-clamp-3">
+                          {item.description}
+                        </p>
 
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
 
               {/* Pagination */}
@@ -443,41 +527,156 @@ export default function Gallery() {
       {/* Footer */}
       <Footer />
 
-      {/* Image Modal */}
-      {selectedImage && (
-        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
-          <div className="relative max-w-4xl max-h-[90vh] w-full">
-            {/* Close button */}
-            <button
-              onClick={() => setSelectedImage(null)}
-              className="absolute top-4 right-4 z-10 bg-white/90 hover:bg-white rounded-full p-2 transition-colors"
-            >
-              <X className="h-6 w-6 text-gray-700" />
-            </button>
-            
-            {/* Image */}
-            <div className="bg-white rounded-xl overflow-hidden shadow-2xl">
-              <img
-                src={selectedImage.imageData}
-                alt={selectedImage.title}
-                className="w-full h-auto max-h-[80vh] object-contain"
-              />
+      {/* Image Modal with Slider and Vertical Scroll */}
+      {selectedImage && (() => {
+        const images = Array.isArray(selectedImage.imageData) ? selectedImage.imageData : [selectedImage.imageData]
+        const hasMultipleImages = images.length > 1
+        
+        // Debug logging
+        console.log('Selected image data:', {
+          imageData: selectedImage.imageData,
+          isArray: Array.isArray(selectedImage.imageData),
+          imagesLength: images.length,
+          images: images
+        })
+        
+        return (
+          <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
+            <div className="relative max-w-4xl max-h-[90vh] w-full flex flex-col">
+              {/* Close button */}
+              <button
+                onClick={() => {
+                  setSelectedImage(null)
+                  setCurrentImageIndex(0)
+                }}
+                className="absolute top-4 right-4 z-20 bg-white/90 hover:bg-white rounded-full p-2 transition-colors"
+              >
+                <X className="h-6 w-6 text-gray-700" />
+              </button>
               
-              {/* Image info */}
-              <div className="p-6">
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                  {selectedImage.title}
-                </h3>
-                {selectedImage.description && (
-                  <p className="text-gray-600">
-                    {selectedImage.description}
-                  </p>
-                )}
+              {/* Scrollable Container */}
+              <div className="bg-white rounded-xl overflow-hidden shadow-2xl max-h-[90vh] flex flex-col overflow-y-auto">
+                {/* Image Slider */}
+                <div className="relative overflow-hidden flex-shrink-0 w-full" style={{ position: 'relative' }}>
+                  <div 
+                    className="flex transition-transform duration-300 ease-in-out"
+                    style={{ 
+                      transform: `translateX(-${currentImageIndex * (100 / images.length)}%)`,
+                      width: `${images.length * 100}%`,
+                      display: 'flex'
+                    }}
+                  >
+                    {images.map((img, index) => {
+                      const imageWidthPercent = 100 / images.length
+                      return (
+                        <div
+                          key={index}
+                          className="flex-shrink-0 flex items-center justify-center bg-white"
+                          style={{ 
+                            width: `${imageWidthPercent}%`,
+                            flex: `0 0 ${imageWidthPercent}%`,
+                            minHeight: '500px',
+                            padding: '1.5rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            boxSizing: 'border-box',
+                            position: 'relative'
+                          }}
+                        >
+                          <img
+                            src={img}
+                            alt={`${selectedImage.title} - Image ${index + 1}`}
+                            className="max-w-full max-h-[70vh] object-contain"
+                            style={{ 
+                              display: 'block',
+                              width: 'auto',
+                              height: 'auto',
+                              maxWidth: 'calc(100% - 3rem)',
+                              maxHeight: '70vh',
+                              opacity: loadedImages.has(index) ? 1 : 0.8,
+                              transition: 'opacity 0.3s ease-in-out'
+                            }}
+                            loading={index <= currentImageIndex + 1 ? "eager" : "lazy"}
+                            onError={(e) => {
+                              console.error('Image load error for index', index)
+                              const target = e.target as HTMLImageElement
+                              target.style.opacity = '0.3'
+                            }}
+                            onLoad={(e) => {
+                              console.log('Image loaded at index', index, 'Total:', images.length, 'Current index:', currentImageIndex)
+                              setLoadedImages(prev => new Set(prev).add(index))
+                              const target = e.target as HTMLImageElement
+                              target.style.opacity = '1'
+                            }}
+                          />
+                        </div>
+                      )
+                    })}
+                  </div>
+                  
+                  {/* Navigation arrows */}
+                  {hasMultipleImages && (
+                    <>
+                      <button
+                        onClick={() => setCurrentImageIndex((prev) => (prev > 0 ? prev - 1 : images.length - 1))}
+                        className="absolute left-4 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white rounded-full p-3 transition-colors"
+                        aria-label="Previous image"
+                      >
+                        <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                        </svg>
+                      </button>
+                      <button
+                        onClick={() => setCurrentImageIndex((prev) => (prev < images.length - 1 ? prev + 1 : 0))}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white rounded-full p-3 transition-colors"
+                        aria-label="Next image"
+                      >
+                        <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </button>
+                      
+                      {/* Image counter */}
+                      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/70 text-white px-4 py-2 rounded-full text-sm z-10">
+                        {currentImageIndex + 1} / {images.length}
+                      </div>
+                      
+                      {/* Dots indicator */}
+                      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 transform translate-y-12 flex justify-center gap-2 z-10">
+                        {images.map((_, index) => (
+                          <button
+                            key={index}
+                            onClick={() => setCurrentImageIndex(index)}
+                            className={`w-2 h-2 rounded-full transition-all ${
+                              index === currentImageIndex 
+                                ? 'bg-[#A5292A] w-8' 
+                                : 'bg-white/70 hover:bg-white'
+                            }`}
+                            aria-label={`Go to image ${index + 1}`}
+                          />
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </div>
+                
+                {/* Image info - scrollable content */}
+                <div className="p-6 border-t border-gray-200 flex-shrink-0">
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                    {selectedImage.title}
+                  </h3>
+                  {selectedImage.description && (
+                    <p className="text-gray-600">
+                      {selectedImage.description}
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )
+      })()}
     </div>
   )
 }

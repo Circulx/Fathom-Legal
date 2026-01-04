@@ -86,8 +86,10 @@ NEXT_PUBLIC_EMAILJS_PUBLIC_KEY=your_public_key
 MONGODB_URI=your_mongodb_connection_string
 
 # NextAuth Configuration (Required for Admin Authentication)
-NEXTAUTH_SECRET=your_random_secret_key_here
-NEXTAUTH_URL=http://localhost:3000  # For local development, use your production URL in production
+# IMPORTANT: Both variables are REQUIRED for production!
+NEXTAUTH_SECRET=your_random_secret_key_here  # Generate with: openssl rand -base64 32
+NEXTAUTH_URL=http://localhost:3000  # For local development
+# In production, set NEXTAUTH_URL to your production URL (e.g., https://yourdomain.com)
 
 # Razorpay Payment Gateway
 RAZORPAY_KEY_ID=your_razorpay_key_id

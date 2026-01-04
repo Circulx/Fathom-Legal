@@ -370,63 +370,61 @@ export default function Templates() {
               <p className="text-sm sm:text-base text-gray-500">Try adjusting your search or filter criteria.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {templates.map((template) => (
                     <div
                       key={template._id}
-                      className="relative bg-white shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 overflow-hidden flex flex-col"
+                      className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-shadow border border-gray-100 overflow-hidden"
                     >
                   {/* Product Image - Top Section */}
-                  <div 
-                    className="h-40 bg-cover bg-center bg-no-repeat relative flex-shrink-0"
-                    style={{
-                      backgroundImage: (template.imageData || template.imageUrl) ? `url(${template.imageData || template.imageUrl})` : 'none',
-                      backgroundColor: (template.imageData || template.imageUrl) ? 'transparent' : '#f3f4f6'
-                    }}
-                  >
-                    {/* Overlay for better text readability */}
-                    <div className="absolute inset-0 bg-black bg-opacity-20"></div>
+                  <div className="aspect-w-16 aspect-h-9">
+                    {(template.imageData || template.imageUrl) ? (
+                      <img
+                        src={template.imageData || template.imageUrl}
+                        alt={template.title}
+                        className="w-full h-64 object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-64 bg-gray-100 flex items-center justify-center">
+                        <FileText className="h-12 w-12 text-gray-400" />
+                      </div>
+                    )}
                     
                     {/* Admin Delete Button */}
                     {isAdmin && (
                       <button
                         onClick={() => handleDelete(template._id)}
-                        className="absolute top-2 right-2 p-1.5 sm:p-2 bg-red-600 text-white hover:bg-red-700 transition-colors z-10"
+                        className="absolute top-2 right-2 p-2 bg-red-600 text-white hover:bg-red-700 transition-colors z-10 rounded"
                       >
-                        <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
+                        <Trash2 className="h-4 w-4" />
                       </button>
-                    )}
-                    
-                    {/* Fallback Icon if no image */}
-                    {!(template.imageData || template.imageUrl) && (
-                      <div className="h-full flex items-center justify-center">
-                        <FileText className="h-12 w-12 sm:h-16 sm:w-16 text-gray-400" />
-                      </div>
                     )}
                   </div>
                   
                   {/* Content Section - Bottom */}
-                  <div className="p-5 flex flex-col flex-grow">
-                    {/* Title */}
-                    <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2 flex-grow">
+                  <div className="p-4">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs font-medium px-2 py-1 rounded-full" style={{ backgroundColor: '#A5292A', color: 'white' }}>
+                        {template.category}
+                      </span>
+                      <span className="text-xs text-gray-500">{template.downloadCount || 0} downloads</span>
+                    </div>
+                    
+                    <h3 className="text-sm font-semibold text-gray-900 mb-1 line-clamp-2">
                       {template.title}
                     </h3>
                     
-                    {/* Price and Button at Bottom */}
-                    <div className="mt-auto">
-                      {/* Price */}
-                      <div className="mb-3">
-                        <div className="text-lg font-bold text-gray-900">
-                          ₹{template.price || 0}
-                        </div>
-                      </div>
-                      
-                      {/* Add to Cart Button */}
+                    <p className="text-xs text-gray-600 mb-2 line-clamp-2">
+                      {template.description}
+                    </p>
+                    
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-bold text-gray-900">₹{template.price || 0}</span>
                       <button
                         onClick={() => addToCart(template)}
-                        className="w-full flex items-center justify-center px-4 py-2.5 bg-red-600 text-white hover:bg-red-700 transition-colors font-medium text-sm"
+                        className="flex items-center px-3 py-1.5 bg-red-600 text-white hover:bg-red-700 transition-colors text-xs font-medium rounded"
                       >
-                        <ShoppingCart className="h-4 w-4 mr-2" />
+                        <ShoppingCart className="h-3 w-3 mr-1" />
                         Add to cart
                       </button>
                     </div>

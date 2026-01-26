@@ -5,6 +5,7 @@ import { Navbar } from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Breadcrumb from "@/components/Breadcrumb";
 import { FileText, Download, Eye, Search, Filter, Trash2, ShoppingCart } from "lucide-react";
+import ReactCountryFlag from "react-country-flag";
 
 interface CustomOption {
   name: string
@@ -34,6 +35,7 @@ interface Template {
   customOptions?: CustomOption[]
   defaultCalendlyLink?: string
   defaultContactEmail?: string
+  countries?: string[]
 }
 
 export default function Templates() {
@@ -48,6 +50,10 @@ export default function Templates() {
   const [showCustomModal, setShowCustomModal] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
   const [selectedCustomOption, setSelectedCustomOption] = useState<CustomOption | null>(null);
+  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [freeDownloadEmail, setFreeDownloadEmail] = useState('');
+  const [freeDownloadName, setFreeDownloadName] = useState('');
+  const [downloadingTemplateId, setDownloadingTemplateId] = useState<string | null>(null);
 
   const categories = [
     { value: 'all', label: 'All' },
@@ -83,6 +89,113 @@ export default function Templates() {
     // This allows users to see all available options (standard + custom)
     setSelectedTemplate(template);
     setShowCustomModal(true);
+  };
+
+  const handleFreeDownload = async () => {
+    if (!selectedTemplate || !freeDownloadEmail.trim()) {
+      alert('Please enter your email address');
+      return;
+    }
+
+    // Validate email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(freeDownloadEmail.trim())) {
+      alert('Please enter a valid email address');
+      return;
+    }
+
+    setDownloadingTemplateId(selectedTemplate._id);
+    
+    try {
+      // Create order for free template
+      const orderData = {
+        customer: {
+          name: freeDownloadName.trim() || 'Guest',
+          email: freeDownloadEmail.trim().toLowerCase(),
+          phone: '0000000000' // Placeholder for free downloads
+        },
+        items: [{
+          templateId: selectedTemplate._id,
+          title: selectedTemplate.title,
+          price: 0,
+          quantity: 1,
+          fileName: selectedTemplate.fileName,
+          fileSize: selectedTemplate.fileSize,
+          isCustom: false
+        }],
+        subtotal: 0,
+        total: 0,
+        paymentMethod: 'free'
+      };
+
+      const orderResponse = await fetch('/api/orders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(orderData)
+      });
+
+      if (!orderResponse.ok) {
+        const errorData = await orderResponse.json();
+        throw new Error(errorData.error || 'Failed to create order');
+      }
+
+      // Download the template
+      const downloadUrl = `/api/templates/${selectedTemplate._id}/download?email=${encodeURIComponent(freeDownloadEmail.trim())}`;
+      const response = await fetch(downloadUrl);
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Download failed' }));
+        throw new Error(errorData.error || 'Download failed');
+      }
+
+      // Check if response is JSON (custom template response)
+      const contentType = response.headers.get('Content-Type') || '';
+      if (contentType.includes('application/json')) {
+        const jsonData = await response.json();
+        alert(`This is a custom template. ${jsonData.message || 'Please contact us.'}`);
+        setDownloadingTemplateId(null);
+        return;
+      }
+
+      // Get the filename from Content-Disposition header or use default
+      const contentDisposition = response.headers.get('Content-Disposition');
+      let filename = selectedTemplate.fileName || 'template';
+      
+      if (contentDisposition) {
+        const filenameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+        if (filenameMatch && filenameMatch[1]) {
+          filename = filenameMatch[1].replace(/['"]/g, '');
+        }
+      }
+
+      // Create blob and download
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      setNotificationMessage('Template downloaded successfully!');
+      setShowNotification(true);
+      setShowEmailModal(false);
+      setFreeDownloadEmail('');
+      setFreeDownloadName('');
+      setSelectedTemplate(null);
+      
+      // Refresh templates to update download count
+      fetchTemplates();
+    } catch (error: any) {
+      console.error('Download error:', error);
+      alert(error.message || 'Failed to download template. Please try again.');
+    } finally {
+      setDownloadingTemplateId(null);
+    }
   };
 
   const addStandardTemplateToCart = (template: Template) => {
@@ -241,6 +354,10 @@ export default function Templates() {
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+
+  const formatPrice = (price: number) => {
+    return `₹${price.toLocaleString()}`;
   };
 
   const handleDelete = async (id: string) => {
@@ -407,7 +524,43 @@ export default function Templates() {
                       <span className="text-xs font-medium px-2 py-1 rounded-full" style={{ backgroundColor: '#A5292A', color: 'white' }}>
                         {template.category}
                       </span>
-                      <span className="text-xs text-gray-500">{template.downloadCount || 0} downloads</span>
+                      <div className="flex items-center gap-1.5">
+                        {template.countries && template.countries.length > 0 ? (
+                          template.countries.map((countryCode) => (
+                            <ReactCountryFlag
+                              key={countryCode}
+                              countryCode={countryCode}
+                              svg
+                              style={{
+                                width: '1.5em',
+                                height: '1.5em',
+                              }}
+                              title={countryCode}
+                            />
+                          ))
+                        ) : (
+                          <>
+                            <ReactCountryFlag
+                              countryCode="IN"
+                              svg
+                              style={{
+                                width: '1.5em',
+                                height: '1.5em',
+                              }}
+                              title="India"
+                            />
+                            <ReactCountryFlag
+                              countryCode="US"
+                              svg
+                              style={{
+                                width: '1.5em',
+                                height: '1.5em',
+                              }}
+                              title="USA"
+                            />
+                          </>
+                        )}
+                      </div>
                     </div>
                     
                     <h3 className="text-sm font-semibold text-gray-900 mb-1 line-clamp-2">
@@ -418,8 +571,10 @@ export default function Templates() {
                       {template.description}
                     </p>
                     
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-bold text-gray-900">₹{template.price || 0}</span>
+                    <div className="flex items-center justify-end">
+                      {template.price > 0 && (
+                        <span className="text-sm font-bold text-gray-900 mr-auto">{formatPrice(template.price)}</span>
+                      )}
                       <button
                         onClick={() => addToCart(template)}
                         className="flex items-center px-3 py-1.5 bg-red-600 text-white hover:bg-red-700 transition-colors text-xs font-medium rounded"
@@ -529,8 +684,14 @@ export default function Templates() {
                       )}
                     </div>
                     <div className="text-2xl font-bold text-[#A5292A] mb-2">
-                      ₹{selectedTemplate.price.toLocaleString()}
-                      <span className="text-sm font-normal text-gray-600"> per template</span>
+                      {selectedTemplate.price === 0 ? (
+                        <span>Free</span>
+                      ) : (
+                        <>
+                          ₹{selectedTemplate.price.toLocaleString()}
+                          <span className="text-sm font-normal text-gray-600"> per template</span>
+                        </>
+                      )}
                     </div>
                     <p className="text-sm text-gray-600 mb-3">Instant download</p>
                     
@@ -622,11 +783,88 @@ export default function Templates() {
               >
                 Cancel
               </button>
+              {selectedTemplate && selectedCustomOption === null && selectedTemplate.price === 0 ? (
+                <button
+                  onClick={() => {
+                    setShowCustomModal(false);
+                    setShowEmailModal(true);
+                  }}
+                  className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center"
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  Download
+                </button>
+              ) : (
+                <button
+                  onClick={addSelectedOptionToCart}
+                  className="px-6 py-2 bg-[#A5292A] text-white rounded-lg hover:bg-red-700 transition-colors"
+                >
+                  Add to Cart
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Email Modal for Free Downloads */}
+      {showEmailModal && selectedTemplate && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
+            <div className="p-6">
+              <h2 className="text-xl font-bold text-gray-900 mb-4">Download Free Template</h2>
+              <p className="text-sm text-gray-600 mb-4">
+                Enter your email to download <strong>{selectedTemplate.title}</strong>
+              </p>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Email Address *
+                  </label>
+                  <input
+                    type="email"
+                    value={freeDownloadEmail}
+                    onChange={(e) => setFreeDownloadEmail(e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                    placeholder="your@email.com"
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Name (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    value={freeDownloadName}
+                    onChange={(e) => setFreeDownloadName(e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                    placeholder="Your Name"
+                  />
+                </div>
+              </div>
+            </div>
+            
+            <div className="px-6 py-4 bg-gray-50 flex justify-end gap-3">
               <button
-                onClick={addSelectedOptionToCart}
-                className="px-6 py-2 bg-[#A5292A] text-white rounded-lg hover:bg-red-700 transition-colors"
+                onClick={() => {
+                  setShowEmailModal(false);
+                  setFreeDownloadEmail('');
+                  setFreeDownloadName('');
+                  setSelectedTemplate(null);
+                }}
+                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
               >
-                Add to Cart
+                Cancel
+              </button>
+              <button
+                onClick={handleFreeDownload}
+                disabled={downloadingTemplateId === selectedTemplate._id}
+                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {downloadingTemplateId === selectedTemplate._id ? 'Downloading...' : 'Download'}
               </button>
             </div>
           </div>

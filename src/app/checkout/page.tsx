@@ -223,6 +223,14 @@ function CheckoutContent() {
     return calculateSubtotal();
   };
 
+  const formatPrice = (price: number) => {
+    return price === 0 ? 'Free' : `₹${price.toLocaleString()}`;
+  };
+
+  const isFreeOrder = () => {
+    return calculateTotal() === 0;
+  };
+
   const removeFromCart = (itemId: string) => {
     const updatedCart = cartItems.filter(item => item._id !== itemId);
     setCartItems(updatedCart);
@@ -354,7 +362,40 @@ function CheckoutContent() {
       const dbOrderId = orderResult.order.id;
       const totalAmount = calculateTotal();
 
-      // Handle Razorpay payment
+      // Check if this is a free order (total is ₹0)
+      if (totalAmount === 0) {
+        // For free orders, auto-complete the payment
+        const updateResponse = await fetch('/api/orders', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            orderId: dbOrderId,
+            updates: {
+              paymentStatus: 'completed',
+              status: 'confirmed'
+            }
+          })
+        });
+
+        if (!updateResponse.ok) {
+          const errorData = await updateResponse.json();
+          throw new Error(errorData.error || 'Failed to complete free order');
+        }
+
+        // Store purchased items and email for download links
+        setPurchasedItems(cartItems);
+        setCustomerEmail(customerInfo.email);
+
+        // Clear cart after successful order
+        localStorage.removeItem('fathom_cart');
+        setOrderSuccess(true);
+        setIsProcessing(false);
+        return;
+      }
+
+      // Handle Razorpay payment for paid orders
       if (paymentMethod === 'razorpay') {
         // Create Razorpay order
         const razorpayResponse = await fetch('/api/razorpay/create-order', {
@@ -710,9 +751,9 @@ function CheckoutContent() {
                 <div className="mb-8">
                   <h2 className="text-xl font-semibold text-gray-900 mb-4">Your Templates</h2>
                   <div className="space-y-3">
-                    {purchasedItems.map((item) => (
+                    {purchasedItems.map((item, index) => (
                       <div
-                        key={item._id}
+                        key={`${item._id}-${item.isCustom ? 'custom' : 'standard'}-${item.customOptionName || ''}-${index}`}
                         className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200 hover:border-[#A5292A] transition-colors"
                       >
                         <div className="flex items-center space-x-4 flex-1">
@@ -1346,7 +1387,12 @@ function CheckoutContent() {
                 disabled={isProcessing}
                 className="flex-1 bg-[#A5292A] text-white py-4 px-6 rounded-lg font-semibold hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isProcessing ? 'Processing...' : `Place Order - ₹${calculateTotal()}`}
+                {isProcessing 
+                  ? 'Processing...' 
+                  : isFreeOrder() 
+                    ? 'Complete Free Order' 
+                    : `Place Order - ₹${calculateTotal().toLocaleString()}`
+                }
               </button>
             </div>
           </div>
@@ -1385,8 +1431,8 @@ function CheckoutContent() {
         <h2 className="text-xl font-bold text-gray-900 mb-4">Order Summary</h2>
 
          <div className="space-y-4 mb-6">
-           {cartItems.map((item) => (
-             <div key={item._id} className="flex items-center space-x-4">
+           {cartItems.map((item, index) => (
+             <div key={`${item._id}-${item.isCustom ? 'custom' : 'standard'}-${item.customOptionName || ''}-${index}`} className="flex items-center space-x-4">
                {(item.imageData || item.imageUrl) ? (
                  <img
                    src={item.imageData || item.imageUrl}
@@ -1444,8 +1490,12 @@ function CheckoutContent() {
                  </div>
                </div>
                <div className="text-right">
-                 <p className="font-semibold text-gray-900">₹{(item.price * (item.quantity || 1)).toFixed(2)}</p>
-                 <p className="text-xs text-gray-500">₹{item.price} each</p>
+                 <p className="font-semibold text-gray-900">
+                   {item.price === 0 ? 'Free' : `₹${(item.price * (item.quantity || 1)).toFixed(2)}`}
+                 </p>
+                 <p className="text-xs text-gray-500">
+                   {item.price === 0 ? 'Free' : `₹${item.price} each`}
+                 </p>
                </div>
              </div>
            ))}
@@ -1454,12 +1504,12 @@ function CheckoutContent() {
         <div className="border-t border-gray-200 pt-4 space-y-2">
           <div className="flex justify-between">
             <span className="text-gray-600">Subtotal</span>
-            <span className="font-medium text-black">₹{calculateSubtotal()}</span>
+            <span className="font-medium text-black">{formatPrice(calculateSubtotal())}</span>
           </div>
           <div className="border-t border-gray-200 pt-2">
             <div className="flex justify-between">
               <span className="text-lg font-bold text-gray-900">Total</span>
-              <span className="text-lg font-bold text-[#A5292A]">₹{calculateTotal()}</span>
+              <span className="text-lg font-bold text-[#A5292A]">{formatPrice(calculateTotal())}</span>
             </div>
           </div>
         </div>

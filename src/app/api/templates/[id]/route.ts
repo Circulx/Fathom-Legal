@@ -33,7 +33,12 @@ export async function GET(
         price: template.price,
         downloadCount: template.downloadCount,
         createdAt: template.createdAt,
-        uploadedBy: template.uploadedBy
+        uploadedBy: template.uploadedBy,
+        countries: template.countries,
+        isCustom: template.isCustom,
+        customOptions: template.customOptions,
+        defaultCalendlyLink: template.defaultCalendlyLink,
+        defaultContactEmail: template.defaultContactEmail
       }
     })
 

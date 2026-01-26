@@ -68,6 +68,7 @@ export async function PUT(request: NextRequest) {
     const customOptionsJson = formData.get('customOptions') as string
     const defaultCalendlyLink = formData.get('defaultCalendlyLink') as string
     const defaultContactEmail = formData.get('defaultContactEmail') as string
+    const countriesJson = formData.get('countries') as string
 
     if (!id) {
       return NextResponse.json({ error: 'Template ID is required' }, { status: 400 })
@@ -89,6 +90,19 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'Template not found' }, { status: 404 })
     }
 
+    // Parse countries
+    let countries: string[] = template.countries && template.countries.length > 0 ? template.countries : ['IN', 'US']
+    if (countriesJson) {
+      try {
+        countries = JSON.parse(countriesJson)
+        if (!Array.isArray(countries)) {
+          countries = ['IN', 'US']
+        }
+      } catch {
+        countries = template.countries && template.countries.length > 0 ? template.countries : ['IN', 'US']
+      }
+    }
+
     // Update basic fields
     template.title = title
     template.description = description
@@ -96,6 +110,7 @@ export async function PUT(request: NextRequest) {
     template.category = category || 'Legal Documents'
     template.defaultCalendlyLink = defaultCalendlyLink
     template.defaultContactEmail = defaultContactEmail
+    template.countries = countries
 
     // Handle image update if provided
     if (image && image.size > 0) {

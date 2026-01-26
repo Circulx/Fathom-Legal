@@ -8,6 +8,7 @@ import {
   Download,
   FileText
 } from 'lucide-react'
+import ReactCountryFlag from "react-country-flag"
 import { Navbar } from '@/components/Navbar'
 
 interface CustomOption {
@@ -41,6 +42,7 @@ interface Template {
   customOptions?: CustomOption[]
   defaultCalendlyLink?: string
   defaultContactEmail?: string
+  countries?: string[]
 }
 
 export default function TemplateDetails() {
@@ -49,6 +51,10 @@ export default function TemplateDetails() {
   const [loading, setLoading] = useState(true)
   const [showCustomModal, setShowCustomModal] = useState(false)
   const [selectedCustomOption, setSelectedCustomOption] = useState<CustomOption | null>(null)
+  const [showEmailModal, setShowEmailModal] = useState(false)
+  const [freeDownloadEmail, setFreeDownloadEmail] = useState('')
+  const [freeDownloadName, setFreeDownloadName] = useState('')
+  const [downloadingTemplateId, setDownloadingTemplateId] = useState<string | null>(null)
 
   useEffect(() => {
     if (params.id) {
@@ -82,11 +88,120 @@ export default function TemplateDetails() {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
   }
 
+  const formatPrice = (price: number) => {
+    return price === 0 ? 'Free' : `₹${price.toLocaleString()}`
+  }
+
   const handleBuyNow = () => {
     if (!template) return;
     
     // Show modal to select option (standard or custom)
     setShowCustomModal(true);
+  }
+
+  const handleFreeDownload = async () => {
+    if (!template || !freeDownloadEmail.trim()) {
+      alert('Please enter your email address');
+      return;
+    }
+
+    // Validate email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(freeDownloadEmail.trim())) {
+      alert('Please enter a valid email address');
+      return;
+    }
+
+    setDownloadingTemplateId(template._id);
+    
+    try {
+      // Create order for free template
+      const orderData = {
+        customer: {
+          name: freeDownloadName.trim() || 'Guest',
+          email: freeDownloadEmail.trim().toLowerCase(),
+          phone: '0000000000' // Placeholder for free downloads
+        },
+        items: [{
+          templateId: template._id,
+          title: template.title,
+          price: 0,
+          quantity: 1,
+          fileName: template.fileName,
+          fileSize: template.fileSize,
+          isCustom: false
+        }],
+        subtotal: 0,
+        total: 0,
+        paymentMethod: 'free'
+      };
+
+      const orderResponse = await fetch('/api/orders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(orderData)
+      });
+
+      if (!orderResponse.ok) {
+        const errorData = await orderResponse.json();
+        throw new Error(errorData.error || 'Failed to create order');
+      }
+
+      // Download the template
+      const downloadUrl = `/api/templates/${template._id}/download?email=${encodeURIComponent(freeDownloadEmail.trim())}`;
+      const response = await fetch(downloadUrl);
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Download failed' }));
+        throw new Error(errorData.error || 'Download failed');
+      }
+
+      // Check if response is JSON (custom template response)
+      const contentType = response.headers.get('Content-Type') || '';
+      if (contentType.includes('application/json')) {
+        const jsonData = await response.json();
+        alert(`This is a custom template. ${jsonData.message || 'Please contact us.'}`);
+        setDownloadingTemplateId(null);
+        return;
+      }
+
+      // Get the filename from Content-Disposition header or use default
+      const contentDisposition = response.headers.get('Content-Disposition');
+      let filename = template.fileName || 'template';
+      
+      if (contentDisposition) {
+        const filenameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+        if (filenameMatch && filenameMatch[1]) {
+          filename = filenameMatch[1].replace(/['"]/g, '');
+        }
+      }
+
+      // Create blob and download
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      alert('Template downloaded successfully!');
+      setShowEmailModal(false);
+      setFreeDownloadEmail('');
+      setFreeDownloadName('');
+      
+      // Refresh template to update download count
+      fetchTemplate();
+    } catch (error: any) {
+      console.error('Download error:', error);
+      alert(error.message || 'Failed to download template. Please try again.');
+    } finally {
+      setDownloadingTemplateId(null);
+    }
   }
 
   const handleOptionSelect = (option: CustomOption | 'standard') => {
@@ -247,8 +362,14 @@ export default function TemplateDetails() {
 
             {/* Price */}
             <div className="flex items-center">
-              <DollarSign className="h-6 w-6 text-green-600" />
-              <span className="text-3xl font-bold text-gray-900 ml-2">₹{template.price}</span>
+              {template.price === 0 ? (
+                <span className="text-3xl font-bold text-green-600">Free</span>
+              ) : (
+                <>
+                  <DollarSign className="h-6 w-6 text-green-600" />
+                  <span className="text-3xl font-bold text-gray-900 ml-2">₹{template.price.toLocaleString()}</span>
+                </>
+              )}
             </div>
 
             {/* Description */}
@@ -282,17 +403,89 @@ export default function TemplateDetails() {
               </div>
             </div>
 
-            {/* Buy Now Button */}
+            {/* Buy Now / Download Button */}
             <button
               onClick={handleBuyNow}
               className="w-full flex items-center justify-center px-6 py-4 bg-red-600 text-white text-lg font-semibold rounded-xl hover:bg-red-700 transition-colors shadow-lg hover:shadow-xl"
             >
-              <DollarSign className="h-5 w-5 mr-2" />
-              Buy Now - ₹{template.price}
+              {template.price === 0 ? (
+                <>
+                  <Download className="h-5 w-5 mr-2" />
+                  Download Free Template
+                </>
+              ) : (
+                <>
+                  <DollarSign className="h-5 w-5 mr-2" />
+                  Buy Now - ₹{template.price.toLocaleString()}
+                </>
+              )}
             </button>
           </div>
         </div>
       </div>
+
+      {/* Email Modal for Free Downloads */}
+      {showEmailModal && template && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
+            <div className="p-6">
+              <h2 className="text-xl font-bold text-gray-900 mb-4">Download Free Template</h2>
+              <p className="text-sm text-gray-600 mb-4">
+                Enter your email to download <strong>{template.title}</strong>
+              </p>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Email Address *
+                  </label>
+                  <input
+                    type="email"
+                    value={freeDownloadEmail}
+                    onChange={(e) => setFreeDownloadEmail(e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                    placeholder="your@email.com"
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Name (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    value={freeDownloadName}
+                    onChange={(e) => setFreeDownloadName(e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                    placeholder="Your Name"
+                  />
+                </div>
+              </div>
+            </div>
+            
+            <div className="px-6 py-4 bg-gray-50 flex justify-end gap-3">
+              <button
+                onClick={() => {
+                  setShowEmailModal(false);
+                  setFreeDownloadEmail('');
+                  setFreeDownloadName('');
+                }}
+                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleFreeDownload}
+                disabled={downloadingTemplateId === template._id}
+                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {downloadingTemplateId === template._id ? 'Downloading...' : 'Download'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Template Options Modal - Shows Standard + Custom Options */}
       {showCustomModal && template && (
@@ -340,8 +533,14 @@ export default function TemplateDetails() {
                       )}
                     </div>
                     <div className="text-2xl font-bold text-[#A5292A] mb-2">
-                      ₹{template.price.toLocaleString()}
-                      <span className="text-sm font-normal text-gray-600"> per template</span>
+                      {template.price === 0 ? (
+                        <span>Free</span>
+                      ) : (
+                        <>
+                          ₹{template.price.toLocaleString()}
+                          <span className="text-sm font-normal text-gray-600"> per template</span>
+                        </>
+                      )}
                     </div>
                     <p className="text-sm text-gray-600 mb-3">Instant download</p>
                     
@@ -432,12 +631,25 @@ export default function TemplateDetails() {
               >
                 Cancel
               </button>
-              <button
-                onClick={addSelectedOptionToCart}
-                className="px-6 py-2 bg-[#A5292A] text-white rounded-lg hover:bg-red-700 transition-colors"
-              >
-                Add to Cart
-              </button>
+              {template && selectedCustomOption === null && template.price === 0 ? (
+                <button
+                  onClick={() => {
+                    setShowCustomModal(false);
+                    setShowEmailModal(true);
+                  }}
+                  className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                >
+                  <Download className="h-4 w-4 inline mr-2" />
+                  Download
+                </button>
+              ) : (
+                <button
+                  onClick={addSelectedOptionToCart}
+                  className="px-6 py-2 bg-[#A5292A] text-white rounded-lg hover:bg-red-700 transition-colors"
+                >
+                  Add to Cart
+                </button>
+              )}
             </div>
           </div>
         </div>

@@ -150,7 +150,7 @@ const OrderSchema = new Schema<IOrder>({
   paymentMethod: {
     type: String,
     required: true,
-    enum: ['razorpay', 'cash', 'bank_transfer']
+    enum: ['razorpay', 'cash', 'bank_transfer', 'free']
   },
   paymentStatus: {
     type: String,

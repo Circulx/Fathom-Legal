@@ -20,6 +20,7 @@ export async function POST(request: NextRequest) {
     const customOptionsJson = formData.get('customOptions') as string
     const defaultCalendlyLink = formData.get('defaultCalendlyLink') as string
     const defaultContactEmail = formData.get('defaultContactEmail') as string
+    const countriesJson = formData.get('countries') as string
 
     // Validate required fields
     if (!image) {
@@ -141,6 +142,19 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Parse countries
+    let countries: string[] = ['IN', 'US'] // Default to India and USA
+    if (countriesJson) {
+      try {
+        countries = JSON.parse(countriesJson)
+        if (!Array.isArray(countries)) {
+          countries = ['IN', 'US']
+        }
+      } catch {
+        countries = ['IN', 'US']
+      }
+    }
+
     // Create template record
     const template = new Template({
       title: title || description, // Use provided title or fallback to description
@@ -157,7 +171,8 @@ export async function POST(request: NextRequest) {
       isCustom: isCustom,
       customOptions: customOptions.length > 0 ? customOptions : undefined,
       defaultCalendlyLink: defaultCalendlyLink,
-      defaultContactEmail: defaultContactEmail
+      defaultContactEmail: defaultContactEmail,
+      countries: countries
     })
 
     await template.save()

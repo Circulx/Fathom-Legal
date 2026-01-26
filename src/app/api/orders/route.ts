@@ -31,13 +31,17 @@ export async function POST(request: NextRequest) {
     })
 
     // Validate required fields
-    if (!customer || !items || !subtotal || !total || !paymentMethod) {
+    // Note: subtotal and total can be 0 for free orders, so check for undefined/null instead of falsy
+    if (!customer || !items || subtotal === undefined || subtotal === null || total === undefined || total === null || !paymentMethod) {
       console.error('❌ Missing required fields:', {
         hasCustomer: !!customer,
         hasItems: !!items,
-        hasSubtotal: subtotal !== undefined,
-        hasTotal: total !== undefined,
-        hasPaymentMethod: !!paymentMethod
+        hasSubtotal: subtotal !== undefined && subtotal !== null,
+        hasTotal: total !== undefined && total !== null,
+        subtotalValue: subtotal,
+        totalValue: total,
+        hasPaymentMethod: !!paymentMethod,
+        paymentMethodValue: paymentMethod
       })
       return NextResponse.json(
         { error: 'Missing required fields' },
@@ -108,14 +112,19 @@ export async function POST(request: NextRequest) {
       customerData.pincode = customer.pincode.trim()
     }
 
+    // For free orders (total === 0), auto-complete payment
+    const isFreeOrder = total === 0
+    const initialPaymentStatus = isFreeOrder ? 'completed' : 'pending'
+    const initialStatus = isFreeOrder ? 'confirmed' : 'pending'
+
     const order = new Order({
       customer: customerData,
       items,
       subtotal,
       total,
       paymentMethod,
-      paymentStatus: 'pending',
-      status: 'pending'
+      paymentStatus: initialPaymentStatus,
+      status: initialStatus
     })
 
     // Validate before saving
@@ -133,6 +142,14 @@ export async function POST(request: NextRequest) {
     }
 
     await order.save()
+
+    if (isFreeOrder) {
+      console.log('✅ Free order created and auto-completed:', {
+        id: order._id,
+        orderNumber: order.orderNumber,
+        total: order.total
+      })
+    }
 
     console.log('✅ Order created successfully:', {
       id: order._id,

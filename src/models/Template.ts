@@ -28,6 +28,7 @@ export interface ITemplate extends Document {
   customOptions?: ICustomOption[]
   defaultCalendlyLink?: string
   defaultContactEmail?: string
+  countries?: string[] // Array of ISO country codes (e.g., ['IN', 'US'])
   createdAt: Date
   updatedAt: Date
 }
@@ -138,7 +139,12 @@ const TemplateSchema = new Schema<ITemplate>({
     type: String,
     required: [true, 'Default contact email is required'],
     trim: true
-  }
+  },
+  countries: [{
+    type: String,
+    trim: true,
+    uppercase: true
+  }]
 }, {
   timestamps: true
 })

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useSession, signOut } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useEditor, EditorContent } from '@tiptap/react'
@@ -11,6 +11,12 @@ import Placeholder from '@tiptap/extension-placeholder'
 import { ResizableImage } from '@/lib/tiptap-extensions/ResizableImage'
 import { BorderedParagraph } from '@/lib/tiptap-extensions/BorderedParagraph'
 import { FontSize } from '@/lib/tiptap-extensions/FontSize'
+import countries from 'i18n-iso-countries'
+import enLocale from 'i18n-iso-countries/langs/en.json'
+import ReactCountryFlag from 'react-country-flag'
+
+// Register country names
+countries.registerLocale(enLocale)
 import { 
   LayoutDashboard,
   FileText,
@@ -69,6 +75,7 @@ interface Template {
   }>
   defaultCalendlyLink?: string
   defaultContactEmail?: string
+  countries?: string[]
 }
 
 interface GalleryItem {
@@ -96,6 +103,117 @@ interface Blog {
 }
 
 // Rich Text Editor Component with Toolbar
+// Country Dropdown Component
+function CountryDropdown({
+  selectedCountries,
+  onChange
+}: {
+  selectedCountries: string[]
+  onChange: (countries: string[]) => void
+}) {
+  const [isOpen, setIsOpen] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
+
+  const allCountries = Object.entries(countries.getNames('en', { select: 'official' }))
+    .sort(([, a], [, b]) => a.localeCompare(b))
+
+  const toggleCountry = (code: string) => {
+    if (selectedCountries.includes(code)) {
+      onChange(selectedCountries.filter(c => c !== code))
+    } else {
+      onChange([...selectedCountries, code])
+    }
+  }
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [])
+
+  const getCountryName = (code: string) => {
+    return countries.getName(code, 'en', { select: 'official' }) || code
+  }
+
+  return (
+    <div className="relative" ref={dropdownRef}>
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full px-3 py-2 border border-black rounded-lg focus:ring-2 focus:ring-gray-400 focus:border-black bg-white text-gray-900 text-left flex items-center justify-between"
+      >
+        <span className="flex items-center gap-2 flex-wrap">
+          {selectedCountries.length > 0 ? (
+            selectedCountries.slice(0, 3).map((code) => (
+              <span key={code} className="flex items-center gap-1">
+                <ReactCountryFlag
+                  countryCode={code}
+                  svg
+                  style={{
+                    width: '1em',
+                    height: '1em',
+                  }}
+                />
+                <span className="text-sm">{getCountryName(code)}</span>
+              </span>
+            ))
+          ) : (
+            <span className="text-gray-500">Select countries</span>
+          )}
+          {selectedCountries.length > 3 && (
+            <span className="text-sm text-gray-500">+{selectedCountries.length - 3} more</span>
+          )}
+        </span>
+        <svg
+          className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+
+      {isOpen && (
+        <div className="absolute z-50 w-full mt-1 bg-white border border-black rounded-lg shadow-lg max-h-60 overflow-y-auto">
+          <div className="p-2">
+            {allCountries.map(([code, name]) => (
+              <label
+                key={code}
+                className="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 cursor-pointer rounded"
+              >
+                <input
+                  type="checkbox"
+                  checked={selectedCountries.includes(code)}
+                  onChange={() => toggleCountry(code)}
+                  className="w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500"
+                />
+                <ReactCountryFlag
+                  countryCode={code}
+                  svg
+                  style={{
+                    width: '1.2em',
+                    height: '1.2em',
+                  }}
+                />
+                <span className="text-sm text-gray-900">{name}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 function RichTextEditor({ 
   value, 
   onChange, 
@@ -457,6 +575,7 @@ export default function AdminDashboard() {
     category: 'Legal Documents',
     image: null as File | null,
     pdfFile: null as File | null,
+    countries: ['IN', 'US'] as string[], // Default to India and USA
     customOptions: [] as Array<{
       name: string
       price: string
@@ -474,6 +593,7 @@ export default function AdminDashboard() {
     image: null as File | null,
     pdfFile: null as File | null,
     existingImageUrl: '',
+    countries: ['IN', 'US'] as string[],
     customOptions: [] as Array<{
       name: string
       price: string
@@ -730,6 +850,11 @@ export default function AdminDashboard() {
       formData.append('defaultCalendlyLink', defaultCalendlyLink)
       formData.append('defaultContactEmail', defaultContactEmail)
 
+      // Add countries
+      if (templateUploadForm.countries && templateUploadForm.countries.length > 0) {
+        formData.append('countries', JSON.stringify(templateUploadForm.countries))
+      }
+
       // Add custom template options if any
       if (templateUploadForm.customOptions.length > 0) {
         formData.append('isCustom', 'true')
@@ -759,10 +884,11 @@ export default function AdminDashboard() {
         setTemplateUploadForm({ 
           title: '',
           description: '', 
-          price: '', 
-          category: 'Legal Documents', 
-          image: null, 
+          price: '',
+          category: 'Legal Documents',
+          image: null,
           pdfFile: null,
+          countries: ['IN', 'US'],
           customOptions: []
         })
         fetchTemplates()
@@ -1239,6 +1365,7 @@ export default function AdminDashboard() {
       image: null,
       pdfFile: null,
       existingImageUrl: template.imageData || template.imageUrl || '',
+      countries: template.countries && template.countries.length > 0 ? template.countries : ['IN', 'US'],
       customOptions: template.customOptions?.map(opt => ({
         name: opt.name,
         price: opt.price.toString(),
@@ -1285,6 +1412,11 @@ export default function AdminDashboard() {
       formData.append('defaultCalendlyLink', defaultCalendlyLink)
       formData.append('defaultContactEmail', defaultContactEmail)
 
+      // Add countries
+      if (templateEditForm.countries && templateEditForm.countries.length > 0) {
+        formData.append('countries', JSON.stringify(templateEditForm.countries))
+      }
+
       // Add custom options if any
       if (templateEditForm.customOptions.length > 0) {
         formData.append('isCustom', 'true')
@@ -1318,6 +1450,7 @@ export default function AdminDashboard() {
           image: null,
           pdfFile: null,
           existingImageUrl: '',
+          countries: ['IN', 'US'],
           customOptions: []
         })
         fetchTemplates()
@@ -1690,7 +1823,9 @@ export default function AdminDashboard() {
                           </p>
                           
                           <div className="flex items-center justify-between">
-                            <span className="text-sm font-bold text-gray-900">₹{template.price || 0}</span>
+                            <span className="text-sm font-bold text-gray-900">
+                              {template.price === 0 ? 'Free' : `₹${template.price || 0}`}
+                            </span>
                             <div className="flex items-center space-x-2">
                               <button
                                 onClick={() => handleTemplateEdit(template)}
@@ -2510,6 +2645,21 @@ export default function AdminDashboard() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Available Countries
+                </label>
+                <CountryDropdown
+                  selectedCountries={templateUploadForm.countries}
+                  onChange={(selected) => {
+                    setTemplateUploadForm(prev => ({ ...prev, countries: selected }))
+                  }}
+                />
+                {templateUploadForm.countries.length === 0 && (
+                  <p className="text-xs text-red-600 mt-1">Please select at least one country</p>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
                   Template Preview Image *
                 </label>
                 <input
@@ -2722,6 +2872,7 @@ export default function AdminDashboard() {
                     image: null,
                     pdfFile: null,
                     existingImageUrl: '',
+                    countries: ['IN', 'US'],
                     customOptions: []
                   })
                 }}
@@ -2872,6 +3023,21 @@ export default function AdminDashboard() {
                   <option value="Forms">Forms</option>
                   <option value="Other">Other</option>
                 </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Available Countries
+                </label>
+                <CountryDropdown
+                  selectedCountries={templateEditForm.countries}
+                  onChange={(selected) => {
+                    setTemplateEditForm(prev => ({ ...prev, countries: selected }))
+                  }}
+                />
+                {templateEditForm.countries.length === 0 && (
+                  <p className="text-xs text-red-600 mt-1">Please select at least one country</p>
+                )}
               </div>
 
               <div>
@@ -3066,6 +3232,7 @@ export default function AdminDashboard() {
                         image: null,
                         pdfFile: null,
                         existingImageUrl: '',
+                        countries: ['IN', 'US'],
                         customOptions: []
                       })
                     }}

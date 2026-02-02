@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import { Navbar } from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import { Calendar, ArrowRight } from 'lucide-react'
@@ -93,11 +94,14 @@ export default async function BlogPage() {
               >
                 {/* Featured Image */}
                 {blog.imageUrl && (
-                  <div className="aspect-w-16 aspect-h-9">
-                    <img
+                  <div className="aspect-w-16 aspect-h-9 relative">
+                    <Image
                       src={blog.imageUrl}
                       alt={blog.title}
-                      className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                      unoptimized={blog.imageUrl?.startsWith('data:')}
+                      sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                     />
                   </div>
                 )}

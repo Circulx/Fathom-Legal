@@ -58,6 +58,10 @@ const GalleryBlogSchema = new Schema<IGalleryBlog>(
   { timestamps: true }
 )
 
+// Database indexes for performance optimization
+GalleryBlogSchema.index({ isActive: 1, isDeleted: 1, category: 1, createdAt: -1 }) // Compound index for list queries with filtering and sorting
+GalleryBlogSchema.index({ slug: 1 }) // Index for slug lookups (already unique, but explicit index helps)
+
 // Ensure either content or externalUrl is provided
 GalleryBlogSchema.pre('save', function (next) {
   if (!this.content && !this.externalUrl) {

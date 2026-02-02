@@ -1,673 +1,107 @@
-'use client'
-
-import { useState, useEffect } from 'react'
-import { useParams } from 'next/navigation'
-import { 
-  ArrowLeft,
-  DollarSign,
-  Download,
-  FileText
-} from 'lucide-react'
-import ReactCountryFlag from "react-country-flag"
+import { notFound } from 'next/navigation'
 import { Navbar } from '@/components/Navbar'
+import connectDB from '@/lib/mongodb'
+import Template from '@/models/Template'
+import TemplateClient from './TemplateClient'
 
-interface CustomOption {
-  name: string
-  price: number
-  description?: string
-  features: string[]
-  calendlyLink?: string
-  contactEmail?: string
+interface TemplatePageProps {
+  params: Promise<{ id: string }>
 }
 
-interface Template {
-  _id: string
-  title: string
-  description: string
-  category: string
-  fileUrl: string
-  fileName: string
-  fileSize: number
-  fileType: string
-  imageUrl?: string // Legacy field
-  imageData?: string // Base64 data URL (preferred)
-  price: number
-  downloadCount: number
-  createdAt: string
-  uploadedBy: {
-    name: string
-    email: string
+async function getTemplateById(id: string) {
+  try {
+    await connectDB()
+    
+    const template = await Template.findById(id)
+      .populate('uploadedBy', 'name email')
+    
+    if (!template || !template.isActive) {
+      return null
+    }
+
+    return {
+      _id: template._id.toString(),
+      title: template.title,
+      description: template.description,
+      category: template.category,
+      fileUrl: template.fileUrl,
+      fileName: template.fileName || '',
+      fileSize: template.fileSize || 0,
+      fileType: template.fileType || '',
+      imageUrl: template.imageUrl,
+      imageData: template.imageData,
+      price: template.price,
+      downloadCount: template.downloadCount || 0,
+      createdAt: template.createdAt.toISOString(),
+      isCustom: template.isCustom || false,
+      customOptions: template.customOptions || [],
+      defaultCalendlyLink: template.defaultCalendlyLink || '',
+      defaultContactEmail: template.defaultContactEmail || ''
+    }
+  } catch (error) {
+    console.error('Error fetching template:', error)
+    return null
   }
-  isCustom?: boolean
-  customOptions?: CustomOption[]
-  defaultCalendlyLink?: string
-  defaultContactEmail?: string
-  countries?: string[]
 }
 
-export default function TemplateDetails() {
-  const params = useParams()
-  const [template, setTemplate] = useState<Template | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [showCustomModal, setShowCustomModal] = useState(false)
-  const [selectedCustomOption, setSelectedCustomOption] = useState<CustomOption | null>(null)
-  const [showEmailModal, setShowEmailModal] = useState(false)
-  const [freeDownloadEmail, setFreeDownloadEmail] = useState('')
-  const [freeDownloadName, setFreeDownloadName] = useState('')
-  const [downloadingTemplateId, setDownloadingTemplateId] = useState<string | null>(null)
+// Generate static params for all active templates at build time
+export async function generateStaticParams() {
+  try {
+    await connectDB()
+    
+    const templates = await Template.find({ 
+      isActive: true
+    })
+      .select('_id')
+      .lean()
 
-  useEffect(() => {
-    if (params.id) {
-      fetchTemplate()
-    }
-  }, [params.id])
-
-  const fetchTemplate = async () => {
-    try {
-      setLoading(true)
-      const response = await fetch(`/api/templates/${params.id}`)
-      const data = await response.json()
-      
-      if (response.ok) {
-        setTemplate(data.template)
-      } else {
-        console.error('Error fetching template:', data.error)
-      }
-    } catch (error) {
-      console.error('Error fetching template:', error)
-    } finally {
-      setLoading(false)
-    }
+    return templates.map((template: any) => ({
+      id: template._id.toString(),
+    }))
+  } catch (error) {
+    console.error('Error generating static params for templates:', error)
+    return []
   }
+}
 
-  const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 Bytes'
-    const k = 1024
-    const sizes = ['Bytes', 'KB', 'MB', 'GB']
-    const i = Math.floor(Math.log(bytes) / Math.log(k))
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
-  }
+// Revalidate pages every 30 minutes (ISR)
+export const revalidate = 1800
 
-  const formatPrice = (price: number) => {
-    return price === 0 ? 'Free' : `₹${price.toLocaleString()}`
-  }
-
-  const handleBuyNow = () => {
-    if (!template) return;
-    
-    // Show modal to select option (standard or custom)
-    setShowCustomModal(true);
-  }
-
-  const handleFreeDownload = async () => {
-    if (!template || !freeDownloadEmail.trim()) {
-      alert('Please enter your email address');
-      return;
-    }
-
-    // Validate email
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(freeDownloadEmail.trim())) {
-      alert('Please enter a valid email address');
-      return;
-    }
-
-    setDownloadingTemplateId(template._id);
-    
-    try {
-      // Create order for free template
-      const orderData = {
-        customer: {
-          name: freeDownloadName.trim() || 'Guest',
-          email: freeDownloadEmail.trim().toLowerCase(),
-          phone: '0000000000' // Placeholder for free downloads
-        },
-        items: [{
-          templateId: template._id,
-          title: template.title,
-          price: 0,
-          quantity: 1,
-          fileName: template.fileName,
-          fileSize: template.fileSize,
-          isCustom: false
-        }],
-        subtotal: 0,
-        total: 0,
-        paymentMethod: 'free'
-      };
-
-      const orderResponse = await fetch('/api/orders', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(orderData)
-      });
-
-      if (!orderResponse.ok) {
-        const errorData = await orderResponse.json();
-        throw new Error(errorData.error || 'Failed to create order');
-      }
-
-      // Download the template
-      const downloadUrl = `/api/templates/${template._id}/download?email=${encodeURIComponent(freeDownloadEmail.trim())}`;
-      const response = await fetch(downloadUrl);
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Download failed' }));
-        throw new Error(errorData.error || 'Download failed');
-      }
-
-      // Check if response is JSON (custom template response)
-      const contentType = response.headers.get('Content-Type') || '';
-      if (contentType.includes('application/json')) {
-        const jsonData = await response.json();
-        alert(`This is a custom template. ${jsonData.message || 'Please contact us.'}`);
-        setDownloadingTemplateId(null);
-        return;
-      }
-
-      // Get the filename from Content-Disposition header or use default
-      const contentDisposition = response.headers.get('Content-Disposition');
-      let filename = template.fileName || 'template';
-      
-      if (contentDisposition) {
-        const filenameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
-        if (filenameMatch && filenameMatch[1]) {
-          filename = filenameMatch[1].replace(/['"]/g, '');
-        }
-      }
-
-      // Create blob and download
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-
-      alert('Template downloaded successfully!');
-      setShowEmailModal(false);
-      setFreeDownloadEmail('');
-      setFreeDownloadName('');
-      
-      // Refresh template to update download count
-      fetchTemplate();
-    } catch (error: any) {
-      console.error('Download error:', error);
-      alert(error.message || 'Failed to download template. Please try again.');
-    } finally {
-      setDownloadingTemplateId(null);
-    }
-  }
-
-  const handleOptionSelect = (option: CustomOption | 'standard') => {
-    if (!template) return;
-    
-    if (option === 'standard') {
-      setSelectedCustomOption(null);
-    } else {
-      setSelectedCustomOption(option);
-    }
-  };
-
-  const addSelectedOptionToCart = () => {
-    if (!template) return;
-    
-    const existingCart = JSON.parse(localStorage.getItem('fathom_cart') || '[]');
-    
-    // Check if the same item already exists in cart
-    let existingItemIndex = -1;
-    
-    if (selectedCustomOption) {
-      // For custom options, check by template ID and custom option name
-      existingItemIndex = existingCart.findIndex((item: any) => 
-        item._id === template._id && 
-        item.isCustom === true && 
-        item.customOptionName === selectedCustomOption.name
-      );
-    } else {
-      // For standard options, check by template ID and that it's not custom
-      existingItemIndex = existingCart.findIndex((item: any) => 
-        item._id === template._id && 
-        item.isCustom === false
-      );
-    }
-    
-    if (existingItemIndex !== -1) {
-      // Item exists, increment quantity
-      existingCart[existingItemIndex].quantity = (existingCart[existingItemIndex].quantity || 1) + 1;
-    } else {
-      // Item doesn't exist, add new item
-      let cartItem;
-      
-      if (selectedCustomOption) {
-        // Custom option selected
-        cartItem = {
-          _id: template._id,
-          title: template.title,
-          description: template.description,
-          price: selectedCustomOption.price,
-          imageData: template.imageData, // Store base64 data separately
-          imageUrl: template.imageUrl, // Legacy URL field
-          category: template.category,
-          fileName: template.fileName,
-          fileSize: template.fileSize,
-          quantity: 1,
-          isCustom: true,
-          customOptionName: selectedCustomOption.name,
-          calendlyLink: selectedCustomOption.calendlyLink || template.defaultCalendlyLink,
-          contactEmail: selectedCustomOption.contactEmail || template.defaultContactEmail
-        };
-      } else {
-        // Standard option selected
-        cartItem = {
-          _id: template._id,
-          title: template.title,
-          description: template.description,
-          price: template.price,
-          imageData: template.imageData, // Store base64 data separately
-          imageUrl: template.imageUrl, // Legacy URL field
-          category: template.category,
-          fileName: template.fileName,
-          fileSize: template.fileSize,
-          quantity: 1,
-          isCustom: false
-        };
-      }
-      
-      existingCart.push(cartItem);
-    }
-    
-    // Save to localStorage
-    localStorage.setItem('fathom_cart', JSON.stringify(existingCart));
-    
-    // Close modal and redirect to checkout
-    setShowCustomModal(false);
-    setSelectedCustomOption(null);
-    window.location.href = '/checkout';
-  }
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-white">
-        <Navbar page="templates" />
-        <div className="flex justify-center items-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600"></div>
-        </div>
-      </div>
-    )
-  }
+export default async function TemplatePage({ params }: TemplatePageProps) {
+  const { id } = await params
+  const template = await getTemplateById(id)
 
   if (!template) {
-    return (
-      <div className="min-h-screen bg-white">
-        <Navbar page="templates" />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="text-center py-12">
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">Template not found</h1>
-            <p className="text-gray-600 mb-6">The template you're looking for doesn't exist.</p>
-            <button
-              onClick={() => window.history.back()}
-              className="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Go Back
-            </button>
-          </div>
-        </div>
-      </div>
-    )
+    notFound()
   }
 
   return (
     <div className="min-h-screen bg-white">
       <Navbar page="templates" />
-      
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Back Button */}
-        <button
-          onClick={() => window.history.back()}
-          className="flex items-center text-gray-600 hover:text-gray-900 mb-6"
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Templates
-        </button>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Template Image */}
-          <div className="aspect-square bg-gray-100 rounded-xl overflow-hidden">
-            {(template.imageData || template.imageUrl) ? (
-              <img 
-                src={template.imageData || template.imageUrl} 
-                alt={template.title}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center">
-                <FileText className="h-24 w-24 text-gray-400" />
-              </div>
-            )}
-          </div>
-
-          {/* Template Details */}
-          <div className="space-y-6">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">{template.title}</h1>
-              <p className="text-gray-600">Category: {template.category}</p>
-            </div>
-
-            {/* Price */}
-            <div className="flex items-center">
-              {template.price === 0 ? (
-                <span className="text-3xl font-bold text-green-600">Free</span>
-              ) : (
-                <>
-                  <DollarSign className="h-6 w-6 text-green-600" />
-                  <span className="text-3xl font-bold text-gray-900 ml-2">₹{template.price.toLocaleString()}</span>
-                </>
-              )}
-            </div>
-
-            {/* Description */}
-            <div>
-              <h2 className="text-xl font-semibold text-gray-900 mb-3">Description</h2>
-              <div className="prose max-w-none">
-                <p className="text-gray-700 whitespace-pre-line">{template.description}</p>
-              </div>
-            </div>
-
-            {/* Template Info */}
-            <div className="bg-gray-50 rounded-lg p-4">
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">Template Information</h3>
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">File Name:</span>
-                  <span className="text-gray-900">{template.fileName}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">File Size:</span>
-                  <span className="text-gray-900">{formatFileSize(template.fileSize)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Downloads:</span>
-                  <span className="text-gray-900">{template.downloadCount}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Uploaded:</span>
-                  <span className="text-gray-900">{new Date(template.createdAt).toLocaleDateString()}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Buy Now / Download Button */}
-            <button
-              onClick={handleBuyNow}
-              className="w-full flex items-center justify-center px-6 py-4 bg-red-600 text-white text-lg font-semibold rounded-xl hover:bg-red-700 transition-colors shadow-lg hover:shadow-xl"
-            >
-              {template.price === 0 ? (
-                <>
-                  <Download className="h-5 w-5 mr-2" />
-                  Download Free Template
-                </>
-              ) : (
-                <>
-                  <DollarSign className="h-5 w-5 mr-2" />
-                  Buy Now - ₹{template.price.toLocaleString()}
-                </>
-              )}
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Email Modal for Free Downloads */}
-      {showEmailModal && template && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
-            <div className="p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">Download Free Template</h2>
-              <p className="text-sm text-gray-600 mb-4">
-                Enter your email to download <strong>{template.title}</strong>
-              </p>
-              
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Email Address *
-                  </label>
-                  <input
-                    type="email"
-                    value={freeDownloadEmail}
-                    onChange={(e) => setFreeDownloadEmail(e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
-                    placeholder="your@email.com"
-                    required
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Name (Optional)
-                  </label>
-                  <input
-                    type="text"
-                    value={freeDownloadName}
-                    onChange={(e) => setFreeDownloadName(e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
-                    placeholder="Your Name"
-                  />
-                </div>
-              </div>
-            </div>
-            
-            <div className="px-6 py-4 bg-gray-50 flex justify-end gap-3">
-              <button
-                onClick={() => {
-                  setShowEmailModal(false);
-                  setFreeDownloadEmail('');
-                  setFreeDownloadName('');
-                }}
-                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleFreeDownload}
-                disabled={downloadingTemplateId === template._id}
-                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {downloadingTemplateId === template._id ? 'Downloading...' : 'Download'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Template Options Modal - Shows Standard + Custom Options */}
-      {showCustomModal && template && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-6xl w-full max-h-[90vh] overflow-y-auto">
-            {/* Modal Header */}
-            <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center">
-              <div>
-                <h2 className="text-xl font-bold text-gray-900">Select Template Option</h2>
-              </div>
-              <button
-                onClick={() => {
-                  setShowCustomModal(false);
-                  setSelectedCustomOption(null);
-                }}
-                className="text-gray-400 hover:text-gray-600 text-2xl"
-              >
-                ×
-              </button>
-            </div>
-
-            {/* Modal Body - Options in Columns */}
-            <div className="p-6">
-              {/* Template Description */}
-              {template.description && (
-                <div className="mb-6 pb-4 border-b border-gray-200">
-                  <p className="text-gray-700 whitespace-pre-line">{template.description}</p>
-                </div>
-              )}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-                {/* Standard Option - Always First Column */}
-                <div
-                  className={`border-2 rounded-lg p-4 cursor-pointer transition-all flex flex-col ${
-                    selectedCustomOption === null
-                      ? 'border-[#A5292A] bg-red-50'
-                      : 'border-gray-200 hover:border-gray-300'
-                  }`}
-                  onClick={() => handleOptionSelect('standard')}
-                >
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <h3 className="text-lg font-bold text-gray-900">Standard</h3>
-                      {selectedCustomOption === null && (
-                        <span className="bg-[#A5292A] text-white text-xs px-2 py-1 rounded">Selected</span>
-                      )}
-                    </div>
-                    <div className="text-2xl font-bold text-[#A5292A] mb-2">
-                      {template.price === 0 ? (
-                        <span>Free</span>
-                      ) : (
-                        <>
-                          ₹{template.price.toLocaleString()}
-                          <span className="text-sm font-normal text-gray-600"> per template</span>
-                        </>
-                      )}
-                    </div>
-                    <p className="text-sm text-gray-600 mb-3">Instant download</p>
-                    
-                    {/* Default Features for Standard Option */}
-                    <div className="mb-3">
-                      <ul className="space-y-1">
-                        <li className="flex items-start text-sm text-gray-700">
-                          <span className="text-green-500 mr-2">✓</span>
-                          <span>Instant Download</span>
-                        </li>
-                        <li className="flex items-start text-sm text-gray-700">
-                          <span className="text-green-500 mr-2">✓</span>
-                          <span>Editable File</span>
-                        </li>
-                        <li className="flex items-start text-sm text-gray-700">
-                          <span className="text-green-500 mr-2">✓</span>
-                          <span>No Customization</span>
-                        </li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Custom Options - Columns 2-5 */}
-                {template.customOptions && template.customOptions.map((option, index) => (
-                  <div
-                    key={index}
-                    className={`border-2 rounded-lg p-4 cursor-pointer transition-all flex flex-col ${
-                      selectedCustomOption?.name === option.name
-                        ? 'border-[#A5292A] bg-red-50'
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                    onClick={() => handleOptionSelect(option)}
-                  >
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <h3 className="text-lg font-bold text-gray-900">{option.name}</h3>
-                        {selectedCustomOption?.name === option.name && (
-                          <span className="bg-[#A5292A] text-white text-xs px-2 py-1 rounded">Selected</span>
-                        )}
-                      </div>
-                      <div className="text-2xl font-bold text-[#A5292A] mb-2">
-                        ₹{option.price.toLocaleString()}
-                        <span className="text-sm font-normal text-gray-600"> per template</span>
-                      </div>
-                      {option.description && (
-                        <p className="text-sm text-gray-600 mb-3">{option.description}</p>
-                      )}
-                      
-                      {/* Features List */}
-                      {option.features && option.features.length > 0 && (
-                        <div className="mb-3">
-                          <ul className="space-y-1">
-                            {option.features.map((feature, idx) => (
-                              <li key={idx} className="flex items-start text-sm text-gray-700">
-                                <span className="text-green-500 mr-2">✓</span>
-                                <span>{feature}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-
-                      {/* Contact Information */}
-                      <div className="mt-auto pt-3 border-t border-gray-200">
-                        <p className="text-xs text-gray-500">
-                          {option.calendlyLink || template.defaultCalendlyLink
-                            ? 'Schedule via Calendly'
-                            : option.contactEmail || template.defaultContactEmail
-                            ? 'Contact via Email'
-                            : 'Contact after purchase'}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Modal Footer */}
-            <div className="sticky bottom-0 bg-white border-t border-gray-200 px-6 py-4 flex justify-end gap-3">
-              <button
-                onClick={() => {
-                  setShowCustomModal(false);
-                  setSelectedCustomOption(null);
-                }}
-                className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                Cancel
-              </button>
-              {template && selectedCustomOption === null && template.price === 0 ? (
-                <button
-                  onClick={() => {
-                    setShowCustomModal(false);
-                    setShowEmailModal(true);
-                  }}
-                  className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-                >
-                  <Download className="h-4 w-4 inline mr-2" />
-                  Download
-                </button>
-              ) : (
-                <button
-                  onClick={addSelectedOptionToCart}
-                  className="px-6 py-2 bg-[#A5292A] text-white rounded-lg hover:bg-red-700 transition-colors"
-                >
-                  Add to Cart
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+      <TemplateClient template={template} />
     </div>
   )
 }
 
+// Generate metadata for SEO
+export async function generateMetadata({ params }: TemplatePageProps) {
+  const { id } = await params
+  const template = await getTemplateById(id)
 
+  if (!template) {
+    return {
+      title: 'Template Not Found | Fathom Legal',
+      description: 'The requested template could not be found.'
+    }
+  }
 
-
-
-
-
-
-
-
-
-
-
-
+  return {
+    title: `${template.title} | Fathom Legal`,
+    description: template.description,
+    openGraph: {
+      title: template.title,
+      description: template.description,
+      images: template.imageData || template.imageUrl ? [template.imageData || template.imageUrl || ''] : [],
+    },
+  }
+}

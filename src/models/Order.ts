@@ -189,6 +189,12 @@ const OrderSchema = new Schema<IOrder>({
   timestamps: true
 })
 
+// Database indexes for performance optimization
+OrderSchema.index({ orderNumber: 1 }) // Index for order number lookups (already unique)
+OrderSchema.index({ 'customer.email': 1, createdAt: -1 }) // Index for customer email queries
+OrderSchema.index({ status: 1, paymentStatus: 1, createdAt: -1 }) // Compound index for admin order queries
+OrderSchema.index({ createdAt: -1 }) // Index for date-based sorting
+
 // Generate order number before saving
 OrderSchema.pre('save', function(next) {
   if (!this.orderNumber) {

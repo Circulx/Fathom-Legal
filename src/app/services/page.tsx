@@ -335,11 +335,13 @@ export default function Services() {
             </div>
 
             <div className="lg:pl-8">
-              <div className="relative">
-                <img
+              <div className="relative w-full h-96 rounded-2xl overflow-hidden shadow-lg">
+                <Image
                   src="https://images.unsplash.com/photo-1521737604893-d14cc237f11d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2084&q=80"
                   alt="Legal consultation"
-                  className="rounded-2xl shadow-lg w-full h-96 object-cover"
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 1024px) 100vw, 50vw"
                 />
                 <div
                   className="absolute inset-0 rounded-2xl"

@@ -86,26 +86,22 @@ export default function AboutUs() {
     {
       icon: <Award className="w-8 h-8" />,
       title: "Expertise & Experience",
-      description: <p className="text-left ml-5">Our team brings years of specialized experience in corporate law, startup ecosystem, and business regulations.</p>
-        
+      description: "Our team brings years of specialized experience in corporate law, startup ecosystem, and business regulations."
     },
     {
       icon: <Users className="w-8 h-8" />,
       title: "Client-Centric Approach",
-      description:<p className="text-left ml-5">We prioritize our clients' needs and provide personalized legal solutions tailored to their specific requirements.</p>
-        
+      description: "We prioritize our clients' needs and provide personalized legal solutions tailored to their specific requirements."
     },
     {
       icon: <Shield className="w-8 h-8" />,
       title: "Ethical Governance",
-      description:<p className="text-left ml-7">We maintain the highest standards of professional ethics and integrity in all our legal practices.</p>
-        
+      description: "We maintain the highest standards of professional ethics and integrity in all our legal practices."
     },
     {
       icon: <Target className="w-8 h-8" />,
       title: "Result-Oriented Solutions",
-      description:<p className="text-left ml-5">Our focus is on delivering practical, efficient, and effective legal solutions that drive business success.</p>
-        
+      description: "Our focus is on delivering practical, efficient, and effective legal solutions that drive business success."
     },
   ];
 
@@ -217,7 +213,7 @@ export default function AboutUs() {
                 }`}>
                   {item.title}
                 </h3>
-                <p className={`text-sm sm:text-base ${
+                <p className={`text-sm sm:text-base text-left ml-5 ${
                   index % 2 === 0 
                     ? 'text-white' 
                     : 'text-gray-600'

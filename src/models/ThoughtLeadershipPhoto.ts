@@ -42,6 +42,9 @@ const ThoughtLeadershipPhotoSchema = new Schema<IThoughtLeadershipPhoto>({
   timestamps: true
 })
 
+// Database indexes for performance optimization
+ThoughtLeadershipPhotoSchema.index({ isActive: 1, category: 1, displayOrder: 1, createdAt: -1 }) // Compound index for list queries
+
 export default mongoose.models.ThoughtLeadershipPhoto || mongoose.model<IThoughtLeadershipPhoto>('ThoughtLeadershipPhoto', ThoughtLeadershipPhotoSchema)
 
 

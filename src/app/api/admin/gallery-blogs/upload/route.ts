@@ -1,11 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { writeFile, mkdir } from 'fs/promises'
-import { join } from 'path'
+import { getServerSession } from 'next-auth/next'
+import { authOptions } from '@/lib/auth'
 import connectDB from '@/lib/mongodb'
 import GalleryBlog from '@/models/GalleryBlog'
+import { put } from '@vercel/blob'
 
 export async function POST(request: NextRequest) {
   try {
+    // Check authentication
+    const session = await getServerSession(authOptions)
+    if (!session || session.user?.role !== 'admin' && session.user?.role !== 'super-admin') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     console.log('Gallery blog creation started')
     await connectDB()
     console.log('Database connected successfully')
@@ -70,40 +77,20 @@ export async function POST(request: NextRequest) {
       }
 
       try {
-        const bytes = await image.arrayBuffer()
-        const buffer = Buffer.from(bytes)
-        
-        // Check if we're on Vercel (serverless environment)
-        const isVercel = process.env.VERCEL === '1'
-        
-        // Always use base64 for production compatibility
-        // This ensures images work on both local and production
-        // NOTE: For better performance with large images, consider using cloud storage (S3, Cloudinary, etc.)
-        const base64 = buffer.toString('base64')
-        imageUrl = `data:${image.type};base64,${base64}`
-        
-        // Also save to filesystem for local development (optional, for easier file management)
-        if (!isVercel) {
-          // Optional: Also save to filesystem for local development
-          try {
-            const uploadsDir = join(process.cwd(), 'public', 'uploads', 'gallery-blogs')
-            await mkdir(uploadsDir, { recursive: true })
-            const timestamp = Date.now()
-            const fileExtension = image.name.split('.').pop() || 'jpg'
-            const fileName = `gallery-blog-${timestamp}.${fileExtension}`
-            const filePath = join(uploadsDir, fileName)
-            await writeFile(filePath, buffer)
-            // Note: We still use base64 URL above for consistency
-          } catch (fsError) {
-            // Ignore filesystem errors, base64 URL is already set
-            console.warn('Could not save to filesystem, using base64 only:', fsError)
-          }
-        }
-      } catch (fileError) {
-        console.error('File upload error:', fileError)
+        const timestamp = Date.now()
+        const imageFileName = `gallery-blogs/${timestamp}-${image.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`
+        const imageBytes = await image.arrayBuffer()
+        const blob = await put(imageFileName, imageBytes, {
+          access: 'public',
+          contentType: image.type,
+        })
+        imageUrl = blob.url
+        console.log(`✅ Gallery blog image uploaded to Vercel Blob: ${imageUrl}`)
+      } catch (blobError) {
+        console.error('❌ Vercel Blob upload failed:', blobError)
         return NextResponse.json({ 
-          error: 'Failed to upload image. Please try again.',
-          details: fileError instanceof Error ? fileError.message : 'Unknown file error'
+          error: 'Failed to upload image to Vercel Blob. Please try again.',
+          details: blobError instanceof Error ? blobError.message : 'Unknown error'
         }, { status: 500 })
       }
     }

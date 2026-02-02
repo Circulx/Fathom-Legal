@@ -1,9 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth/next'
+import { authOptions } from '@/lib/auth'
 import connectDB from '@/lib/mongodb'
 import Template from '@/models/Template'
+import { put } from '@vercel/blob'
 
 export async function GET(request: NextRequest) {
   try {
+    // Check authentication
+    const session = await getServerSession(authOptions)
+    if (!session || session.user?.role !== 'admin' && session.user?.role !== 'super-admin') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     await connectDB()
     
     const { searchParams } = new URL(request.url)
@@ -54,6 +63,12 @@ export async function GET(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
+    // Check authentication
+    const session = await getServerSession(authOptions)
+    if (!session || session.user?.role !== 'admin' && session.user?.role !== 'super-admin') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     await connectDB()
     
     const formData = await request.formData()
@@ -131,18 +146,29 @@ export async function PUT(request: NextRequest) {
       const maxSize = 5 * 1024 * 1024 // 5MB
       if (image.size > maxSize) {
         return NextResponse.json({ 
-          error: 'Image size too large. Maximum size is 5MB for database storage.' 
+          error: 'Image size too large. Maximum size is 5MB.' 
         }, { status: 400 })
       }
 
-      // Convert image to Base64 for MongoDB storage
-      const imageBytes = await image.arrayBuffer()
-      const imageBuffer = Buffer.from(imageBytes)
-      const base64Data = imageBuffer.toString('base64')
-      const imageDataUrl = `data:${image.type};base64,${base64Data}`
-      
-      template.imageData = imageDataUrl
-      console.log(`✅ Template image stored in MongoDB as base64`)
+      // Upload image to Vercel Blob
+      try {
+        const timestamp = Date.now()
+        const imageFileName = `templates/${timestamp}-${image.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`
+        const imageBytes = await image.arrayBuffer()
+        const blob = await put(imageFileName, imageBytes, {
+          access: 'public',
+          contentType: image.type,
+        })
+        template.imageUrl = blob.url
+        template.imageData = undefined // Clear old base64 data
+        console.log(`✅ Template image uploaded to Vercel Blob: ${blob.url}`)
+      } catch (blobError) {
+        console.error('❌ Vercel Blob upload failed:', blobError)
+        return NextResponse.json({ 
+          error: 'Failed to upload image to Vercel Blob. Please try again.',
+          details: blobError instanceof Error ? blobError.message : 'Unknown error'
+        }, { status: 500 })
+      }
     }
 
     // Handle PDF file update if provided
@@ -232,6 +258,12 @@ export async function PUT(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
+    // Check authentication
+    const session = await getServerSession(authOptions)
+    if (!session || session.user?.role !== 'admin' && session.user?.role !== 'super-admin') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     await connectDB()
     
     const { searchParams } = new URL(request.url)

@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation'
+import Image from 'next/image'
 import { Navbar } from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import { BlogContent } from '@/components/BlogContent'
@@ -60,6 +61,34 @@ async function getBlogBySlug(slug: string): Promise<Blog | null> {
     return null
   }
 }
+
+// Generate static params for all blog slugs at build time
+export async function generateStaticParams() {
+  try {
+    await connectDB()
+    
+    const blogs = await Blog.find({ 
+      isActive: true,
+      isDeleted: { $ne: true },
+      isDraft: { $ne: true },
+      content: { $exists: true, $ne: null } // Only blogs with content
+    })
+      .select('slug')
+      .lean()
+
+    return blogs
+      .filter(blog => blog.slug) // Only include blogs with slugs
+      .map((blog) => ({
+        slug: blog.slug as string,
+      }))
+  } catch (error) {
+    console.error('Error generating static params for blogs:', error)
+    return []
+  }
+}
+
+// Revalidate pages every 30 minutes (ISR)
+export const revalidate = 1800
 
 export default async function BlogPage({ params }: BlogPageProps) {
   const { slug } = await params
@@ -128,11 +157,14 @@ export default async function BlogPage({ params }: BlogPageProps) {
 
         {/* Featured Image */}
         {blog.imageUrl && (
-          <div className="mb-8">
-            <img
+          <div className="mb-8 relative w-full h-64 md:h-96">
+            <Image
               src={blog.imageUrl}
               alt={blog.title}
-              className="w-full h-64 md:h-96 object-cover rounded-lg shadow-lg"
+              fill
+              className="object-cover rounded-lg shadow-lg"
+              unoptimized={blog.imageUrl?.startsWith('data:')}
+              sizes="100vw"
             />
           </div>
         )}

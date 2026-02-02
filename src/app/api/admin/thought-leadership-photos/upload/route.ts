@@ -1,11 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { writeFile, mkdir } from 'fs/promises'
-import { join } from 'path'
+import { getServerSession } from 'next-auth/next'
+import { authOptions } from '@/lib/auth'
 import connectDB from '@/lib/mongodb'
 import ThoughtLeadershipPhoto from '@/models/ThoughtLeadershipPhoto'
+import { put } from '@vercel/blob'
 
 export async function POST(request: NextRequest) {
   try {
+    // Check authentication
+    const session = await getServerSession(authOptions)
+    if (!session || session.user?.role !== 'admin' && session.user?.role !== 'super-admin') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     console.log('Thought leadership photo upload started')
     await connectDB()
     console.log('Database connected successfully')
@@ -50,22 +57,25 @@ export async function POST(request: NextRequest) {
       }, { status: 400 })
     }
 
-    // Create uploads directory if it doesn't exist
-    const uploadsDir = join(process.cwd(), 'public', 'uploads', 'thought-leadership-photos')
-    await mkdir(uploadsDir, { recursive: true })
-
-    // Generate unique filename
-    const timestamp = Date.now()
-    const fileExtension = image.name.split('.').pop()
-    const fileName = `thought-leadership-photo-${timestamp}.${fileExtension}`
-    const filePath = join(uploadsDir, fileName)
-
-    // Save image
-    const bytes = await image.arrayBuffer()
-    const buffer = Buffer.from(bytes)
-    await writeFile(filePath, buffer)
-
-    const imageUrl = `/uploads/thought-leadership-photos/${fileName}`
+    // Upload image to Vercel Blob
+    let imageUrl: string
+    try {
+      const timestamp = Date.now()
+      const imageFileName = `thought-leadership-photos/${timestamp}-${image.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`
+      const imageBytes = await image.arrayBuffer()
+      const blob = await put(imageFileName, imageBytes, {
+        access: 'public',
+        contentType: image.type,
+      })
+      imageUrl = blob.url
+      console.log(`✅ Thought leadership photo uploaded to Vercel Blob: ${imageUrl}`)
+    } catch (blobError) {
+      console.error('❌ Vercel Blob upload failed:', blobError)
+      return NextResponse.json({ 
+        error: 'Failed to upload image to Vercel Blob. Please try again.',
+        details: blobError instanceof Error ? blobError.message : 'Unknown error'
+      }, { status: 500 })
+    }
 
     console.log('Creating thought leadership photo with data:', {
       title,

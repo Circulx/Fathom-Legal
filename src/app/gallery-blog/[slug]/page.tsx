@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation'
+import Image from 'next/image'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import connectDB from '@/lib/mongodb'
@@ -47,6 +48,34 @@ async function getGalleryBlogBySlug(slug: string) {
     return null
   }
 }
+
+// Generate static params for all gallery blog slugs at build time
+export async function generateStaticParams() {
+  try {
+    await connectDB()
+    
+    const galleryBlogs = await GalleryBlog.find({ 
+      isActive: true,
+      isDeleted: { $ne: true },
+      isDraft: { $ne: true },
+      content: { $exists: true, $ne: null } // Only blogs with content
+    })
+      .select('slug')
+      .lean()
+
+    return galleryBlogs
+      .filter(blog => blog.slug) // Only include blogs with slugs
+      .map((blog) => ({
+        slug: blog.slug as string,
+      }))
+  } catch (error) {
+    console.error('Error generating static params for gallery blogs:', error)
+    return []
+  }
+}
+
+// Revalidate pages every 30 minutes (ISR)
+export const revalidate = 1800
 
 export default async function GalleryBlogPage({ params }: GalleryBlogPageProps) {
   const { slug } = await params
@@ -99,11 +128,14 @@ export default async function GalleryBlogPage({ params }: GalleryBlogPageProps) 
         <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
           {/* Featured Image */}
           {blog.imageUrl && (
-            <div className="w-full h-64 md:h-96">
-              <img
+            <div className="w-full h-64 md:h-96 relative">
+              <Image
                 src={blog.imageUrl}
                 alt={blog.title}
-                className="w-full h-full object-cover"
+                fill
+                className="object-cover"
+                unoptimized={blog.imageUrl?.startsWith('data:')}
+                sizes="100vw"
               />
             </div>
           )}

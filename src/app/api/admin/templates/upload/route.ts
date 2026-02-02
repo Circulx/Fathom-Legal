@@ -1,10 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth/next'
+import { authOptions } from '@/lib/auth'
 import connectDB from '@/lib/mongodb'
 import Template from '@/models/Template'
 import { uploadToGCS, isGCSConfigured } from '@/lib/gcs'
+import { put } from '@vercel/blob'
 
 export async function POST(request: NextRequest) {
   try {
+    // Check authentication
+    const session = await getServerSession(authOptions)
+    if (!session || session.user?.role !== 'admin' && session.user?.role !== 'super-admin') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     await connectDB()
     
     const formData = await request.formData()
@@ -83,16 +92,28 @@ export async function POST(request: NextRequest) {
     // Generate unique filenames
     const timestamp = Date.now()
     const imageExtension = image.name.split('.').pop()
-    const imageFileName = `${timestamp}-image-${image.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`
+    const imageFileName = `templates/${timestamp}-${image.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`
 
     const pdfExtension = pdfFile.name.split('.').pop()
     const pdfFileName = `${timestamp}-${pdfFile.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`
 
-    // Convert image to Base64 for MongoDB storage
-    const imageBytes = await image.arrayBuffer()
-    const imageBuffer = Buffer.from(imageBytes)
-    const base64Data = imageBuffer.toString('base64')
-    const imageDataUrl = `data:${image.type};base64,${base64Data}`
+    // Upload image to Vercel Blob
+    let imageUrl: string | undefined = undefined
+    try {
+      const imageBytes = await image.arrayBuffer()
+      const blob = await put(imageFileName, imageBytes, {
+        access: 'public',
+        contentType: image.type,
+      })
+      imageUrl = blob.url
+      console.log(`✅ Template image uploaded to Vercel Blob: ${imageUrl}`)
+    } catch (blobError) {
+      console.error('❌ Vercel Blob upload failed:', blobError)
+      return NextResponse.json({ 
+        error: 'Failed to upload image to Vercel Blob. Please try again.',
+        details: blobError instanceof Error ? blobError.message : 'Unknown error'
+      }, { status: 500 })
+    }
 
     // Convert PDF file to buffer for GCS upload
     const pdfBytes = await pdfFile.arrayBuffer()
@@ -164,7 +185,8 @@ export async function POST(request: NextRequest) {
       fileName: pdfFile.name,
       fileSize: pdfFile.size,
       fileType: pdfFile.type, // Store actual file type (PDF or DOCX)
-      imageData: imageDataUrl, // Base64 data URL stored in MongoDB
+      imageUrl: imageUrl, // Vercel Blob URL
+      imageData: undefined, // No longer storing base64
       price: parseFloat(price),
       uploadedBy,
       tags: tagsArray,
@@ -188,8 +210,8 @@ export async function POST(request: NextRequest) {
         fileName: template.fileName,
         fileSize: template.fileSize,
         fileType: template.fileType,
-        imageUrl: template.imageUrl, // Legacy field
-        imageData: template.imageData, // Base64 data URL
+        imageUrl: template.imageUrl, // Vercel Blob URL
+        imageData: template.imageData, // Legacy field (may be undefined for new uploads)
         price: template.price,
         tags: template.tags,
         createdAt: template.createdAt

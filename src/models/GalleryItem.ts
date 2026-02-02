@@ -56,6 +56,9 @@ const GalleryItemSchema = new Schema<IGalleryItem>({
   strict: true
 })
 
+// Database indexes for performance optimization
+GalleryItemSchema.index({ isActive: 1, createdAt: -1 }) // Compound index for list queries
+
 // Pre-save hook to ensure imageData is always an array
 GalleryItemSchema.pre('save', function(next) {
   if (this.imageData && typeof this.imageData === 'string') {

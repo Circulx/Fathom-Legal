@@ -2,6 +2,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import connectDB from '@/lib/mongodb'
 import GalleryItem from '@/models/GalleryItem'
 
+
+export const dynamic = 'force-dynamic'
+
+export const revalidate = 1800
+
 export async function GET(request: NextRequest) {
   try {
     await connectDB()

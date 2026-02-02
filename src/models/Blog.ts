@@ -86,6 +86,10 @@ const BlogSchema = new Schema<IBlog>({
   timestamps: true
 })
 
+// Database indexes for performance optimization
+BlogSchema.index({ isActive: 1, isDeleted: 1, category: 1, createdAt: -1 }) // Compound index for list queries with filtering and sorting
+BlogSchema.index({ slug: 1 }) // Index for slug lookups 
+
 // Ensure either content or externalUrl is provided
 BlogSchema.pre('save', function(next) {
   if (!this.content && !this.externalUrl) {

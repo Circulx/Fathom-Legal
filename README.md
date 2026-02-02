@@ -106,6 +106,10 @@ GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account-key.json
 # GCS Bucket Name (for template documents only)
 # Template preview images are stored in MongoDB as base64
 GCS_BUCKET_NAME=your-gcs-bucket-name
+
+# Vercel Blob Storage (for image uploads)
+# Get your token from: https://vercel.com/dashboard/stores
+BLOB_READ_WRITE_TOKEN=vercel_blob_xxxxx
 ```
 
 ### Google Cloud Storage Setup

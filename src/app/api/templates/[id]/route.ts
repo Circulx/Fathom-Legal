@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import connectDB from '@/lib/mongodb'
 import Template from '@/models/Template'
 
+// Cache this route for 30 minutes (1800 seconds)
+export const revalidate = 1800
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }

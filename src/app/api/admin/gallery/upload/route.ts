@@ -1,9 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth/next'
+import { authOptions } from '@/lib/auth'
 import connectDB from '@/lib/mongodb'
 import GalleryItem from '@/models/GalleryItem'
+import { put } from '@vercel/blob'
 
 export async function POST(request: NextRequest) {
   try {
+    // Check authentication
+    const session = await getServerSession(authOptions)
+    if (!session || session.user?.role !== 'admin' && session.user?.role !== 'super-admin') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     await connectDB()
     
     const formData = await request.formData()
@@ -39,10 +48,13 @@ export async function POST(request: NextRequest) {
     ]
 
     const maxSize = 5 * 1024 * 1024 // 5MB
-    const imageDataUrls: string[] = []
+    const imageUrls: string[] = []
     let imageType = ''
 
-    for (const image of images) {
+    // Upload all images to Vercel Blob
+    for (let i = 0; i < images.length; i++) {
+      const image = images[i]
+      
       if (!allowedTypes.includes(image.type)) {
         return NextResponse.json({ 
           error: 'Invalid image type. Only JPEG, PNG, GIF, and WebP images are allowed.' 
@@ -51,38 +63,45 @@ export async function POST(request: NextRequest) {
 
       if (image.size > maxSize) {
         return NextResponse.json({ 
-          error: 'Image size too large. Maximum size is 5MB for database storage.' 
+          error: 'Image size too large. Maximum size is 5MB.' 
         }, { status: 400 })
       }
 
-      // Convert image to Base64
-      const bytes = await image.arrayBuffer()
-      const buffer = Buffer.from(bytes)
-      const base64Data = buffer.toString('base64')
-      const dataUrl = `data:${image.type};base64,${base64Data}`
-      imageDataUrls.push(dataUrl)
-      
-      // Use the first image's type
-      if (!imageType) {
-        imageType = image.type
+      try {
+        const timestamp = Date.now()
+        const imageFileName = `gallery/${timestamp}-${i}-${image.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`
+        const imageBytes = await image.arrayBuffer()
+        const blob = await put(imageFileName, imageBytes, {
+          access: 'public',
+          contentType: image.type,
+        })
+        imageUrls.push(blob.url)
+        
+        // Use the first image's type
+        if (!imageType) {
+          imageType = image.type
+        }
+      } catch (blobError) {
+        console.error(`❌ Failed to upload image ${i + 1}:`, blobError)
+        return NextResponse.json({ 
+          error: `Failed to upload image ${i + 1} to Vercel Blob. Please try again.`,
+          details: blobError instanceof Error ? blobError.message : 'Unknown error'
+        }, { status: 500 })
       }
     }
 
     // Validate that we have at least one image
-    if (imageDataUrls.length === 0) {
-      return NextResponse.json({ error: 'No valid images to upload' }, { status: 400 })
-    }
-
-    // Ensure imageDataUrls is a proper array
-    if (!Array.isArray(imageDataUrls) || imageDataUrls.length === 0) {
+    if (imageUrls.length === 0) {
       return NextResponse.json({ error: 'No valid images to upload' }, { status: 400 })
     }
 
     // Create gallery item record with multiple images
+    // Store URLs in imageData field for backward compatibility (frontend expects imageData)
+    // In the future, we can migrate to a separate imageUrls field
     const galleryItemData: any = {
       title: title.trim(),
       description: description?.trim() || '',
-      imageData: imageDataUrls, // Ensure this is an array
+      imageData: imageUrls, // Store Vercel Blob URLs instead of base64
       imageType: imageType,
       isActive: true
     }
@@ -94,11 +113,6 @@ export async function POST(request: NextRequest) {
       imageType: galleryItemData.imageType,
       imageDataIsArray: Array.isArray(galleryItemData.imageData)
     })
-
-    // Ensure imageData is definitely an array
-    if (!Array.isArray(galleryItemData.imageData)) {
-      galleryItemData.imageData = [galleryItemData.imageData]
-    }
 
     const galleryItem = new GalleryItem(galleryItemData)
 

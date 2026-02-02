@@ -149,5 +149,8 @@ const TemplateSchema = new Schema<ITemplate>({
   timestamps: true
 })
 
+// Database indexes for performance optimization
+TemplateSchema.index({ isActive: 1, category: 1, createdAt: -1 }) // Compound index for list queries with filtering and sorting
+
 export default mongoose.models.Template || mongoose.model<ITemplate>('Template', TemplateSchema)
 

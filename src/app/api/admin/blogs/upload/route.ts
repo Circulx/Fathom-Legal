@@ -5,6 +5,7 @@ import connectDB from '@/lib/mongodb'
 import Blog from '@/models/Blog'
 import { generateUniqueSlug } from '@/lib/slug'
 import { put } from '@vercel/blob'
+import { revalidatePath } from 'next/cache'
 
 export async function POST(request: NextRequest) {
   try {
@@ -106,6 +107,16 @@ export async function POST(request: NextRequest) {
     })
 
     await blog.save()
+
+    // Revalidate the thought leadership page to show the new blog immediately
+    try {
+      revalidatePath('/thoughtleadership')
+      revalidatePath('/api/thought-leadership-blogs')
+      console.log('✅ Revalidated thought leadership page')
+    } catch (revalidateError) {
+      // Log but don't fail the request if revalidation fails
+      console.warn('⚠️ Revalidation warning:', revalidateError)
+    }
 
     return NextResponse.json({ 
       success: true,

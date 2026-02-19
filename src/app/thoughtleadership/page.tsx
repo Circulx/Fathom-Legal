@@ -6,6 +6,11 @@ import BlogGrid from '@/components/ThoughtLeadership/BlogGrid'
 import connectDB from '@/lib/mongodb'
 import Blog from '@/models/Blog'
 
+// Use ISR (Incremental Static Regeneration) with 60 second revalidation
+// This provides caching for performance while keeping data relatively fresh
+// On-demand revalidation is triggered when blogs are uploaded
+export const revalidate = 60
+
 interface Blog {
   _id: string
   title: string
@@ -26,7 +31,11 @@ async function getBlogs(page: number = 1) {
     const limit = 6
     const skip = (page - 1) * limit
     
-    const query: any = { isActive: true, isDeleted: { $ne: true } }
+    const query: any = { 
+      isActive: true, 
+      isDeleted: { $ne: true },
+      isDraft: { $ne: true } // Exclude draft blogs
+    }
     
     const blogs = await Blog.find(query)
       .sort({ createdAt: -1 })

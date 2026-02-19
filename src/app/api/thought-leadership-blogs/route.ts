@@ -3,9 +3,8 @@ import connectDB from '@/lib/mongodb'
 import Blog from '@/models/Blog'
 
 
-export const dynamic = 'force-dynamic'
-
-export const revalidate = 1800
+// Use ISR with 60 second revalidation for API route
+export const revalidate = 60
 
 export async function GET(request: NextRequest) {
   try {
@@ -17,8 +16,12 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '12')
 
-    // Build query - only active and non-deleted thought leadership blogs
-    let query: any = { isActive: true, isDeleted: { $ne: true } }
+    // Build query - only active, non-deleted, and non-draft thought leadership blogs
+    let query: any = { 
+      isActive: true, 
+      isDeleted: { $ne: true },
+      isDraft: { $ne: true } // Exclude draft blogs
+    }
 
     if (category && category !== 'all') {
       query.category = category

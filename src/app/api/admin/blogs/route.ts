@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
 import connectDB from '@/lib/mongodb'
 import Blog from '@/models/Blog'
+import { revalidatePath } from 'next/cache'
 
 export async function GET(request: NextRequest) {
   try {
@@ -186,6 +187,15 @@ export async function PUT(request: NextRequest) {
 
     await blog.save()
 
+    // Revalidate the thought leadership page to show updated blog immediately
+    try {
+      revalidatePath('/thoughtleadership')
+      revalidatePath('/api/thought-leadership-blogs')
+      console.log('✅ Revalidated thought leadership page after update')
+    } catch (revalidateError) {
+      console.warn('⚠️ Revalidation warning:', revalidateError)
+    }
+
     return NextResponse.json({ 
       success: true,
       message: 'Blog updated successfully',
@@ -229,6 +239,15 @@ export async function DELETE(request: NextRequest) {
     
     if (!blog) {
       return NextResponse.json({ error: 'Blog not found' }, { status: 404 })
+    }
+
+    // Revalidate the thought leadership page to remove deleted blog immediately
+    try {
+      revalidatePath('/thoughtleadership')
+      revalidatePath('/api/thought-leadership-blogs')
+      console.log('✅ Revalidated thought leadership page after delete')
+    } catch (revalidateError) {
+      console.warn('⚠️ Revalidation warning:', revalidateError)
     }
 
     return NextResponse.json({ message: 'Blog deleted successfully' })

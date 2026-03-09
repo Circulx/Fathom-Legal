@@ -145,7 +145,7 @@ export async function PUT(request: NextRequest) {
 
     galleryBlog.title = title
     galleryBlog.description = description
-    galleryBlog.category = category
+    galleryBlog.category = category as 'WEBINAR' | 'INTERVIEW' | 'FEATURE' | 'ARTICLE' | 'NEWS' | 'CASE_STUDY' | 'NEWSLETTER' | 'WHITEPAPER'
     galleryBlog.content = content || undefined
     galleryBlog.externalUrl = externalUrl || undefined
     galleryBlog.imageUrl = imageUrl || undefined

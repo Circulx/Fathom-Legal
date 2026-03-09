@@ -41,7 +41,9 @@ export default function GalleryBlogs({
   const fetchGalleryBlogs = async (page: number = 1) => {
     try {
       setBlogLoading(true)
-      const response = await fetch(`/api/gallery-blogs?page=${page}&limit=6`)
+      const response = await fetch(`/api/gallery-blogs?page=${page}&limit=6&t=${Date.now()}`, {
+        cache: 'no-store'
+      })
       if (response.ok) {
         const data = await response.json()
         setGalleryBlogs(data.blogs || [])

@@ -555,6 +555,9 @@ export default function AdminDashboard() {
   const [galleryBlogsLoading, setGalleryBlogsLoading] = useState(true)
   const [showGalleryBlogCreateModal, setShowGalleryBlogCreateModal] = useState(false)
   const [galleryBlogCreating, setGalleryBlogCreating] = useState(false)
+  const [showGalleryBlogEditModal, setShowGalleryBlogEditModal] = useState(false)
+  const [galleryBlogEditing, setGalleryBlogEditing] = useState(false)
+  const [editingGalleryBlogId, setEditingGalleryBlogId] = useState<string | null>(null)
 
   // Thought Leadership Photos state
   const [thoughtLeadershipPhotos, setThoughtLeadershipPhotos] = useState<any[]>([])
@@ -648,6 +651,18 @@ export default function AdminDashboard() {
     content: '',
     externalUrl: '',
     image: null as File | null
+  })
+
+  // Gallery Blog edit form state
+  const [galleryBlogEditForm, setGalleryBlogEditForm] = useState({
+    title: '',
+    description: '',
+    category: 'ARTICLE' as 'WEBINAR' | 'INTERVIEW' | 'FEATURE' | 'ARTICLE' | 'NEWS' | 'CASE_STUDY' | 'NEWSLETTER' | 'WHITEPAPER',
+    content: '',
+    externalUrl: '',
+    image: null as File | null,
+    existingImageUrl: '',
+    removeImage: false
   })
 
   // Thought Leadership Photo upload form state
@@ -1291,6 +1306,101 @@ export default function AdminDashboard() {
       alert('Failed to create gallery blog')
     } finally {
       setGalleryBlogCreating(false)
+    }
+  }
+
+  // Handle opening gallery blog edit modal
+  const handleGalleryBlogEdit = (blog: Blog) => {
+    setEditingGalleryBlogId(blog._id)
+    setGalleryBlogEditForm({
+      title: blog.title,
+      description: blog.description,
+      category: blog.category as 'WEBINAR' | 'INTERVIEW' | 'FEATURE' | 'ARTICLE' | 'NEWS' | 'CASE_STUDY' | 'NEWSLETTER' | 'WHITEPAPER',
+      content: blog.content || '',
+      externalUrl: blog.externalUrl || '',
+      image: null,
+      existingImageUrl: blog.imageUrl || '',
+      removeImage: false
+    })
+    setShowGalleryBlogEditModal(true)
+  }
+
+  // Handle gallery blog update
+  const handleGalleryBlogUpdate = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    if (!galleryBlogEditForm.title) {
+      alert('Please fill in the title field')
+      return
+    }
+
+    if (!galleryBlogEditForm.description) {
+      alert('Please fill in the description field')
+      return
+    }
+
+    if (!galleryBlogEditForm.content && !galleryBlogEditForm.externalUrl) {
+      alert('Please provide either content or external URL')
+      return
+    }
+
+    if (!editingGalleryBlogId) {
+      alert('Gallery blog ID is missing')
+      return
+    }
+
+    setGalleryBlogEditing(true)
+    try {
+      const formData = new FormData()
+      formData.append('id', editingGalleryBlogId)
+      formData.append('title', galleryBlogEditForm.title)
+      formData.append('description', galleryBlogEditForm.description || '')
+      formData.append('category', galleryBlogEditForm.category)
+      formData.append('content', galleryBlogEditForm.content)
+      formData.append('externalUrl', galleryBlogEditForm.externalUrl)
+      formData.append('removeImage', galleryBlogEditForm.removeImage.toString())
+
+      if (galleryBlogEditForm.image) {
+        formData.append('image', galleryBlogEditForm.image)
+      }
+
+      const response = await fetch('/api/gallery-blogs', {
+        method: 'PUT',
+        body: formData
+      })
+
+      if (response.ok) {
+        setShowGalleryBlogEditModal(false)
+        setEditingGalleryBlogId(null)
+        setGalleryBlogEditForm({
+          title: '',
+          description: '',
+          category: 'ARTICLE',
+          content: '',
+          externalUrl: '',
+          image: null,
+          existingImageUrl: '',
+          removeImage: false
+        })
+        fetchGalleryBlogs()
+        if (activeSection === 'dashboard') {
+          fetchTemplates()
+          fetchGalleryItems(1, 1000)
+          fetchThoughtLeadershipBlogs()
+          fetchThoughtLeadershipPhotos()
+        }
+        setSuccessMessage('Gallery blog updated successfully!')
+        setShowSuccessMessage(true)
+        setTimeout(() => setShowSuccessMessage(false), 3000)
+      } else {
+        const error = await response.json()
+        alert(error.error || 'Failed to update gallery blog')
+      }
+    } catch (error) {
+      console.error('Gallery blog update error:', error)
+      alert('Failed to update gallery blog')
+    } finally {
+      setGalleryBlogEditing(false)
     }
   }
 
@@ -2224,6 +2334,13 @@ export default function AdminDashboard() {
                           <div className="flex items-center justify-between mb-4">
                             <div className="flex items-center space-x-2">
                               <button
+                                onClick={() => handleGalleryBlogEdit(blog)}
+                                className="p-2 text-gray-400 hover:text-blue-600 transition-colors"
+                                title="Edit"
+                              >
+                                <Edit className="h-4 w-4" />
+                              </button>
+                              <button
                                 onClick={() => handleGalleryBlogDelete(blog._id, blog.title)}
                                 className="p-2 text-gray-400 hover:text-red-600 transition-colors"
                                 title="Delete"
@@ -2467,6 +2584,173 @@ export default function AdminDashboard() {
                   className="px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {galleryBlogCreating ? 'Creating...' : 'Create Gallery Blog'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Gallery Blog Edit Modal */}
+      {showGalleryBlogEditModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-gray-900">Edit Gallery Blog Post</h2>
+              <button
+                onClick={() => {
+                  setShowGalleryBlogEditModal(false)
+                  setEditingGalleryBlogId(null)
+                  setGalleryBlogEditForm({
+                    title: '',
+                    description: '',
+                    category: 'ARTICLE',
+                    content: '',
+                    externalUrl: '',
+                    image: null,
+                    existingImageUrl: '',
+                    removeImage: false
+                  })
+                }}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleGalleryBlogUpdate} className="space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Title *
+                </label>
+                <input
+                  type="text"
+                  value={galleryBlogEditForm.title}
+                  onChange={(e) => setGalleryBlogEditForm(prev => ({ ...prev, title: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-white text-black"
+                  placeholder="Enter blog title"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Description *
+                </label>
+                <textarea
+                  value={galleryBlogEditForm.description}
+                  onChange={(e) => setGalleryBlogEditForm(prev => ({ ...prev, description: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-white text-black"
+                  rows={3}
+                  placeholder="Enter blog description"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Category *
+                </label>
+                <select
+                  value={galleryBlogEditForm.category}
+                  onChange={(e) => setGalleryBlogEditForm(prev => ({ ...prev, category: e.target.value as any }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-white text-black"
+                  required
+                >
+                  <option value="ARTICLE">Article</option>
+                  <option value="WEBINAR">Webinar</option>
+                  <option value="INTERVIEW">Interview</option>
+                  <option value="FEATURE">Feature</option>
+                  <option value="NEWS">News</option>
+                  <option value="CASE_STUDY">Case Study</option>
+                  <option value="NEWSLETTER">Newsletter</option>
+                  <option value="WHITEPAPER">Whitepaper</option>
+                </select>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Blog Content
+                  </label>
+                  <RichTextEditor
+                    value={galleryBlogEditForm.content}
+                    onChange={(value) => setGalleryBlogEditForm(prev => ({ ...prev, content: value }))}
+                    placeholder="Enter blog content (optional if external URL is provided)"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    External URL
+                  </label>
+                  <input
+                    type="url"
+                    value={galleryBlogEditForm.externalUrl}
+                    onChange={(e) => setGalleryBlogEditForm(prev => ({ ...prev, externalUrl: e.target.value }))}
+                    className="w-full px-3 py-2 border border-black rounded-lg focus:ring-2 focus:ring-gray-400 focus:border-black bg-white text-black"
+                    placeholder="https://example.com/blog-post (optional if content is provided)"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Featured Image
+                </label>
+                {galleryBlogEditForm.existingImageUrl && !galleryBlogEditForm.removeImage && (
+                  <div className="mb-3">
+                    <img
+                      src={galleryBlogEditForm.existingImageUrl}
+                      alt="Current featured image"
+                      className="w-full h-32 object-cover rounded-lg mb-2"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setGalleryBlogEditForm(prev => ({ ...prev, removeImage: true }))}
+                      className="text-sm text-red-600 hover:text-red-700"
+                    >
+                      Remove Image
+                    </button>
+                  </div>
+                )}
+                {(!galleryBlogEditForm.existingImageUrl || galleryBlogEditForm.removeImage) && (
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => setGalleryBlogEditForm(prev => ({ ...prev, image: e.target.files?.[0] || null }))}
+                    className="w-full px-3 py-2 border border-black rounded-lg focus:ring-2 focus:ring-gray-400 focus:border-black bg-white text-black"
+                  />
+                )}
+              </div>
+
+              <div className="flex justify-end space-x-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowGalleryBlogEditModal(false)
+                    setEditingGalleryBlogId(null)
+                    setGalleryBlogEditForm({
+                      title: '',
+                      description: '',
+                      category: 'ARTICLE',
+                      content: '',
+                      externalUrl: '',
+                      image: null,
+                      existingImageUrl: '',
+                      removeImage: false
+                    })
+                  }}
+                  className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={galleryBlogEditing}
+                  className="px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {galleryBlogEditing ? 'Updating...' : 'Update Gallery Blog'}
                 </button>
               </div>
             </form>

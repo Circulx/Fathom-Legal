@@ -8,6 +8,9 @@ import connectDB from '@/lib/mongodb'
 import GalleryItem from '@/models/GalleryItem'
 import GalleryBlog from '@/models/GalleryBlog'
 
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 interface GalleryItem {
   _id: string
   title: string

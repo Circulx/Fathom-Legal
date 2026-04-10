@@ -549,6 +549,9 @@ export default function AdminDashboard() {
   const [showThoughtLeadershipBlogEditModal, setShowThoughtLeadershipBlogEditModal] = useState(false)
   const [thoughtLeadershipBlogEditing, setThoughtLeadershipBlogEditing] = useState(false)
   const [editingBlogId, setEditingBlogId] = useState<string | null>(null)
+  const [thoughtLeadershipBlogsCurrentPage, setThoughtLeadershipBlogsCurrentPage] = useState(1)
+  const [thoughtLeadershipBlogsTotalPages, setThoughtLeadershipBlogsTotalPages] = useState(1)
+  const [thoughtLeadershipBlogsTotalItems, setThoughtLeadershipBlogsTotalItems] = useState(0)
 
   // Gallery Blogs state
   const [galleryBlogs, setGalleryBlogs] = useState<Blog[]>([])
@@ -770,15 +773,18 @@ export default function AdminDashboard() {
   }
 
   // Fetch thought leadership blogs
-  const fetchThoughtLeadershipBlogs = async () => {
+  const fetchThoughtLeadershipBlogs = async (page: number = thoughtLeadershipBlogsCurrentPage, limit: number = 9) => {
     try {
       setThoughtLeadershipBlogsLoading(true)
-      const response = await fetch(`/api/thought-leadership-blogs?t=${Date.now()}`, {
+      const response = await fetch(`/api/thought-leadership-blogs?page=${page}&limit=${limit}&t=${Date.now()}`, {
         cache: 'no-store'
       })
       if (response.ok) {
         const data = await response.json()
         setThoughtLeadershipBlogs(data.blogs || [])
+        setThoughtLeadershipBlogsTotalPages(data.pagination?.pages || 1)
+        setThoughtLeadershipBlogsTotalItems(data.pagination?.total || 0)
+        setThoughtLeadershipBlogsCurrentPage(page)
       }
     } catch (error) {
       console.error('Error fetching thought leadership blogs:', error)
@@ -803,6 +809,22 @@ export default function AdminDashboard() {
     } finally {
       setGalleryBlogsLoading(false)
     }
+  }
+
+  const getThoughtLeadershipPageNumbers = () => {
+    const maxVisiblePages = 5
+    if (thoughtLeadershipBlogsTotalPages <= maxVisiblePages) {
+      return Array.from({ length: thoughtLeadershipBlogsTotalPages }, (_, i) => i + 1)
+    }
+
+    let start = Math.max(1, thoughtLeadershipBlogsCurrentPage - 2)
+    let end = Math.min(thoughtLeadershipBlogsTotalPages, start + maxVisiblePages - 1)
+
+    if (end - start < maxVisiblePages - 1) {
+      start = Math.max(1, end - maxVisiblePages + 1)
+    }
+
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i)
   }
 
   // Fetch thought leadership photos
@@ -2157,9 +2179,10 @@ export default function AdminDashboard() {
                     </button>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {thoughtLeadershipBlogs.map((blog) => (
-                      <div key={blog._id} className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-shadow border border-gray-100 overflow-hidden">
+                  <div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {thoughtLeadershipBlogs.map((blog) => (
+                        <div key={blog._id} className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-shadow border border-gray-100 overflow-hidden">
                         {/* Category Badge */}
                         <div className="p-4 pb-0">
                           <span className="inline-block px-3 py-1 text-xs font-medium text-gray-600 bg-gray-100 rounded-full">
@@ -2233,7 +2256,51 @@ export default function AdminDashboard() {
                           </div>
                         </div>
                       </div>
-                    ))}
+                      ))}
+                    </div>
+
+                    {/* Thought Leadership Pagination */}
+                    {thoughtLeadershipBlogsTotalPages > 1 && (
+                      <div className="mt-6 flex justify-center">
+                        <nav className="flex items-center space-x-2">
+                          <button
+                            onClick={() => fetchThoughtLeadershipBlogs(thoughtLeadershipBlogsCurrentPage - 1)}
+                            disabled={thoughtLeadershipBlogsCurrentPage === 1}
+                            className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            Previous
+                          </button>
+
+                          {getThoughtLeadershipPageNumbers().map((page) => (
+                            <button
+                              key={page}
+                              onClick={() => fetchThoughtLeadershipBlogs(page)}
+                              className={`px-3 py-2 text-sm font-medium rounded-lg ${
+                                thoughtLeadershipBlogsCurrentPage === page
+                                  ? 'bg-red-600 text-white'
+                                  : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
+                              }`}
+                            >
+                              {page}
+                            </button>
+                          ))}
+
+                          <button
+                            onClick={() => fetchThoughtLeadershipBlogs(thoughtLeadershipBlogsCurrentPage + 1)}
+                            disabled={thoughtLeadershipBlogsCurrentPage === thoughtLeadershipBlogsTotalPages}
+                            className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            Next
+                          </button>
+                        </nav>
+                      </div>
+                    )}
+
+                    {thoughtLeadershipBlogsTotalItems > 0 && (
+                      <div className="mt-4 text-center text-sm text-gray-600">
+                        Showing page {thoughtLeadershipBlogsCurrentPage} of {thoughtLeadershipBlogsTotalPages} ({thoughtLeadershipBlogsTotalItems} total articles)
+                      </div>
+                    )}
                   </div>
                 )}
               </>

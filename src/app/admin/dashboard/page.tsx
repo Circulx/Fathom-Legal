@@ -41,9 +41,15 @@ import {
   Italic,
   Underline,
   Strikethrough,
+  Calendar,
+  BarChart3,
+  ChevronDown,
+  ChevronRight,
   Edit
 } from 'lucide-react'
 import { Navbar } from '@/components/Navbar'
+import CrmSection, { type CrmView } from '@/components/CRM/CrmSection'
+import { CRM_LEADS } from '@/components/CRM/data'
 
 interface Template {
   _id: string
@@ -519,6 +525,7 @@ export default function AdminDashboard() {
   
   // All state declarations must be at the top, before any conditional logic
   const [activeSection, setActiveSection] = useState('dashboard')
+  const [crmExpanded, setCrmExpanded] = useState(false)
   
   // Templates state
   const [templates, setTemplates] = useState<Template[]>([])
@@ -730,6 +737,25 @@ export default function AdminDashboard() {
     { id: 'gallery-blogs', label: 'Gallery Blogs', icon: Newspaper },
     { id: 'thought-leadership-photos', label: 'Thought Leadership Photos', icon: Camera },
   ]
+
+  const crmSubItems = [
+    { id: 'crm-overview', label: 'Overview', icon: LayoutDashboard },
+    { id: 'crm-leads', label: 'Leads & enquiries', icon: Users, badge: CRM_LEADS.length },
+    { id: 'crm-consultations', label: 'Consultations', icon: Calendar },
+    { id: 'crm-analytics', label: 'Analytics', icon: BarChart3 },
+  ]
+
+  const isCrmSection = (section: string) => section.startsWith('crm-')
+
+  const getCrmView = (section: string): CrmView => {
+    const map: Record<string, CrmView> = {
+      'crm-overview': 'overview',
+      'crm-leads': 'leads',
+      'crm-consultations': 'consultations',
+      'crm-analytics': 'analytics',
+    }
+    return map[section] || 'overview'
+  }
 
   // Fetch templates
   const fetchTemplates = async () => {
@@ -1707,6 +1733,9 @@ export default function AdminDashboard() {
   // Load data when section is selected
   const handleSectionChange = (section: string) => {
     setActiveSection(section)
+    if (isCrmSection(section)) {
+      setCrmExpanded(true)
+    }
     if (section === 'dashboard') {
       // Fetch all data for dashboard
       fetchTemplates()
@@ -1725,6 +1754,16 @@ export default function AdminDashboard() {
     } else if (section === 'thought-leadership-photos') {
       fetchThoughtLeadershipPhotos()
     }
+  }
+
+  const handleCrmNavigate = (view: CrmView) => {
+    const map: Record<CrmView, string> = {
+      overview: 'crm-overview',
+      leads: 'crm-leads',
+      consultations: 'crm-consultations',
+      analytics: 'crm-analytics',
+    }
+    handleSectionChange(map[view])
   }
 
   return (
@@ -1774,6 +1813,52 @@ export default function AdminDashboard() {
                   </button>
                 );
               })}
+
+              <button
+                type="button"
+                onClick={() => setCrmExpanded((prev) => !prev)}
+                className={`w-full flex items-center px-3 py-3 text-left transition-all duration-200 ${
+                  isCrmSection(activeSection)
+                    ? 'bg-gray-100 text-gray-900 font-semibold'
+                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-800'
+                }`}
+              >
+                <Users className="w-5 h-5 mr-3" />
+                <span className="font-medium">CRM</span>
+                {crmExpanded ? (
+                  <ChevronDown className="w-4 h-4 ml-auto" />
+                ) : (
+                  <ChevronRight className="w-4 h-4 ml-auto" />
+                )}
+              </button>
+
+              {crmExpanded && (
+                <div className="space-y-1 ml-4 pl-3 border-l border-gray-200">
+                  {crmSubItems.map((item) => {
+                    const Icon = item.icon;
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => handleSectionChange(item.id)}
+                        className={`w-full flex items-center px-3 py-2.5 text-left transition-all duration-200 ${
+                          activeSection === item.id
+                            ? 'bg-gray-100 text-gray-900 font-semibold'
+                            : 'text-gray-600 hover:bg-gray-50 hover:text-gray-800'
+                        }`}
+                      >
+                        <Icon className="w-4 h-4 mr-3" />
+                        <span className="font-medium text-sm">{item.label}</span>
+                        {item.badge !== undefined && (
+                          <span className="ml-auto text-[11px] font-semibold px-2 py-0.5 rounded-full bg-gray-200 text-gray-600">
+                            {item.badge}
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </nav>
           </div>
           
@@ -2524,6 +2609,14 @@ export default function AdminDashboard() {
                   </div>
                 )}
               </>
+            )}
+
+            {/* CRM Section */}
+            {isCrmSection(activeSection) && (
+              <CrmSection
+                activeView={getCrmView(activeSection)}
+                onNavigate={handleCrmNavigate}
+              />
             )}
 
           </div>

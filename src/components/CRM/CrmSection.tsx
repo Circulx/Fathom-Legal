@@ -1,0 +1,278 @@
+'use client'
+
+import {
+  Search,
+  Bell,
+  Inbox,
+  CalendarDays,
+  Clock,
+  Trophy,
+  TrendingUp,
+  AlertCircle,
+  CircleCheck,
+  FolderOpen,
+  Archive,
+} from 'lucide-react'
+import { CRM_LEADS, LEAD_SOURCES, getInitials } from './data'
+import { StatusBadge } from './shared'
+import CrmLeads from './CrmLeads'
+import CrmConsultations from './CrmConsultations'
+import CrmAnalytics from './CrmAnalytics'
+
+export type CrmView = 'overview' | 'leads' | 'consultations' | 'analytics'
+
+const VIEW_TITLES: Record<CrmView, { title: string; subtitle: string }> = {
+  overview: { title: 'Overview', subtitle: 'A snapshot of your practice today' },
+  leads: { title: 'Leads & enquiries', subtitle: 'Track every enquiry from first contact to retained' },
+  consultations: { title: 'Consultations', subtitle: 'Your scheduled client meetings' },
+  analytics: { title: 'Analytics', subtitle: 'How your intake is performing' },
+}
+
+function CrmOverview({ onNavigate }: { onNavigate: (view: CrmView) => void }) {
+  const recentLeads = CRM_LEADS.slice(0, 5)
+  const todayConsultations = CRM_LEADS.filter((l) => l.date !== '—').slice(0, 4)
+  const engagedCount = CRM_LEADS.filter((l) => l.status === 'engaged').length
+  const openCount = CRM_LEADS.filter((l) => l.status === 'open').length
+  const closedCount = CRM_LEADS.filter((l) => l.status === 'closed').length
+  const consultationsThisWeek = CRM_LEADS.filter((l) => l.date !== '—').length
+  const awaitingResponse = CRM_LEADS.filter((l) =>
+    ['prospect', 'booked', 'proposal', 'engagement'].includes(l.status)
+  ).length
+
+  return (
+    <>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3.5 mb-7">
+        <div className="bg-white border border-[#e7e1d9] rounded-[14px] p-5">
+          <div className="w-9 h-9 rounded-[10px] bg-[#f6ecee] flex items-center justify-center mb-3.5">
+            <Inbox className="w-5 h-5 text-[#7a1322]" />
+          </div>
+          <div className="text-[30px] font-medium text-[#1c1a18] leading-none tracking-tight">
+            {CRM_LEADS.length}
+          </div>
+          <div className="text-[12.5px] text-[#736c63] mt-1.5">New enquiries (7 days)</div>
+          <div className="inline-flex items-center gap-1 text-[11.5px] font-medium text-[#3f7a52] mt-2">
+            <TrendingUp className="w-3.5 h-3.5" />
+            +2 vs last week
+          </div>
+        </div>
+
+        <div className="bg-white border border-[#e7e1d9] rounded-[14px] p-5">
+          <div className="w-9 h-9 rounded-[10px] bg-[#e6eef5] flex items-center justify-center mb-3.5">
+            <CalendarDays className="w-5 h-5 text-[#2f5d8a]" />
+          </div>
+          <div className="text-[30px] font-medium text-[#1c1a18] leading-none tracking-tight">
+            {consultationsThisWeek}
+          </div>
+          <div className="text-[12.5px] text-[#736c63] mt-1.5">Consultations this week</div>
+          <div className="inline-flex items-center gap-1 text-[11.5px] font-medium text-[#3f7a52] mt-2">
+            <TrendingUp className="w-3.5 h-3.5" />
+            3 confirmed
+          </div>
+        </div>
+
+        <div className="bg-white border border-[#e7e1d9] rounded-[14px] p-5">
+          <div className="w-9 h-9 rounded-[10px] bg-[#f5ecdb] flex items-center justify-center mb-3.5">
+            <Clock className="w-5 h-5 text-[#9a6b1f]" />
+          </div>
+          <div className="text-[30px] font-medium text-[#1c1a18] leading-none tracking-tight">
+            {awaitingResponse}
+          </div>
+          <div className="text-[12.5px] text-[#736c63] mt-1.5">Awaiting response</div>
+          <div className="inline-flex items-center gap-1 text-[11.5px] font-medium text-[#7a1322] mt-2">
+            <AlertCircle className="w-3.5 h-3.5" />
+            needs follow-up
+          </div>
+        </div>
+
+        <div className="bg-white border border-[#e7e1d9] rounded-[14px] p-5">
+          <div className="w-9 h-9 rounded-[10px] bg-[#e8f1ea] flex items-center justify-center mb-3.5">
+            <Trophy className="w-5 h-5 text-[#3f7a52]" />
+          </div>
+          <div className="text-[30px] font-medium text-[#1c1a18] leading-none tracking-tight">42%</div>
+          <div className="text-[12.5px] text-[#736c63] mt-1.5">Lead → retained rate</div>
+          <div className="inline-flex items-center gap-1 text-[11.5px] font-medium text-[#3f7a52] mt-2">
+            <TrendingUp className="w-3.5 h-3.5" />
+            +6% this month
+          </div>
+        </div>
+
+        <div className="bg-white border border-[#e7e1d9] rounded-[14px] p-5">
+          <div className="w-9 h-9 rounded-[10px] bg-[#e8f1ea] flex items-center justify-center mb-3.5">
+            <CircleCheck className="w-5 h-5 text-[#3f7a52]" />
+          </div>
+          <div className="text-[30px] font-medium text-[#1c1a18] leading-none tracking-tight">
+            {engagedCount}
+          </div>
+          <div className="text-[12.5px] text-[#736c63] mt-1.5">Engaged</div>
+          <div className="inline-flex items-center gap-1 text-[11.5px] font-medium text-[#3f7a52] mt-2">
+            <TrendingUp className="w-3.5 h-3.5" />
+            active clients
+          </div>
+        </div>
+
+        <div className="bg-white border border-[#e7e1d9] rounded-[14px] p-5">
+          <div className="w-9 h-9 rounded-[10px] bg-[#e9eef5] flex items-center justify-center mb-3.5">
+            <FolderOpen className="w-5 h-5 text-[#3a5a8a]" />
+          </div>
+          <div className="text-[30px] font-medium text-[#1c1a18] leading-none tracking-tight">
+            {openCount}
+          </div>
+          <div className="text-[12.5px] text-[#736c63] mt-1.5">Open</div>
+          <div className="inline-flex items-center gap-1 text-[11.5px] font-medium text-[#3a5a8a] mt-2">
+            <FolderOpen className="w-3.5 h-3.5" />
+            matters in progress
+          </div>
+        </div>
+
+        <div className="bg-white border border-[#e7e1d9] rounded-[14px] p-5">
+          <div className="w-9 h-9 rounded-[10px] bg-[#eee] flex items-center justify-center mb-3.5">
+            <Archive className="w-5 h-5 text-[#8a8178]" />
+          </div>
+          <div className="text-[30px] font-medium text-[#1c1a18] leading-none tracking-tight">
+            {closedCount}
+          </div>
+          <div className="text-[12.5px] text-[#736c63] mt-1.5">Closed</div>
+          <div className="inline-flex items-center gap-1 text-[11.5px] font-medium text-[#8a8178] mt-2">
+            <Archive className="w-3.5 h-3.5" />
+            resolved matters
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-3.5 mb-7">
+        <div className="bg-white border border-[#e7e1d9] rounded-[14px] overflow-hidden">
+          <div className="flex items-center px-5 py-4 border-b border-[#efebe4]">
+            <h3 className="text-base font-medium text-[#1c1a18]">Recent enquiries</h3>
+            <button
+              type="button"
+              onClick={() => onNavigate('leads')}
+              className="ml-auto text-[12.5px] font-medium text-[#7a1322] hover:underline"
+            >
+              View all →
+            </button>
+          </div>
+          <div className="px-5 py-1">
+            {recentLeads.map((lead) => (
+              <div
+                key={lead.id}
+                className="flex items-center gap-3 py-3 border-b border-[#efebe4] last:border-b-0 cursor-pointer hover:bg-[#fbf9f6] -mx-2 px-2 rounded-lg transition-colors"
+              >
+                <div className="w-9 h-9 rounded-full bg-[#f6ecee] text-[#7a1322] flex items-center justify-center text-[13px] font-semibold flex-shrink-0">
+                  {getInitials(lead.first, lead.last)}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="text-[13.5px] font-medium text-[#1c1a18]">
+                    {lead.first} {lead.last}
+                  </div>
+                  <div className="text-xs text-[#736c63] truncate">
+                    {lead.areas[0]}
+                    {lead.areas.length > 1 ? ` +${lead.areas.length - 1}` : ''}
+                  </div>
+                </div>
+                <div className="text-[11.5px] text-[#736c63] whitespace-nowrap">{lead.ago}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="bg-white border border-[#e7e1d9] rounded-[14px] overflow-hidden">
+          <div className="flex items-center px-5 py-4 border-b border-[#efebe4]">
+            <h3 className="text-base font-medium text-[#1c1a18]">Where leads come from</h3>
+          </div>
+          <div className="px-5 py-4 space-y-4">
+            {LEAD_SOURCES.map((source) => (
+              <div key={source.name}>
+                <div className="flex justify-between text-[12.5px] mb-1">
+                  <span className="text-[#2a2724]">{source.name}</span>
+                  <span className="text-[#736c63] font-medium">{source.value}%</span>
+                </div>
+                <div className="h-[7px] rounded-md bg-[#efebe4] overflow-hidden">
+                  <div
+                    className="h-full rounded-md bg-gradient-to-r from-[#7a1322] to-[#5c0e1a]"
+                    style={{ width: `${source.value}%` }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-white border border-[#e7e1d9] rounded-[14px] overflow-hidden">
+        <div className="flex items-center px-5 py-4 border-b border-[#efebe4]">
+          <h3 className="text-base font-medium text-[#1c1a18]">Today&apos;s consultations</h3>
+          <button
+            type="button"
+            onClick={() => onNavigate('consultations')}
+            className="ml-auto text-[12.5px] font-medium text-[#7a1322] hover:underline"
+          >
+            Open calendar →
+          </button>
+        </div>
+        <div className="px-5 py-1">
+          {todayConsultations.map((lead) => (
+            <div
+              key={lead.id}
+              className="flex items-center gap-3 py-3 border-b border-[#efebe4] last:border-b-0"
+            >
+              <div className="w-9 h-9 rounded-full bg-[#f6ecee] text-[#7a1322] flex items-center justify-center text-[13px] font-semibold flex-shrink-0">
+                {getInitials(lead.first, lead.last)}
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="text-[13.5px] font-medium text-[#1c1a18]">
+                  {lead.first} {lead.last} — {lead.areas[0]}
+                </div>
+                <div className="text-xs text-[#736c63]">
+                  {lead.date} at {lead.time} · 20 min · Google Meet
+                </div>
+              </div>
+              <StatusBadge status={lead.status} />
+            </div>
+          ))}
+        </div>
+      </div>
+    </>
+  )
+}
+
+interface CrmSectionProps {
+  activeView: CrmView
+  onNavigate: (view: CrmView) => void
+}
+
+export default function CrmSection({ activeView, onNavigate }: CrmSectionProps) {
+  const { title, subtitle } = VIEW_TITLES[activeView]
+
+  return (
+    <div className="bg-[#fbf9f6] text-[#2a2724] [color-scheme:light] -mx-4 sm:-mx-6 lg:-mx-8 -my-8 px-4 sm:px-6 lg:px-8 py-8 min-h-[calc(100vh-5rem)]">
+      <div className="flex items-center gap-4 mb-7">
+        <div>
+          <h1 className="text-[21px] font-medium text-[#1c1a18] tracking-tight">{title}</h1>
+          <p className="text-[12.5px] text-[#736c63] mt-0.5">{subtitle}</p>
+        </div>
+        <div className="ml-auto flex items-center gap-2.5">
+          <div className="hidden sm:flex items-center gap-2 bg-white border border-[#e7e1d9] rounded-full px-3.5 py-2 w-[230px]">
+            <Search className="w-4 h-4 text-[#736c63]" />
+            <input
+              type="text"
+              placeholder="Search leads, matters…"
+              className="border-none bg-transparent text-[13.5px] text-[#2a2724] w-full focus:outline-none placeholder:text-[#736c63]"
+            />
+          </div>
+          <button
+            type="button"
+            className="relative w-[38px] h-[38px] rounded-full border border-[#e7e1d9] bg-white flex items-center justify-center text-[#736c63] hover:border-[#7a1322] hover:text-[#7a1322] transition-colors"
+          >
+            <Bell className="w-4 h-4" />
+            <span className="absolute top-2 right-2.5 w-[7px] h-[7px] rounded-full bg-[#7a1322] border-[1.5px] border-white" />
+          </button>
+        </div>
+      </div>
+
+      {activeView === 'overview' && <CrmOverview onNavigate={onNavigate} />}
+      {activeView === 'leads' && <CrmLeads />}
+      {activeView === 'consultations' && <CrmConsultations />}
+      {activeView === 'analytics' && <CrmAnalytics />}
+    </div>
+  )
+}

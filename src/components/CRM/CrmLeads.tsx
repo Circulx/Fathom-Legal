@@ -36,7 +36,7 @@ const FILTER_CHIPS: { id: StatusFilter; label: string }[] = [
   { id: 'prospect', label: 'Prospect' },
   { id: 'booked', label: 'Consultation booked' },
   { id: 'proposal', label: 'Proposal sent' },
-  { id: 'engagement', label: 'Letter of engagement' },
+  { id: 'engagement', label: 'LOE' },
   { id: 'engaged', label: 'Engaged' },
   { id: 'open', label: 'Open' },
   { id: 'closed', label: 'Closed' },

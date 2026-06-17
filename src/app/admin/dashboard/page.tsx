@@ -575,7 +575,12 @@ export default function AdminDashboard() {
   const [showThoughtLeadershipPhotoUploadModal, setShowThoughtLeadershipPhotoUploadModal] = useState(false)
   const [thoughtLeadershipPhotoUploading, setThoughtLeadershipPhotoUploading] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
-  const [itemToDelete, setItemToDelete] = useState<{id: string, type: 'blog' | 'gallery' | 'gallery-blog' | 'thought-leadership-photo', title: string} | null>(null)
+  const [itemToDelete, setItemToDelete] = useState<{
+    id: string
+    type: 'blog' | 'gallery' | 'gallery-image' | 'gallery-blog' | 'thought-leadership-photo'
+    title: string
+    imageIndex?: number
+  } | null>(null)
   const [deleteLoading, setDeleteLoading] = useState(false)
   const [showSuccessMessage, setShowSuccessMessage] = useState(false)
   const [successMessage, setSuccessMessage] = useState('')
@@ -1660,6 +1665,11 @@ export default function AdminDashboard() {
     setShowDeleteConfirm(true)
   }
 
+  const handleGalleryImageDelete = (itemId: string, itemTitle: string, imageIndex: number) => {
+    setItemToDelete({ id: itemId, type: 'gallery-image', title: itemTitle, imageIndex })
+    setShowDeleteConfirm(true)
+  }
+
   // Handle blog deletion
   const handleBlogDelete = (blogId: string, blogTitle: string) => {
     setItemToDelete({ id: blogId, type: 'blog', title: blogTitle })
@@ -1695,7 +1705,12 @@ export default function AdminDashboard() {
         endpoint = '/api/admin/gallery'
       }
       
-      const response = await fetch(`${endpoint}?id=${itemToDelete.id}`, {
+      const query = new URLSearchParams({ id: itemToDelete.id })
+      if (itemToDelete.type === 'gallery-image' && itemToDelete.imageIndex !== undefined) {
+        query.set('imageIndex', itemToDelete.imageIndex.toString())
+      }
+
+      const response = await fetch(`${endpoint}?${query.toString()}`, {
         method: 'DELETE'
       })
       
@@ -1706,6 +1721,23 @@ export default function AdminDashboard() {
           fetchGalleryBlogs()
         } else if (itemToDelete.type === 'thought-leadership-photo') {
           fetchThoughtLeadershipPhotos()
+        } else if (itemToDelete.type === 'gallery-image') {
+          fetchGalleryItems(1, 1000)
+          if (showGalleryEditModal && editingGalleryId === itemToDelete.id) {
+            const remainingImages = galleryEditForm.existingImageData.filter(
+              (_, index) => index !== itemToDelete.imageIndex
+            )
+            if (remainingImages.length === 0) {
+              setShowGalleryEditModal(false)
+              setEditingGalleryId(null)
+              setGalleryEditForm({ title: '', description: '', image: null, existingImageData: [] })
+            } else {
+              setGalleryEditForm((prev) => ({
+                ...prev,
+                existingImageData: remainingImages,
+              }))
+            }
+          }
         } else {
           fetchGalleryItems(1, 1000)
         }
@@ -2127,45 +2159,63 @@ export default function AdminDashboard() {
                       {galleryItems.length === 0 ? (
                         <p className="text-gray-500 text-center py-8">No images uploaded yet</p>
                       ) : (
-                        <div className="space-y-3">
-                          {galleryItems.map((item, index) => (
-                            <div key={item._id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                              <div className="flex items-center space-x-4">
-                                <span className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-sm font-medium text-gray-600">
-                                  {index + 1}
-                                </span>
-                                <div>
-                                  <h4 className="font-medium text-gray-900">{item.title}</h4>
-                                  {item.description && (
-                                    <p className="text-sm text-gray-500 mt-1">{item.description}</p>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                          {galleryItems.map((item) => {
+                            const images = Array.isArray(item.imageData)
+                              ? item.imageData
+                              : [item.imageData]
+                            const previewImage = images[0]
+
+                            return (
+                              <div
+                                key={item._id}
+                                className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-md transition-shadow"
+                              >
+                                <div className="aspect-square bg-gray-100 relative">
+                                  {previewImage ? (
+                                    <img
+                                      src={previewImage}
+                                      alt={item.title}
+                                      className="w-full h-full object-cover"
+                                    />
+                                  ) : (
+                                    <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                      <ImageIcon className="w-10 h-10" />
+                                    </div>
                                   )}
-                                  {!item.isActive && (
-                                    <span className="inline-block mt-1 text-xs px-2 py-1 bg-red-100 text-red-800 rounded-full">
-                                      Deleted
+                                  {images.length > 1 && (
+                                    <span className="absolute top-2 right-2 text-xs font-medium px-2 py-1 rounded-full bg-black/60 text-white">
+                                      {images.length} photos
                                     </span>
                                   )}
                                 </div>
+
+                                <div className="p-4">
+                                  <h4 className="font-medium text-gray-900 line-clamp-2">{item.title}</h4>
+                                  {item.description && (
+                                    <p className="text-sm text-gray-500 mt-1 line-clamp-2">{item.description}</p>
+                                  )}
+
+                                  <div className="flex items-center justify-end gap-1 mt-4">
+                                    <button
+                                      onClick={() => handleGalleryEdit(item)}
+                                      className="text-blue-600 hover:text-blue-800 transition-colors p-2 hover:bg-blue-50 rounded-lg"
+                                      title="Edit gallery item"
+                                    >
+                                      <Edit className="h-4 w-4" />
+                                    </button>
+                                    <button
+                                      onClick={() => handleGalleryDelete(item._id, item.title)}
+                                      className="text-red-600 hover:text-red-800 transition-colors p-2 hover:bg-red-50 rounded-lg"
+                                      title="Delete permanently"
+                                    >
+                                      <Trash2 className="h-4 w-4" />
+                                    </button>
+                                  </div>
+                                </div>
                               </div>
-                              {item.isActive && (
-                              <div className="flex items-center space-x-2">
-                                <button
-                                  onClick={() => handleGalleryEdit(item)}
-                                  className="text-blue-600 hover:text-blue-800 transition-colors p-2 hover:bg-blue-50 rounded-lg"
-                                  title="Edit image"
-                                >
-                                  <Edit className="h-4 w-4" />
-                                </button>
-                                <button
-                                  onClick={() => handleGalleryDelete(item._id, item.title)}
-                                  className="text-red-600 hover:text-red-800 transition-colors p-2 hover:bg-red-50 rounded-lg"
-                                  title="Delete image"
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </button>
-                              </div>
-                              )}
-                            </div>
-                          ))}
+                            )
+                          })}
                         </div>
                       )}
                     </div>
@@ -3851,12 +3901,28 @@ export default function AdminDashboard() {
                 {galleryEditForm.existingImageData.length > 0 && (
                   <div className="mb-2 grid grid-cols-2 gap-2 max-h-64 overflow-y-auto">
                     {galleryEditForm.existingImageData.map((img, index) => (
-                      <div key={index} className="relative">
+                      <div key={index} className="relative group">
                         <img 
                           src={img} 
                           alt={`Image ${index + 1}`} 
                           className="w-full h-32 object-cover border border-gray-200 rounded-lg"
                         />
+                        {editingGalleryId && (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleGalleryImageDelete(
+                                editingGalleryId,
+                                galleryEditForm.title || 'this photo',
+                                index
+                              )
+                            }
+                            className="absolute top-2 right-2 p-1.5 rounded-full bg-white/90 text-red-600 opacity-0 group-hover:opacity-100 hover:bg-red-50 transition-opacity shadow-sm"
+                            title="Delete this photo permanently"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -4225,13 +4291,18 @@ export default function AdminDashboard() {
             
             <div className="mb-6">
               <p className="text-gray-700 mb-2">
-                Are you sure you want to delete this {itemToDelete.type}?
+                Are you sure you want to permanently delete{' '}
+                {itemToDelete.type === 'gallery-image' ? 'this photo from' : 'this'}{' '}
+                {itemToDelete.type === 'gallery' || itemToDelete.type === 'gallery-image'
+                  ? 'gallery item'
+                  : itemToDelete.type.replace(/-/g, ' ')}
+                ?
               </p>
               <p className="text-sm text-gray-600 font-medium">
-                "{itemToDelete.title}"
+                &quot;{itemToDelete.title}&quot;
               </p>
               <p className="text-sm text-red-600 mt-2">
-                This action cannot be undone.
+                This will permanently remove {itemToDelete.type === 'gallery-image' ? 'the photo' : 'it'} from storage and cannot be undone.
               </p>
             </div>
 

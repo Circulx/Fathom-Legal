@@ -11,7 +11,7 @@ export const CRM_STATUSES: Record<CrmStatus, string> = {
   prospect: 'Prospect',
   booked: 'Consultation booked',
   proposal: 'Proposal sent',
-  engagement: 'Letter of engagement',
+  engagement: 'LOE',
   engaged: 'Engaged',
   open: 'Open',
   closed: 'Closed',

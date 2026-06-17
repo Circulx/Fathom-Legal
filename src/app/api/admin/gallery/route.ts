@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
 import connectDB from '@/lib/mongodb'
 import GalleryItem from '@/models/GalleryItem'
+import { collectImageUrls, deleteStoredImages } from '@/lib/gallery-storage'
 
 export async function GET(request: NextRequest) {
   try {
@@ -13,8 +14,8 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '10')
 
-    // Build query - for admin, show all items (active and inactive)
-    let query: any = {}
+    // Build query - show active gallery items in admin
+    let query: any = { isActive: true }
 
     if (search) {
       query.$or = [
@@ -168,18 +169,53 @@ export async function DELETE(request: NextRequest) {
     
     const { searchParams } = new URL(request.url)
     const id = searchParams.get('id')
+    const imageIndexParam = searchParams.get('imageIndex')
 
     if (!id) {
       return NextResponse.json({ error: 'Gallery item ID is required' }, { status: 400 })
     }
 
-    const galleryItem = await GalleryItem.findByIdAndUpdate(id, { isActive: false })
+    const galleryItem = await GalleryItem.findById(id)
     
     if (!galleryItem) {
       return NextResponse.json({ error: 'Gallery item not found' }, { status: 404 })
     }
 
-    return NextResponse.json({ message: 'Gallery item deleted successfully' })
+    if (imageIndexParam !== null) {
+      const imageIndex = parseInt(imageIndexParam, 10)
+      const images = collectImageUrls(galleryItem.imageData)
+
+      if (Number.isNaN(imageIndex) || imageIndex < 0 || imageIndex >= images.length) {
+        return NextResponse.json({ error: 'Invalid image index' }, { status: 400 })
+      }
+
+      const [removedUrl] = images.splice(imageIndex, 1)
+      await deleteStoredImages([removedUrl])
+
+      if (images.length === 0) {
+        await GalleryItem.findByIdAndDelete(id)
+        return NextResponse.json({ message: 'Gallery item deleted permanently' })
+      }
+
+      galleryItem.imageData = images
+      await galleryItem.save()
+
+      return NextResponse.json({
+        message: 'Image deleted permanently',
+        galleryItem: {
+          id: galleryItem._id,
+          title: galleryItem.title,
+          description: galleryItem.description,
+          imageData: galleryItem.imageData,
+          imageType: galleryItem.imageType,
+        },
+      })
+    }
+
+    await deleteStoredImages(collectImageUrls(galleryItem.imageData))
+    await GalleryItem.findByIdAndDelete(id)
+
+    return NextResponse.json({ message: 'Gallery item deleted permanently' })
 
   } catch (error) {
     console.error('Delete gallery item error:', error)

@@ -200,12 +200,14 @@ export const Navbar = ({ page }) => {
             >
               Contact
             </Link>
-            {/* <button
+
+            <Link
+              href="/enquiry"
               className="text-white px-6 py-2 rounded-lg hover:opacity-90 transition-all font-bold"
               style={{ backgroundColor: "#A5292A" }}
             >
-              Get Consultation
-            </button> */}
+              Start Enquiry
+            </Link>
           </nav>
 
           {/* Mobile menu button */}
@@ -396,6 +398,15 @@ export const Navbar = ({ page }) => {
                 onClick={() => setIsMenuOpen(false)}
               >
                 Contact
+              </Link>
+
+              <Link
+                href="/enquiry"
+                className="block px-3 py-2 mt-3 text-white rounded-lg hover:opacity-90 transition-all font-bold text-center"
+                style={{ backgroundColor: "#A5292A" }}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Start Enquiry
               </Link>
             </div>
           </div>

@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { Menu, X, ChevronDown } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import logo from "../../assets/cropped-icon-red-192x192.png";
+
 export const Navbar = ({ page }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isServicesOpen, setIsServicesOpen] = useState(false);
@@ -16,7 +16,7 @@ export const Navbar = ({ page }) => {
         <div className="flex items-center justify-between h-20">
           <Link href="/" className="flex items-center hover:opacity-80 transition-opacity">
             <div className="w-12 h-12">
-              <Image src={logo} alt="Fathom Legal Logo" width={48} height={48} />
+              <Image src="/cropped-icon-red-192x192.png" alt="Fathom Legal Logo" width={48} height={48} />
             </div>
             <div className="text-2xl font-bold text-gray-800">
               Fathom <span style={{ color: "#A5292A" }}>Legal</span>
@@ -202,11 +202,11 @@ export const Navbar = ({ page }) => {
             </Link>
 
             <Link
-              href="/enquiry"
+              href="/fathom-crm"
               className="text-white px-6 py-2 rounded-lg hover:opacity-90 transition-all font-bold"
               style={{ backgroundColor: "#A5292A" }}
             >
-              Start Enquiry
+              Fathom-CRM
             </Link>
           </nav>
 
@@ -401,12 +401,12 @@ export const Navbar = ({ page }) => {
               </Link>
 
               <Link
-                href="/enquiry"
-                className="block px-3 py-2 mt-3 text-white rounded-lg hover:opacity-90 transition-all font-bold text-center"
+                className="block px-3 py-2 font-bold text-white rounded my-2"
                 style={{ backgroundColor: "#A5292A" }}
+                href="/fathom-crm"
                 onClick={() => setIsMenuOpen(false)}
               >
-                Start Enquiry
+              Book a Call
               </Link>
             </div>
           </div>

@@ -1,4 +1,5 @@
 import { connectDB } from '@/lib/mongodb'
+import { syncLeadFromIntake } from '@/lib/intake-to-lead'
 import IntakeSubmission from '@/models/IntakeSubmission'
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -29,6 +30,12 @@ export async function POST(request: NextRequest) {
         { error: 'Submission not found' },
         { status: 404 }
       )
+    }
+
+    try {
+      await syncLeadFromIntake(submission)
+    } catch (leadError) {
+      console.error('CRM lead sync error:', leadError)
     }
     
     return NextResponse.json({

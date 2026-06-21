@@ -1,5 +1,6 @@
 'use client'
 
+import { useCallback, useEffect, useState } from 'react'
 import {
   Search,
   Bell,
@@ -7,17 +8,17 @@ import {
   CalendarDays,
   Clock,
   Trophy,
-  TrendingUp,
   AlertCircle,
   CircleCheck,
   FolderOpen,
   Archive,
 } from 'lucide-react'
-import { CRM_LEADS, LEAD_SOURCES, getInitials } from './data'
+import { getInitials, normalizeStatus, type CrmLead, type LeadPatch } from './data'
 import { StatusBadge } from './shared'
 import CrmLeads from './CrmLeads'
 import CrmConsultations from './CrmConsultations'
 import CrmAnalytics from './CrmAnalytics'
+import { computeCrmStats, computeSourceBreakdown } from '@/lib/crm-analytics'
 
 export type CrmView = 'overview' | 'leads' | 'consultations' | 'analytics'
 
@@ -28,16 +29,17 @@ const VIEW_TITLES: Record<CrmView, { title: string; subtitle: string }> = {
   analytics: { title: 'Analytics', subtitle: 'How your intake is performing' },
 }
 
-function CrmOverview({ onNavigate }: { onNavigate: (view: CrmView) => void }) {
-  const recentLeads = CRM_LEADS.slice(0, 5)
-  const todayConsultations = CRM_LEADS.filter((l) => l.date !== '—').slice(0, 4)
-  const engagedCount = CRM_LEADS.filter((l) => l.status === 'engaged').length
-  const openCount = CRM_LEADS.filter((l) => l.status === 'open').length
-  const closedCount = CRM_LEADS.filter((l) => l.status === 'closed').length
-  const consultationsThisWeek = CRM_LEADS.filter((l) => l.date !== '—').length
-  const awaitingResponse = CRM_LEADS.filter((l) =>
-    ['prospect', 'booked', 'proposal', 'engagement'].includes(l.status)
-  ).length
+function CrmOverview({
+  leads,
+  onNavigate,
+}: {
+  leads: CrmLead[]
+  onNavigate: (view: CrmView) => void
+}) {
+  const stats = computeCrmStats(leads)
+  const sourceBreakdown = computeSourceBreakdown(leads)
+  const recentLeads = leads.slice(0, 5)
+  const upcomingConsultations = leads.filter((l) => l.date !== '—').slice(0, 4)
 
   return (
     <>
@@ -47,13 +49,9 @@ function CrmOverview({ onNavigate }: { onNavigate: (view: CrmView) => void }) {
             <Inbox className="w-5 h-5 text-[#7a1322]" />
           </div>
           <div className="text-[30px] font-medium text-[#1c1a18] leading-none tracking-tight">
-            {CRM_LEADS.length}
+            {stats.recentCount}
           </div>
           <div className="text-[12.5px] text-[#736c63] mt-1.5">New enquiries (7 days)</div>
-          <div className="inline-flex items-center gap-1 text-[11.5px] font-medium text-[#3f7a52] mt-2">
-            <TrendingUp className="w-3.5 h-3.5" />
-            +2 vs last week
-          </div>
         </div>
 
         <div className="bg-white border border-[#e7e1d9] rounded-[14px] p-5">
@@ -61,13 +59,9 @@ function CrmOverview({ onNavigate }: { onNavigate: (view: CrmView) => void }) {
             <CalendarDays className="w-5 h-5 text-[#2f5d8a]" />
           </div>
           <div className="text-[30px] font-medium text-[#1c1a18] leading-none tracking-tight">
-            {consultationsThisWeek}
+            {stats.consultationsScheduled}
           </div>
-          <div className="text-[12.5px] text-[#736c63] mt-1.5">Consultations this week</div>
-          <div className="inline-flex items-center gap-1 text-[11.5px] font-medium text-[#3f7a52] mt-2">
-            <TrendingUp className="w-3.5 h-3.5" />
-            3 confirmed
-          </div>
+          <div className="text-[12.5px] text-[#736c63] mt-1.5">Consultations scheduled</div>
         </div>
 
         <div className="bg-white border border-[#e7e1d9] rounded-[14px] p-5">
@@ -75,7 +69,7 @@ function CrmOverview({ onNavigate }: { onNavigate: (view: CrmView) => void }) {
             <Clock className="w-5 h-5 text-[#9a6b1f]" />
           </div>
           <div className="text-[30px] font-medium text-[#1c1a18] leading-none tracking-tight">
-            {awaitingResponse}
+            {stats.awaitingResponse}
           </div>
           <div className="text-[12.5px] text-[#736c63] mt-1.5">Awaiting response</div>
           <div className="inline-flex items-center gap-1 text-[11.5px] font-medium text-[#7a1322] mt-2">
@@ -88,12 +82,10 @@ function CrmOverview({ onNavigate }: { onNavigate: (view: CrmView) => void }) {
           <div className="w-9 h-9 rounded-[10px] bg-[#e8f1ea] flex items-center justify-center mb-3.5">
             <Trophy className="w-5 h-5 text-[#3f7a52]" />
           </div>
-          <div className="text-[30px] font-medium text-[#1c1a18] leading-none tracking-tight">42%</div>
-          <div className="text-[12.5px] text-[#736c63] mt-1.5">Lead → retained rate</div>
-          <div className="inline-flex items-center gap-1 text-[11.5px] font-medium text-[#3f7a52] mt-2">
-            <TrendingUp className="w-3.5 h-3.5" />
-            +6% this month
+          <div className="text-[30px] font-medium text-[#1c1a18] leading-none tracking-tight">
+            {stats.retainedRate}%
           </div>
+          <div className="text-[12.5px] text-[#736c63] mt-1.5">Lead → retained rate</div>
         </div>
 
         <div className="bg-white border border-[#e7e1d9] rounded-[14px] p-5">
@@ -101,13 +93,9 @@ function CrmOverview({ onNavigate }: { onNavigate: (view: CrmView) => void }) {
             <CircleCheck className="w-5 h-5 text-[#3f7a52]" />
           </div>
           <div className="text-[30px] font-medium text-[#1c1a18] leading-none tracking-tight">
-            {engagedCount}
+            {stats.engaged}
           </div>
           <div className="text-[12.5px] text-[#736c63] mt-1.5">Engaged</div>
-          <div className="inline-flex items-center gap-1 text-[11.5px] font-medium text-[#3f7a52] mt-2">
-            <TrendingUp className="w-3.5 h-3.5" />
-            active clients
-          </div>
         </div>
 
         <div className="bg-white border border-[#e7e1d9] rounded-[14px] p-5">
@@ -115,13 +103,9 @@ function CrmOverview({ onNavigate }: { onNavigate: (view: CrmView) => void }) {
             <FolderOpen className="w-5 h-5 text-[#3a5a8a]" />
           </div>
           <div className="text-[30px] font-medium text-[#1c1a18] leading-none tracking-tight">
-            {openCount}
+            {stats.open}
           </div>
           <div className="text-[12.5px] text-[#736c63] mt-1.5">Open</div>
-          <div className="inline-flex items-center gap-1 text-[11.5px] font-medium text-[#3a5a8a] mt-2">
-            <FolderOpen className="w-3.5 h-3.5" />
-            matters in progress
-          </div>
         </div>
 
         <div className="bg-white border border-[#e7e1d9] rounded-[14px] p-5">
@@ -129,13 +113,9 @@ function CrmOverview({ onNavigate }: { onNavigate: (view: CrmView) => void }) {
             <Archive className="w-5 h-5 text-[#8a8178]" />
           </div>
           <div className="text-[30px] font-medium text-[#1c1a18] leading-none tracking-tight">
-            {closedCount}
+            {stats.closed}
           </div>
           <div className="text-[12.5px] text-[#736c63] mt-1.5">Closed</div>
-          <div className="inline-flex items-center gap-1 text-[11.5px] font-medium text-[#8a8178] mt-2">
-            <Archive className="w-3.5 h-3.5" />
-            resolved matters
-          </div>
         </div>
       </div>
 
@@ -152,26 +132,30 @@ function CrmOverview({ onNavigate }: { onNavigate: (view: CrmView) => void }) {
             </button>
           </div>
           <div className="px-5 py-1">
-            {recentLeads.map((lead) => (
-              <div
-                key={lead.id}
-                className="flex items-center gap-3 py-3 border-b border-[#efebe4] last:border-b-0 cursor-pointer hover:bg-[#fbf9f6] -mx-2 px-2 rounded-lg transition-colors"
-              >
-                <div className="w-9 h-9 rounded-full bg-[#f6ecee] text-[#7a1322] flex items-center justify-center text-[13px] font-semibold flex-shrink-0">
-                  {getInitials(lead.first, lead.last)}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="text-[13.5px] font-medium text-[#1c1a18]">
-                    {lead.first} {lead.last}
+            {recentLeads.length === 0 ? (
+              <p className="py-6 text-sm text-[#736c63] text-center">No enquiries yet</p>
+            ) : (
+              recentLeads.map((lead) => (
+                <div
+                  key={lead.id}
+                  className="flex items-center gap-3 py-3 border-b border-[#efebe4] last:border-b-0"
+                >
+                  <div className="w-9 h-9 rounded-full bg-[#f6ecee] text-[#7a1322] flex items-center justify-center text-[13px] font-semibold flex-shrink-0">
+                    {getInitials(lead.first, lead.last)}
                   </div>
-                  <div className="text-xs text-[#736c63] truncate">
-                    {lead.areas[0]}
-                    {lead.areas.length > 1 ? ` +${lead.areas.length - 1}` : ''}
+                  <div className="min-w-0 flex-1">
+                    <div className="text-[13.5px] font-medium text-[#1c1a18]">
+                      {lead.first} {lead.last}
+                    </div>
+                    <div className="text-xs text-[#736c63] truncate">
+                      {lead.areas[0]}
+                      {lead.areas.length > 1 ? ` +${lead.areas.length - 1}` : ''}
+                    </div>
                   </div>
+                  <div className="text-[11.5px] text-[#736c63] whitespace-nowrap">{lead.ago}</div>
                 </div>
-                <div className="text-[11.5px] text-[#736c63] whitespace-nowrap">{lead.ago}</div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
 
@@ -180,27 +164,31 @@ function CrmOverview({ onNavigate }: { onNavigate: (view: CrmView) => void }) {
             <h3 className="text-base font-medium text-[#1c1a18]">Where leads come from</h3>
           </div>
           <div className="px-5 py-4 space-y-4">
-            {LEAD_SOURCES.map((source) => (
-              <div key={source.name}>
-                <div className="flex justify-between text-[12.5px] mb-1">
-                  <span className="text-[#2a2724]">{source.name}</span>
-                  <span className="text-[#736c63] font-medium">{source.value}%</span>
+            {sourceBreakdown.length === 0 ? (
+              <p className="text-sm text-[#736c63] text-center py-4">No source data yet</p>
+            ) : (
+              sourceBreakdown.map((source) => (
+                <div key={source.name}>
+                  <div className="flex justify-between text-[12.5px] mb-1">
+                    <span className="text-[#2a2724]">{source.name}</span>
+                    <span className="text-[#736c63] font-medium">{source.value}%</span>
+                  </div>
+                  <div className="h-[7px] rounded-md bg-[#efebe4] overflow-hidden">
+                    <div
+                      className="h-full rounded-md bg-gradient-to-r from-[#7a1322] to-[#5c0e1a]"
+                      style={{ width: `${source.value}%` }}
+                    />
+                  </div>
                 </div>
-                <div className="h-[7px] rounded-md bg-[#efebe4] overflow-hidden">
-                  <div
-                    className="h-full rounded-md bg-gradient-to-r from-[#7a1322] to-[#5c0e1a]"
-                    style={{ width: `${source.value}%` }}
-                  />
-                </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
       </div>
 
       <div className="bg-white border border-[#e7e1d9] rounded-[14px] overflow-hidden">
         <div className="flex items-center px-5 py-4 border-b border-[#efebe4]">
-          <h3 className="text-base font-medium text-[#1c1a18]">Today&apos;s consultations</h3>
+          <h3 className="text-base font-medium text-[#1c1a18]">Upcoming consultations</h3>
           <button
             type="button"
             onClick={() => onNavigate('consultations')}
@@ -210,25 +198,29 @@ function CrmOverview({ onNavigate }: { onNavigate: (view: CrmView) => void }) {
           </button>
         </div>
         <div className="px-5 py-1">
-          {todayConsultations.map((lead) => (
-            <div
-              key={lead.id}
-              className="flex items-center gap-3 py-3 border-b border-[#efebe4] last:border-b-0"
-            >
-              <div className="w-9 h-9 rounded-full bg-[#f6ecee] text-[#7a1322] flex items-center justify-center text-[13px] font-semibold flex-shrink-0">
-                {getInitials(lead.first, lead.last)}
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="text-[13.5px] font-medium text-[#1c1a18]">
-                  {lead.first} {lead.last} — {lead.areas[0]}
+          {upcomingConsultations.length === 0 ? (
+            <p className="py-6 text-sm text-[#736c63] text-center">No consultations scheduled</p>
+          ) : (
+            upcomingConsultations.map((lead) => (
+              <div
+                key={lead.id}
+                className="flex items-center gap-3 py-3 border-b border-[#efebe4] last:border-b-0"
+              >
+                <div className="w-9 h-9 rounded-full bg-[#f6ecee] text-[#7a1322] flex items-center justify-center text-[13px] font-semibold flex-shrink-0">
+                  {getInitials(lead.first, lead.last)}
                 </div>
-                <div className="text-xs text-[#736c63]">
-                  {lead.date} at {lead.time} · 20 min · Google Meet
+                <div className="min-w-0 flex-1">
+                  <div className="text-[13.5px] font-medium text-[#1c1a18]">
+                    {lead.first} {lead.last} — {lead.areas[0]}
+                  </div>
+                  <div className="text-xs text-[#736c63]">
+                    {lead.date} at {lead.time} · 20 min · Google Meet
+                  </div>
                 </div>
+                <StatusBadge status={lead.status} />
               </div>
-              <StatusBadge status={lead.status} />
-            </div>
-          ))}
+            ))
+          )}
         </div>
       </div>
     </>
@@ -238,10 +230,71 @@ function CrmOverview({ onNavigate }: { onNavigate: (view: CrmView) => void }) {
 interface CrmSectionProps {
   activeView: CrmView
   onNavigate: (view: CrmView) => void
+  onLeadsCountChange?: (count: number) => void
 }
 
-export default function CrmSection({ activeView, onNavigate }: CrmSectionProps) {
+export default function CrmSection({ activeView, onNavigate, onLeadsCountChange }: CrmSectionProps) {
   const { title, subtitle } = VIEW_TITLES[activeView]
+  const [leads, setLeads] = useState<CrmLead[]>([])
+  const [leadsLoading, setLeadsLoading] = useState(true)
+
+  const fetchLeads = useCallback(async () => {
+    try {
+      setLeadsLoading(true)
+      const response = await fetch('/api/admin/leads')
+      if (!response.ok) throw new Error('Failed to load leads')
+      const data = await response.json()
+      const loaded = (data.leads ?? []).map((lead: CrmLead) => ({
+        ...lead,
+        status: normalizeStatus(lead.status),
+        actionables: lead.actionables ?? [],
+        createdAt: lead.createdAt ?? new Date().toISOString(),
+      }))
+      setLeads(loaded)
+      onLeadsCountChange?.(loaded.length)
+    } catch (error) {
+      console.error('Error fetching leads:', error)
+      setLeads([])
+      onLeadsCountChange?.(0)
+    } finally {
+      setLeadsLoading(false)
+    }
+  }, [onLeadsCountChange])
+
+  useEffect(() => {
+    fetchLeads()
+  }, [fetchLeads])
+
+  const patchLead = useCallback(async (id: string, patch: LeadPatch) => {
+    const response = await fetch(`/api/admin/leads/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(patch),
+    })
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({}))
+      throw new Error(data.error || 'Failed to update lead')
+    }
+    const data = await response.json()
+    const updated: CrmLead = {
+      ...data.lead,
+      status: normalizeStatus(data.lead.status),
+      actionables: data.lead.actionables ?? [],
+    }
+    setLeads((prev) => prev.map((l) => (l.id === id ? updated : l)))
+    return updated
+  }, [])
+
+  const addLeadToList = useCallback(
+    (lead: CrmLead) => {
+      setLeads((prev) => {
+        const next = [lead, ...prev]
+        onLeadsCountChange?.(next.length)
+        return next
+      })
+    },
+    [onLeadsCountChange]
+  )
 
   return (
     <div className="bg-[#fbf9f6] text-[#2a2724] [color-scheme:light] -mx-4 sm:-mx-6 lg:-mx-8 -my-8 px-4 sm:px-6 lg:px-8 py-8 min-h-[calc(100vh-5rem)]">
@@ -269,10 +322,23 @@ export default function CrmSection({ activeView, onNavigate }: CrmSectionProps) 
         </div>
       </div>
 
-      {activeView === 'overview' && <CrmOverview onNavigate={onNavigate} />}
-      {activeView === 'leads' && <CrmLeads />}
-      {activeView === 'consultations' && <CrmConsultations />}
-      {activeView === 'analytics' && <CrmAnalytics />}
+      {leadsLoading && activeView !== 'leads' ? (
+        <div className="py-20 text-center text-[#736c63] text-sm">Loading CRM data…</div>
+      ) : (
+        <>
+          {activeView === 'overview' && <CrmOverview leads={leads} onNavigate={onNavigate} />}
+          {activeView === 'leads' && (
+            <CrmLeads
+              leads={leads}
+              loading={leadsLoading}
+              onPatchLead={patchLead}
+              onLeadAdded={addLeadToList}
+            />
+          )}
+          {activeView === 'consultations' && <CrmConsultations leads={leads} />}
+          {activeView === 'analytics' && <CrmAnalytics leads={leads} />}
+        </>
+      )}
     </div>
   )
 }

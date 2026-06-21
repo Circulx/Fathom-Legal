@@ -17,7 +17,6 @@ import {
   CircleCheck,
 } from 'lucide-react'
 import {
-  CRM_LEADS,
   CRM_STATUSES,
   LEAD_SOURCE_OPTIONS,
   PRACTICE_AREAS,
@@ -28,6 +27,7 @@ import {
 } from './data'
 import { STATUS_STYLES, STATUS_SWATCH, CRM_INPUT_CLASS, CRM_SELECT_CLASS, CRM_TEXTAREA_CLASS, CRM_NOTE_INPUT_CLASS } from './shared'
 import LeadActionables from './LeadActionables'
+import type { LeadPatch } from './data'
 
 type StatusFilter = 'all' | CrmStatus
 
@@ -130,14 +130,19 @@ const emptyForm: AddProspectForm = {
   matter: '',
 }
 
-export default function CrmLeads() {
-  const [leads, setLeads] = useState<CrmLead[]>(() =>
-    CRM_LEADS.map((lead) => ({
-      ...lead,
-      status: normalizeStatus(lead.status),
-      actionables: lead.actionables ?? [],
-    }))
-  )
+export default function CrmLeads({
+  leads,
+  loading: leadsLoading,
+  onPatchLead,
+  onLeadAdded,
+}: {
+  leads: CrmLead[]
+  loading: boolean
+  onPatchLead: (id: string, patch: LeadPatch) => Promise<CrmLead>
+  onLeadAdded: (lead: CrmLead) => void
+}) {
+  const [addSubmitting, setAddSubmitting] = useState(false)
+  const [addError, setAddError] = useState('')
   const [filter, setFilter] = useState<StatusFilter>('all')
   const [showModal, setShowModal] = useState(false)
   const [form, setForm] = useState<AddProspectForm>(emptyForm)
@@ -148,42 +153,18 @@ export default function CrmLeads() {
   const filteredLeads =
     filter === 'all' ? leads : leads.filter((l) => l.status === filter)
 
-  const updateLeadStatus = (id: number, status: CrmStatus) => {
-    setLeads((prev) =>
-      prev.map((l) =>
-        l.id === id
-          ? {
-              ...l,
-              status,
-              timeline: [
-                ...l.timeline,
-                {
-                  icon: 'check',
-                  text: `Status changed to "${CRM_STATUSES[status]}"`,
-                  when: 'Just now',
-                },
-              ],
-            }
-          : l
-      )
-    )
-    if (drawerLead?.id === id) {
-      setDrawerLead((prev) =>
-        prev
-          ? {
-              ...prev,
-              status,
-              timeline: [
-                ...prev.timeline,
-                {
-                  icon: 'check',
-                  text: `Status changed to "${CRM_STATUSES[status]}"`,
-                  when: 'Just now',
-                },
-              ],
-            }
-          : null
-      )
+  useEffect(() => {
+    if (!drawerLead) return
+    const current = leads.find((l) => l.id === drawerLead.id)
+    if (current) setDrawerLead(current)
+  }, [leads, drawerLead?.id])
+
+  const updateLeadStatus = async (id: string, status: CrmStatus) => {
+    try {
+      const updated = await onPatchLead(id, { status })
+      if (drawerLead?.id === id) setDrawerLead(updated)
+    } catch (error) {
+      console.error('Failed to update status:', error)
     }
   }
 
@@ -195,56 +176,77 @@ export default function CrmLeads() {
 
   const closeDrawer = () => setDrawerLead(null)
 
-  const handleAddProspect = () => {
+  const handleAddProspect = async () => {
     const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!form.first.trim() || !form.last.trim() || !emailRe.test(form.email.trim())) {
       setFormError(true)
       return
     }
 
-    const newLead: CrmLead = {
-      id: Math.max(...leads.map((l) => l.id), 0) + 1,
-      first: form.first.trim(),
-      last: form.last.trim(),
-      email: form.email.trim(),
-      phone: form.phone.trim() || '—',
-      company: form.company.trim() || '—',
-      source: form.source,
-      areas: form.areas.length > 0 ? form.areas : ['Corporate advisory'],
-      matter: form.matter.trim() || '—',
-      date: '—',
-      time: '—',
-      status: form.status,
-      ago: 'Just now',
-      timeline: [{ icon: 'inbox', text: 'Prospect added manually', when: 'Just now' }],
-      actionables: [],
-    }
+    setAddSubmitting(true)
+    setAddError('')
 
-    setLeads((prev) => [newLead, ...prev])
-    setShowModal(false)
-    setForm(emptyForm)
-    setFormError(false)
+    try {
+      const response = await fetch('/api/admin/leads', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          first: form.first.trim(),
+          last: form.last.trim(),
+          email: form.email.trim(),
+          phone: form.phone.trim(),
+          company: form.company.trim(),
+          source: form.source,
+          status: form.status,
+          areas: form.areas.length > 0 ? form.areas : ['Corporate advisory'],
+          matter: form.matter.trim(),
+        }),
+      })
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}))
+        throw new Error(data.error || 'Failed to add prospect')
+      }
+
+      const data = await response.json()
+      const newLead: CrmLead = {
+        ...data.lead,
+        status: normalizeStatus(data.lead.status),
+        actionables: data.lead.actionables ?? [],
+        createdAt: data.lead.createdAt ?? new Date().toISOString(),
+      }
+
+      onLeadAdded(newLead)
+      setShowModal(false)
+      setForm(emptyForm)
+      setFormError(false)
+    } catch (error) {
+      console.error('Add prospect error:', error)
+      setAddError(error instanceof Error ? error.message : 'Failed to add prospect')
+    } finally {
+      setAddSubmitting(false)
+    }
   }
 
-  const addNote = () => {
+  const addNote = async () => {
     if (!drawerLead || !noteInput.trim()) return
-    const updated = {
-      ...drawerLead,
-      timeline: [
-        ...drawerLead.timeline,
-        { icon: 'file', text: noteInput.trim(), when: 'Just now' },
-      ],
+    try {
+      const updated = await onPatchLead(drawerLead.id, { note: noteInput.trim() })
+      setDrawerLead(updated)
+      setNoteInput('')
+    } catch (error) {
+      console.error('Failed to add note:', error)
     }
-    setLeads((prev) => prev.map((l) => (l.id === drawerLead.id ? updated : l)))
-    setDrawerLead(updated)
-    setNoteInput('')
   }
 
-  const updateActionables = (actionables: CrmLead['actionables']) => {
+  const updateActionables = async (actionables: CrmLead['actionables']) => {
     if (!drawerLead) return
-    const updated = { ...drawerLead, actionables }
-    setLeads((prev) => prev.map((l) => (l.id === drawerLead.id ? updated : l)))
-    setDrawerLead(updated)
+    try {
+      const updated = await onPatchLead(drawerLead.id, { actionables })
+      setDrawerLead(updated)
+    } catch (error) {
+      console.error('Failed to update actionables:', error)
+    }
   }
 
   const toggleArea = (area: string) => {
@@ -288,6 +290,7 @@ export default function CrmLeads() {
           onClick={() => {
             setForm(emptyForm)
             setFormError(false)
+            setAddError('')
             setShowModal(true)
           }}
           className="inline-flex items-center gap-1.5 bg-gradient-to-br from-[#7a1322] to-[#5c0e1a] text-white rounded-full px-4 py-2 text-[13px] font-medium shadow-md hover:-translate-y-px transition-transform"
@@ -313,7 +316,20 @@ export default function CrmLeads() {
               </tr>
             </thead>
             <tbody>
-              {filteredLeads.map((lead) => (
+              {leadsLoading ? (
+                <tr>
+                  <td colSpan={5} className="px-4 py-12 text-center text-[#736c63] text-sm">
+                    Loading leads…
+                  </td>
+                </tr>
+              ) : filteredLeads.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="px-4 py-12 text-center text-[#736c63] text-sm">
+                    No prospects yet. Use &quot;Add prospect&quot; to create one.
+                  </td>
+                </tr>
+              ) : (
+              filteredLeads.map((lead) => (
                 <tr
                   key={lead.id}
                   onClick={() => openDrawer(lead)}
@@ -361,7 +377,8 @@ export default function CrmLeads() {
                     />
                   </td>
                 </tr>
-              ))}
+              ))
+              )}
             </tbody>
           </table>
         </div>
@@ -517,6 +534,10 @@ export default function CrmLeads() {
                   className={CRM_TEXTAREA_CLASS}
                 />
               </div>
+
+              {addError && (
+                <p className="text-[12px] text-[#7a1322] font-medium">{addError}</p>
+              )}
             </div>
 
             <div className="flex justify-end gap-2.5 px-6 py-4 border-t border-[#e7e1d9]">
@@ -524,16 +545,18 @@ export default function CrmLeads() {
                 type="button"
                 onClick={() => setShowModal(false)}
                 className="px-5 py-2.5 text-[13.5px] font-medium border border-[#e7e1d9] rounded-full bg-white hover:border-[#7a1322] hover:text-[#7a1322]"
+                disabled={addSubmitting}
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={handleAddProspect}
-                className="inline-flex items-center gap-2 px-5 py-2.5 text-[13.5px] font-medium text-white rounded-full bg-gradient-to-br from-[#7a1322] to-[#5c0e1a]"
+                disabled={addSubmitting}
+                className="inline-flex items-center gap-2 px-5 py-2.5 text-[13.5px] font-medium text-white rounded-full bg-gradient-to-br from-[#7a1322] to-[#5c0e1a] disabled:opacity-50"
               >
                 <Check className="w-4 h-4" />
-                Add prospect
+                {addSubmitting ? 'Adding…' : 'Add prospect'}
               </button>
             </div>
           </div>

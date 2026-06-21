@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
-import { CRM_LEADS, type CrmLead } from './data'
+import type { CrmLead } from './data'
 
 const MONTH_MAP: Record<string, number> = {
   Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5,
@@ -87,7 +87,7 @@ function ConsultationCard({ lead }: { lead: CrmLead }) {
   )
 }
 
-export default function CrmConsultations() {
+export default function CrmConsultations({ leads }: { leads: CrmLead[] }) {
   const today = useMemo(() => {
     const d = new Date()
     d.setHours(0, 0, 0, 0)
@@ -106,7 +106,7 @@ export default function CrmConsultations() {
 
   const consultationsByDay = useMemo(() => {
     const year = weekStart.getFullYear()
-    const scheduled = CRM_LEADS.filter((l) => l.date !== '—')
+    const scheduled = leads.filter((l) => l.date !== '—')
 
     return weekDays.map((day) =>
       scheduled
@@ -116,7 +116,7 @@ export default function CrmConsultations() {
         })
         .sort((a, b) => parseTimeToMinutes(a.time) - parseTimeToMinutes(b.time))
     )
-  }, [weekDays, weekStart])
+  }, [weekDays, weekStart, leads])
 
   const isCurrentWeek = weekDays.some((day) => isSameDay(day, today))
   const weekLabel = isCurrentWeek

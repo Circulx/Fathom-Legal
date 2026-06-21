@@ -49,7 +49,6 @@ import {
 } from 'lucide-react'
 import { Navbar } from '@/components/Navbar'
 import CrmSection, { type CrmView } from '@/components/CRM/CrmSection'
-import { CRM_LEADS } from '@/components/CRM/data'
 
 interface Template {
   _id: string
@@ -526,6 +525,7 @@ export default function AdminDashboard() {
   // All state declarations must be at the top, before any conditional logic
   const [activeSection, setActiveSection] = useState('dashboard')
   const [crmExpanded, setCrmExpanded] = useState(false)
+  const [crmLeadCount, setCrmLeadCount] = useState(0)
   
   // Templates state
   const [templates, setTemplates] = useState<Template[]>([])
@@ -714,6 +714,15 @@ export default function AdminDashboard() {
     console.log('✅ Authenticated admin:', session.user)
   }, [session, status, router])
 
+  useEffect(() => {
+    if (!session || status !== 'authenticated') return
+
+    fetch('/api/admin/leads')
+      .then((response) => (response.ok ? response.json() : { leads: [] }))
+      .then((data) => setCrmLeadCount(data.leads?.length ?? 0))
+      .catch(() => setCrmLeadCount(0))
+  }, [session, status])
+
   // Load dashboard data when section changes to dashboard
   useEffect(() => {
     if (activeSection === 'dashboard' && session && status === 'authenticated') {
@@ -745,7 +754,7 @@ export default function AdminDashboard() {
 
   const crmSubItems = [
     { id: 'crm-overview', label: 'Overview', icon: LayoutDashboard },
-    { id: 'crm-leads', label: 'Leads & enquiries', icon: Users, badge: CRM_LEADS.length },
+    { id: 'crm-leads', label: 'Leads & enquiries', icon: Users, badge: crmLeadCount },
     { id: 'crm-consultations', label: 'Consultations', icon: Calendar },
     { id: 'crm-analytics', label: 'Analytics', icon: BarChart3 },
   ]
@@ -2666,6 +2675,7 @@ export default function AdminDashboard() {
               <CrmSection
                 activeView={getCrmView(activeSection)}
                 onNavigate={handleCrmNavigate}
+                onLeadsCountChange={setCrmLeadCount}
               />
             )}
 

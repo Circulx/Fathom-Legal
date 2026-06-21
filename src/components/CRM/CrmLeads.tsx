@@ -176,6 +176,13 @@ export default function CrmLeads({
 
   const closeDrawer = () => setDrawerLead(null)
 
+  const openEmailClient = (lead: CrmLead) => {
+    const subject = 'Re: Your enquiry with Fathom Legal'
+    const body = `Hi ${lead.first},\n\n`
+    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(lead.email)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+    window.open(gmailUrl, '_blank', 'noopener,noreferrer')
+  }
+
   const handleAddProspect = async () => {
     const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!form.first.trim() || !form.last.trim() || !emailRe.test(form.email.trim())) {
@@ -738,6 +745,7 @@ export default function CrmLeads({
             <div className="p-4 border-t border-[#e7e1d9] flex gap-2.5 bg-[#fbf9f6]">
               <button
                 type="button"
+                onClick={() => openEmailClient(drawerLead)}
                 className="flex-1 inline-flex items-center justify-center gap-2 py-3 text-[13.5px] font-medium text-white rounded-full bg-gradient-to-br from-[#7a1322] to-[#5c0e1a]"
               >
                 <Mail className="w-4 h-4" />

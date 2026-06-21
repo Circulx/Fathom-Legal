@@ -45,7 +45,7 @@ export default function FathomCRM() {
               </p>
 
               {/* CTA Button */}
-              <Link href="/contact">
+              <Link href="/client-intake">
                 <button 
                   className="px-8 py-4 rounded-full font-semibold text-lg text-white hover:opacity-90 transition-all inline-flex items-center gap-2"
                   style={{ backgroundColor: '#A5292A' }}

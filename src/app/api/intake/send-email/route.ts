@@ -93,15 +93,15 @@ export async function POST(request: NextRequest) {
             opacity: 0.95;
           }
           .content {
-            padding: 40px;
+            padding: 30px;
           }
           .greeting {
-            font-size: 16px;
-            margin-bottom: 20px;
-            line-height: 1.8;
+            font-size: 15px;
+            margin-bottom: 18px;
+            line-height: 1.6;
           }
           .section {
-            margin-bottom: 35px;
+            margin-bottom: 25px;
           }
           .section:last-child {
             margin-bottom: 0;
@@ -144,41 +144,49 @@ export async function POST(request: NextRequest) {
             text-align: right;
           }
           .meeting-section {
-            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            background: linear-gradient(135deg, #A5292A 0%, #8a2123 100%);
             color: white;
-            padding: 30px;
-            border-radius: 6px;
+            padding: 25px;
+            border-radius: 8px;
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
+            border: 2px solid #A5292A;
           }
           .meeting-section h3 {
-            font-size: 18px;
-            margin-bottom: 20px;
+            font-size: 16px;
+            margin-bottom: 18px;
             font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
           }
           .meeting-link {
             display: inline-block;
-            background-color: white;
-            color: #2563eb;
-            padding: 14px 40px;
+            background-color: #ffffff;
+            color: #A5292A;
+            padding: 16px 45px;
             text-decoration: none;
             border-radius: 6px;
             font-weight: 700;
-            margin-bottom: 15px;
+            margin: 0 auto 15px;
             transition: all 0.3s;
-            font-size: 16px;
+            font-size: 18px;
+            border: 3px solid #ffffff;
+            box-shadow: 0 4px 12px rgba(165, 41, 42, 0.3);
           }
           .meeting-link:hover {
             background-color: #f0f0f0;
+            transform: translateY(-2px);
           }
           .meeting-url {
-            background-color: rgba(255,255,255,0.1);
-            padding: 12px;
-            border-radius: 4px;
+            background-color: rgba(255,255,255,0.15);
+            padding: 14px 12px;
+            border-radius: 6px;
             word-break: break-all;
-            font-size: 12px;
+            font-size: 13px;
             font-family: 'Courier New', monospace;
-            opacity: 0.9;
+            opacity: 0.95;
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #ffffff;
           }
           .checklist {
             background-color: #f0fdf4;
@@ -296,30 +304,27 @@ export async function POST(request: NextRequest) {
             </div>
 
             <div class="meeting-section">
-              <h3>📹 Join Your Google Meet</h3>
-              <a href="${googleMeetLink}" class="meeting-link">Click to Join Meeting</a>
+              <h3>📹 Your Google Meet Link</h3>
+              <a href="${googleMeetLink}" target="_blank" style="display: inline-block; background-color: #ffffff; color: #A5292A; padding: 16px 45px; text-decoration: none; border-radius: 6px; font-weight: 700; font-size: 18px; margin-bottom: 15px; box-shadow: 0 4px 12px rgba(165, 41, 42, 0.3); border: 3px solid #ffffff;" class="meeting-link">→ Join Meeting Now</a>
               <div class="meeting-url">${googleMeetLink}</div>
             </div>
 
             <div class="section">
-              <div class="section-title">✓ Before Your Consultation</div>
+              <div class="section-title">✓ Before Your Meeting</div>
               <div class="checklist">
-                <h4>Please ensure:</h4>
-                <ul>
-                  <li>You have a stable internet connection</li>
-                  <li>Your microphone and camera are working properly</li>
-                  <li>You join 5 minutes early for technical checks</li>
-                  <li>You have any relevant documents ready to discuss</li>
-                  <li>You choose a quiet location for the meeting</li>
-                  <li>You save this email with the Google Meet link</li>
+                <ul style="padding-left: 0; list-style: none;">
+                  <li>✓ Stable internet connection with working microphone & camera</li>
+                  <li>✓ Join 5 minutes early for technical checks</li>
+                  <li>✓ Have documents ready to discuss</li>
+                  <li>✓ Choose a quiet location for the call</li>
                 </ul>
               </div>
             </div>
 
             <div class="section">
               <div class="reschedule-section">
-                <h4>Need to Reschedule?</h4>
-                <p>If you need to reschedule your consultation, please reply to this email or contact us at least 24 hours in advance. We'll be happy to help you find a new time slot.</p>
+                <h4>Reschedule or Cancel</h4>
+                <p>Reply to this email at least 24 hours in advance to reschedule or cancel. We&apos;ll be happy to help.</p>
               </div>
             </div>
 

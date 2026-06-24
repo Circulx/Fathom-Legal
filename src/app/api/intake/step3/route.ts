@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
       selectedDate,
       selectedTime,
       confirmedEmail,
-      calendlyEventId,
+      googleMeetLink,
     } = await request.json()
     
     if (!sessionId || !selectedDate || !selectedTime || !confirmedEmail) {
@@ -29,7 +29,8 @@ export async function POST(request: NextRequest) {
         selectedDate,
         selectedTime,
         confirmedEmail,
-        calendlyEventId,
+        googleMeetLink: googleMeetLink || 'https://meet.google.com/wkd-evwz-dxw',
+        completedAt: new Date(),
       },
       { new: true }
     )

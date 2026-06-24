@@ -1,5 +1,4 @@
 import { connectDB } from '@/lib/mongodb'
-import { syncLeadFromIntake } from '@/lib/intake-to-lead'
 import IntakeSubmission from '@/models/IntakeSubmission'
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -9,15 +8,36 @@ export async function POST(request: NextRequest) {
     
     const {
       sessionId,
-      selectedDate,
-      selectedTime,
-      confirmedEmail,
-      googleMeetLink,
+      firstName,
+      lastName,
+      email,
+      phone,
+      company,
+      heardAbout,
+      matterDescription,
     } = await request.json()
     
-    if (!sessionId || !selectedDate || !selectedTime || !confirmedEmail) {
+    if (!sessionId || !firstName || !lastName || !email || !phone) {
       return NextResponse.json(
         { error: 'Missing required fields' },
+        { status: 400 }
+      )
+    }
+
+    // Email format validation
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+    if (!emailRegex.test(email)) {
+      return NextResponse.json(
+        { error: 'Invalid email format. Please enter a valid email address.' },
+        { status: 400 }
+      )
+    }
+
+    // Phone number validation (10-15 digits, optional +, spaces, dashes, parentheses)
+    const phoneRegex = /^\+?[\d\s\-().]{7,15}$/
+    if (!phoneRegex.test(phone)) {
+      return NextResponse.json(
+        { error: 'Invalid phone number format. Please enter a valid phone number (e.g. +1 800-555-0199).' },
         { status: 400 }
       )
     }
@@ -25,12 +45,14 @@ export async function POST(request: NextRequest) {
     const submission = await IntakeSubmission.findOneAndUpdate(
       { sessionId },
       {
-        currentStep: 3,
-        selectedDate,
-        selectedTime,
-        confirmedEmail,
-        googleMeetLink: googleMeetLink || 'https://meet.google.com/wkd-evwz-dxw',
-        completedAt: new Date(),
+        currentStep: 2,
+        firstName,
+        lastName,
+        email,
+        phone,
+        company,
+        heardAbout,
+        matterDescription,
       },
       { new: true }
     )
@@ -41,22 +63,16 @@ export async function POST(request: NextRequest) {
         { status: 404 }
       )
     }
-
-    try {
-      await syncLeadFromIntake(submission)
-    } catch (leadError) {
-      console.error('CRM lead sync error:', leadError)
-    }
     
     return NextResponse.json({
       success: true,
       data: submission,
-      message: 'Step 3 data saved successfully',
+      message: 'Step 2 data saved successfully',
     })
   } catch (error) {
-    console.error('Step 3 save error:', error)
+    console.error('Step 2 save error:', error)
     return NextResponse.json(
-      { error: 'Failed to save step 3 data' },
+      { error: 'Failed to save step 2 data' },
       { status: 500 }
     )
   }
@@ -81,9 +97,9 @@ export async function GET(request: NextRequest) {
       data: submission,
     })
   } catch (error) {
-    console.error('Step 3 fetch error:', error)
+    console.error('Step 2 fetch error:', error)
     return NextResponse.json(
-      { error: 'Failed to fetch step 3 data' },
+      { error: 'Failed to fetch step 2 data' },
       { status: 500 }
     )
   }

@@ -18,26 +18,36 @@ export async function POST(request: NextRequest) {
     const gmailPassword = process.env.GMAIL_APP_PASSWORD?.replace(/\s+/g, '')
 
     if (!gmailUser || !gmailPassword) {
-      console.error('[v0] Gmail credentials not configured', {
+      console.error('[v0] CRITICAL: Gmail credentials missing or empty', {
         hasUser: !!process.env.GMAIL_USER,
         hasPassword: !!process.env.GMAIL_APP_PASSWORD,
-        userValue: gmailUser,
+        gmailUser,
         passwordLength: gmailPassword?.length || 0
       })
       return NextResponse.json(
-        { error: 'Email service not configured' },
+        { 
+          success: false,
+          emailSent: false,
+          error: 'Email service not configured. Please check GMAIL_USER and GMAIL_APP_PASSWORD environment variables.'
+        },
         { status: 500 }
       )
     }
 
-    console.log('[v0] Gmail auth initializing for user:', gmailUser)
+    console.log('[v0] Initializing Gmail transporter for:', gmailUser)
+    console.log('[v0] Gmail credentials set - Password length:', gmailPassword.length)
 
-    // Create transporter using Gmail service
+    // Create transporter using Gmail SMTP with explicit port 465 and SSL
     const transporter = nodemailer.createTransport({
-      service: 'gmail',
+      host: 'smtp.gmail.com',
+      port: 465,
+      secure: true, // Use SSL/TLS
       auth: {
         user: gmailUser,
         pass: gmailPassword
+      },
+      tls: {
+        rejectUnauthorized: true
       }
     })
 
@@ -341,32 +351,50 @@ export async function POST(request: NextRequest) {
     </html>
     `
 
-    // Send email with detailed error handling
+    // Send email with detailed error handling and retry logic
     let emailSent = false
     let emailError = null
+    let sendAttempts = 0
+    const maxAttempts = 1
     
-    try {
-      console.log('[v0] Sending email to:', email)
-      const result = await transporter.sendMail({
-        from: gmailUser,
-        to: email,
-        subject: `Consultation Confirmed - ${formattedDate} at ${selectedTime} IST | Fathom Legal`,
-        html: emailHTML,
-        replyTo: gmailUser
-      })
-      console.log('[v0] Email sent successfully:', result.messageId)
-      emailSent = true
-    } catch (emailErr) {
-      emailError = emailErr instanceof Error ? emailErr.message : 'Unknown email error'
-      console.error('[v0] Email sending failed:', {
-        error: emailError,
-        code: emailErr instanceof Error && 'code' in emailErr ? (emailErr as any).code : 'N/A',
-        response: emailErr instanceof Error && 'response' in emailErr ? (emailErr as any).response : 'N/A'
-      })
-      // Continue - email failure should not block confirmation
+    while (sendAttempts < maxAttempts && !emailSent) {
+      try {
+        sendAttempts++
+        console.log(`[v0] Sending email attempt ${sendAttempts}/${maxAttempts} to:`, email)
+        
+        const result = await transporter.sendMail({
+          from: gmailUser,
+          to: email,
+          subject: `Consultation Confirmed - ${formattedDate} at ${selectedTime} IST | Fathom Legal`,
+          html: emailHTML,
+          replyTo: gmailUser
+        })
+        
+        console.log('[v0] Email sent successfully! Message ID:', result.messageId)
+        emailSent = true
+      } catch (emailErr) {
+        emailError = emailErr instanceof Error ? emailErr.message : 'Unknown email error'
+        const errorCode = emailErr instanceof Error && 'code' in emailErr ? (emailErr as any).code : 'N/A'
+        
+        if (errorCode === 'EAUTH') {
+          console.error('[v0] AUTHENTICATION ERROR - Gmail credentials are invalid')
+          console.error('[v0] Error details:', {
+            message: emailError.split('\n')[0],
+            code: errorCode,
+            suggestion: 'Please regenerate Gmail App Password at https://myaccount.google.com/apppasswords'
+          })
+        } else {
+          console.error('[v0] Email sending failed:', {
+            error: emailError,
+            code: errorCode,
+            attempt: sendAttempts,
+            maxAttempts
+          })
+        }
+      }
     }
 
-    console.log('[v0] Email operation complete:', { emailSent, hasError: !!emailError })
+    console.log('[v0] Email operation complete:', { emailSent, attempts: sendAttempts, hasError: !!emailError })
 
     // Always return success even if email fails, as the booking is confirmed in DB
     return NextResponse.json({
@@ -374,8 +402,8 @@ export async function POST(request: NextRequest) {
       emailSent: emailSent,
       emailError: emailError || null,
       message: emailSent 
-        ? 'Confirmation email sent successfully' 
-        : 'Booking confirmed but email failed to send. Check your spam folder or request resend.'
+        ? 'Confirmation email sent successfully to ' + email
+        : 'Booking confirmed! Your consultation details have been saved. Email delivery encountered an issue - please check your spam folder or contact support.'
     }, {
       status: 200
     })

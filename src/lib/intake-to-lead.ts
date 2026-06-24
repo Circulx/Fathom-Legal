@@ -3,6 +3,7 @@ import type { ILead } from '@/models/Lead'
 import Lead from '@/models/Lead'
 import { LEAD_SOURCE_OPTIONS } from '@/components/CRM/data'
 import { formatTimelineWhen } from '@/lib/crm-leads'
+import { formatTimeDisplay } from '@/lib/time-format'
 
 const SERVICE_ID_TO_AREA: Record<string, string> = {
   corporate: 'Corporate advisory',
@@ -40,20 +41,8 @@ export function formatConsultationDate(isoDate?: string): string {
   })
 }
 
-/** Converts 24h "HH:MM" (from intake) to "h:MM AM/PM" for CRM display */
-export function formatConsultationTime(time?: string): string {
-  if (!time || time === '—') return '—'
-  const match24 = time.match(/^(\d{1,2}):(\d{2})$/)
-  if (match24) {
-    let hours = parseInt(match24[1], 10)
-    const minutes = match24[2]
-    const period = hours >= 12 ? 'PM' : 'AM'
-    if (hours > 12) hours -= 12
-    if (hours === 0) hours = 12
-    return `${hours}:${minutes} ${period}`
-  }
-  return time
-}
+/** @deprecated Use formatTimeDisplay from @/lib/time-format */
+export const formatConsultationTime = formatTimeDisplay
 
 function buildMatter(submission: IIntakeSubmission): string {
   if (submission.matterDescription?.trim()) {

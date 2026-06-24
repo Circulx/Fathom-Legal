@@ -1,4 +1,7 @@
 import type { CrmLead } from '@/components/CRM/data'
+import { parseTimeToMinutes } from '@/lib/time-format'
+
+export { parseTimeToMinutes } from '@/lib/time-format'
 
 const MONTH_MAP: Record<string, number> = {
   Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5,
@@ -46,17 +49,6 @@ export function leadConsultationMatchesDay(lead: CrmLead, calendarDay: Date): bo
     leadDate.getMonth() === calendarDay.getMonth() &&
     leadDate.getDate() === calendarDay.getDate()
   )
-}
-
-export function parseTimeToMinutes(timeStr: string): number {
-  const match = timeStr.match(/^(\d+):(\d+)\s*(AM|PM)$/i)
-  if (!match) return 0
-  let hours = parseInt(match[1], 10)
-  const minutes = parseInt(match[2], 10)
-  const period = match[3].toUpperCase()
-  if (period === 'PM' && hours !== 12) hours += 12
-  if (period === 'AM' && hours === 12) hours = 0
-  return hours * 60 + minutes
 }
 
 export function compareLeadConsultationDates(

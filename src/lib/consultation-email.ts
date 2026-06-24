@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer'
+import { formatTimeDisplay } from '@/lib/time-format'
 
 export interface RescheduleEmailParams {
   email: string
@@ -42,10 +43,11 @@ function formatEmailDate(isoDate: string): string {
 
 function buildRescheduleEmailHtml(params: RescheduleEmailParams): string {
   const formattedDate = formatEmailDate(params.selectedDate)
+  const displayTime = formatTimeDisplay(params.selectedTime)
   const matter = params.matter?.trim() || 'Legal consultation'
   const previousSlot =
     params.previousDate && params.previousTime
-      ? `<p style="margin-top: 12px; color: #666; font-size: 14px;">Your previous appointment was <strong>${params.previousDate}</strong> at <strong>${params.previousTime} IST</strong>.</p>`
+      ? `<p style="margin-top: 12px; color: #666; font-size: 14px;">Your previous appointment was <strong>${params.previousDate}</strong> at <strong>${formatTimeDisplay(params.previousTime)} IST</strong>.</p>`
       : ''
 
   return `
@@ -82,7 +84,7 @@ function buildRescheduleEmailHtml(params: RescheduleEmailParams): string {
             <div class="details-box">
               <div class="detail-row"><span><strong>Name</strong></span><span>${params.firstName} ${params.lastName}</span></div>
               <div class="detail-row"><span><strong>New date</strong></span><span>${formattedDate}</span></div>
-              <div class="detail-row"><span><strong>New time</strong></span><span>${params.selectedTime} IST</span></div>
+              <div class="detail-row"><span><strong>New time</strong></span><span>${displayTime} IST</span></div>
               <div class="detail-row"><span><strong>Duration</strong></span><span>20 minutes</span></div>
               <div class="detail-row"><span><strong>Services</strong></span><span>${matter}</span></div>
             </div>
@@ -114,13 +116,14 @@ export async function sendRescheduleNotificationEmail(
   }
 
   const formattedDate = formatEmailDate(params.selectedDate)
+  const displayTime = formatTimeDisplay(params.selectedTime)
   const html = buildRescheduleEmailHtml(params)
 
   try {
     await gmail.transporter.sendMail({
       from: gmail.gmailUser,
       to: params.email,
-      subject: `Consultation Rescheduled - ${formattedDate} at ${params.selectedTime} IST | Fathom Legal`,
+      subject: `Consultation Rescheduled - ${formattedDate} at ${displayTime} IST | Fathom Legal`,
       html,
       replyTo: gmail.gmailUser,
     })

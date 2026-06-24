@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   Search,
-  Bell,
   X,
   Inbox,
   CalendarDays,
@@ -148,7 +147,21 @@ function CrmOverview({
               recentLeads.map((lead) => (
                 <div
                   key={lead.id}
-                  className="flex items-center gap-3 py-3 border-b border-[#efebe4] last:border-b-0"
+                  role={onLeadClick ? 'button' : undefined}
+                  tabIndex={onLeadClick ? 0 : undefined}
+                  onClick={() => onLeadClick?.(lead)}
+                  onKeyDown={(e) => {
+                    if (!onLeadClick) return
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      onLeadClick(lead)
+                    }
+                  }}
+                  className={`flex items-center gap-3 py-3 border-b border-[#efebe4] last:border-b-0 w-full text-left ${
+                    onLeadClick
+                      ? 'hover:bg-[#fdf5f6] -mx-5 px-5 transition-colors cursor-pointer'
+                      : ''
+                  }`}
                 >
                   <div className="w-9 h-9 rounded-full bg-[#f6ecee] text-[#7a1322] flex items-center justify-center text-[13px] font-semibold flex-shrink-0">
                     {getInitials(lead.first, lead.last)}
@@ -464,13 +477,6 @@ export default function CrmSection({ activeView, onNavigate, onLeadsCountChange 
             )}
           </div>
           )}
-          <button
-            type="button"
-            className="relative w-[38px] h-[38px] rounded-full border border-[#e7e1d9] bg-white flex items-center justify-center text-[#736c63] hover:border-[#7a1322] hover:text-[#7a1322] transition-colors"
-          >
-            <Bell className="w-4 h-4" />
-            <span className="absolute top-2 right-2.5 w-[7px] h-[7px] rounded-full bg-[#7a1322] border-[1.5px] border-white" />
-          </button>
         </div>
       </div>
 

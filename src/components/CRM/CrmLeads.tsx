@@ -42,6 +42,7 @@ import CrmAssigneeManager from './CrmAssigneeManager'
 import type { LeadPatch } from './data'
 import { downloadLeadsCsv } from '@/lib/crm-export'
 import { getBookableWeekdayDates } from '@/lib/booking-calendar'
+import { formatTimeDisplay } from '@/lib/time-format'
 
 const PAGE_SIZE_OPTIONS = [10, 20, 50] as const
 
@@ -161,13 +162,6 @@ interface EditLeadForm {
 
 function getRescheduleCalendarDates() {
   return getBookableWeekdayDates(3)
-}
-
-function formatSlotDisplay(time24: string) {
-  const [hour, minute] = time24.split(':').map(Number)
-  const period = hour >= 12 ? 'PM' : 'AM'
-  const displayHour = hour > 12 ? hour - 12 : hour === 0 ? 12 : hour
-  return `${displayHour}:${minute.toString().padStart(2, '0')} ${period}`
 }
 
 function leadToEditForm(lead: CrmLead): EditLeadForm {
@@ -1313,7 +1307,7 @@ export default function CrmLeads({
                                     : 'border-[#e7e1d9] bg-white hover:border-[#7a1322]'
                                 }`}
                               >
-                                {formatSlotDisplay(slot.time)}
+                                {formatTimeDisplay(slot.time)}
                               </button>
                             )
                           })}

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 import nodemailer from 'nodemailer'
+import { formatTimeDisplay } from '@/lib/time-format'
 
 export async function POST(request: NextRequest) {
   try {
@@ -49,6 +50,7 @@ export async function POST(request: NextRequest) {
       month: 'long',
       day: 'numeric'
     })
+    const displayTime = formatTimeDisplay(selectedTime)
 
     // Create professional email HTML
     const emailHTML = `
@@ -286,7 +288,7 @@ export async function POST(request: NextRequest) {
                 </div>
                 <div class="detail-row">
                   <span class="detail-label">Time:</span>
-                  <span class="detail-value">${selectedTime} IST</span>
+                  <span class="detail-value">${displayTime} IST</span>
                 </div>
                 <div class="detail-row">
                   <span class="detail-label">Duration:</span>
@@ -355,7 +357,7 @@ export async function POST(request: NextRequest) {
       const result = await transporter.sendMail({
         from: gmailUser,
         to: email,
-        subject: `Consultation Confirmed - ${formattedDate} at ${selectedTime} IST | Fathom Legal`,
+        subject: `Consultation Confirmed - ${formattedDate} at ${displayTime} IST | Fathom Legal`,
         html: emailHTML,
         replyTo: gmailUser
       })

@@ -6,6 +6,7 @@ import { ChevronRight, Building2, Zap, Coins, FileText, Gavel, Lightbulb, CheckC
 import { Navbar } from '@/components/Navbar/index'
 import Footer from '@/components/Footer'
 import { getBookableWeekdayDates } from '@/lib/booking-calendar'
+import { formatTimeDisplay } from '@/lib/time-format'
 
 interface FormData {
   selectedServices: string[]
@@ -704,11 +705,7 @@ const isStep2Valid =
                   <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
                     {availableSlots.map((slot) => {
                       const isSelected = schedulingData.selectedTime === slot.time
-                      // Convert 24-hour format to 12-hour for display
-                      const [hour, minute] = slot.time.split(':').map(Number)
-                      const period = hour >= 12 ? 'PM' : 'AM'
-                      const displayHour = hour > 12 ? hour - 12 : (hour === 0 ? 12 : hour)
-                      const displayTime = `${displayHour}:${minute.toString().padStart(2, '0')} ${period}`
+                      const displayTime = formatTimeDisplay(slot.time)
                       
                       return (
                         <button
@@ -739,7 +736,7 @@ const isStep2Valid =
               <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
                 <p className="text-sm text-green-800">
                   <span className="font-semibold">Selected: </span>
-                  {new Date(schedulingData.selectedDate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} at {schedulingData.selectedTime} IST
+                  {new Date(schedulingData.selectedDate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} at {formatTimeDisplay(schedulingData.selectedTime)} IST
                 </p>
               </div>
             )}
@@ -833,7 +830,7 @@ const isStep2Valid =
               </div>
               <div className="bg-gray-100 p-3 rounded">
                 <p className="text-xs text-gray-600 font-bold mb-0.5">TIME</p>
-                <p className="text-sm font-bold text-gray-900">{schedulingData.selectedTime}</p>
+                <p className="text-sm font-bold text-gray-900">{formatTimeDisplay(schedulingData.selectedTime)}</p>
               </div>
               <div className="bg-gray-100 p-3 rounded">
                 <p className="text-xs text-gray-600 font-bold mb-0.5">DURATION</p>

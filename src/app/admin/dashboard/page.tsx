@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { useSession, signOut } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useEditor, EditorContent } from '@tiptap/react'
@@ -30,6 +30,9 @@ import {
   ShoppingCart,
   Clock,
   TrendingUp,
+  Inbox,
+  CalendarDays,
+  AlertCircle,
   Plus,
   Upload,
   Download,
@@ -49,6 +52,8 @@ import {
 } from 'lucide-react'
 import { Navbar } from '@/components/Navbar'
 import CrmSection, { type CrmView } from '@/components/CRM/CrmSection'
+import { normalizeStatus, type CrmLead } from '@/components/CRM/data'
+import { computeCrmStats } from '@/lib/crm-analytics'
 
 interface Template {
   _id: string
@@ -526,6 +531,7 @@ export default function AdminDashboard() {
   const [activeSection, setActiveSection] = useState('dashboard')
   const [crmExpanded, setCrmExpanded] = useState(false)
   const [crmLeadCount, setCrmLeadCount] = useState(0)
+  const [crmLeads, setCrmLeads] = useState<CrmLead[]>([])
   
   // Templates state
   const [templates, setTemplates] = useState<Template[]>([])
@@ -719,9 +725,23 @@ export default function AdminDashboard() {
 
     fetch('/api/admin/leads')
       .then((response) => (response.ok ? response.json() : { leads: [] }))
-      .then((data) => setCrmLeadCount(data.leads?.length ?? 0))
-      .catch(() => setCrmLeadCount(0))
+      .then((data) => {
+        const loaded = (data.leads ?? []).map((lead: CrmLead) => ({
+          ...lead,
+          status: normalizeStatus(lead.status),
+          actionables: lead.actionables ?? [],
+          createdAt: lead.createdAt ?? new Date().toISOString(),
+        }))
+        setCrmLeads(loaded)
+        setCrmLeadCount(loaded.length)
+      })
+      .catch(() => {
+        setCrmLeads([])
+        setCrmLeadCount(0)
+      })
   }, [session, status])
+
+  const crmStats = useMemo(() => computeCrmStats(crmLeads), [crmLeads])
 
   // Load dashboard data when section changes to dashboard
   useEffect(() => {
@@ -2003,6 +2023,94 @@ export default function AdminDashboard() {
                       </div>
                     </div>
                   </div>
+                </div>
+
+                <div className="mt-10 mb-4 flex items-center justify-between">
+                  <div>
+                    <h2 className="text-xl font-semibold text-gray-900">CRM & Leads</h2>
+                    <p className="text-sm text-gray-500">Practice intake at a glance</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleSectionChange('crm-overview')}
+                    className="text-sm font-medium hover:underline"
+                    style={{ color: '#7a1322' }}
+                  >
+                    Open CRM →
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  <button
+                    type="button"
+                    onClick={() => handleSectionChange('crm-leads')}
+                    className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 text-left hover:border-[#7a1322]/30 hover:shadow-md transition-all"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-gray-600 mb-1">Total leads</p>
+                        <p className="text-3xl font-bold text-gray-900 mb-2">{crmLeadCount}</p>
+                        <p className="text-sm text-gray-500">All enquiries</p>
+                      </div>
+                      <div className="w-12 h-12 rounded-full flex items-center justify-center bg-[#f6ecee]">
+                        <Users className="w-6 h-6" style={{ color: '#7a1322' }} />
+                      </div>
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleSectionChange('crm-leads')}
+                    className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 text-left hover:border-[#7a1322]/30 hover:shadow-md transition-all"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-gray-600 mb-1">New enquiries</p>
+                        <p className="text-3xl font-bold text-gray-900 mb-2">{crmStats.recentCount}</p>
+                        <p className="text-sm text-gray-500">Last 7 days</p>
+                      </div>
+                      <div className="w-12 h-12 rounded-full flex items-center justify-center bg-[#f6ecee]">
+                        <Inbox className="w-6 h-6" style={{ color: '#7a1322' }} />
+                      </div>
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleSectionChange('crm-consultations')}
+                    className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 text-left hover:border-[#7a1322]/30 hover:shadow-md transition-all"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-gray-600 mb-1">Consultations</p>
+                        <p className="text-3xl font-bold text-gray-900 mb-2">{crmStats.consultationsScheduled}</p>
+                        <p className="text-sm text-gray-500">Scheduled</p>
+                      </div>
+                      <div className="w-12 h-12 rounded-full flex items-center justify-center bg-[#e6eef5]">
+                        <CalendarDays className="w-6 h-6" style={{ color: '#2f5d8a' }} />
+                      </div>
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleSectionChange('crm-leads')}
+                    className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 text-left hover:border-[#7a1322]/30 hover:shadow-md transition-all"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-gray-600 mb-1">Awaiting response</p>
+                        <p className="text-3xl font-bold text-gray-900 mb-2">{crmStats.awaitingResponse}</p>
+                        <p className="text-sm text-gray-500 flex items-center gap-1">
+                          <AlertCircle className="w-3.5 h-3.5" style={{ color: '#7a1322' }} />
+                          Needs follow-up
+                        </p>
+                      </div>
+                      <div className="w-12 h-12 rounded-full flex items-center justify-center bg-[#f5ecdb]">
+                        <Clock className="w-6 h-6" style={{ color: '#9a6b1f' }} />
+                      </div>
+                    </div>
+                  </button>
                 </div>
               </>
             )}

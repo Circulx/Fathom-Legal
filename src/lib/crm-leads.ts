@@ -1,6 +1,8 @@
 import type { ILead } from '@/models/Lead'
 import type { CrmLead } from '@/components/CRM/data'
 
+const DEFAULT_MEET_LINK = 'https://meet.google.com/wkd-evwz-dxw'
+
 export function formatLeadAgo(date: Date): string {
   const diffMs = Date.now() - date.getTime()
   const minutes = Math.floor(diffMs / 60000)
@@ -38,6 +40,11 @@ export function leadDocToCrmLead(doc: ILead | Record<string, unknown>): CrmLead 
     matter: lead.matter || '—',
     date: lead.date || '—',
     time: lead.time || '—',
+    consultationDateIso: lead.consultationDateIso || '',
+    consultationTime24: lead.consultationTime24 || '',
+    googleMeetLink:
+      lead.googleMeetLink ||
+      (lead.date && lead.date !== '—' ? DEFAULT_MEET_LINK : ''),
     status: lead.status,
     ago: formatLeadAgo(createdAt),
     createdAt: createdAt.toISOString(),

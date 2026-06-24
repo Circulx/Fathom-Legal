@@ -34,6 +34,9 @@ export interface ILead extends Document {
   matter: string
   date: string
   time: string
+  consultationDateIso?: string
+  consultationTime24?: string
+  googleMeetLink?: string
   status: LeadStatus
   timeline: ILeadTimelineItem[]
   actionables: ILeadActionable[]
@@ -73,6 +76,9 @@ const LeadSchema = new Schema<ILead>(
     matter: { type: String, default: '—', trim: true },
     date: { type: String, default: '—' },
     time: { type: String, default: '—' },
+    consultationDateIso: { type: String, default: '' },
+    consultationTime24: { type: String, default: '' },
+    googleMeetLink: { type: String, default: '' },
     status: {
       type: String,
       enum: ['prospect', 'booked', 'proposal', 'engagement', 'engaged', 'open', 'closed'],

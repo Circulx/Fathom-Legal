@@ -40,6 +40,21 @@ export function formatConsultationDate(isoDate?: string): string {
   })
 }
 
+/** Converts 24h "HH:MM" (from intake) to "h:MM AM/PM" for CRM display */
+export function formatConsultationTime(time?: string): string {
+  if (!time || time === '—') return '—'
+  const match24 = time.match(/^(\d{1,2}):(\d{2})$/)
+  if (match24) {
+    let hours = parseInt(match24[1], 10)
+    const minutes = match24[2]
+    const period = hours >= 12 ? 'PM' : 'AM'
+    if (hours > 12) hours -= 12
+    if (hours === 0) hours = 12
+    return `${hours}:${minutes} ${period}`
+  }
+  return time
+}
+
 function buildMatter(submission: IIntakeSubmission): string {
   if (submission.matterDescription?.trim()) {
     return submission.matterDescription.trim()
@@ -66,8 +81,12 @@ export async function syncLeadFromIntake(
   }
 
   const now = new Date()
-  const date = formatConsultationDate(submission.selectedDate)
-  const time = submission.selectedTime?.trim() || '—'
+  const dateIso = submission.selectedDate?.trim() || ''
+  const time24 = submission.selectedTime?.trim() || ''
+  const date = formatConsultationDate(dateIso)
+  const time = formatConsultationTime(time24)
+  const meetLink =
+    submission.googleMeetLink?.trim() || 'https://meet.google.com/wkd-evwz-dxw'
   const areas = mapServicesToAreas(submission.selectedServices)
   const matter = buildMatter(submission)
   const source = mapHeardAboutToSource(submission.heardAbout)
@@ -85,6 +104,9 @@ export async function syncLeadFromIntake(
     existing.matter = matter
     existing.date = date
     existing.time = time
+    existing.consultationDateIso = dateIso
+    existing.consultationTime24 = time24
+    existing.googleMeetLink = meetLink
     existing.status = 'booked'
     await existing.save()
     return existing
@@ -102,6 +124,9 @@ export async function syncLeadFromIntake(
     matter,
     date,
     time,
+    consultationDateIso: dateIso,
+    consultationTime24: time24,
+    googleMeetLink: meetLink,
     status: 'booked',
     timeline: [
       {

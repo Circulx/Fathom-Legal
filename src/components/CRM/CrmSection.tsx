@@ -1,9 +1,10 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   Search,
   Bell,
+  X,
   Inbox,
   CalendarDays,
   Clock,
@@ -13,12 +14,13 @@ import {
   FolderOpen,
   Archive,
 } from 'lucide-react'
-import { getInitials, normalizeStatus, UNASSIGNED_ASSIGNEE, type CrmAssigneeRecord, type CrmLead, type LeadPatch } from './data'
+import { getInitials, normalizeStatus, filterLeadsBySearch, UNASSIGNED_ASSIGNEE, type CrmAssigneeRecord, type CrmLead, type LeadPatch } from './data'
 import { StatusBadge } from './shared'
 import CrmLeads from './CrmLeads'
 import CrmConsultations from './CrmConsultations'
 import CrmAnalytics from './CrmAnalytics'
 import { computeCrmStats, computeSourceBreakdown } from '@/lib/crm-analytics'
+import { compareLeadConsultationDates } from '@/lib/crm-consultation-dates'
 
 export type CrmView = 'overview' | 'leads' | 'consultations' | 'analytics'
 
@@ -32,14 +34,22 @@ const VIEW_TITLES: Record<CrmView, { title: string; subtitle: string }> = {
 function CrmOverview({
   leads,
   onNavigate,
+  onLeadClick,
 }: {
   leads: CrmLead[]
   onNavigate: (view: CrmView) => void
+  onLeadClick?: (lead: CrmLead) => void
 }) {
   const stats = computeCrmStats(leads)
   const sourceBreakdown = computeSourceBreakdown(leads)
   const recentLeads = leads.slice(0, 5)
-  const upcomingConsultations = leads.filter((l) => l.date !== '—').slice(0, 4)
+  const upcomingConsultations = useMemo(() => {
+    const near = new Date()
+    return [...leads]
+      .filter((l) => l.date !== '—')
+      .sort((a, b) => compareLeadConsultationDates(a, b, near))
+      .slice(0, 4)
+  }, [leads])
 
   return (
     <>
@@ -204,7 +214,21 @@ function CrmOverview({
             upcomingConsultations.map((lead) => (
               <div
                 key={lead.id}
-                className="flex items-center gap-3 py-3 border-b border-[#efebe4] last:border-b-0"
+                role={onLeadClick ? 'button' : undefined}
+                tabIndex={onLeadClick ? 0 : undefined}
+                onClick={() => onLeadClick?.(lead)}
+                onKeyDown={(e) => {
+                  if (!onLeadClick) return
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    onLeadClick(lead)
+                  }
+                }}
+                className={`flex items-center gap-3 py-3 border-b border-[#efebe4] last:border-b-0 w-full text-left ${
+                  onLeadClick
+                    ? 'hover:bg-[#fdf5f6] -mx-5 px-5 transition-colors cursor-pointer'
+                    : ''
+                }`}
               >
                 <div className="w-9 h-9 rounded-full bg-[#f6ecee] text-[#7a1322] flex items-center justify-center text-[13px] font-semibold flex-shrink-0">
                   {getInitials(lead.first, lead.last)}
@@ -214,7 +238,23 @@ function CrmOverview({
                     {lead.first} {lead.last} — {lead.areas[0]}
                   </div>
                   <div className="text-xs text-[#736c63]">
-                    {lead.date} at {lead.time} · 20 min · Google Meet
+                    {lead.date} at {lead.time} · 20 min
+                    {lead.googleMeetLink ? (
+                      <>
+                        {' · '}
+                        <a
+                          href={lead.googleMeetLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-[#7a1322] hover:underline"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          Google Meet
+                        </a>
+                      </>
+                    ) : (
+                      ' · Google Meet'
+                    )}
                   </div>
                 </div>
                 <StatusBadge status={lead.status} />
@@ -238,6 +278,14 @@ export default function CrmSection({ activeView, onNavigate, onLeadsCountChange 
   const [leads, setLeads] = useState<CrmLead[]>([])
   const [leadsLoading, setLeadsLoading] = useState(true)
   const [assignees, setAssignees] = useState<CrmAssigneeRecord[]>([])
+  const [searchQuery, setSearchQuery] = useState('')
+  const [drawerLeadId, setDrawerLeadId] = useState<string | null>(null)
+
+  const filteredLeads = useMemo(
+    () => filterLeadsBySearch(leads, searchQuery),
+    [leads, searchQuery]
+  )
+  const isSearching = searchQuery.trim().length > 0
 
   const fetchAssignees = useCallback(async () => {
     try {
@@ -299,6 +347,15 @@ export default function CrmSection({ activeView, onNavigate, onLeadsCountChange 
     )
   }, [assignees])
 
+  const deleteAssignee = useCallback(async (id: string) => {
+    const response = await fetch(`/api/admin/assignees/${id}`, { method: 'DELETE' })
+    const data = await response.json().catch(() => ({}))
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to remove assignee')
+    }
+    setAssignees((prev) => prev.filter((a) => a.id !== id))
+  }, [])
+
   useEffect(() => {
     if (!leadsLoading) {
       onLeadsCountChange?.(leads.length)
@@ -338,6 +395,45 @@ export default function CrmSection({ activeView, onNavigate, onLeadsCountChange 
     setLeads((prev) => prev.filter((l) => l.id !== id))
   }, [])
 
+  const rescheduleLead = useCallback(async (id: string, date: string, time: string) => {
+    const response = await fetch(`/api/admin/leads/${id}/reschedule`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ date, time }),
+    })
+    const data = await response.json().catch(() => ({}))
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to reschedule consultation')
+    }
+    const updated: CrmLead = {
+      ...data.lead,
+      status: normalizeStatus(data.lead.status),
+      actionables: data.lead.actionables ?? [],
+    }
+    setLeads((prev) => prev.map((l) => (l.id === id ? updated : l)))
+    return {
+      lead: updated,
+      emailSent: Boolean(data.emailSent),
+      emailError: data.emailError ?? null,
+    }
+  }, [])
+
+  const crmLeadsProps = {
+    loading: leadsLoading,
+    assignees,
+    onEnsureAssignee: addAssignee,
+    onDeleteAssignee: deleteAssignee,
+    onPatchLead: patchLead,
+    onLeadAdded: addLeadToList,
+    onLeadDeleted: deleteLead,
+    onRescheduleLead: rescheduleLead,
+    searchQuery,
+    onSearchQueryChange: setSearchQuery,
+    drawerLeadId,
+    onDrawerLeadIdChange: setDrawerLeadId,
+    leadPool: leads,
+  }
+
   return (
     <div className="bg-[#fbf9f6] text-[#2a2724] [color-scheme:light] -mx-4 sm:-mx-6 lg:-mx-8 -my-8 px-4 sm:px-6 lg:px-8 py-8 min-h-[calc(100vh-5rem)]">
       <div className="flex items-center gap-4 mb-7">
@@ -346,14 +442,28 @@ export default function CrmSection({ activeView, onNavigate, onLeadsCountChange 
           <p className="text-[12.5px] text-[#736c63] mt-0.5">{subtitle}</p>
         </div>
         <div className="ml-auto flex items-center gap-2.5">
-          <div className="hidden sm:flex items-center gap-2 bg-white border border-[#e7e1d9] rounded-full px-3.5 py-2 w-[230px]">
-            <Search className="w-4 h-4 text-[#736c63]" />
+          {activeView !== 'leads' && (
+          <div className="hidden sm:flex items-center gap-2 bg-white border border-[#e7e1d9] rounded-full px-3.5 py-2 w-[260px] focus-within:border-[#7a1322] focus-within:ring-2 focus-within:ring-[#f6ecee]">
+            <Search className="w-4 h-4 text-[#736c63] flex-shrink-0" />
             <input
               type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search leads, matters…"
               className="border-none bg-transparent text-[13.5px] text-[#2a2724] w-full focus:outline-none placeholder:text-[#736c63]"
             />
+            {isSearching && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                className="text-[#736c63] hover:text-[#7a1322] flex-shrink-0"
+                aria-label="Clear search"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
           </div>
+          )}
           <button
             type="button"
             className="relative w-[38px] h-[38px] rounded-full border border-[#e7e1d9] bg-white flex items-center justify-center text-[#736c63] hover:border-[#7a1322] hover:text-[#7a1322] transition-colors"
@@ -364,24 +474,53 @@ export default function CrmSection({ activeView, onNavigate, onLeadsCountChange 
         </div>
       </div>
 
+      {isSearching && !leadsLoading && (
+        <p className="text-[12.5px] text-[#736c63] mb-4">
+          {filteredLeads.length === 0
+            ? `No results for “${searchQuery.trim()}”`
+            : `${filteredLeads.length} result${filteredLeads.length === 1 ? '' : 's'} for “${searchQuery.trim()}”`}
+        </p>
+      )}
+
       {leadsLoading && activeView !== 'leads' ? (
         <div className="py-20 text-center text-[#736c63] text-sm">Loading CRM data…</div>
       ) : (
         <>
-          {activeView === 'overview' && <CrmOverview leads={leads} onNavigate={onNavigate} />}
-          {activeView === 'leads' && (
-            <CrmLeads
-              leads={leads}
-              loading={leadsLoading}
-              assignees={assignees}
-              onEnsureAssignee={addAssignee}
-              onPatchLead={patchLead}
-              onLeadAdded={addLeadToList}
-              onLeadDeleted={deleteLead}
-            />
+          {activeView === 'overview' && (
+            <>
+              <CrmOverview
+                leads={filteredLeads}
+                onNavigate={onNavigate}
+                onLeadClick={(lead) => setDrawerLeadId(lead.id)}
+              />
+              {drawerLeadId && (
+                <CrmLeads
+                  leads={filteredLeads}
+                  {...crmLeadsProps}
+                  drawerOnly
+                />
+              )}
+            </>
           )}
-          {activeView === 'consultations' && <CrmConsultations leads={leads} />}
-          {activeView === 'analytics' && <CrmAnalytics leads={leads} />}
+          {activeView === 'leads' && (
+            <CrmLeads leads={leads} {...crmLeadsProps} />
+          )}
+          {activeView === 'consultations' && (
+            <>
+              <CrmConsultations
+                leads={filteredLeads}
+                onLeadClick={(lead) => setDrawerLeadId(lead.id)}
+              />
+              {drawerLeadId && (
+                <CrmLeads
+                  leads={filteredLeads}
+                  {...crmLeadsProps}
+                  drawerOnly
+                />
+              )}
+            </>
+          )}
+          {activeView === 'analytics' && <CrmAnalytics leads={filteredLeads} />}
         </>
       )}
     </div>

@@ -17,6 +17,13 @@ import {
   CircleCheck,
   Pencil,
   Trash2,
+  Video,
+  ExternalLink,
+  Users,
+  Search,
+  Download,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react'
 import {
   CRM_STATUSES,
@@ -24,13 +31,19 @@ import {
   PRACTICE_AREAS,
   getInitials,
   normalizeStatus,
+  filterLeadsBySearch,
   type CrmAssigneeRecord,
   type CrmLead,
   type CrmStatus,
 } from './data'
 import { STATUS_STYLES, STATUS_SWATCH, CRM_INPUT_CLASS, CRM_SELECT_CLASS, CRM_TEXTAREA_CLASS, CRM_NOTE_INPUT_CLASS } from './shared'
 import LeadActionables from './LeadActionables'
+import CrmAssigneeManager from './CrmAssigneeManager'
 import type { LeadPatch } from './data'
+import { downloadLeadsCsv } from '@/lib/crm-export'
+import { getBookableWeekdayDates } from '@/lib/booking-calendar'
+
+const PAGE_SIZE_OPTIONS = [10, 20, 50] as const
 
 type StatusFilter = 'all' | CrmStatus
 
@@ -146,6 +159,17 @@ interface EditLeadForm {
   time: string
 }
 
+function getRescheduleCalendarDates() {
+  return getBookableWeekdayDates(3)
+}
+
+function formatSlotDisplay(time24: string) {
+  const [hour, minute] = time24.split(':').map(Number)
+  const period = hour >= 12 ? 'PM' : 'AM'
+  const displayHour = hour > 12 ? hour - 12 : hour === 0 ? 12 : hour
+  return `${displayHour}:${minute.toString().padStart(2, '0')} ${period}`
+}
+
 function leadToEditForm(lead: CrmLead): EditLeadForm {
   return {
     first: lead.first,
@@ -166,18 +190,39 @@ export default function CrmLeads({
   loading: leadsLoading,
   assignees,
   onEnsureAssignee,
+  onDeleteAssignee,
   onPatchLead,
   onLeadAdded,
   onLeadDeleted,
+  onRescheduleLead,
+  searchQuery = '',
+  onSearchQueryChange,
+  drawerLeadId = null,
+  onDrawerLeadIdChange,
+  leadPool,
+  drawerOnly = false,
 }: {
   leads: CrmLead[]
   loading: boolean
   assignees: CrmAssigneeRecord[]
   onEnsureAssignee: (name: string) => Promise<void>
+  onDeleteAssignee: (id: string) => Promise<void>
   onPatchLead: (id: string, patch: LeadPatch) => Promise<CrmLead>
   onLeadAdded: (lead: CrmLead) => void
   onLeadDeleted: (id: string) => Promise<void>
+  onRescheduleLead: (
+    id: string,
+    date: string,
+    time: string
+  ) => Promise<{ lead: CrmLead; emailSent: boolean; emailError: string | null }>
+  searchQuery?: string
+  onSearchQueryChange?: (query: string) => void
+  drawerLeadId?: string | null
+  onDrawerLeadIdChange?: (id: string | null) => void
+  leadPool?: CrmLead[]
+  drawerOnly?: boolean
 }) {
+  const pool = leadPool ?? leads
   const knownAssignees = assignees.map((a) => a.name)
   const [addSubmitting, setAddSubmitting] = useState(false)
   const [addError, setAddError] = useState('')
@@ -193,15 +238,65 @@ export default function CrmLeads({
   const [editSubmitting, setEditSubmitting] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [deleteSubmitting, setDeleteSubmitting] = useState(false)
+  const [isRescheduling, setIsRescheduling] = useState(false)
+  const [rescheduleDate, setRescheduleDate] = useState('')
+  const [rescheduleTime, setRescheduleTime] = useState('')
+  const [availableSlots, setAvailableSlots] = useState<Array<{ time: string; available: boolean }>>([])
+  const [loadingSlots, setLoadingSlots] = useState(false)
+  const [rescheduleError, setRescheduleError] = useState('')
+  const [rescheduleSubmitting, setRescheduleSubmitting] = useState(false)
+  const [rescheduleNotice, setRescheduleNotice] = useState('')
+  const [showAssigneeManager, setShowAssigneeManager] = useState(false)
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState<number>(20)
 
-  const filteredLeads =
+  const rescheduleCalendarDates = getRescheduleCalendarDates()
+
+  const statusFiltered =
     filter === 'all' ? leads : leads.filter((l) => l.status === filter)
+
+  const filteredLeads = filterLeadsBySearch(statusFiltered, searchQuery)
+
+  const totalPages = Math.max(1, Math.ceil(filteredLeads.length / pageSize))
+  const safePage = Math.min(page, totalPages)
+  const pageStart = (safePage - 1) * pageSize
+  const paginatedLeads = filteredLeads.slice(pageStart, pageStart + pageSize)
+
+  useEffect(() => {
+    setPage(1)
+  }, [filter, searchQuery, leads.length, pageSize])
 
   useEffect(() => {
     if (!drawerLead) return
-    const current = leads.find((l) => l.id === drawerLead.id)
+    const current = pool.find((l) => l.id === drawerLead.id)
     if (current) setDrawerLead(current)
-  }, [leads, drawerLead?.id])
+  }, [pool, drawerLead?.id])
+
+  useEffect(() => {
+    if (!onDrawerLeadIdChange) return
+    if (drawerLeadId) {
+      const current = pool.find((l) => l.id === drawerLeadId)
+      if (current) {
+        setDrawerLead(current)
+        setNoteInput('')
+        setIsEditing(false)
+        setEditForm(null)
+        setEditError('')
+        setShowDeleteConfirm(false)
+        setIsRescheduling(false)
+        setRescheduleDate('')
+        setRescheduleTime('')
+        setRescheduleError('')
+        setRescheduleNotice('')
+      }
+    } else {
+      setDrawerLead(null)
+      setIsEditing(false)
+      setEditForm(null)
+      setShowDeleteConfirm(false)
+      setIsRescheduling(false)
+    }
+  }, [drawerLeadId, pool, onDrawerLeadIdChange])
 
   const updateLeadStatus = async (id: string, status: CrmStatus) => {
     try {
@@ -213,20 +308,125 @@ export default function CrmLeads({
   }
 
   const openDrawer = (lead: CrmLead) => {
-    const current = leads.find((l) => l.id === lead.id) || lead
-    setDrawerLead(current)
-    setNoteInput('')
-    setIsEditing(false)
-    setEditForm(null)
-    setEditError('')
-    setShowDeleteConfirm(false)
+    const current = pool.find((l) => l.id === lead.id) || lead
+    onDrawerLeadIdChange?.(current.id)
+    if (!onDrawerLeadIdChange) {
+      setDrawerLead(current)
+      setNoteInput('')
+      setIsEditing(false)
+      setEditForm(null)
+      setEditError('')
+      setShowDeleteConfirm(false)
+      setIsRescheduling(false)
+      setRescheduleDate('')
+      setRescheduleTime('')
+      setRescheduleError('')
+      setRescheduleNotice('')
+    }
   }
 
   const closeDrawer = () => {
-    setDrawerLead(null)
+    onDrawerLeadIdChange?.(null)
+    if (!onDrawerLeadIdChange) {
+      setDrawerLead(null)
+      setIsEditing(false)
+      setEditForm(null)
+      setShowDeleteConfirm(false)
+      setIsRescheduling(false)
+    }
+  }
+
+  const fetchAvailableSlots = async (date: string) => {
+    setLoadingSlots(true)
+    try {
+      const response = await fetch('/api/intake/check-availability', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ date }),
+      })
+      const data = await response.json()
+      if (data.success) {
+        setAvailableSlots(data.slots)
+      }
+    } catch (error) {
+      console.error('Failed to fetch slots:', error)
+      const slots: Array<{ time: string; available: boolean }> = []
+      for (let hour = 9; hour < 17; hour++) {
+        for (let min = 0; min < 60; min += 20) {
+          slots.push({
+            time: `${hour.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')}`,
+            available: true,
+          })
+        }
+      }
+      setAvailableSlots(slots)
+    } finally {
+      setLoadingSlots(false)
+    }
+  }
+
+  const startReschedule = () => {
+    if (!drawerLead) return
+    setIsRescheduling(true)
     setIsEditing(false)
-    setEditForm(null)
     setShowDeleteConfirm(false)
+    setRescheduleError('')
+    const prefilledDate = drawerLead.consultationDateIso || ''
+    const prefilledTime = drawerLead.consultationTime24 || ''
+    setRescheduleDate(prefilledDate)
+    setRescheduleTime(prefilledTime)
+    if (prefilledDate) {
+      fetchAvailableSlots(prefilledDate)
+    } else {
+      setAvailableSlots([])
+    }
+  }
+
+  const cancelReschedule = () => {
+    setIsRescheduling(false)
+    setRescheduleDate('')
+    setRescheduleTime('')
+    setRescheduleError('')
+    setAvailableSlots([])
+    setRescheduleNotice('')
+  }
+
+  const handleRescheduleDateSelect = (dateStr: string) => {
+    setRescheduleDate(dateStr)
+    setRescheduleTime('')
+    fetchAvailableSlots(dateStr)
+  }
+
+  const saveReschedule = async () => {
+    if (!drawerLead || !rescheduleDate || !rescheduleTime) {
+      setRescheduleError('Select a date and time slot.')
+      return
+    }
+
+    setRescheduleSubmitting(true)
+    setRescheduleError('')
+    setRescheduleNotice('')
+    try {
+      const { lead: updated, emailSent, emailError } = await onRescheduleLead(
+        drawerLead.id,
+        rescheduleDate,
+        rescheduleTime
+      )
+      setDrawerLead(updated)
+      setIsRescheduling(false)
+      setRescheduleDate('')
+      setRescheduleTime('')
+      setAvailableSlots([])
+      setRescheduleNotice(
+        emailSent
+          ? 'Consultation rescheduled. The client has been notified by email.'
+          : `Consultation rescheduled, but the notification email could not be sent${emailError ? ` (${emailError})` : ''}. Please contact the client directly.`
+      )
+    } catch (error) {
+      setRescheduleError(error instanceof Error ? error.message : 'Failed to reschedule')
+    } finally {
+      setRescheduleSubmitting(false)
+    }
   }
 
   const startEdit = () => {
@@ -401,6 +601,8 @@ export default function CrmLeads({
 
   return (
     <>
+      {!drawerOnly && (
+        <>
       <div className="flex flex-wrap items-center gap-2.5 mb-5">
         <div className="flex flex-wrap gap-1.5 flex-1">
           {FILTER_CHIPS.map((chip) => (
@@ -420,6 +622,19 @@ export default function CrmLeads({
         </div>
         <button
           type="button"
+          onClick={() => setShowAssigneeManager(true)}
+          className="inline-flex items-center gap-1.5 border border-[#e7e1d9] bg-white text-[#2a2724] rounded-full px-4 py-2 text-[13px] font-medium hover:border-[#7a1322] hover:text-[#7a1322] transition-colors"
+        >
+          <Users className="w-4 h-4" />
+          Assignees
+          {assignees.length > 0 && (
+            <span className="text-[11px] font-semibold bg-[#f6ecee] text-[#7a1322] px-1.5 py-0.5 rounded-full min-w-[20px] text-center">
+              {assignees.length}
+            </span>
+          )}
+        </button>
+        <button
+          type="button"
           onClick={() => {
             setForm(emptyForm)
             setFormError(false)
@@ -430,6 +645,38 @@ export default function CrmLeads({
         >
           <span className="text-[17px] leading-none font-semibold">+</span>
           Add prospect
+        </button>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2.5 mb-4">
+        <div className="flex items-center gap-2 bg-white border border-[#e7e1d9] rounded-full px-3.5 py-2 flex-1 min-w-[200px] max-w-md focus-within:border-[#7a1322] focus-within:ring-2 focus-within:ring-[#f6ecee]">
+          <Search className="w-4 h-4 text-[#736c63] flex-shrink-0" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => onSearchQueryChange?.(e.target.value)}
+            placeholder="Search name, email, matter…"
+            className="border-none bg-transparent text-[13.5px] text-[#2a2724] w-full focus:outline-none placeholder:text-[#736c63]"
+          />
+          {searchQuery.trim() && (
+            <button
+              type="button"
+              onClick={() => onSearchQueryChange?.('')}
+              className="text-[#736c63] hover:text-[#7a1322] flex-shrink-0"
+              aria-label="Clear search"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
+        <button
+          type="button"
+          onClick={() => downloadLeadsCsv(filteredLeads)}
+          disabled={filteredLeads.length === 0}
+          className="inline-flex items-center gap-1.5 border border-[#e7e1d9] bg-white text-[#2a2724] rounded-full px-4 py-2 text-[13px] font-medium hover:border-[#7a1322] hover:text-[#7a1322] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+        >
+          <Download className="w-4 h-4" />
+          Export CSV
         </button>
       </div>
 
@@ -458,11 +705,15 @@ export default function CrmLeads({
               ) : filteredLeads.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="px-4 py-12 text-center text-[#736c63] text-sm">
-                    No prospects yet. Use &quot;Add prospect&quot; to create one.
+                    {searchQuery.trim()
+                      ? `No leads match “${searchQuery.trim()}”.`
+                      : filter !== 'all'
+                      ? `No leads with status “${FILTER_CHIPS.find((c) => c.id === filter)?.label ?? filter}”.`
+                      : 'No prospects yet. Use "Add prospect" to create one.'}
                   </td>
                 </tr>
               ) : (
-              filteredLeads.map((lead) => (
+              paginatedLeads.map((lead) => (
                 <tr
                   key={lead.id}
                   onClick={() => openDrawer(lead)}
@@ -515,6 +766,55 @@ export default function CrmLeads({
             </tbody>
           </table>
         </div>
+        {!leadsLoading && filteredLeads.length > 0 && (
+          <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 border-t border-[#e7e1d9] bg-[#fbf9f6]">
+            <div className="flex flex-wrap items-center gap-4">
+              <p className="text-[12.5px] text-[#736c63]">
+                Showing {pageStart + 1}–{Math.min(pageStart + pageSize, filteredLeads.length)} of{' '}
+                {filteredLeads.length}
+                {searchQuery.trim() ? ` matching “${searchQuery.trim()}”` : ''}
+              </p>
+              <label className="flex items-center gap-2 text-[12.5px] text-[#736c63]">
+                Per page
+                <select
+                  value={pageSize}
+                  onChange={(e) => setPageSize(Number(e.target.value))}
+                  className="h-8 rounded-lg border border-[#e7e1d9] bg-white px-2 text-[12.5px] text-[#2a2724] focus:outline-none focus:border-[#7a1322]"
+                  aria-label="Leads per page"
+                >
+                  {PAGE_SIZE_OPTIONS.map((n) => (
+                    <option key={n} value={n}>
+                      {n}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={safePage <= 1}
+                className="w-8 h-8 rounded-lg border border-[#e7e1d9] bg-white flex items-center justify-center text-[#736c63] hover:border-[#7a1322] hover:text-[#7a1322] disabled:opacity-40 disabled:cursor-not-allowed"
+                aria-label="Previous page"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <span className="text-[12.5px] text-[#736c63] min-w-[88px] text-center">
+                Page {safePage} of {totalPages}
+              </span>
+              <button
+                type="button"
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                disabled={safePage >= totalPages}
+                className="w-8 h-8 rounded-lg border border-[#e7e1d9] bg-white flex items-center justify-center text-[#736c63] hover:border-[#7a1322] hover:text-[#7a1322] disabled:opacity-40 disabled:cursor-not-allowed"
+                aria-label="Next page"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Add prospect modal */}
@@ -695,6 +995,16 @@ export default function CrmLeads({
           </div>
         </div>
       )}
+        </>
+      )}
+
+      <CrmAssigneeManager
+        open={showAssigneeManager}
+        onClose={() => setShowAssigneeManager(false)}
+        assignees={assignees}
+        onAdd={onEnsureAssignee}
+        onDelete={onDeleteAssignee}
+      />
 
       {/* Lead detail drawer */}
       {drawerLead && (
@@ -937,31 +1247,142 @@ export default function CrmLeads({
                 </div>
               </section>
 
+              {rescheduleNotice && !isRescheduling && (
+                <div
+                  className={`rounded-[10px] p-3 text-[13px] ${
+                    rescheduleNotice.includes('notified by email')
+                      ? 'bg-[#f0f6f1] border border-[#86efac] text-[#166534]'
+                      : 'bg-[#fef3c7] border border-[#fcd34d] text-[#92400e]'
+                  }`}
+                >
+                  {rescheduleNotice}
+                </div>
+              )}
+
               <section>
                 <h4 className="text-[11px] uppercase tracking-widest text-[#736c63] font-semibold mb-2">
                   Consultation
                 </h4>
-                {[
-                  {
-                    icon: Calendar,
-                    label: 'Date',
-                    value: drawerLead.date === '—' ? 'Not booked yet' : drawerLead.date,
-                  },
-                  {
-                    icon: Clock,
-                    label: 'Time',
-                    value: drawerLead.time === '—' ? '—' : `${drawerLead.time} IST`,
-                  },
-                ].map(({ icon: Icon, label, value }) => (
-                  <div
-                    key={label}
-                    className="flex gap-2.5 py-2 text-[13.5px] border-b border-[#efebe4] last:border-b-0"
-                  >
-                    <Icon className="w-4 h-4 text-[#7a1322] flex-shrink-0 mt-0.5" />
-                    <span className="text-[#736c63] min-w-[74px]">{label}</span>
-                    <span className="text-[#1c1a18] font-medium">{value}</span>
+                {isRescheduling ? (
+                  <div className="bg-[#fbf9f6] border border-[#e7e1d9] rounded-[10px] p-4 space-y-4">
+                    <p className="text-[13px] font-medium text-[#1c1a18]">Pick a new date and time</p>
+                    <div className="grid grid-cols-4 sm:grid-cols-5 gap-1.5 max-h-[140px] overflow-y-auto">
+                      {rescheduleCalendarDates.map((date) => {
+                        const dateStr = date.toISOString().split('T')[0]
+                        const isSelected = rescheduleDate === dateStr
+                        return (
+                          <button
+                            key={dateStr}
+                            type="button"
+                            onClick={() => handleRescheduleDateSelect(dateStr)}
+                            className={`p-2 rounded-lg border text-center text-[11px] transition-colors ${
+                              isSelected
+                                ? 'border-[#7a1322] bg-[#f6ecee] text-[#7a1322] font-semibold'
+                                : 'border-[#e7e1d9] bg-white hover:border-[#7a1322]'
+                            }`}
+                          >
+                            <div className="font-medium">{date.toLocaleDateString('en-US', { weekday: 'short' })}</div>
+                            <div>{date.getDate()}</div>
+                          </button>
+                        )
+                      })}
+                    </div>
+                    {rescheduleDate && (
+                      <div>
+                        <p className="text-[12px] text-[#736c63] mb-2">
+                          Available slots {loadingSlots ? '(loading…)' : ''}
+                        </p>
+                        <div className="grid grid-cols-3 gap-1.5 max-h-[120px] overflow-y-auto">
+                          {availableSlots.map((slot) => {
+                            const isSelected = rescheduleTime === slot.time
+                            const isCurrentSlot =
+                              drawerLead.consultationDateIso === rescheduleDate &&
+                              drawerLead.consultationTime24 === slot.time
+                            const selectable = slot.available || isCurrentSlot
+                            return (
+                              <button
+                                key={slot.time}
+                                type="button"
+                                disabled={!selectable}
+                                onClick={() => selectable && setRescheduleTime(slot.time)}
+                                className={`p-2 rounded-lg border text-[11px] transition-colors ${
+                                  isSelected
+                                    ? 'border-[#7a1322] bg-[#7a1322] text-white font-medium'
+                                    : !selectable
+                                    ? 'border-[#e7e1d9] bg-[#f5f5f5] text-[#9ca3af] cursor-not-allowed'
+                                    : 'border-[#e7e1d9] bg-white hover:border-[#7a1322]'
+                                }`}
+                              >
+                                {formatSlotDisplay(slot.time)}
+                              </button>
+                            )
+                          })}
+                        </div>
+                      </div>
+                    )}
+                    {rescheduleError && (
+                      <p className="text-[12px] text-[#7a1322] font-medium">{rescheduleError}</p>
+                    )}
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={saveReschedule}
+                        disabled={rescheduleSubmitting || !rescheduleDate || !rescheduleTime}
+                        className="inline-flex items-center gap-2 px-4 py-2 text-[13px] font-medium text-white rounded-full bg-gradient-to-br from-[#7a1322] to-[#5c0e1a] disabled:opacity-50"
+                      >
+                        <Check className="w-4 h-4" />
+                        {rescheduleSubmitting ? 'Saving…' : 'Confirm reschedule'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={cancelReschedule}
+                        disabled={rescheduleSubmitting}
+                        className="px-4 py-2 text-[13px] font-medium border border-[#e7e1d9] rounded-full bg-white"
+                      >
+                        Cancel
+                      </button>
+                    </div>
                   </div>
-                ))}
+                ) : (
+                  <>
+                    {[
+                      {
+                        icon: Calendar,
+                        label: 'Date',
+                        value: drawerLead.date === '—' ? 'Not booked yet' : drawerLead.date,
+                      },
+                      {
+                        icon: Clock,
+                        label: 'Time',
+                        value: drawerLead.time === '—' ? '—' : `${drawerLead.time} IST`,
+                      },
+                    ].map(({ icon: Icon, label, value }) => (
+                      <div
+                        key={label}
+                        className="flex gap-2.5 py-2 text-[13.5px] border-b border-[#efebe4] last:border-b-0"
+                      >
+                        <Icon className="w-4 h-4 text-[#7a1322] flex-shrink-0 mt-0.5" />
+                        <span className="text-[#736c63] min-w-[74px]">{label}</span>
+                        <span className="text-[#1c1a18] font-medium">{value}</span>
+                      </div>
+                    ))}
+                    {drawerLead.googleMeetLink && drawerLead.date !== '—' && (
+                      <div className="flex gap-2.5 py-2 text-[13.5px]">
+                        <Video className="w-4 h-4 text-[#7a1322] flex-shrink-0 mt-0.5" />
+                        <span className="text-[#736c63] min-w-[74px]">Meet</span>
+                        <a
+                          href={drawerLead.googleMeetLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-[#7a1322] font-medium hover:underline inline-flex items-center gap-1 min-w-0"
+                        >
+                          <span className="truncate">Join Google Meet</span>
+                          <ExternalLink className="w-3.5 h-3.5 flex-shrink-0" />
+                        </a>
+                      </div>
+                    )}
+                  </>
+                )}
               </section>
 
               <section>
@@ -1075,7 +1496,7 @@ export default function CrmLeads({
               )}
             </div>
 
-            {!isEditing && (
+            {!isEditing && !isRescheduling && (
             <div className="p-4 border-t border-[#e7e1d9] flex gap-2.5 bg-[#fbf9f6]">
               <button
                 type="button"
@@ -1087,6 +1508,7 @@ export default function CrmLeads({
               </button>
               <button
                 type="button"
+                onClick={startReschedule}
                 className="inline-flex items-center gap-2 px-5 py-3 text-[13.5px] font-medium border border-[#e7e1d9] rounded-full bg-white hover:border-[#7a1322] hover:text-[#7a1322]"
               >
                 <Calendar className="w-4 h-4" />

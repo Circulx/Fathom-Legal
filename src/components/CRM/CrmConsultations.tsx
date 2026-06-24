@@ -3,11 +3,10 @@
 import { useMemo, useState } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import type { CrmLead } from './data'
-
-const MONTH_MAP: Record<string, number> = {
-  Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5,
-  Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11,
-}
+import {
+  leadConsultationMatchesDay,
+  parseTimeToMinutes,
+} from '@/lib/crm-consultation-dates'
 
 const CARD_THEMES = {
   maroon: {
@@ -27,26 +26,6 @@ function getMondayOfWeek(date: Date): Date {
   d.setDate(d.getDate() + diff)
   d.setHours(0, 0, 0, 0)
   return d
-}
-
-function parseLeadDate(dateStr: string, referenceYear: number): Date | null {
-  if (dateStr === '—') return null
-  const match = dateStr.match(/^[A-Za-z]{3},\s+([A-Za-z]{3})\s+(\d+)$/)
-  if (!match) return null
-  const month = MONTH_MAP[match[1]]
-  if (month === undefined) return null
-  return new Date(referenceYear, month, parseInt(match[2], 10))
-}
-
-function parseTimeToMinutes(timeStr: string): number {
-  const match = timeStr.match(/^(\d+):(\d+)\s*(AM|PM)$/i)
-  if (!match) return 0
-  let hours = parseInt(match[1], 10)
-  const minutes = parseInt(match[2], 10)
-  const period = match[3].toUpperCase()
-  if (period === 'PM' && hours !== 12) hours += 12
-  if (period === 'AM' && hours === 12) hours = 0
-  return hours * 60 + minutes
 }
 
 function isSameDay(a: Date, b: Date): boolean {
@@ -72,22 +51,36 @@ function getCardTheme(lead: CrmLead): keyof typeof CARD_THEMES {
   return lead.areas[0] === 'Startup & funding' ? 'green' : 'maroon'
 }
 
-function ConsultationCard({ lead }: { lead: CrmLead }) {
+function ConsultationCard({
+  lead,
+  onClick,
+}: {
+  lead: CrmLead
+  onClick: () => void
+}) {
   const theme = CARD_THEMES[getCardTheme(lead)]
   return (
-    <div
-      className={`rounded-[10px] border border-[#efebe4] border-l-[3px] ${theme.bg} ${theme.border} px-3 py-2.5`}
+    <button
+      type="button"
+      onClick={onClick}
+      className={`w-full text-left rounded-[10px] border border-[#efebe4] border-l-[3px] ${theme.bg} ${theme.border} px-3 py-2.5 hover:shadow-sm hover:border-[#7a1322]/30 transition-all cursor-pointer`}
     >
       <div className="text-[11px] font-medium text-[#736c63] mb-1">{lead.time}</div>
       <div className="text-[13px] font-medium text-[#1c1a18] leading-snug">
         {lead.first} {lead.last}
       </div>
       <div className="text-[11.5px] text-[#736c63] mt-0.5 truncate">{lead.areas[0]}</div>
-    </div>
+    </button>
   )
 }
 
-export default function CrmConsultations({ leads }: { leads: CrmLead[] }) {
+export default function CrmConsultations({
+  leads,
+  onLeadClick,
+}: {
+  leads: CrmLead[]
+  onLeadClick: (lead: CrmLead) => void
+}) {
   const today = useMemo(() => {
     const d = new Date()
     d.setHours(0, 0, 0, 0)
@@ -105,18 +98,14 @@ export default function CrmConsultations({ leads }: { leads: CrmLead[] }) {
   }, [weekStart])
 
   const consultationsByDay = useMemo(() => {
-    const year = weekStart.getFullYear()
     const scheduled = leads.filter((l) => l.date !== '—')
 
     return weekDays.map((day) =>
       scheduled
-        .filter((lead) => {
-          const leadDate = parseLeadDate(lead.date, year)
-          return leadDate && isSameDay(leadDate, day)
-        })
+        .filter((lead) => leadConsultationMatchesDay(lead, day))
         .sort((a, b) => parseTimeToMinutes(a.time) - parseTimeToMinutes(b.time))
     )
-  }, [weekDays, weekStart, leads])
+  }, [weekDays, leads])
 
   const isCurrentWeek = weekDays.some((day) => isSameDay(day, today))
   const weekLabel = isCurrentWeek
@@ -193,7 +182,11 @@ export default function CrmConsultations({ leads }: { leads: CrmLead[] }) {
             className="px-2.5 py-3 border-r border-[#efebe4] last:border-r-0 space-y-2.5"
           >
             {consultationsByDay[i].map((lead) => (
-              <ConsultationCard key={lead.id} lead={lead} />
+              <ConsultationCard
+                key={lead.id}
+                lead={lead}
+                onClick={() => onLeadClick(lead)}
+              />
             ))}
           </div>
         ))}

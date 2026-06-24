@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { ChevronRight, Building2, Zap, Coins, FileText, Gavel, Lightbulb, CheckCircle, AlertCircle, Calendar, Clock, ChevronLeft, ChevronRight as ChevronRightIcon, Video } from 'lucide-react'
 import { Navbar } from '@/components/Navbar/index'
 import Footer from '@/components/Footer'
+import { getBookableWeekdayDates } from '@/lib/booking-calendar'
 
 interface FormData {
   selectedServices: string[]
@@ -121,24 +122,7 @@ const isStep2Valid =
     setLoadingSlots(false)
   }
 
-  // Get calendar dates (30 days from today)
-  const getCalendarDates = () => {
-    const dates = []
-    const today = new Date()
-    for (let i = 1; i <= 30; i++) {
-      const date = new Date(today)
-      date.setDate(today.getDate() + i)
-      const dayOfWeek = date.getDay()
-      
-      // Only include weekdays
-      if (dayOfWeek !== 0 && dayOfWeek !== 6) {
-        dates.push(new Date(date))
-      }
-    }
-    return dates
-  }
-  
-  const calendarDates = getCalendarDates()
+  const calendarDates = getBookableWeekdayDates(3)
 
   // Handle date selection
   const handleDateSelection = (date: Date) => {
@@ -297,9 +281,24 @@ const isStep2Valid =
       })
 
       if (!dbResponse.ok) {
-        setError('Failed to save scheduling. Please try again.')
+        const errData = await dbResponse.json().catch(() => ({}))
+        setError(errData.error || 'Failed to save scheduling. Please try again.')
         setIsLoading(false)
         return
+      }
+
+      // Mark intake complete and sync lead to admin CRM
+      try {
+        const step4Response = await fetch('/api/intake/step4', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sessionId }),
+        })
+        if (!step4Response.ok) {
+          console.error('CRM sync failed after booking')
+        }
+      } catch (syncErr) {
+        console.error('Step 4 / CRM sync error:', syncErr)
       }
 
       // Send confirmation email via Gmail
@@ -688,7 +687,9 @@ const isStep2Valid =
                   )
                 })}
               </div>
-              <p className="text-xs text-gray-500 mt-4">Only weekdays are available. Select a date to view time slots.</p>
+              <p className="text-xs text-gray-500 mt-4">
+                Weekdays only, up to 3 months ahead. Select a date to view time slots.
+              </p>
             </div>
 
             {/* Time Slot Selection with Availability */}

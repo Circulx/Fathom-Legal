@@ -46,6 +46,9 @@ export interface CrmLead {
   matter: string
   date: string
   time: string
+  consultationDateIso?: string
+  consultationTime24?: string
+  googleMeetLink?: string
   status: CrmStatus
   ago: string
   createdAt: string
@@ -97,4 +100,32 @@ export function normalizeStatus(status: string): CrmStatus {
     return status as CrmStatus
   }
   return 'prospect'
+}
+
+export function filterLeadsBySearch(leads: CrmLead[], query: string): CrmLead[] {
+  const trimmed = query.trim().toLowerCase()
+  if (!trimmed) return leads
+
+  const terms = trimmed.split(/\s+/).filter(Boolean)
+
+  return leads.filter((lead) => {
+    const haystack = [
+      lead.first,
+      lead.last,
+      `${lead.first} ${lead.last}`,
+      lead.email,
+      lead.phone,
+      lead.company,
+      lead.source,
+      lead.matter,
+      lead.date,
+      lead.time,
+      ...lead.areas,
+      CRM_STATUSES[lead.status],
+    ]
+      .join(' ')
+      .toLowerCase()
+
+    return terms.every((term) => haystack.includes(term))
+  })
 }

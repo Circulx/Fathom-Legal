@@ -203,10 +203,10 @@ export const Navbar = ({ page }) => {
 
             <Link
               href="/fathom-crm"
-              className="text-white px-6 py-2 rounded-lg hover:opacity-90 transition-all font-bold"
+              className="text-white px-3 py-1 rounded-lg hover:opacity-90 transition-all font-bold"
               style={{ backgroundColor: "#A5292A" }}
             >
-              Fathom-CRM
+              Book a Call
             </Link>
           </nav>
 
@@ -401,7 +401,7 @@ export const Navbar = ({ page }) => {
               </Link>
 
               <Link
-                className="block px-3 py-2 font-bold text-white rounded my-2"
+                className="block px-2 py-1 font-bold text-white rounded my-2"
                 style={{ backgroundColor: "#A5292A" }}
                 href="/fathom-crm"
                 onClick={() => setIsMenuOpen(false)}
@@ -411,7 +411,7 @@ export const Navbar = ({ page }) => {
             </div>
           </div>
         )}
-      </div>
+      </div> 
     </header>
   );
 };

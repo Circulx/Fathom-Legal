@@ -65,25 +65,87 @@ export default function ClientIntakePage() {
   
   const timeSlots = generateTimeSlots()
 
-  // Get next 5 working days (excluding weekends)
-  const getAvailableDates = () => {
-    const dates = []
-    const today = new Date()
-    let current = new Date(today)
-    
-    while (dates.length < 5) {
-      current.setDate(current.getDate() + 1)
-      const dayOfWeek = current.getDay()
-      
-      if (dayOfWeek !== 0 && dayOfWeek !== 6) { // Exclude Sunday (0) and Saturday (6)
-        dates.push(new Date(current))
+  // State for slot availability
+  const [availableSlots, setAvailableSlots] = useState<Array<{ time: string; available: boolean }>>([])
+  const [loadingSlots, setLoadingSlots] = useState(false)
+
+
+
+
+// Add these validation helpers at the top of the component (after useState declarations)
+const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+const phoneRegex = /^\+?[\d\s\-().]{7,15}$/
+
+const isEmailValid = emailRegex.test(formData.email)
+const isPhoneValid = phoneRegex.test(formData.phone)
+
+const isStep2Valid =
+  !!formData.firstName &&
+  !!formData.lastName &&
+  isEmailValid &&
+  isPhoneValid
+
+
+
+
+
+
+
+
+
+  // Fetch available slots for selected date
+  const fetchAvailableSlots = async (date: string) => {
+    setLoadingSlots(true)
+    try {
+      const response = await fetch('/api/intake/check-availability', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ date })
+      })
+      const data = await response.json()
+      if (data.success) {
+        setAvailableSlots(data.slots)
       }
+    } catch (err) {
+      console.error('[v0] Error fetching slots:', err)
+      // Fallback: show all slots as available
+      const slots: Array<{ time: string; available: boolean }> = []
+      for (let hour = 9; hour < 17; hour++) {
+        for (let min = 0; min < 60; min += 20) {
+          const timeStr = `${hour.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')}`
+          slots.push({ time: timeStr, available: true })
+        }
+      }
+      setAvailableSlots(slots)
     }
-    
-    return dates
+    setLoadingSlots(false)
   }
 
-  const availableDates = getAvailableDates()
+  // Get calendar dates (30 days from today)
+  const getCalendarDates = () => {
+    const dates = []
+    const today = new Date()
+    for (let i = 1; i <= 30; i++) {
+      const date = new Date(today)
+      date.setDate(today.getDate() + i)
+      const dayOfWeek = date.getDay()
+      
+      // Only include weekdays
+      if (dayOfWeek !== 0 && dayOfWeek !== 6) {
+        dates.push(new Date(date))
+      }
+    }
+    return dates
+  }
+  
+  const calendarDates = getCalendarDates()
+
+  // Handle date selection
+  const handleDateSelection = (date: Date) => {
+    const dateStr = date.toISOString().split('T')[0]
+    setSchedulingData(prev => ({ ...prev, selectedDate: dateStr, selectedTime: '' }))
+    fetchAvailableSlots(dateStr)
+  }
 
   // Initialize session
   useEffect(() => {
@@ -407,127 +469,161 @@ export default function ClientIntakePage() {
   )
 
   const renderStep2 = () => (
-    <div className="max-w-3xl mx-auto px-4 py-8">
-      <div className="text-right mb-8">
-        <span className="text-sm font-semibold text-gray-600">STEP 2 OF 4</span>
+  <div className="max-w-3xl mx-auto px-4 py-8">
+    <div className="text-right mb-8">
+      <span className="text-sm font-semibold text-gray-600">STEP 2 OF 4</span>
+    </div>
+
+    {renderProgressBar()}
+
+    <h1 className="text-4xl font-bold mb-2 text-gray-900">Your details</h1>
+    <p className="text-gray-600 mb-8">
+      We'll use this to confirm your booking and send your meeting details. Everything you share is kept confidential.
+    </p>
+
+    {error && (
+      <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 flex items-center gap-2">
+        <AlertCircle className="w-5 h-5" />
+        {error}
       </div>
+    )}
 
-      {renderProgressBar()}
-
-      <h1 className="text-4xl font-bold mb-2 text-gray-900">Your details</h1>
-      <p className="text-gray-600 mb-8">
-        We'll use this to confirm your booking and send your meeting details. Everything you share is kept confidential.
-      </p>
-
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 flex items-center gap-2">
-          <AlertCircle className="w-5 h-5" />
-          {error}
-        </div>
-      )}
-
-      <div className="space-y-6 mb-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-semibold text-gray-900 mb-2">First name *</label>
-            <input
-              type="text"
-              value={formData.firstName}
-              onChange={(e) => setFormData(prev => ({ ...prev, firstName: e.target.value }))}
-              placeholder="Jane"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#A5292A] focus:ring-1 focus:ring-[#A5292A]"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-semibold text-gray-900 mb-2">Last name *</label>
-            <input
-              type="text"
-              value={formData.lastName}
-              onChange={(e) => setFormData(prev => ({ ...prev, lastName: e.target.value }))}
-              placeholder="Smith"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#A5292A] focus:ring-1 focus:ring-[#A5292A]"
-            />
-          </div>
-        </div>
-
+    <div className="space-y-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-semibold text-gray-900 mb-2">Email address *</label>
+          <label className="block text-sm font-semibold text-gray-900 mb-2">First name *</label>
           <input
-            type="email"
-            value={formData.email}
-            onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-            placeholder="jane@example.com"
+            type="text"
+            value={formData.firstName}
+            onChange={(e) => setFormData(prev => ({ ...prev, firstName: e.target.value }))}
+            placeholder="Jane"
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#A5292A] focus:ring-1 focus:ring-[#A5292A]"
           />
         </div>
-
         <div>
-          <label className="block text-sm font-semibold text-gray-900 mb-2">Phone number *</label>
+          <label className="block text-sm font-semibold text-gray-900 mb-2">Last name *</label>
           <input
-            type="tel"
-            value={formData.phone}
-            onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
-            placeholder="+91 98765 43210"
+            type="text"
+            value={formData.lastName}
+            onChange={(e) => setFormData(prev => ({ ...prev, lastName: e.target.value }))}
+            placeholder="Smith"
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#A5292A] focus:ring-1 focus:ring-[#A5292A]"
-          />
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-semibold text-gray-900 mb-2">Company / Organisation</label>
-            <input
-              type="text"
-              value={formData.company}
-              onChange={(e) => setFormData(prev => ({ ...prev, company: e.target.value }))}
-              placeholder="Acme Corp (optional)"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#A5292A] focus:ring-1 focus:ring-[#A5292A]"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-semibold text-gray-900 mb-2">How did you hear about us?</label>
-            <select
-              value={formData.heardAbout}
-              onChange={(e) => setFormData(prev => ({ ...prev, heardAbout: e.target.value }))}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#A5292A] focus:ring-1 focus:ring-[#A5292A]"
-            >
-              <option value="">Select...</option>
-              <option value="google">Google Search</option>
-              <option value="referral">Referral</option>
-              <option value="social">Social Media</option>
-              <option value="other">Other</option>
-            </select>
-          </div>
-        </div>
-
-        <div>
-          <label className="block text-sm font-semibold text-gray-900 mb-2">Brief description of your matter</label>
-          <textarea
-            value={formData.matterDescription}
-            onChange={(e) => setFormData(prev => ({ ...prev, matterDescription: e.target.value }))}
-            placeholder="Briefly describe the legal matter you need help with..."
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#A5292A] focus:ring-1 focus:ring-[#A5292A] resize-none"
-            rows={4}
           />
         </div>
       </div>
 
-      <div className="flex items-center justify-between gap-4">
-        <button
-          onClick={() => setCurrentStep(1)}
-          className="text-[#A5292A] font-semibold hover:underline"
-        >
-          ← Back
-        </button>
-        <button
-          onClick={handleStep2Continue}
-          disabled={isLoading}
-          className="px-8 py-3 bg-[#A5292A] text-white rounded-full font-semibold hover:bg-[#8a2123] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-        >
-          Continue →
-        </button>
+      {/* Email field with inline validation */}
+      <div>
+        <label className="block text-sm font-semibold text-gray-900 mb-2">Email address *</label>
+        <input
+          type="email"
+          value={formData.email}
+          onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+          placeholder="jane@example.com"
+          className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-1 transition-colors ${
+            formData.email && !isEmailValid
+              ? 'border-red-400 focus:border-red-400 focus:ring-red-400 bg-red-50'
+              : 'border-gray-300 focus:border-[#A5292A] focus:ring-[#A5292A]'
+          }`}
+        />
+        {formData.email && !isEmailValid && (
+          <div className="flex items-center gap-1.5 mt-1.5 text-red-600 text-sm">
+            <AlertCircle className="w-4 h-4 flex-shrink-0" />
+            Please enter a valid email address (e.g. jane@example.com)
+          </div>
+        )}
+        {formData.email && isEmailValid && (
+          <div className="flex items-center gap-1.5 mt-1.5 text-green-600 text-sm">
+            <CheckCircle className="w-4 h-4 flex-shrink-0" />
+            Valid email
+          </div>
+        )}
+      </div>
+
+      {/* Phone field with inline validation */}
+      <div>
+        <label className="block text-sm font-semibold text-gray-900 mb-2">Phone number *</label>
+        <input
+          type="tel"
+          value={formData.phone}
+          onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
+          placeholder="+91 98765 43210"
+          className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-1 transition-colors ${
+            formData.phone && !isPhoneValid
+              ? 'border-red-400 focus:border-red-400 focus:ring-red-400 bg-red-50'
+              : 'border-gray-300 focus:border-[#A5292A] focus:ring-[#A5292A]'
+          }`}
+        />
+        {formData.phone && !isPhoneValid && (
+          <div className="flex items-center gap-1.5 mt-1.5 text-red-600 text-sm">
+            <AlertCircle className="w-4 h-4 flex-shrink-0" />
+            Enter a valid phone number (7–15 digits, e.g. +91 98765 43210)
+          </div>
+        )}
+        {formData.phone && isPhoneValid && (
+          <div className="flex items-center gap-1.5 mt-1.5 text-green-600 text-sm">
+            <CheckCircle className="w-4 h-4 flex-shrink-0" />
+            Valid phone number
+          </div>
+        )}
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-semibold text-gray-900 mb-2">Company / Organisation</label>
+          <input
+            type="text"
+            value={formData.company}
+            onChange={(e) => setFormData(prev => ({ ...prev, company: e.target.value }))}
+            placeholder="Acme Corp (optional)"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#A5292A] focus:ring-1 focus:ring-[#A5292A]"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-semibold text-gray-900 mb-2">How did you hear about us?</label>
+          <select
+            value={formData.heardAbout}
+            onChange={(e) => setFormData(prev => ({ ...prev, heardAbout: e.target.value }))}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#A5292A] focus:ring-1 focus:ring-[#A5292A]"
+          >
+            <option value="">Select...</option>
+            <option value="google">Google Search</option>
+            <option value="referral">Referral</option>
+            <option value="social">Social Media</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+      </div>
+
+      <div>
+        <label className="block text-sm font-semibold text-gray-900 mb-2">Brief description of your matter</label>
+        <textarea
+          value={formData.matterDescription}
+          onChange={(e) => setFormData(prev => ({ ...prev, matterDescription: e.target.value }))}
+          placeholder="Briefly describe the legal matter you need help with..."
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#A5292A] focus:ring-1 focus:ring-[#A5292A] resize-none"
+          rows={4}
+        />
       </div>
     </div>
-  )
+
+    <div className="flex items-center justify-between gap-4">
+      <button
+        onClick={() => setCurrentStep(1)}
+        className="text-[#A5292A] font-semibold hover:underline"
+      >
+        ← Back
+      </button>
+      <button
+        onClick={handleStep2Continue}
+        disabled={isLoading || !isStep2Valid}
+        className="px-8 py-3 bg-[#A5292A] text-white rounded-full font-semibold hover:bg-[#8a2123] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+      >
+        Continue →
+      </button>
+    </div>
+  </div>
+)
 
   const renderStep3 = () => (
       <div className="max-w-3xl mx-auto px-4 py-8">
@@ -569,48 +665,71 @@ export default function ClientIntakePage() {
               Select a date and time
             </label>
 
-            {/* Date Selection */}
+            {/* Date Selection - Full Calendar */}
             <div className="border border-gray-200 rounded-lg p-6 mb-6 bg-white">
-              <h3 className="font-semibold text-gray-900 mb-4">Available Dates</h3>
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-                {availableDates.map((date) => (
-                  <button
-                    key={date.toISOString()}
-                    onClick={() => {
-                      setSchedulingData(prev => ({ ...prev, selectedDate: date.toISOString().split('T')[0], selectedTime: '' }))
-                    }}
-                    className={`p-3 rounded-lg border-2 font-medium transition-all ${
-                      schedulingData.selectedDate === date.toISOString().split('T')[0]
-                        ? 'border-[#A5292A] bg-[#A5292A]/10 text-[#A5292A]'
-                        : 'border-gray-200 bg-white text-gray-900 hover:border-gray-300'
-                    }`}
-                  >
-                    <div className="text-xs">{date.toLocaleDateString('en-US', { weekday: 'short' })}</div>
-                    <div className="text-sm">{date.getDate()}</div>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Time Slot Selection */}
-            {schedulingData.selectedDate && (
-              <div className="border border-gray-200 rounded-lg p-6 bg-white mb-6">
-                <h3 className="font-semibold text-gray-900 mb-4">Available Time Slots (20 min)</h3>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  {timeSlots.map((time) => (
+              <h3 className="font-semibold text-gray-900 mb-4">Select a Date</h3>
+              <div className="grid grid-cols-3 md:grid-cols-7 gap-2">
+                {calendarDates.map((date) => {
+                  const dateStr = date.toISOString().split('T')[0]
+                  const isSelected = schedulingData.selectedDate === dateStr
+                  return (
                     <button
-                      key={time}
-                      onClick={() => setSchedulingData(prev => ({ ...prev, selectedTime: time }))}
-                      className={`p-3 rounded-lg border-2 font-medium transition-all ${
-                        schedulingData.selectedTime === time
-                          ? 'border-[#A5292A] bg-[#A5292A]/10 text-[#A5292A]'
-                          : 'border-gray-200 bg-white text-gray-900 hover:border-gray-300'
+                      key={dateStr}
+                      onClick={() => handleDateSelection(date)}
+                      className={`p-3 rounded-lg border-2 font-medium transition-all text-center ${
+                        isSelected
+                          ? 'border-[#A5292A] bg-[#A5292A] text-white'
+                          : 'border-gray-200 bg-white text-gray-900 hover:border-[#A5292A]'
                       }`}
                     >
-                      {time}
+                      <div className="text-xs mb-1">{date.toLocaleDateString('en-US', { weekday: 'short' })}</div>
+                      <div className="text-sm font-bold">{date.getDate()}</div>
                     </button>
-                  ))}
-                </div>
+                  )
+                })}
+              </div>
+              <p className="text-xs text-gray-500 mt-4">Only weekdays are available. Select a date to view time slots.</p>
+            </div>
+
+            {/* Time Slot Selection with Availability */}
+            {schedulingData.selectedDate && (
+              <div className="border border-gray-200 rounded-lg p-6 bg-white mb-6">
+                <h3 className="font-semibold text-gray-900 mb-4">
+                  Available Time Slots (20 minutes each) {loadingSlots && '...'}
+                </h3>
+                {loadingSlots ? (
+                  <p className="text-gray-500">Loading available slots...</p>
+                ) : (
+                  <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
+                    {availableSlots.map((slot) => {
+                      const isSelected = schedulingData.selectedTime === slot.time
+                      // Convert 24-hour format to 12-hour for display
+                      const [hour, minute] = slot.time.split(':').map(Number)
+                      const period = hour >= 12 ? 'PM' : 'AM'
+                      const displayHour = hour > 12 ? hour - 12 : (hour === 0 ? 12 : hour)
+                      const displayTime = `${displayHour}:${minute.toString().padStart(2, '0')} ${period}`
+                      
+                      return (
+                        <button
+                          key={slot.time}
+                          onClick={() => slot.available && setSchedulingData(prev => ({ ...prev, selectedTime: slot.time }))}
+                          disabled={!slot.available}
+                          className={`p-3 rounded-lg border-2 font-medium transition-all text-center ${
+                            isSelected && slot.available
+                              ? 'border-[#A5292A] bg-[#A5292A] text-white'
+                              : !slot.available
+                              ? 'border-gray-300 bg-gray-100 text-gray-400 cursor-not-allowed'
+                              : 'border-gray-200 bg-white text-gray-900 hover:border-[#A5292A]'
+                          }`}
+                          title={!slot.available ? 'This slot is booked' : ''}
+                        >
+                          <div className="text-xs">{displayTime}</div>
+                          {!slot.available && <div className="text-xs mt-1">✕ Booked</div>}
+                        </button>
+                      )
+                    })}
+                  </div>
+                )}
               </div>
             )}
 

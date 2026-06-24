@@ -30,7 +30,9 @@ export interface CrmActionable {
   assignee: string
 }
 
-export const TEAM_MEMBERS = ['Ishita Sharma', 'Rahul Verma', 'Unassigned']
+export const UNASSIGNED_ASSIGNEE = 'Unassigned'
+
+export type CrmAssigneeRecord = { id: string; name: string }
 
 export interface CrmLead {
   id: string
@@ -55,6 +57,14 @@ export type LeadPatch = {
   status?: CrmStatus
   note?: string
   actionables?: CrmActionable[]
+  first?: string
+  last?: string
+  email?: string
+  phone?: string
+  company?: string
+  source?: string
+  areas?: string[]
+  matter?: string
   date?: string
   time?: string
 }

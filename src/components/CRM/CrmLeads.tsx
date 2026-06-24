@@ -15,6 +15,8 @@ import {
   Inbox,
   FileText,
   CircleCheck,
+  Pencil,
+  Trash2,
 } from 'lucide-react'
 import {
   CRM_STATUSES,
@@ -22,6 +24,7 @@ import {
   PRACTICE_AREAS,
   getInitials,
   normalizeStatus,
+  type CrmAssigneeRecord,
   type CrmLead,
   type CrmStatus,
 } from './data'
@@ -130,17 +133,52 @@ const emptyForm: AddProspectForm = {
   matter: '',
 }
 
+interface EditLeadForm {
+  first: string
+  last: string
+  email: string
+  phone: string
+  company: string
+  source: string
+  areas: string[]
+  matter: string
+  date: string
+  time: string
+}
+
+function leadToEditForm(lead: CrmLead): EditLeadForm {
+  return {
+    first: lead.first,
+    last: lead.last,
+    email: lead.email,
+    phone: lead.phone === '—' ? '' : lead.phone,
+    company: lead.company === '—' ? '' : lead.company,
+    source: lead.source,
+    areas: [...lead.areas],
+    matter: lead.matter === '—' ? '' : lead.matter,
+    date: lead.date === '—' ? '' : lead.date,
+    time: lead.time === '—' ? '' : lead.time,
+  }
+}
+
 export default function CrmLeads({
   leads,
   loading: leadsLoading,
+  assignees,
+  onEnsureAssignee,
   onPatchLead,
   onLeadAdded,
+  onLeadDeleted,
 }: {
   leads: CrmLead[]
   loading: boolean
+  assignees: CrmAssigneeRecord[]
+  onEnsureAssignee: (name: string) => Promise<void>
   onPatchLead: (id: string, patch: LeadPatch) => Promise<CrmLead>
   onLeadAdded: (lead: CrmLead) => void
+  onLeadDeleted: (id: string) => Promise<void>
 }) {
+  const knownAssignees = assignees.map((a) => a.name)
   const [addSubmitting, setAddSubmitting] = useState(false)
   const [addError, setAddError] = useState('')
   const [filter, setFilter] = useState<StatusFilter>('all')
@@ -149,6 +187,12 @@ export default function CrmLeads({
   const [formError, setFormError] = useState(false)
   const [drawerLead, setDrawerLead] = useState<CrmLead | null>(null)
   const [noteInput, setNoteInput] = useState('')
+  const [isEditing, setIsEditing] = useState(false)
+  const [editForm, setEditForm] = useState<EditLeadForm | null>(null)
+  const [editError, setEditError] = useState('')
+  const [editSubmitting, setEditSubmitting] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [deleteSubmitting, setDeleteSubmitting] = useState(false)
 
   const filteredLeads =
     filter === 'all' ? leads : leads.filter((l) => l.status === filter)
@@ -172,9 +216,91 @@ export default function CrmLeads({
     const current = leads.find((l) => l.id === lead.id) || lead
     setDrawerLead(current)
     setNoteInput('')
+    setIsEditing(false)
+    setEditForm(null)
+    setEditError('')
+    setShowDeleteConfirm(false)
   }
 
-  const closeDrawer = () => setDrawerLead(null)
+  const closeDrawer = () => {
+    setDrawerLead(null)
+    setIsEditing(false)
+    setEditForm(null)
+    setShowDeleteConfirm(false)
+  }
+
+  const startEdit = () => {
+    if (!drawerLead) return
+    setEditForm(leadToEditForm(drawerLead))
+    setEditError('')
+    setIsEditing(true)
+    setShowDeleteConfirm(false)
+  }
+
+  const cancelEdit = () => {
+    setIsEditing(false)
+    setEditForm(null)
+    setEditError('')
+  }
+
+  const saveEdit = async () => {
+    if (!drawerLead || !editForm) return
+    const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!editForm.first.trim() || !editForm.last.trim() || !emailRe.test(editForm.email.trim())) {
+      setEditError('Enter a first name, last name, and valid email.')
+      return
+    }
+
+    setEditSubmitting(true)
+    setEditError('')
+    try {
+      const updated = await onPatchLead(drawerLead.id, {
+        first: editForm.first.trim(),
+        last: editForm.last.trim(),
+        email: editForm.email.trim(),
+        phone: editForm.phone.trim(),
+        company: editForm.company.trim(),
+        source: editForm.source,
+        areas: editForm.areas.length > 0 ? editForm.areas : ['Corporate advisory'],
+        matter: editForm.matter.trim(),
+        date: editForm.date.trim() || '—',
+        time: editForm.time.trim() || '—',
+      })
+      setDrawerLead(updated)
+      setIsEditing(false)
+      setEditForm(null)
+    } catch (error) {
+      setEditError(error instanceof Error ? error.message : 'Failed to save changes')
+    } finally {
+      setEditSubmitting(false)
+    }
+  }
+
+  const handleDeleteLead = async () => {
+    if (!drawerLead) return
+    setDeleteSubmitting(true)
+    try {
+      await onLeadDeleted(drawerLead.id)
+      closeDrawer()
+    } catch (error) {
+      console.error('Failed to delete lead:', error)
+      setDeleteSubmitting(false)
+    }
+  }
+
+  const toggleEditArea = (area: string) => {
+    if (!editForm) return
+    setEditForm((prev) =>
+      prev
+        ? {
+            ...prev,
+            areas: prev.areas.includes(area)
+              ? prev.areas.filter((a) => a !== area)
+              : [...prev.areas, area],
+          }
+        : prev
+    )
+  }
 
   const openEmailClient = (lead: CrmLead) => {
     const subject = 'Re: Your enquiry with Fathom Legal'
@@ -579,13 +705,25 @@ export default function CrmLeads({
           />
           <aside className="fixed top-0 right-0 bottom-0 w-[440px] max-w-[92vw] bg-[#fbf9f6] text-[#2a2724] [color-scheme:light] z-[60] flex flex-col shadow-2xl">
             <div className="bg-gradient-to-br from-[#7a1322] to-[#5c0e1a] text-white p-6 relative">
-              <button
-                type="button"
-                onClick={closeDrawer}
-                className="absolute top-5 right-5 w-8 h-8 rounded-full bg-white/15 flex items-center justify-center hover:bg-white/25"
-              >
-                <X className="w-4 h-4" />
-              </button>
+              <div className="absolute top-5 right-5 flex items-center gap-2">
+                {!isEditing && (
+                  <button
+                    type="button"
+                    onClick={startEdit}
+                    className="w-8 h-8 rounded-full bg-white/15 flex items-center justify-center hover:bg-white/25"
+                    title="Edit lead"
+                  >
+                    <Pencil className="w-4 h-4" />
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={closeDrawer}
+                  className="w-8 h-8 rounded-full bg-white/15 flex items-center justify-center hover:bg-white/25"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
               <div className="w-[54px] h-[54px] rounded-full bg-white/18 border border-white/30 flex items-center justify-center text-lg font-semibold mb-3">
                 {getInitials(drawerLead.first, drawerLead.last)}
               </div>
@@ -600,6 +738,159 @@ export default function CrmLeads({
             </div>
 
             <div className="flex-1 overflow-y-auto p-5 space-y-5">
+              {isEditing && editForm ? (
+                <section className="space-y-4">
+                  <h4 className="text-[11px] uppercase tracking-widest text-[#736c63] font-semibold">
+                    Edit lead details
+                  </h4>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-[12.5px] font-medium text-[#1c1a18] mb-1.5">
+                        First name *
+                      </label>
+                      <input
+                        value={editForm.first}
+                        onChange={(e) => setEditForm((p) => p && { ...p, first: e.target.value })}
+                        className={CRM_INPUT_CLASS}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[12.5px] font-medium text-[#1c1a18] mb-1.5">
+                        Last name *
+                      </label>
+                      <input
+                        value={editForm.last}
+                        onChange={(e) => setEditForm((p) => p && { ...p, last: e.target.value })}
+                        className={CRM_INPUT_CLASS}
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-[12.5px] font-medium text-[#1c1a18] mb-1.5">
+                      Email *
+                    </label>
+                    <input
+                      type="email"
+                      value={editForm.email}
+                      onChange={(e) => setEditForm((p) => p && { ...p, email: e.target.value })}
+                      className={CRM_INPUT_CLASS}
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-[12.5px] font-medium text-[#1c1a18] mb-1.5">Phone</label>
+                      <input
+                        value={editForm.phone}
+                        onChange={(e) => setEditForm((p) => p && { ...p, phone: e.target.value })}
+                        className={CRM_INPUT_CLASS}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[12.5px] font-medium text-[#1c1a18] mb-1.5">
+                        Company
+                      </label>
+                      <input
+                        value={editForm.company}
+                        onChange={(e) => setEditForm((p) => p && { ...p, company: e.target.value })}
+                        className={CRM_INPUT_CLASS}
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-[12.5px] font-medium text-[#1c1a18] mb-1.5">Source</label>
+                    <select
+                      value={editForm.source}
+                      onChange={(e) => setEditForm((p) => p && { ...p, source: e.target.value })}
+                      className={CRM_SELECT_CLASS}
+                    >
+                      {LEAD_SOURCE_OPTIONS.map((s) => (
+                        <option key={s} value={s}>
+                          {s}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[12.5px] font-medium text-[#1c1a18] mb-1.5">
+                      Practice areas
+                    </label>
+                    <div className="flex flex-wrap gap-1.5">
+                      {PRACTICE_AREAS.map((area) => (
+                        <button
+                          key={area}
+                          type="button"
+                          onClick={() => toggleEditArea(area)}
+                          className={`text-xs border rounded-full px-3 py-1.5 transition-colors ${
+                            editForm.areas.includes(area)
+                              ? 'bg-[#f6ecee] text-[#7a1322] border-[#7a1322] font-medium'
+                              : 'bg-white text-[#736c63] border-[#e7e1d9] hover:border-[#7a1322]'
+                          }`}
+                        >
+                          {area}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-[12.5px] font-medium text-[#1c1a18] mb-1.5">
+                      Matter description
+                    </label>
+                    <textarea
+                      value={editForm.matter}
+                      onChange={(e) => setEditForm((p) => p && { ...p, matter: e.target.value })}
+                      rows={3}
+                      className={CRM_TEXTAREA_CLASS}
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-[12.5px] font-medium text-[#1c1a18] mb-1.5">
+                        Consultation date
+                      </label>
+                      <input
+                        value={editForm.date}
+                        onChange={(e) => setEditForm((p) => p && { ...p, date: e.target.value })}
+                        placeholder="e.g. Wed, Jul 1"
+                        className={CRM_INPUT_CLASS}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[12.5px] font-medium text-[#1c1a18] mb-1.5">
+                        Consultation time
+                      </label>
+                      <input
+                        value={editForm.time}
+                        onChange={(e) => setEditForm((p) => p && { ...p, time: e.target.value })}
+                        placeholder="e.g. 10:00 AM"
+                        className={CRM_INPUT_CLASS}
+                      />
+                    </div>
+                  </div>
+                  {editError && (
+                    <p className="text-[12px] text-[#7a1322] font-medium">{editError}</p>
+                  )}
+                  <div className="flex gap-2 pt-1">
+                    <button
+                      type="button"
+                      onClick={saveEdit}
+                      disabled={editSubmitting}
+                      className="inline-flex items-center gap-2 px-4 py-2.5 text-[13px] font-medium text-white rounded-full bg-gradient-to-br from-[#7a1322] to-[#5c0e1a] disabled:opacity-50"
+                    >
+                      <Check className="w-4 h-4" />
+                      {editSubmitting ? 'Saving…' : 'Save changes'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={cancelEdit}
+                      disabled={editSubmitting}
+                      className="px-4 py-2.5 text-[13px] font-medium border border-[#e7e1d9] rounded-full bg-white hover:border-[#7a1322] hover:text-[#7a1322]"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </section>
+              ) : (
+                <>
               <section>
                 <h4 className="text-[11px] uppercase tracking-widest text-[#736c63] font-semibold mb-2">
                   Contact
@@ -697,6 +988,8 @@ export default function CrmLeads({
 
               <LeadActionables
                 actionables={drawerLead.actionables}
+                knownAssignees={knownAssignees}
+                onEnsureAssignee={onEnsureAssignee}
                 onChange={updateActionables}
               />
 
@@ -740,8 +1033,49 @@ export default function CrmLeads({
                   </button>
                 </div>
               </section>
+
+              <section className="pt-2 border-t border-[#efebe4]">
+                {!showDeleteConfirm ? (
+                  <button
+                    type="button"
+                    onClick={() => setShowDeleteConfirm(true)}
+                    className="inline-flex items-center gap-2 text-[13px] font-medium text-[#7a1322] hover:text-[#5c0e1a]"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    Delete lead
+                  </button>
+                ) : (
+                  <div className="bg-[#fdf5f6] border border-[#e7e1d9] rounded-[10px] p-4">
+                    <p className="text-[13px] text-[#2a2724] mb-3">
+                      Delete {drawerLead.first} {drawerLead.last}? This cannot be undone.
+                    </p>
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={handleDeleteLead}
+                        disabled={deleteSubmitting}
+                        className="inline-flex items-center gap-2 px-4 py-2 text-[13px] font-medium text-white rounded-full bg-[#7a1322] hover:bg-[#5c0e1a] disabled:opacity-50"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                        {deleteSubmitting ? 'Deleting…' : 'Yes, delete'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setShowDeleteConfirm(false)}
+                        disabled={deleteSubmitting}
+                        className="px-4 py-2 text-[13px] font-medium border border-[#e7e1d9] rounded-full bg-white"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </section>
+                </>
+              )}
             </div>
 
+            {!isEditing && (
             <div className="p-4 border-t border-[#e7e1d9] flex gap-2.5 bg-[#fbf9f6]">
               <button
                 type="button"
@@ -759,6 +1093,7 @@ export default function CrmLeads({
                 Reschedule
               </button>
             </div>
+            )}
           </aside>
         </>
       )}

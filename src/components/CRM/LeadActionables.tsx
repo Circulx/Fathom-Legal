@@ -1,35 +1,79 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Plus, Trash2, User } from 'lucide-react'
-import { TEAM_MEMBERS, type CrmActionable } from './data'
+import { UNASSIGNED_ASSIGNEE, type CrmActionable } from './data'
 
 interface LeadActionablesProps {
   actionables: CrmActionable[]
+  knownAssignees: string[]
   onChange: (actionables: CrmActionable[]) => void
+  onEnsureAssignee?: (name: string) => Promise<void>
 }
 
-export default function LeadActionables({ actionables, onChange }: LeadActionablesProps) {
+function buildAssigneeSuggestions(knownAssignees: string[], actionables: CrmActionable[]) {
+  const names = new Set<string>()
+  for (const name of knownAssignees) {
+    if (name && name !== UNASSIGNED_ASSIGNEE) names.add(name)
+  }
+  for (const task of actionables) {
+    if (task.assignee && task.assignee !== UNASSIGNED_ASSIGNEE) {
+      names.add(task.assignee)
+    }
+  }
+  return Array.from(names).sort((a, b) => a.localeCompare(b))
+}
+
+function toAssigneeInputValue(assignee: string) {
+  return assignee === UNASSIGNED_ASSIGNEE ? '' : assignee
+}
+
+function fromAssigneeInputValue(value: string) {
+  const trimmed = value.trim()
+  return trimmed || UNASSIGNED_ASSIGNEE
+}
+
+export default function LeadActionables({
+  actionables,
+  knownAssignees,
+  onChange,
+  onEnsureAssignee,
+}: LeadActionablesProps) {
   const [newTask, setNewTask] = useState('')
-  const [newAssignee, setNewAssignee] = useState('Unassigned')
+  const [newAssignee, setNewAssignee] = useState('')
+
+  const assigneeSuggestions = useMemo(
+    () => buildAssigneeSuggestions(knownAssignees, actionables),
+    [knownAssignees, actionables]
+  )
 
   const completedCount = actionables.filter((a) => a.completed).length
   const totalCount = actionables.length
 
-  const addTask = () => {
+  const persistAssignee = async (raw: string) => {
+    const name = raw.trim()
+    if (!name || name === UNASSIGNED_ASSIGNEE) return
+    await onEnsureAssignee?.(name)
+  }
+
+  const addTask = async () => {
     const text = newTask.trim()
     if (!text) return
+    const assignee = fromAssigneeInputValue(newAssignee)
+    if (assignee !== UNASSIGNED_ASSIGNEE) {
+      await persistAssignee(newAssignee)
+    }
     onChange([
       ...actionables,
       {
         id: `task-${Date.now()}`,
         text,
         completed: false,
-        assignee: newAssignee,
+        assignee,
       },
     ])
     setNewTask('')
-    setNewAssignee('Unassigned')
+    setNewAssignee('')
   }
 
   const toggleTask = (id: string) => {
@@ -42,12 +86,19 @@ export default function LeadActionables({ actionables, onChange }: LeadActionabl
     onChange(actionables.filter((a) => a.id !== id))
   }
 
-  const updateAssignee = (id: string, assignee: string) => {
+  const updateAssignee = (id: string, raw: string) => {
+    const assignee = fromAssigneeInputValue(raw)
     onChange(actionables.map((a) => (a.id === id ? { ...a, assignee } : a)))
   }
 
   return (
     <section>
+      <datalist id="crm-assignee-suggestions">
+        {assigneeSuggestions.map((name) => (
+          <option key={name} value={name} />
+        ))}
+      </datalist>
+
       <div className="flex items-center mb-3">
         <h4 className="text-[11px] uppercase tracking-widest text-[#736c63] font-semibold">
           Actionables
@@ -92,19 +143,17 @@ export default function LeadActionables({ actionables, onChange }: LeadActionabl
               </p>
               <div className="flex items-center gap-2 mt-1">
                 <User className="w-3 h-3 text-[#9a9289] flex-shrink-0" />
-                <select
-                  value={task.assignee}
+                <input
+                  type="text"
+                  list="crm-assignee-suggestions"
+                  value={toAssigneeInputValue(task.assignee)}
                   onChange={(e) => updateAssignee(task.id, e.target.value)}
-                  className={`text-[11.5px] bg-transparent border-none p-0 focus:outline-none focus:ring-0 cursor-pointer ${
-                    task.assignee === 'Unassigned' ? 'text-[#9a9289]' : 'text-[#736c63]'
+                  onBlur={(e) => void persistAssignee(e.target.value)}
+                  placeholder="Assign to…"
+                  className={`flex-1 min-w-0 text-[11.5px] bg-transparent border-none p-0 focus:outline-none focus:ring-0 placeholder:text-[#9a9289] ${
+                    task.assignee === UNASSIGNED_ASSIGNEE ? 'text-[#9a9289]' : 'text-[#736c63]'
                   }`}
-                >
-                  {TEAM_MEMBERS.map((member) => (
-                    <option key={member} value={member}>
-                      {member}
-                    </option>
-                  ))}
-                </select>
+                />
               </div>
             </div>
 
@@ -120,34 +169,33 @@ export default function LeadActionables({ actionables, onChange }: LeadActionabl
         ))}
       </div>
 
-      <div className="flex gap-2 mt-3">
+      <div className="flex flex-col gap-2 mt-3">
         <input
           value={newTask}
           onChange={(e) => setNewTask(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && addTask()}
+          onKeyDown={(e) => e.key === 'Enter' && void addTask()}
           placeholder="Add a task…"
-          className="flex-1 min-w-0 border border-[#e7e1d9] rounded-full px-4 py-2 text-[13px] bg-white text-[#1c1a18] placeholder:text-[#9ca3af] focus:outline-none focus:border-[#7a1322]"
+          className="w-full border border-[#e7e1d9] rounded-full px-4 py-2 text-[13px] bg-white text-[#1c1a18] placeholder:text-[#9ca3af] focus:outline-none focus:border-[#7a1322]"
         />
-        <select
-          value={newAssignee}
-          onChange={(e) => setNewAssignee(e.target.value)}
-          className="border border-[#e7e1d9] rounded-full px-3 py-2 text-[12.5px] bg-white text-[#736c63] focus:outline-none focus:border-[#7a1322] max-w-[130px]"
-        >
-          {TEAM_MEMBERS.map((member) => (
-            <option key={member} value={member}>
-              {member === 'Unassigned' ? 'Assign to…' : member}
-            </option>
-          ))}
-        </select>
-        <button
-          type="button"
-          onClick={addTask}
-          disabled={!newTask.trim()}
-          className="w-9 h-9 rounded-full bg-[#7a1322] text-white flex items-center justify-center flex-shrink-0 disabled:opacity-40 hover:bg-[#5c0e1a] transition-colors"
-          aria-label="Add task"
-        >
-          <Plus className="w-4 h-4" />
-        </button>
+        <div className="flex gap-2">
+          <input
+            value={newAssignee}
+            onChange={(e) => setNewAssignee(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && void addTask()}
+            list="crm-assignee-suggestions"
+            placeholder="Assign to…"
+            className="flex-1 min-w-0 border border-[#e7e1d9] rounded-full px-4 py-2 text-[13px] bg-white text-[#1c1a18] placeholder:text-[#9ca3af] focus:outline-none focus:border-[#7a1322]"
+          />
+          <button
+            type="button"
+            onClick={() => void addTask()}
+            disabled={!newTask.trim()}
+            className="w-9 h-9 rounded-full bg-[#7a1322] text-white flex items-center justify-center flex-shrink-0 disabled:opacity-40 hover:bg-[#5c0e1a] transition-colors"
+            aria-label="Add task"
+          >
+            <Plus className="w-4 h-4" />
+          </button>
+        </div>
       </div>
     </section>
   )

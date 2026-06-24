@@ -13,7 +13,7 @@ import {
   FolderOpen,
   Archive,
 } from 'lucide-react'
-import { getInitials, normalizeStatus, type CrmLead, type LeadPatch } from './data'
+import { getInitials, normalizeStatus, UNASSIGNED_ASSIGNEE, type CrmAssigneeRecord, type CrmLead, type LeadPatch } from './data'
 import { StatusBadge } from './shared'
 import CrmLeads from './CrmLeads'
 import CrmConsultations from './CrmConsultations'
@@ -237,6 +237,18 @@ export default function CrmSection({ activeView, onNavigate, onLeadsCountChange 
   const { title, subtitle } = VIEW_TITLES[activeView]
   const [leads, setLeads] = useState<CrmLead[]>([])
   const [leadsLoading, setLeadsLoading] = useState(true)
+  const [assignees, setAssignees] = useState<CrmAssigneeRecord[]>([])
+
+  const fetchAssignees = useCallback(async () => {
+    try {
+      const response = await fetch('/api/admin/assignees')
+      if (!response.ok) return
+      const data = await response.json()
+      setAssignees(data.assignees ?? [])
+    } catch (error) {
+      console.error('Error fetching assignees:', error)
+    }
+  }, [])
 
   const fetchLeads = useCallback(async () => {
     try {
@@ -251,19 +263,47 @@ export default function CrmSection({ activeView, onNavigate, onLeadsCountChange 
         createdAt: lead.createdAt ?? new Date().toISOString(),
       }))
       setLeads(loaded)
-      onLeadsCountChange?.(loaded.length)
     } catch (error) {
       console.error('Error fetching leads:', error)
       setLeads([])
-      onLeadsCountChange?.(0)
     } finally {
       setLeadsLoading(false)
     }
-  }, [onLeadsCountChange])
+  }, [])
 
   useEffect(() => {
     fetchLeads()
-  }, [fetchLeads])
+    fetchAssignees()
+  }, [fetchLeads, fetchAssignees])
+
+  const addAssignee = useCallback(async (name: string) => {
+    const trimmed = name.trim()
+    if (!trimmed || trimmed.toLowerCase() === UNASSIGNED_ASSIGNEE.toLowerCase()) return
+
+    const exists = assignees.some(
+      (assignee) => assignee.name.toLowerCase() === trimmed.toLowerCase()
+    )
+    if (exists) return
+
+    const response = await fetch('/api/admin/assignees', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: trimmed }),
+    })
+    const data = await response.json().catch(() => ({}))
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to add assignee')
+    }
+    setAssignees((prev) =>
+      [...prev, data.assignee].sort((a, b) => a.name.localeCompare(b.name))
+    )
+  }, [assignees])
+
+  useEffect(() => {
+    if (!leadsLoading) {
+      onLeadsCountChange?.(leads.length)
+    }
+  }, [leads.length, leadsLoading, onLeadsCountChange])
 
   const patchLead = useCallback(async (id: string, patch: LeadPatch) => {
     const response = await fetch(`/api/admin/leads/${id}`, {
@@ -285,16 +325,18 @@ export default function CrmSection({ activeView, onNavigate, onLeadsCountChange 
     return updated
   }, [])
 
-  const addLeadToList = useCallback(
-    (lead: CrmLead) => {
-      setLeads((prev) => {
-        const next = [lead, ...prev]
-        onLeadsCountChange?.(next.length)
-        return next
-      })
-    },
-    [onLeadsCountChange]
-  )
+  const addLeadToList = useCallback((lead: CrmLead) => {
+    setLeads((prev) => [lead, ...prev])
+  }, [])
+
+  const deleteLead = useCallback(async (id: string) => {
+    const response = await fetch(`/api/admin/leads/${id}`, { method: 'DELETE' })
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({}))
+      throw new Error(data.error || 'Failed to delete lead')
+    }
+    setLeads((prev) => prev.filter((l) => l.id !== id))
+  }, [])
 
   return (
     <div className="bg-[#fbf9f6] text-[#2a2724] [color-scheme:light] -mx-4 sm:-mx-6 lg:-mx-8 -my-8 px-4 sm:px-6 lg:px-8 py-8 min-h-[calc(100vh-5rem)]">
@@ -331,8 +373,11 @@ export default function CrmSection({ activeView, onNavigate, onLeadsCountChange 
             <CrmLeads
               leads={leads}
               loading={leadsLoading}
+              assignees={assignees}
+              onEnsureAssignee={addAssignee}
               onPatchLead={patchLead}
               onLeadAdded={addLeadToList}
+              onLeadDeleted={deleteLead}
             />
           )}
           {activeView === 'consultations' && <CrmConsultations leads={leads} />}

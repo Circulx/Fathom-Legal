@@ -44,6 +44,89 @@ export async function PATCH(
 
     const body = await request.json()
     const now = new Date()
+    let detailsUpdated = false
+
+    if (body.first !== undefined) {
+      const first = body.first?.trim()
+      if (!first) {
+        return NextResponse.json({ error: 'First name is required' }, { status: 400 })
+      }
+      if (first !== lead.first) {
+        lead.first = first
+        detailsUpdated = true
+      }
+    }
+
+    if (body.last !== undefined) {
+      const last = body.last?.trim()
+      if (!last) {
+        return NextResponse.json({ error: 'Last name is required' }, { status: 400 })
+      }
+      if (last !== lead.last) {
+        lead.last = last
+        detailsUpdated = true
+      }
+    }
+
+    if (body.email !== undefined) {
+      const email = body.email?.trim().toLowerCase()
+      const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+      if (!email || !emailRe.test(email)) {
+        return NextResponse.json({ error: 'A valid email is required' }, { status: 400 })
+      }
+      if (email !== lead.email) {
+        lead.email = email
+        detailsUpdated = true
+      }
+    }
+
+    if (body.phone !== undefined) {
+      const phone = body.phone?.trim() || '—'
+      if (phone !== lead.phone) {
+        lead.phone = phone
+        detailsUpdated = true
+      }
+    }
+
+    if (body.company !== undefined) {
+      const company = body.company?.trim() || '—'
+      if (company !== lead.company) {
+        lead.company = company
+        detailsUpdated = true
+      }
+    }
+
+    if (body.source !== undefined) {
+      const source = body.source?.trim()
+      if (!source) {
+        return NextResponse.json({ error: 'Source is required' }, { status: 400 })
+      }
+      if (source !== lead.source) {
+        lead.source = source
+        detailsUpdated = true
+      }
+    }
+
+    if (body.areas !== undefined) {
+      const areas =
+        Array.isArray(body.areas) && body.areas.length > 0
+          ? body.areas.map((a: string) => a.trim()).filter(Boolean)
+          : ['Corporate advisory']
+      const prev = JSON.stringify(lead.areas)
+      const next = JSON.stringify(areas)
+      if (prev !== next) {
+        lead.areas = areas
+        detailsUpdated = true
+      }
+    }
+
+    if (body.matter !== undefined) {
+      const matter = body.matter?.trim() || '—'
+      if (matter !== lead.matter) {
+        lead.matter = matter
+        detailsUpdated = true
+      }
+    }
 
     if (body.status !== undefined) {
       if (!VALID_STATUSES.includes(body.status)) {
@@ -72,11 +155,27 @@ export async function PATCH(
     }
 
     if (body.date !== undefined) {
-      lead.date = body.date
+      const date = body.date?.trim() || '—'
+      if (date !== lead.date) {
+        lead.date = date
+        detailsUpdated = true
+      }
     }
 
     if (body.time !== undefined) {
-      lead.time = body.time
+      const time = body.time?.trim() || '—'
+      if (time !== lead.time) {
+        lead.time = time
+        detailsUpdated = true
+      }
+    }
+
+    if (detailsUpdated) {
+      lead.timeline.push({
+        icon: 'file',
+        text: 'Lead details updated',
+        when: formatTimelineWhen(now),
+      })
     }
 
     await lead.save()
@@ -84,6 +183,31 @@ export async function PATCH(
     return NextResponse.json({ lead: leadDocToCrmLead(lead) })
   } catch (error) {
     console.error('Update lead error:', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
+}
+
+export async function DELETE(
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const session = await requireAdmin()
+    if (!session) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const { id } = await params
+    await connectDB()
+
+    const lead = await Lead.findByIdAndDelete(id)
+    if (!lead) {
+      return NextResponse.json({ error: 'Lead not found' }, { status: 404 })
+    }
+
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error('Delete lead error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

@@ -333,23 +333,43 @@ export async function POST(request: NextRequest) {
     </html>
     `
 
-    // Send email
-    await transporter.sendMail({
-      from: gmailUser,
-      to: email,
-      subject: `Consultation Confirmed - ${formattedDate} at ${selectedTime} IST | Fathom Legal`,
-      html: emailHTML,
-      replyTo: gmailUser
-    })
+    // Send email with error handling
+    let emailSent = false
+    let emailError = null
+    
+    try {
+      await transporter.sendMail({
+        from: gmailUser,
+        to: email,
+        subject: `Consultation Confirmed - ${formattedDate} at ${selectedTime} IST | Fathom Legal`,
+        html: emailHTML,
+        replyTo: gmailUser
+      })
+      emailSent = true
+    } catch (emailErr) {
+      emailError = emailErr instanceof Error ? emailErr.message : 'Unknown email error'
+      console.error('Email sending failed:', emailError)
+      // Continue - email failure should not block confirmation
+    }
 
+    // Always return success even if email fails, as the booking is confirmed in DB
     return NextResponse.json({
       success: true,
-      message: 'Confirmation email sent successfully'
+      emailSent: emailSent,
+      emailError: emailError || null,
+      message: emailSent 
+        ? 'Confirmation email sent successfully' 
+        : 'Booking confirmed but email failed to send. Check your spam folder or request resend.'
+    }, {
+      status: 200
     })
   } catch (error) {
-    console.error('Error sending email:', error)
+    console.error('Error in email route:', error)
     return NextResponse.json(
-      { error: 'Failed to send email' },
+      { 
+        error: 'Failed to process request',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      },
       { status: 500 }
     )
   }

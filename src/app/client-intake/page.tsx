@@ -241,30 +241,40 @@ export default function ClientIntakePage() {
       }
 
       // Send confirmation email via Gmail
-      const emailResponse = await fetch('/api/intake/send-email', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: schedulingData.confirmedEmail,
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          selectedDate: schedulingData.selectedDate,
-          selectedTime: schedulingData.selectedTime,
-          matter: formData.selectedServices.join(', '),
-          googleMeetLink: googleMeetLink,
-          sessionId
+      let emailSent = false
+      try {
+        const emailResponse = await fetch('/api/intake/send-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: schedulingData.confirmedEmail,
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            selectedDate: schedulingData.selectedDate,
+            selectedTime: schedulingData.selectedTime,
+            matter: formData.selectedServices.join(', '),
+            googleMeetLink: googleMeetLink,
+            sessionId
+          })
         })
-      })
 
-      if (emailResponse.ok) {
-        setSuccessMessage('Confirmation email sent successfully!')
-        setSchedulingData(updatedSchedulingData)
-        setCurrentStep(4)
-      } else {
-        // Even if email fails, meeting is scheduled. Move to confirmation.
-        setSchedulingData(updatedSchedulingData)
-        setCurrentStep(4)
+        const emailData = await emailResponse.json()
+        if (emailData.emailSent) {
+          setSuccessMessage('Confirmation email sent to ' + schedulingData.confirmedEmail)
+          emailSent = true
+        } else if (emailResponse.ok) {
+          // Email service configured but send failed
+          console.warn('Email send failed:', emailData.emailError)
+          setSuccessMessage('Booking confirmed! Email delivery may be delayed.')
+        }
+      } catch (emailErr) {
+        console.error('Email API error:', emailErr)
+        setSuccessMessage('Booking confirmed! Please check spam folder for confirmation email.')
       }
+
+      // Always move to confirmation - booking is saved in DB regardless of email status
+      setSchedulingData(updatedSchedulingData)
+      setCurrentStep(4)
     } catch (err) {
       setError('An error occurred. Please try again.')
       console.error('Error:', err)
@@ -654,138 +664,142 @@ export default function ClientIntakePage() {
   )
 
   const renderStep4 = () => (
-    <div className="max-w-3xl mx-auto px-4 py-8">
+    <div className="max-w-2xl mx-auto px-4 py-8">
       <div className="text-right mb-8">
-        <span className="text-sm font-semibold text-gray-600">CONFIRMED</span>
+        <span className="text-sm font-semibold text-green-600">CONFIRMED</span>
       </div>
 
       {renderProgressBar()}
 
-      <div className="bg-[#A5292A] text-white rounded-lg p-12 mb-12 text-center">
-        <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-6">
-          <CheckCircle className="w-12 h-12 text-white" />
+      {/* Main Confirmation Card */}
+      <div className="bg-white rounded-2xl shadow-lg overflow-hidden mb-8 border border-gray-100">
+        {/* Success Header */}
+        <div className="bg-gradient-to-r from-[#A5292A] to-[#8a2123] text-white p-8 text-center">
+          <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
+            <CheckCircle className="w-10 h-10 text-white" />
+          </div>
+          <h1 className="text-3xl font-bold mb-2">Consultation Confirmed</h1>
+          <p className="text-[#A5292A]/90 text-sm font-medium">Your meeting is scheduled and ready</p>
         </div>
-        <h1 className="text-4xl font-bold mb-2">Your consultation is booked</h1>
-        <p className="text-[#A5292A]/80">A confirmation has been sent to {schedulingData.confirmedEmail}</p>
-      </div>
 
-      {/* Google Meet Link - Prominent */}
-      <div className="bg-gradient-to-r from-blue-50 to-blue-100 border-2 border-blue-300 rounded-lg p-8 mb-8">
-        <h2 className="text-lg font-bold text-blue-900 mb-4 flex items-center gap-2">
-          <Video className="w-6 h-6" />
-          Google Meet Meeting Link
-        </h2>
-        <a
-          href={schedulingData.googleMeetLink}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="block w-full px-6 py-3 bg-blue-600 text-white text-center rounded-lg font-semibold hover:bg-blue-700 transition-colors mb-3"
-        >
-          Join Google Meet Now
-        </a>
-        <p className="text-sm text-blue-800 break-all font-mono bg-white/50 p-2 rounded">
-          {schedulingData.googleMeetLink}
-        </p>
-      </div>
-
-      {/* Booking Details */}
-      <div className="bg-white rounded-lg border border-gray-200 p-8 mb-8">
-        <h2 className="text-xl font-bold text-gray-900 mb-6">Booking Details</h2>
-        
-        <div className="space-y-4">
-          <div className="flex items-center justify-between pb-4 border-b border-gray-200">
-            <span className="text-gray-600 font-medium">Name</span>
-            <span className="text-gray-900 font-semibold">{formData.firstName} {formData.lastName}</span>
+        {/* Content Grid */}
+        <div className="p-8">
+          {/* Google Meet Section */}
+          <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 mb-8 border border-blue-200">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                <Video className="w-6 h-6 text-white" />
+              </div>
+              <h2 className="text-lg font-bold text-blue-900">Google Meet Link</h2>
+            </div>
+            <a
+              href={schedulingData.googleMeetLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block w-full px-6 py-3 bg-blue-600 text-white text-center rounded-lg font-semibold hover:bg-blue-700 transition-all duration-200 mb-3 cursor-pointer"
+            >
+              Join Meeting
+            </a>
+            <p className="text-xs text-blue-800 break-all font-mono bg-white/60 p-3 rounded-lg border border-blue-200">
+              {schedulingData.googleMeetLink}
+            </p>
           </div>
 
-          <div className="flex items-center justify-between pb-4 border-b border-gray-200">
-            <span className="text-gray-600 font-medium">Date</span>
-            <span className="text-gray-900 font-semibold">
-              {new Date(schedulingData.selectedDate).toLocaleDateString('en-US', {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-              })}
-            </span>
+          {/* Booking Details Grid */}
+          <div className="mb-8">
+            <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4">Appointment Details</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <p className="text-xs text-gray-600 font-semibold uppercase mb-1">Name</p>
+                <p className="text-sm font-bold text-gray-900">{formData.firstName} {formData.lastName}</p>
+              </div>
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <p className="text-xs text-gray-600 font-semibold uppercase mb-1">Email</p>
+                <p className="text-sm font-bold text-gray-900 break-all">{schedulingData.confirmedEmail}</p>
+              </div>
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <p className="text-xs text-gray-600 font-semibold uppercase mb-1">Date</p>
+                <p className="text-sm font-bold text-gray-900">
+                  {new Date(schedulingData.selectedDate).toLocaleDateString('en-US', {
+                    weekday: 'short',
+                    month: 'short',
+                    day: 'numeric'
+                  })}
+                </p>
+              </div>
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <p className="text-xs text-gray-600 font-semibold uppercase mb-1">Time</p>
+                <p className="text-sm font-bold text-gray-900">{schedulingData.selectedTime} IST</p>
+              </div>
+              <div className="bg-gray-50 p-4 rounded-lg col-span-2">
+                <p className="text-xs text-gray-600 font-semibold uppercase mb-1">Services</p>
+                <p className="text-sm font-bold text-gray-900">{formData.selectedServices.join(', ')}</p>
+              </div>
+            </div>
           </div>
 
-          <div className="flex items-center justify-between pb-4 border-b border-gray-200">
-            <span className="text-gray-600 font-medium">Time</span>
-            <span className="text-gray-900 font-semibold">{schedulingData.selectedTime} IST</span>
+          {/* Divider */}
+          <div className="border-t border-gray-200 my-8"></div>
+
+          {/* Pre-Consultation Checklist */}
+          <div className="mb-8">
+            <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4 flex items-center gap-2">
+              <Clock className="w-4 h-4 text-[#A5292A]" />
+              Before Your Meeting
+            </h3>
+            <div className="space-y-3">
+              <div className="flex gap-3 items-start">
+                <div className="w-5 h-5 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <span className="text-green-700 font-bold text-xs">✓</span>
+                </div>
+                <p className="text-sm text-gray-700">Stable internet connection with working microphone/camera</p>
+              </div>
+              <div className="flex gap-3 items-start">
+                <div className="w-5 h-5 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <span className="text-green-700 font-bold text-xs">✓</span>
+                </div>
+                <p className="text-sm text-gray-700">Join 5 minutes early for technical checks</p>
+              </div>
+              <div className="flex gap-3 items-start">
+                <div className="w-5 h-5 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <span className="text-green-700 font-bold text-xs">✓</span>
+                </div>
+                <p className="text-sm text-gray-700">Have relevant documents ready to discuss</p>
+              </div>
+              <div className="flex gap-3 items-start">
+                <div className="w-5 h-5 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <span className="text-green-700 font-bold text-xs">✓</span>
+                </div>
+                <p className="text-sm text-gray-700">Choose a quiet location for the call</p>
+              </div>
+            </div>
           </div>
 
-          <div className="flex items-center justify-between pb-4 border-b border-gray-200">
-            <span className="text-gray-600 font-medium">Duration</span>
-            <span className="text-gray-900 font-semibold">20 minutes</span>
-          </div>
-
-          <div className="flex items-center justify-between pb-4 border-b border-gray-200">
-            <span className="text-gray-600 font-medium">Matter / Services</span>
-            <span className="text-gray-900 font-semibold text-right">{formData.selectedServices.join(', ')}</span>
-          </div>
-
-          <div className="flex items-center justify-between pt-4">
-            <span className="text-gray-600 font-medium">Email</span>
-            <span className="text-gray-900 font-semibold">{schedulingData.confirmedEmail}</span>
+          {/* Important Note */}
+          <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-8">
+            <p className="text-xs text-amber-800 font-semibold mb-1">Reschedule or Cancel</p>
+            <p className="text-sm text-amber-900">Reply to your confirmation email to reschedule or cancel at least 24 hours in advance.</p>
           </div>
         </div>
       </div>
 
-      {/* Next Steps */}
-      <div className="bg-blue-50 rounded-lg border border-blue-200 p-6 mb-8">
-        <h3 className="font-semibold text-blue-900 mb-4 flex items-center gap-2">
-          <Clock className="w-5 h-5" />
-          Before Your Consultation
-        </h3>
-        <ul className="space-y-2 text-sm text-blue-800">
-          <li className="flex gap-2">
-            <span>✓</span>
-            <span>Ensure you have a stable internet connection and working microphone/camera</span>
-          </li>
-          <li className="flex gap-2">
-            <span>✓</span>
-            <span>Join the meeting 5 minutes early for technical checks</span>
-          </li>
-          <li className="flex gap-2">
-            <span>✓</span>
-            <span>Have any relevant documents ready to discuss</span>
-          </li>
-          <li className="flex gap-2">
-            <span>✓</span>
-            <span>Choose a quiet location for the meeting</span>
-          </li>
-          <li className="flex gap-2">
-            <span>✓</span>
-            <span>Save the Google Meet link from the confirmation email</span>
-          </li>
-        </ul>
-      </div>
-
-      {/* Contact Info */}
-      <div className="bg-gray-50 rounded-lg border border-gray-200 p-6 mb-8">
-        <h3 className="font-semibold text-gray-900 mb-3">Need to Reschedule?</h3>
-        <p className="text-sm text-gray-700">
-          If you need to reschedule your consultation, please reply to the confirmation email or contact us at least 24 hours in advance. We&apos;ll be happy to help you find a new time slot.
-        </p>
-      </div>
-
-      <div className="flex gap-4">
+      {/* Action Buttons */}
+      <div className="flex gap-4 mb-8">
         <button
           onClick={handleStartNew}
-          className="px-8 py-3 bg-[#A5292A] text-white rounded-full font-semibold hover:bg-[#8a2123] transition-colors"
+          className="flex-1 px-6 py-3 bg-[#A5292A] text-white rounded-full font-semibold hover:bg-[#8a2123] transition-all duration-200 shadow-md hover:shadow-lg"
         >
-          ✓ Start New Intake
+          Start New Intake
         </button>
-        <Link href="/">
-          <button className="px-8 py-3 border-2 border-[#A5292A] text-[#A5292A] rounded-full font-semibold hover:bg-[#A5292A]/5 transition-colors">
+        <Link href="/" className="flex-1">
+          <button className="w-full px-6 py-3 border-2 border-[#A5292A] text-[#A5292A] rounded-full font-semibold hover:bg-[#A5292A]/5 transition-all duration-200">
             Back to Home
           </button>
         </Link>
       </div>
 
-      <p className="text-xs text-gray-500 mt-8 p-4 bg-gray-50 rounded-lg">
-        <strong>Privacy Notice:</strong> In accordance with Bar Council of India regulations, this intake form is provided for clients voluntarily seeking information about Fathom Legal. It does not constitute advertising or solicitation.
+      <p className="text-xs text-gray-500 text-center p-4">
+        <strong>Privacy Notice:</strong> In accordance with Bar Council of India regulations, this intake form is provided for clients voluntarily seeking information about Fathom Legal.
       </p>
     </div>
   )

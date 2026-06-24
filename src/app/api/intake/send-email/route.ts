@@ -270,7 +270,7 @@ export async function POST(request: NextRequest) {
           <div class="content">
             <div class="greeting">
               <p>Dear ${firstName},</p>
-              <p style="margin-top: 12px;">Thank you for booking a consultation with Fathom Legal. Your appointment has been confirmed and a Google Meet link has been generated for your meeting.</p>
+              <p style="margin-top: 12px;">Thank you for booking a consultation with Fathom Legal. Your <strong>20-minute appointment</strong> has been confirmed and a Google Meet link has been generated for your meeting.</p>
             </div>
 
             <div class="section">
@@ -290,7 +290,7 @@ export async function POST(request: NextRequest) {
                 </div>
                 <div class="detail-row">
                   <span class="detail-label">Duration:</span>
-                  <span class="detail-value">20 minutes</span>
+                  <span class="detail-value"><strong>20 Minutes</strong></span>
                 </div>
                 <div class="detail-row">
                   <span class="detail-label">Meeting Type:</span>

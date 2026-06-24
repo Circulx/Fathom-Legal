@@ -664,142 +664,109 @@ export default function ClientIntakePage() {
   )
 
   const renderStep4 = () => (
-    <div className="max-w-2xl mx-auto px-4 py-8">
-      <div className="text-right mb-8">
+    <div className="max-w-2xl mx-auto px-4 py-6">
+      <div className="text-right mb-4">
         <span className="text-sm font-semibold text-green-600">CONFIRMED</span>
       </div>
 
       {renderProgressBar()}
 
-      {/* Main Confirmation Card */}
-      <div className="bg-white rounded-2xl shadow-lg overflow-hidden mb-8 border border-gray-100">
-        {/* Success Header */}
-        <div className="bg-gradient-to-r from-[#A5292A] to-[#8a2123] text-white p-8 text-center">
-          <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
-            <CheckCircle className="w-10 h-10 text-white" />
+      {/* Main Confirmation Card - Compact */}
+      <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200">
+        {/* Success Header - Compact */}
+        <div className="bg-gradient-to-r from-[#A5292A] to-[#8a2123] text-white p-5 text-center">
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <CheckCircle className="w-6 h-6 text-white" />
+            <h1 className="text-2xl font-bold">Consultation Confirmed</h1>
           </div>
-          <h1 className="text-3xl font-bold mb-2">Consultation Confirmed</h1>
-          <p className="text-[#A5292A]/90 text-sm font-medium">Your meeting is scheduled and ready</p>
         </div>
 
-        {/* Content Grid */}
-        <div className="p-8">
-          {/* Google Meet Section */}
-          <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 mb-8 border border-blue-200">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-                <Video className="w-6 h-6 text-white" />
-              </div>
-              <h2 className="text-lg font-bold text-blue-900">Google Meet Link</h2>
-            </div>
+        {/* Content - Optimized for single screen */}
+        <div className="p-6">
+          {/* Google Meet Section - Prominent */}
+          <div className="bg-gradient-to-r from-[#A5292A] to-[#8a2123] rounded-lg p-4 mb-5">
+            <p className="text-white text-xs font-semibold uppercase mb-2 opacity-90">Join Your Meeting</p>
             <a
               href={schedulingData.googleMeetLink}
               target="_blank"
               rel="noopener noreferrer"
-              className="block w-full px-6 py-3 bg-blue-600 text-white text-center rounded-lg font-semibold hover:bg-blue-700 transition-all duration-200 mb-3 cursor-pointer"
+              className="block w-full px-4 py-2.5 bg-white text-[#A5292A] text-center rounded-lg font-bold hover:bg-gray-100 transition-all duration-200 mb-2 cursor-pointer"
             >
-              Join Meeting
+              → Join Google Meet
             </a>
-            <p className="text-xs text-blue-800 break-all font-mono bg-white/60 p-3 rounded-lg border border-blue-200">
+            <p className="text-xs text-white/80 font-mono break-all opacity-90">
               {schedulingData.googleMeetLink}
             </p>
           </div>
 
-          {/* Booking Details Grid */}
-          <div className="mb-8">
-            <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4">Appointment Details</h3>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <p className="text-xs text-gray-600 font-semibold uppercase mb-1">Name</p>
-                <p className="text-sm font-bold text-gray-900">{formData.firstName} {formData.lastName}</p>
-              </div>
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <p className="text-xs text-gray-600 font-semibold uppercase mb-1">Email</p>
-                <p className="text-sm font-bold text-gray-900 break-all">{schedulingData.confirmedEmail}</p>
-              </div>
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <p className="text-xs text-gray-600 font-semibold uppercase mb-1">Date</p>
+          {/* Quick Details - 2 Rows */}
+          <div className="mb-5">
+            <div className="grid grid-cols-3 gap-3 mb-3">
+              <div className="bg-gray-100 p-3 rounded">
+                <p className="text-xs text-gray-600 font-bold mb-0.5">DATE</p>
                 <p className="text-sm font-bold text-gray-900">
                   {new Date(schedulingData.selectedDate).toLocaleDateString('en-US', {
-                    weekday: 'short',
                     month: 'short',
                     day: 'numeric'
                   })}
                 </p>
               </div>
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <p className="text-xs text-gray-600 font-semibold uppercase mb-1">Time</p>
-                <p className="text-sm font-bold text-gray-900">{schedulingData.selectedTime} IST</p>
+              <div className="bg-gray-100 p-3 rounded">
+                <p className="text-xs text-gray-600 font-bold mb-0.5">TIME</p>
+                <p className="text-sm font-bold text-gray-900">{schedulingData.selectedTime}</p>
               </div>
-              <div className="bg-gray-50 p-4 rounded-lg col-span-2">
-                <p className="text-xs text-gray-600 font-semibold uppercase mb-1">Services</p>
-                <p className="text-sm font-bold text-gray-900">{formData.selectedServices.join(', ')}</p>
+              <div className="bg-gray-100 p-3 rounded">
+                <p className="text-xs text-gray-600 font-bold mb-0.5">DURATION</p>
+                <p className="text-sm font-bold text-gray-900">20 min</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="bg-gray-100 p-3 rounded">
+                <p className="text-xs text-gray-600 font-bold mb-0.5">NAME</p>
+                <p className="text-sm font-bold text-gray-900">{formData.firstName} {formData.lastName}</p>
+              </div>
+              <div className="bg-gray-100 p-3 rounded">
+                <p className="text-xs text-gray-600 font-bold mb-0.5">EMAIL</p>
+                <p className="text-xs font-bold text-gray-900 break-all">{schedulingData.confirmedEmail}</p>
               </div>
             </div>
           </div>
 
-          {/* Divider */}
-          <div className="border-t border-gray-200 my-8"></div>
-
-          {/* Pre-Consultation Checklist */}
-          <div className="mb-8">
-            <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4 flex items-center gap-2">
-              <Clock className="w-4 h-4 text-[#A5292A]" />
-              Before Your Meeting
-            </h3>
-            <div className="space-y-3">
-              <div className="flex gap-3 items-start">
-                <div className="w-5 h-5 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <span className="text-green-700 font-bold text-xs">✓</span>
-                </div>
-                <p className="text-sm text-gray-700">Stable internet connection with working microphone/camera</p>
-              </div>
-              <div className="flex gap-3 items-start">
-                <div className="w-5 h-5 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <span className="text-green-700 font-bold text-xs">✓</span>
-                </div>
-                <p className="text-sm text-gray-700">Join 5 minutes early for technical checks</p>
-              </div>
-              <div className="flex gap-3 items-start">
-                <div className="w-5 h-5 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <span className="text-green-700 font-bold text-xs">✓</span>
-                </div>
-                <p className="text-sm text-gray-700">Have relevant documents ready to discuss</p>
-              </div>
-              <div className="flex gap-3 items-start">
-                <div className="w-5 h-5 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <span className="text-green-700 font-bold text-xs">✓</span>
-                </div>
-                <p className="text-sm text-gray-700">Choose a quiet location for the call</p>
-              </div>
-            </div>
+          {/* Services - Single row */}
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+            <p className="text-xs text-blue-700 font-bold mb-1">SERVICES</p>
+            <p className="text-sm text-blue-900 font-semibold">{formData.selectedServices.join(', ')}</p>
           </div>
 
-          {/* Important Note */}
-          <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-8">
-            <p className="text-xs text-amber-800 font-semibold mb-1">Reschedule or Cancel</p>
-            <p className="text-sm text-amber-900">Reply to your confirmation email to reschedule or cancel at least 24 hours in advance.</p>
+          {/* Quick Checklist */}
+          <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-4">
+            <p className="text-xs text-green-700 font-bold mb-2">BEFORE YOUR MEETING</p>
+            <div className="space-y-1">
+              <p className="text-xs text-green-800">✓ Have stable internet & working mic/camera</p>
+              <p className="text-xs text-green-800">✓ Join 5 minutes early</p>
+              <p className="text-xs text-green-800">✓ Have documents ready</p>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Action Buttons */}
-      <div className="flex gap-4 mb-8">
+      {/* Action Buttons - Compact */}
+      <div className="flex gap-3 mt-4 mb-4">
         <button
           onClick={handleStartNew}
-          className="flex-1 px-6 py-3 bg-[#A5292A] text-white rounded-full font-semibold hover:bg-[#8a2123] transition-all duration-200 shadow-md hover:shadow-lg"
+          className="flex-1 px-4 py-2.5 bg-[#A5292A] text-white rounded-lg font-semibold hover:bg-[#8a2123] transition-all text-sm"
         >
-          Start New Intake
+          New Intake
         </button>
         <Link href="/" className="flex-1">
-          <button className="w-full px-6 py-3 border-2 border-[#A5292A] text-[#A5292A] rounded-full font-semibold hover:bg-[#A5292A]/5 transition-all duration-200">
-            Back to Home
+          <button className="w-full px-4 py-2.5 border-2 border-[#A5292A] text-[#A5292A] rounded-lg font-semibold hover:bg-[#A5292A]/5 transition-all text-sm">
+            Home
           </button>
         </Link>
       </div>
 
-      <p className="text-xs text-gray-500 text-center p-4">
-        <strong>Privacy Notice:</strong> In accordance with Bar Council of India regulations, this intake form is provided for clients voluntarily seeking information about Fathom Legal.
+      <p className="text-xs text-gray-500 text-center">
+        <strong>Privacy Notice:</strong> Intake form per Bar Council of India regulations
       </p>
     </div>
   )

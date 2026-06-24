@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { ChevronRight, Building2, Zap, Coins, FileText, Gavel, Lightbulb, CheckCircle, AlertCircle, Calendar, Clock } from 'lucide-react'
+import { ChevronRight, Building2, Zap, Coins, FileText, Gavel, Lightbulb, CheckCircle, AlertCircle, Calendar, Clock, ChevronLeft, ChevronRight as ChevronRightIcon, Video } from 'lucide-react'
 import { Navbar } from '@/components/Navbar/index'
 import Footer from '@/components/Footer'
 
@@ -49,11 +49,21 @@ export default function ClientIntakePage() {
   const [error, setError] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
 
-  // Available time slots for scheduling
-  const timeSlots = [
-    '9:00 AM', '9:30 AM', '10:00 AM', '10:30 AM', '11:00 AM', '11:30 AM',
-    '2:00 PM', '2:30 PM', '3:00 PM', '3:30 PM', '4:00 PM', '4:30 PM'
-  ]
+  // Generate 20-min time slots from 9 AM to 5 PM
+  const generateTimeSlots = () => {
+    const slots = []
+    for (let hour = 9; hour < 17; hour++) {
+      for (let min = 0; min < 60; min += 20) {
+        const period = hour >= 12 ? 'PM' : 'AM'
+        const displayHour = hour > 12 ? hour - 12 : hour
+        const slotTime = `${displayHour}:${min.toString().padStart(2, '0')} ${period}`
+        slots.push(slotTime)
+      }
+    }
+    return slots
+  }
+  
+  const timeSlots = generateTimeSlots()
 
   // Get next 5 working days (excluding weekends)
   const getAvailableDates = () => {
@@ -196,30 +206,19 @@ export default function ClientIntakePage() {
     }
   }
 
-  const generateGoogleMeetLink = () => {
-    // Generate a unique Google Meet link based on session and date/time
-    const meetingCode = `${sessionId.substring(0, 8)}-${Date.now().toString(36)}`
-    return `https://meet.google.com/${meetingCode}`
-  }
+  const googleMeetLink = 'https://meet.google.com/wkd-evwz-dxw'
 
   const handleStep3Continue = async () => {
-    if (!schedulingData.confirmedEmail) {
-      setError('Please confirm your email address')
+    if (!schedulingData.selectedDate || !schedulingData.selectedTime || !schedulingData.confirmedEmail) {
+      setError('Please select a date, time, and confirm your email address')
       return
     }
-    
-    // If user hasn't filled date/time (using Calendly), use placeholder values
-    // The actual booking is done through Calendly's system
-    const selectedDate = schedulingData.selectedDate || new Date().toISOString().split('T')[0]
-    const selectedTime = schedulingData.selectedTime || 'To be confirmed via Calendly'
 
     setError('')
     setIsLoading(true)
 
     try {
-      // Generate Google Meet link
-      const googleMeetLink = generateGoogleMeetLink()
-      const updatedSchedulingData = { ...schedulingData, googleMeetLink, selectedDate, selectedTime }
+      const updatedSchedulingData = { ...schedulingData, googleMeetLink }
 
       // Save to database
       const dbResponse = await fetch('/api/intake/step3', {
@@ -227,10 +226,10 @@ export default function ClientIntakePage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           sessionId,
-          selectedDate,
-          selectedTime,
+          selectedDate: schedulingData.selectedDate,
+          selectedTime: schedulingData.selectedTime,
           confirmedEmail: schedulingData.confirmedEmail,
-          googleMeetLink,
+          googleMeetLink: googleMeetLink,
           currentStep: 4
         })
       })
@@ -249,10 +248,10 @@ export default function ClientIntakePage() {
           email: schedulingData.confirmedEmail,
           firstName: formData.firstName,
           lastName: formData.lastName,
-          selectedDate,
-          selectedTime,
+          selectedDate: schedulingData.selectedDate,
+          selectedTime: schedulingData.selectedTime,
           matter: formData.selectedServices.join(', '),
-          googleMeetLink,
+          googleMeetLink: googleMeetLink,
           sessionId
         })
       })
@@ -521,97 +520,135 @@ export default function ClientIntakePage() {
   )
 
   const renderStep3 = () => (
-    <div className="max-w-3xl mx-auto px-4 py-8">
-      <div className="text-right mb-8">
-        <span className="text-sm font-semibold text-gray-600">STEP 3 OF 4</span>
-      </div>
-
-      {renderProgressBar()}
-
-      <h1 className="text-4xl font-bold mb-2 text-gray-900">Schedule your consultation</h1>
-      <p className="text-gray-600 mb-8">
-        Pick a date and time that works for you. A confirmation email with your Google Meet link will be sent immediately.
-      </p>
-
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 flex items-center gap-2">
-          <AlertCircle className="w-5 h-5" />
-          {error}
+      <div className="max-w-3xl mx-auto px-4 py-8">
+        <div className="text-right mb-8">
+          <span className="text-sm font-semibold text-gray-600">STEP 3 OF 4</span>
         </div>
-      )}
 
-      {successMessage && (
-        <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-6 flex items-center gap-2">
-          <CheckCircle className="w-5 h-5" />
-          {successMessage}
+        {renderProgressBar()}
+
+        <h1 className="text-4xl font-bold mb-2 text-gray-900">Schedule your consultation</h1>
+        <p className="text-gray-600 mb-8">
+          Pick a date and time that works for you. A confirmation email with your Google Meet link will be sent immediately.
+        </p>
+
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 flex items-center gap-2">
+            <AlertCircle className="w-5 h-5" />
+            {error}
+          </div>
+        )}
+
+        {successMessage && (
+          <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-6 flex items-center gap-2">
+            <CheckCircle className="w-5 h-5" />
+            {successMessage}
+          </div>
+        )}
+
+        <div className="bg-[#A5292A] text-white rounded-lg p-6 mb-8">
+          <h2 className="font-semibold text-lg">20-min Free Legal Consultation</h2>
+          <p className="text-[#A5292A]/80 mt-1">Fathom Legal — an attorney will be matched to your matter</p>
         </div>
-      )}
 
-      <div className="bg-[#A5292A] text-white rounded-lg p-6 mb-8">
-        <h2 className="font-semibold text-lg">20-min Free Legal Consultation</h2>
-        <p className="text-[#A5292A]/80 mt-1">Fathom Legal — an attorney will be matched to your matter</p>
-      </div>
+        <div className="space-y-8 mb-8">
+          {/* Custom Calendar */}
+          <div>
+            <label className="flex items-center gap-2 text-sm font-semibold text-gray-900 mb-4">
+              <Calendar className="w-5 h-5" />
+              Select a date and time
+            </label>
 
-      <div className="space-y-8 mb-8">
-        {/* Calendly Embed */}
-        <div>
-          <label className="flex items-center gap-2 text-sm font-semibold text-gray-900 mb-4">
-            <Calendar className="w-5 h-5" />
-            Select a date and time
-          </label>
-          {process.env.NEXT_PUBLIC_CALENDLY_URL ? (
-            <div className="border border-gray-200 rounded-lg overflow-hidden">
-              <iframe
-                src={`${process.env.NEXT_PUBLIC_CALENDLY_URL}?hide_event_type_details=1&hide_gdpr_block=1&background_color=ffffff`}
-                width="100%"
-                height="700"
-                frameBorder="0"
-                className="rounded-lg"
-              />
+            {/* Date Selection */}
+            <div className="border border-gray-200 rounded-lg p-6 mb-6 bg-white">
+              <h3 className="font-semibold text-gray-900 mb-4">Available Dates</h3>
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+                {availableDates.map((date) => (
+                  <button
+                    key={date.toISOString()}
+                    onClick={() => {
+                      setSchedulingData(prev => ({ ...prev, selectedDate: date.toISOString().split('T')[0], selectedTime: '' }))
+                    }}
+                    className={`p-3 rounded-lg border-2 font-medium transition-all ${
+                      schedulingData.selectedDate === date.toISOString().split('T')[0]
+                        ? 'border-[#A5292A] bg-[#A5292A]/10 text-[#A5292A]'
+                        : 'border-gray-200 bg-white text-gray-900 hover:border-gray-300'
+                    }`}
+                  >
+                    <div className="text-xs">{date.toLocaleDateString('en-US', { weekday: 'short' })}</div>
+                    <div className="text-sm">{date.getDate()}</div>
+                  </button>
+                ))}
+              </div>
             </div>
-          ) : (
-            <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded-lg">
-              <p className="text-sm font-semibold">Calendly URL not configured</p>
-              <p className="text-xs mt-1">Please add NEXT_PUBLIC_CALENDLY_URL to your environment variables</p>
-            </div>
-          )}
-          <p className="text-xs text-gray-500 mt-3">Select your preferred date and time from the calendar above</p>
+
+            {/* Time Slot Selection */}
+            {schedulingData.selectedDate && (
+              <div className="border border-gray-200 rounded-lg p-6 bg-white mb-6">
+                <h3 className="font-semibold text-gray-900 mb-4">Available Time Slots (20 min)</h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  {timeSlots.map((time) => (
+                    <button
+                      key={time}
+                      onClick={() => setSchedulingData(prev => ({ ...prev, selectedTime: time }))}
+                      className={`p-3 rounded-lg border-2 font-medium transition-all ${
+                        schedulingData.selectedTime === time
+                          ? 'border-[#A5292A] bg-[#A5292A]/10 text-[#A5292A]'
+                          : 'border-gray-200 bg-white text-gray-900 hover:border-gray-300'
+                      }`}
+                    >
+                      {time}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Selection Summary */}
+            {schedulingData.selectedDate && schedulingData.selectedTime && (
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+                <p className="text-sm text-green-800">
+                  <span className="font-semibold">Selected: </span>
+                  {new Date(schedulingData.selectedDate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} at {schedulingData.selectedTime} IST
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Email Confirmation */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-900 mb-2">
+              Confirm your email *
+            </label>
+            <input
+              type="email"
+              value={schedulingData.confirmedEmail}
+              onChange={(e) => setSchedulingData(prev => ({ ...prev, confirmedEmail: e.target.value }))}
+              placeholder={formData.email || 'your@email.com'}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#A5292A] focus:ring-1 focus:ring-[#A5292A]"
+            />
+            <p className="text-xs text-gray-500 mt-2">Confirmation email and Google Meet link will be sent to this address</p>
+          </div>
         </div>
 
-        {/* Email Confirmation */}
-        <div>
-          <label className="block text-sm font-semibold text-gray-900 mb-2">
-            Confirm your email *
-          </label>
-          <input
-            type="email"
-            value={schedulingData.confirmedEmail}
-            onChange={(e) => setSchedulingData(prev => ({ ...prev, confirmedEmail: e.target.value }))}
-            placeholder={formData.email}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#A5292A] focus:ring-1 focus:ring-[#A5292A]"
-          />
-          <p className="text-xs text-gray-500 mt-2">Confirmation email and Google Meet link will be sent to this address</p>
+        <div className="flex items-center justify-between gap-4">
+          <button
+            onClick={() => setCurrentStep(2)}
+            className="text-[#A5292A] font-semibold hover:underline"
+          >
+            ← Back
+          </button>
+          <button
+            onClick={handleStep3Continue}
+            disabled={isLoading || !schedulingData.selectedDate || !schedulingData.selectedTime || !schedulingData.confirmedEmail}
+            className="px-8 py-3 bg-[#A5292A] text-white rounded-full font-semibold hover:bg-[#8a2123] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            Confirm & schedule →
+          </button>
         </div>
-      </div>
 
-      <div className="flex items-center justify-between gap-4">
-        <button
-          onClick={() => setCurrentStep(2)}
-          className="text-[#A5292A] font-semibold hover:underline"
-        >
-          ← Back
-        </button>
-        <button
-          onClick={handleStep3Continue}
-          disabled={isLoading || !schedulingData.confirmedEmail}
-          className="px-8 py-3 bg-[#A5292A] text-white rounded-full font-semibold hover:bg-[#8a2123] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-        >
-          Confirm & schedule →
-        </button>
-      </div>
-
-      <p className="text-xs text-gray-500 mt-8 p-4 bg-blue-50 rounded-lg">
-        <strong>Privacy Notice:</strong> In accordance with Bar Council of India regulations, this intake form is provided for clients voluntarily seeking information about Fathom Legal. It does not constitute advertising or solicitation.
+        <p className="text-xs text-gray-500 mt-8 p-4 bg-blue-50 rounded-lg">
+          <strong>Privacy Notice:</strong> In accordance with Bar Council of India regulations, this intake form is provided for clients voluntarily seeking information about Fathom Legal. It does not constitute advertising or solicitation.
       </p>
     </div>
   )
@@ -632,6 +669,25 @@ export default function ClientIntakePage() {
         <p className="text-[#A5292A]/80">A confirmation has been sent to {schedulingData.confirmedEmail}</p>
       </div>
 
+      {/* Google Meet Link - Prominent */}
+      <div className="bg-gradient-to-r from-blue-50 to-blue-100 border-2 border-blue-300 rounded-lg p-8 mb-8">
+        <h2 className="text-lg font-bold text-blue-900 mb-4 flex items-center gap-2">
+          <Video className="w-6 h-6" />
+          Google Meet Meeting Link
+        </h2>
+        <a
+          href={schedulingData.googleMeetLink}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="block w-full px-6 py-3 bg-blue-600 text-white text-center rounded-lg font-semibold hover:bg-blue-700 transition-colors mb-3"
+        >
+          Join Google Meet Now
+        </a>
+        <p className="text-sm text-blue-800 break-all font-mono bg-white/50 p-2 rounded">
+          {schedulingData.googleMeetLink}
+        </p>
+      </div>
+
       {/* Booking Details */}
       <div className="bg-white rounded-lg border border-gray-200 p-8 mb-8">
         <h2 className="text-xl font-bold text-gray-900 mb-6">Booking Details</h2>
@@ -646,9 +702,9 @@ export default function ClientIntakePage() {
             <span className="text-gray-600 font-medium">Date</span>
             <span className="text-gray-900 font-semibold">
               {new Date(schedulingData.selectedDate).toLocaleDateString('en-US', {
-                weekday: 'short',
+                weekday: 'long',
                 year: 'numeric',
-                month: 'short',
+                month: 'long',
                 day: 'numeric'
               })}
             </span>
@@ -661,37 +717,57 @@ export default function ClientIntakePage() {
 
           <div className="flex items-center justify-between pb-4 border-b border-gray-200">
             <span className="text-gray-600 font-medium">Duration</span>
-            <span className="text-gray-900 font-semibold">20 minutes · Google Meet</span>
+            <span className="text-gray-900 font-semibold">20 minutes</span>
           </div>
 
           <div className="flex items-center justify-between pb-4 border-b border-gray-200">
-            <span className="text-gray-600 font-medium">Matter</span>
+            <span className="text-gray-600 font-medium">Matter / Services</span>
             <span className="text-gray-900 font-semibold text-right">{formData.selectedServices.join(', ')}</span>
           </div>
 
           <div className="flex items-center justify-between pt-4">
-            <span className="text-gray-600 font-medium">Meeting Link</span>
-            <a
-              href={schedulingData.googleMeetLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[#A5292A] font-semibold hover:underline"
-            >
-              Join Google Meet
-            </a>
+            <span className="text-gray-600 font-medium">Email</span>
+            <span className="text-gray-900 font-semibold">{schedulingData.confirmedEmail}</span>
           </div>
         </div>
       </div>
 
       {/* Next Steps */}
       <div className="bg-blue-50 rounded-lg border border-blue-200 p-6 mb-8">
-        <h3 className="font-semibold text-blue-900 mb-3">Before Your Consultation</h3>
+        <h3 className="font-semibold text-blue-900 mb-4 flex items-center gap-2">
+          <Clock className="w-5 h-5" />
+          Before Your Consultation
+        </h3>
         <ul className="space-y-2 text-sm text-blue-800">
-          <li>✓ Ensure you have a stable internet connection</li>
-          <li>✓ Join 5 minutes early for technical checks</li>
-          <li>✓ Have any relevant documents ready to discuss</li>
-          <li>✓ Choose a quiet location for the meeting</li>
+          <li className="flex gap-2">
+            <span>✓</span>
+            <span>Ensure you have a stable internet connection and working microphone/camera</span>
+          </li>
+          <li className="flex gap-2">
+            <span>✓</span>
+            <span>Join the meeting 5 minutes early for technical checks</span>
+          </li>
+          <li className="flex gap-2">
+            <span>✓</span>
+            <span>Have any relevant documents ready to discuss</span>
+          </li>
+          <li className="flex gap-2">
+            <span>✓</span>
+            <span>Choose a quiet location for the meeting</span>
+          </li>
+          <li className="flex gap-2">
+            <span>✓</span>
+            <span>Save the Google Meet link from the confirmation email</span>
+          </li>
         </ul>
+      </div>
+
+      {/* Contact Info */}
+      <div className="bg-gray-50 rounded-lg border border-gray-200 p-6 mb-8">
+        <h3 className="font-semibold text-gray-900 mb-3">Need to Reschedule?</h3>
+        <p className="text-sm text-gray-700">
+          If you need to reschedule your consultation, please reply to the confirmation email or contact us at least 24 hours in advance. We&apos;ll be happy to help you find a new time slot.
+        </p>
       </div>
 
       <div className="flex gap-4">

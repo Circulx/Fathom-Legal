@@ -47,7 +47,14 @@ export async function POST(request: NextRequest) {
     <!DOCTYPE html>
     <html>
       <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <style>
+          * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+          }
           body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             line-height: 1.6;
@@ -58,161 +65,267 @@ export async function POST(request: NextRequest) {
             max-width: 600px;
             margin: 0 auto;
             background-color: #ffffff;
-            padding: 40px;
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
           }
           .header {
             background: linear-gradient(135deg, #A5292A 0%, #8a2123 100%);
             color: white;
-            padding: 30px;
-            border-radius: 8px;
+            padding: 40px 30px;
             text-align: center;
-            margin-bottom: 30px;
           }
           .header h1 {
-            margin: 0;
-            font-size: 28px;
-            font-weight: 600;
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 10px;
           }
           .header p {
-            margin: 8px 0 0 0;
             font-size: 14px;
-            opacity: 0.9;
+            opacity: 0.95;
+          }
+          .content {
+            padding: 40px;
+          }
+          .greeting {
+            font-size: 16px;
+            margin-bottom: 20px;
+            line-height: 1.8;
           }
           .section {
-            margin-bottom: 30px;
-            padding-bottom: 30px;
-            border-bottom: 1px solid #eee;
+            margin-bottom: 35px;
           }
           .section:last-child {
-            border-bottom: none;
-            padding-bottom: 0;
+            margin-bottom: 0;
           }
           .section-title {
-            font-size: 16px;
-            font-weight: 600;
+            font-size: 14px;
+            font-weight: 700;
             color: #A5292A;
-            margin-bottom: 15px;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
           }
-          .details {
+          .details-box {
             background-color: #f9f9f9;
-            padding: 20px;
-            border-radius: 6px;
             border-left: 4px solid #A5292A;
+            padding: 20px;
+            border-radius: 4px;
           }
           .detail-row {
             display: flex;
             justify-content: space-between;
-            padding: 10px 0;
-            border-bottom: 1px solid #eee;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #efefef;
+            font-size: 14px;
           }
           .detail-row:last-child {
             border-bottom: none;
+            padding-bottom: 0;
           }
           .detail-label {
             font-weight: 600;
             color: #666;
-            width: 40%;
+            flex: 1;
           }
           .detail-value {
             color: #333;
-            font-weight: 500;
-            width: 60%;
+            font-weight: 600;
+            flex: 1;
             text-align: right;
+          }
+          .meeting-section {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 6px;
+            text-align: center;
+            margin-bottom: 30px;
+          }
+          .meeting-section h3 {
+            font-size: 18px;
+            margin-bottom: 20px;
+            font-weight: 700;
           }
           .meeting-link {
             display: inline-block;
-            background-color: #A5292A;
-            color: white;
-            padding: 12px 30px;
+            background-color: white;
+            color: #2563eb;
+            padding: 14px 40px;
             text-decoration: none;
             border-radius: 6px;
-            font-weight: 600;
-            margin-top: 15px;
-            transition: background-color 0.3s;
+            font-weight: 700;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+            font-size: 16px;
           }
           .meeting-link:hover {
-            background-color: #8a2123;
+            background-color: #f0f0f0;
+          }
+          .meeting-url {
+            background-color: rgba(255,255,255,0.1);
+            padding: 12px;
+            border-radius: 4px;
+            word-break: break-all;
+            font-size: 12px;
+            font-family: 'Courier New', monospace;
+            opacity: 0.9;
+          }
+          .checklist {
+            background-color: #f0fdf4;
+            border: 1px solid #86efac;
+            border-left: 4px solid #22c55e;
+            padding: 20px;
+            border-radius: 4px;
+            margin-bottom: 30px;
+          }
+          .checklist h4 {
+            color: #166534;
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 12px;
+          }
+          .checklist ul {
+            list-style: none;
+            padding: 0;
+          }
+          .checklist li {
+            color: #166534;
+            font-size: 13px;
+            margin-bottom: 8px;
+            padding-left: 24px;
+            position: relative;
+          }
+          .checklist li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            font-weight: 700;
+          }
+          .reschedule-section {
+            background-color: #fef3c7;
+            border: 1px solid #fcd34d;
+            border-left: 4px solid #f59e0b;
+            padding: 20px;
+            border-radius: 4px;
+          }
+          .reschedule-section h4 {
+            color: #92400e;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 14px;
+          }
+          .reschedule-section p {
+            color: #92400e;
+            font-size: 13px;
+            line-height: 1.6;
           }
           .footer {
-            background-color: #f5f5f5;
-            padding: 20px;
-            border-radius: 6px;
-            font-size: 13px;
-            color: #666;
+            background-color: #f9f9f9;
+            padding: 25px;
             text-align: center;
-            margin-top: 30px;
+            border-top: 1px solid #eee;
+            font-size: 12px;
+            color: #666;
+          }
+          .footer strong {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
           }
           .footer p {
-            margin: 5px 0;
+            margin: 4px 0;
+          }
+          .divider {
+            height: 1px;
+            background-color: #eee;
+            margin: 30px 0;
           }
         </style>
       </head>
       <body>
         <div class="container">
           <div class="header">
-            <h1>✓ Your Consultation is Booked</h1>
-            <p>Confirmation Email from Fathom Legal</p>
+            <h1>✓ Consultation Confirmed</h1>
+            <p>Your booking with Fathom Legal is secure</p>
           </div>
 
-          <p>Dear ${firstName},</p>
-          
-          <p>Thank you for booking a consultation with Fathom Legal. Your appointment has been confirmed. Here are the details:</p>
+          <div class="content">
+            <div class="greeting">
+              <p>Dear ${firstName},</p>
+              <p style="margin-top: 12px;">Thank you for booking a consultation with Fathom Legal. Your appointment has been confirmed and a Google Meet link has been generated for your meeting.</p>
+            </div>
 
-          <div class="section">
-            <div class="section-title">Booking Details</div>
-            <div class="details">
-              <div class="detail-row">
-                <span class="detail-label">Client Name:</span>
-                <span class="detail-value">${firstName} ${lastName}</span>
+            <div class="section">
+              <div class="section-title">📋 Consultation Details</div>
+              <div class="details-box">
+                <div class="detail-row">
+                  <span class="detail-label">Name:</span>
+                  <span class="detail-value">${firstName} ${lastName}</span>
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">Date:</span>
+                  <span class="detail-value">${formattedDate}</span>
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">Time:</span>
+                  <span class="detail-value">${selectedTime} IST</span>
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">Duration:</span>
+                  <span class="detail-value">20 minutes</span>
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">Meeting Type:</span>
+                  <span class="detail-value">Google Meet (Online)</span>
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">Services:</span>
+                  <span class="detail-value" style="text-align: right;">${matter}</span>
+                </div>
               </div>
-              <div class="detail-row">
-                <span class="detail-label">Date:</span>
-                <span class="detail-value">${formattedDate}</span>
+            </div>
+
+            <div class="meeting-section">
+              <h3>📹 Join Your Google Meet</h3>
+              <a href="${googleMeetLink}" class="meeting-link">Click to Join Meeting</a>
+              <div class="meeting-url">${googleMeetLink}</div>
+            </div>
+
+            <div class="section">
+              <div class="section-title">✓ Before Your Consultation</div>
+              <div class="checklist">
+                <h4>Please ensure:</h4>
+                <ul>
+                  <li>You have a stable internet connection</li>
+                  <li>Your microphone and camera are working properly</li>
+                  <li>You join 5 minutes early for technical checks</li>
+                  <li>You have any relevant documents ready to discuss</li>
+                  <li>You choose a quiet location for the meeting</li>
+                  <li>You save this email with the Google Meet link</li>
+                </ul>
               </div>
-              <div class="detail-row">
-                <span class="detail-label">Time:</span>
-                <span class="detail-value">${selectedTime} IST</span>
+            </div>
+
+            <div class="section">
+              <div class="reschedule-section">
+                <h4>Need to Reschedule?</h4>
+                <p>If you need to reschedule your consultation, please reply to this email or contact us at least 24 hours in advance. We'll be happy to help you find a new time slot.</p>
               </div>
-              <div class="detail-row">
-                <span class="detail-label">Duration:</span>
-                <span class="detail-value">20 minutes</span>
-              </div>
-              <div class="detail-row">
-                <span class="detail-label">Matter:</span>
-                <span class="detail-value">${matter}</span>
-              </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="section" style="text-align: center; font-size: 12px; color: #999;">
+              <p><strong>Session ID:</strong> ${sessionId}</p>
+              <p style="margin-top: 8px;">This is an automated email. Please do not reply with sensitive information.</p>
             </div>
           </div>
 
-          <div class="section">
-            <div class="section-title">Meeting Information</div>
-            <p>Your consultation will be conducted via Google Meet. Click the link below to join the meeting:</p>
-            ${googleMeetLink ? `<a href="${googleMeetLink}" class="meeting-link">Join Meeting on Google Meet</a>` : ''}
-            ${googleMeetLink ? `<p style="word-break: break-all; color: #999; font-size: 12px; margin-top: 10px;">Link: ${googleMeetLink}</p>` : ''}
-          </div>
-
-          <div class="section">
-            <div class="section-title">Before Your Consultation</div>
-            <ul style="padding-left: 20px; color: #555;">
-              <li>Ensure you have a stable internet connection</li>
-              <li>Join 5 minutes early for technical checks</li>
-              <li>Have any relevant documents ready to discuss</li>
-              <li>Choose a quiet location for the meeting</li>
-            </ul>
-          </div>
-
-          <div class="section">
-            <div class="section-title">Need to Reschedule?</div>
-            <p>If you need to reschedule your consultation, please reply to this email or contact us at least 24 hours in advance. We'll be happy to help you find a new time slot.</p>
-          </div>
-
           <div class="footer">
-            <p><strong>Fathom Legal - Advocates & Corporate Consultants</strong></p>
-            <p>Your consultation is confirmed. Session ID: ${sessionId}</p>
+            <strong>Fathom Legal - Advocates & Corporate Consultants</strong>
+            <p>📧 We're committed to protecting your privacy and confidentiality</p>
             <p>© 2024 Fathom Legal. All rights reserved.</p>
           </div>
         </div>

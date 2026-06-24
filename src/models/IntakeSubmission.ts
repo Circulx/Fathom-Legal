@@ -21,6 +21,7 @@ export interface IIntakeSubmission extends Document {
   selectedDate?: string
   selectedTime?: string
   confirmedEmail?: string
+  googleMeetLink?: string
   calendlyEventId?: string
   
   // Timestamps
@@ -66,6 +67,7 @@ const IntakeSubmissionSchema = new Schema<IIntakeSubmission>(
     selectedDate: String,
     selectedTime: String,
     confirmedEmail: String,
+    googleMeetLink: String,
     calendlyEventId: String,
     
     completedAt: Date,

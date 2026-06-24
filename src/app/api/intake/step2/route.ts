@@ -23,6 +23,24 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       )
     }
+
+    // Email format validation
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+    if (!emailRegex.test(email)) {
+      return NextResponse.json(
+        { error: 'Invalid email format. Please enter a valid email address.' },
+        { status: 400 }
+      )
+    }
+
+    // Phone number validation (10-15 digits, optional +, spaces, dashes, parentheses)
+    const phoneRegex = /^\+?[\d\s\-().]{7,15}$/
+    if (!phoneRegex.test(phone)) {
+      return NextResponse.json(
+        { error: 'Invalid phone number format. Please enter a valid phone number (e.g. +1 800-555-0199).' },
+        { status: 400 }
+      )
+    }
     
     const submission = await IntakeSubmission.findOneAndUpdate(
       { sessionId },

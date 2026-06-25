@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { ChevronRight, Building2, Zap, Coins, FileText, Gavel, Lightbulb, CheckCircle, AlertCircle, Calendar, Clock, ChevronLeft, ChevronRight as ChevronRightIcon, Video } from 'lucide-react'
+import { ChevronRight, Building2, Zap, Coins, FileText, Gavel, Lightbulb, CheckCircle, AlertCircle, Calendar, Clock, ChevronLeft, Video } from 'lucide-react'
 import { Navbar } from '@/components/Navbar/index'
 import Footer from '@/components/Footer'
 
@@ -677,62 +677,67 @@ export default function ClientIntakePage() {
             </label>
 
             {/* Date Selection - Full Month Calendar */}
-            <div className="border border-gray-200 rounded-lg p-6 mb-6 bg-white">
-              <h3 className="font-semibold text-gray-900 mb-4">Select a Date</h3>
+            <div className="border border-[#A5292A]/20 rounded-xl p-6 mb-6 bg-gradient-to-br from-white to-[#A5292A]/2 shadow-sm">
+              <h3 className="font-bold text-lg text-[#A5292A] mb-6 flex items-center gap-2">
+                <Calendar className="w-5 h-5" />
+                Select Your Preferred Date
+              </h3>
               
               {/* Month/Year Navigation */}
-              <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center justify-between mb-6 bg-[#A5292A]/5 p-4 rounded-lg">
                 <button
                   onClick={handlePrevMonth}
-                  className="p-2 rounded-lg border border-gray-300 hover:bg-gray-100 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="p-2 rounded-lg bg-white border-2 border-[#A5292A] text-[#A5292A] hover:bg-[#A5292A]/10 transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:border-gray-300 disabled:text-gray-400"
                   disabled={displayMonth.getMonth() === today.getMonth() && displayMonth.getFullYear() === today.getFullYear()}
+                  title="Previous month"
                 >
-                  <ChevronLeft className="w-5 h-5 text-gray-900" />
+                  <ChevronLeft className="w-5 h-5" />
                 </button>
                 
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-4">
                   <select
                     value={displayMonth.getMonth()}
                     onChange={(e) => handleYearMonthChange(e, false)}
-                    className="px-3 py-2 border border-gray-300 rounded-lg font-semibold text-gray-900 focus:outline-none focus:border-[#A5292A]"
+                    className="px-4 py-2 border-2 border-[#A5292A] rounded-lg font-bold text-[#A5292A] bg-white focus:outline-none focus:ring-2 focus:ring-[#A5292A]/20 hover:border-[#A5292A]/80 transition-all cursor-pointer"
                   >
                     {['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'].map((m, i) => (
-                      <option key={i} value={i}>{m}</option>
+                      <option key={i} value={i} className="text-gray-900">{m}</option>
                     ))}
                   </select>
                   
                   <select
                     value={displayMonth.getFullYear()}
                     onChange={(e) => handleYearMonthChange(e, true)}
-                    className="px-3 py-2 border border-gray-300 rounded-lg font-semibold text-gray-900 focus:outline-none focus:border-[#A5292A]"
+                    className="px-4 py-2 border-2 border-[#A5292A] rounded-lg font-bold text-[#A5292A] bg-white focus:outline-none focus:ring-2 focus:ring-[#A5292A]/20 hover:border-[#A5292A]/80 transition-all cursor-pointer"
                   >
                     {Array.from({ length: 5 }, (_, i) => today.getFullYear() + i).map((year) => (
-                      <option key={year} value={year}>{year}</option>
+                      <option key={year} value={year} className="text-gray-900">{year}</option>
                     ))}
                   </select>
                 </div>
                 
                 <button
                   onClick={handleNextMonth}
-                  className="p-2 rounded-lg border border-gray-300 hover:bg-gray-100 transition-all"
+                  className="p-2 rounded-lg bg-white border-2 border-[#A5292A] text-[#A5292A] hover:bg-[#A5292A]/10 transition-all"
+                  title="Next month"
                 >
-                  <ChevronRight className="w-5 h-5 text-gray-900" />
+                  <ChevronRight className="w-5 h-5" />
                 </button>
               </div>
               
               {/* Calendar Grid */}
-              <div className="bg-gray-50 rounded-lg p-4">
+              <div className="bg-white rounded-xl p-5 border border-[#A5292A]/10">
                 {/* Day headers */}
-                <div className="grid grid-cols-7 gap-1 mb-2">
+                <div className="grid grid-cols-7 gap-2 mb-3">
                   {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
-                    <div key={day} className="text-center text-xs font-bold text-gray-600 py-2">
+                    <div key={day} className="text-center text-sm font-bold text-[#A5292A] py-2 bg-[#A5292A]/5 rounded-lg">
                       {day}
                     </div>
                   ))}
                 </div>
                 
                 {/* Calendar dates */}
-                <div className="grid grid-cols-7 gap-1">
+                <div className="grid grid-cols-7 gap-2">
                   {monthCalendar.map((week, weekIndex) =>
                     week.map((day, dayIndex) => {
                       const isSelected = day.date && schedulingData.selectedDate === day.date.toISOString().split('T')[0]
@@ -743,16 +748,16 @@ export default function ClientIntakePage() {
                           key={`${weekIndex}-${dayIndex}`}
                           onClick={() => day.date && !day.isDisabled && handleDateSelection(day.date)}
                           disabled={day.isDisabled}
-                          className={`aspect-square rounded-lg border-2 font-medium transition-all text-center flex items-center justify-center ${
+                          className={`aspect-square rounded-lg border-2 font-semibold transition-all text-center flex items-center justify-center text-sm ${
                             day.isDisabled && !day.isCurrentMonth
-                              ? 'bg-white border-white text-gray-300 cursor-default'
+                              ? 'bg-transparent border-transparent text-transparent cursor-default'
                               : day.isDisabled
-                              ? 'bg-gray-200 border-gray-300 text-gray-400 cursor-not-allowed'
+                              ? 'bg-gray-100 border-gray-300 text-gray-400 cursor-not-allowed'
                               : isSelected
-                              ? 'border-[#A5292A] bg-[#A5292A] text-white'
+                              ? 'border-[#A5292A] bg-[#A5292A] text-white shadow-md'
                               : isToday
-                              ? 'border-[#A5292A] bg-[#A5292A]/10 text-[#A5292A]'
-                              : 'border-gray-300 bg-white text-gray-900 hover:border-[#A5292A] hover:bg-[#A5292A]/5'
+                              ? 'border-[#A5292A] bg-[#A5292A]/15 text-[#A5292A] shadow-sm'
+                              : 'border-gray-300 bg-white text-gray-900 hover:border-[#A5292A] hover:bg-[#A5292A]/8 hover:shadow-sm'
                           }`}
                           title={day.isDisabled && day.isCurrentMonth ? day.date?.getDay() === 0 || day.date?.getDay() === 6 ? 'Weekend - Not available' : 'Past date' : ''}
                         >
@@ -764,21 +769,25 @@ export default function ClientIntakePage() {
                 </div>
               </div>
               
-              <p className="text-xs text-gray-500 mt-4">
-                Only weekdays from today onwards are available. Select a date to view time slots.
-              </p>
+              <div className="flex items-start gap-2 mt-4 text-xs text-gray-600 bg-blue-50 p-3 rounded-lg border border-blue-100">
+                <span className="font-semibold mt-0.5">ℹ️</span>
+                <p>Only weekdays from today onwards are available. Select a date to view available time slots.</p>
+              </div>
             </div>
 
             {/* Time Slot Selection with Availability */}
             {schedulingData.selectedDate && (
-              <div className="border border-gray-200 rounded-lg p-6 bg-white mb-6">
-                <h3 className="font-semibold text-gray-900 mb-4">
-                  Available Time Slots (20 minutes each) {loadingSlots && '...'}
+              <div className="border border-[#A5292A]/20 rounded-xl p-6 bg-gradient-to-br from-white to-[#A5292A]/2 shadow-sm mb-6">
+                <h3 className="font-bold text-lg text-[#A5292A] mb-5 flex items-center gap-2">
+                  <Clock className="w-5 h-5" />
+                  Select Time Slot (20 minutes) {loadingSlots && <span className="text-sm font-normal text-gray-500">Loading...</span>}
                 </h3>
                 {loadingSlots ? (
-                  <p className="text-gray-500">Loading available slots...</p>
+                  <div className="flex items-center justify-center py-8">
+                    <p className="text-gray-600 font-medium">Loading available slots...</p>
+                  </div>
                 ) : (
-                  <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
+                  <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
                     {availableSlots.map((slot) => {
                       const isSelected = schedulingData.selectedTime === slot.time
                       // Convert 24-hour format to 12-hour for display
@@ -792,17 +801,17 @@ export default function ClientIntakePage() {
                           key={slot.time}
                           onClick={() => slot.available && setSchedulingData(prev => ({ ...prev, selectedTime: slot.time }))}
                           disabled={!slot.available}
-                          className={`p-3 rounded-lg border-2 font-medium transition-all text-center ${
+                          className={`p-3 rounded-lg border-2 font-semibold transition-all text-center ${
                             isSelected && slot.available
-                              ? 'border-[#A5292A] bg-[#A5292A] text-white'
+                              ? 'border-[#A5292A] bg-[#A5292A] text-white shadow-md'
                               : !slot.available
                               ? 'border-gray-300 bg-gray-100 text-gray-400 cursor-not-allowed'
-                              : 'border-gray-200 bg-white text-gray-900 hover:border-[#A5292A]'
+                              : 'border-gray-300 bg-white text-gray-900 hover:border-[#A5292A] hover:bg-[#A5292A]/8 hover:shadow-sm'
                           }`}
                           title={!slot.available ? 'This slot is booked' : ''}
                         >
-                          <div className="text-xs">{displayTime}</div>
-                          {!slot.available && <div className="text-xs mt-1">✕ Booked</div>}
+                          <div className="text-sm">{displayTime}</div>
+                          {!slot.available && <div className="text-xs mt-0.5 text-gray-500">Booked</div>}
                         </button>
                       )
                     })}
@@ -813,10 +822,10 @@ export default function ClientIntakePage() {
 
             {/* Selection Summary */}
             {schedulingData.selectedDate && schedulingData.selectedTime && (
-              <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
-                <p className="text-sm text-green-800">
-                  <span className="font-semibold">Selected: </span>
-                  {new Date(schedulingData.selectedDate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} at {schedulingData.selectedTime} IST
+              <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-300 rounded-xl p-4 mb-6 shadow-sm">
+                <p className="text-sm text-green-900 font-semibold flex items-center gap-2">
+                  <CheckCircle className="w-5 h-5 text-green-600" />
+                  {new Date(schedulingData.selectedDate).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })} at {schedulingData.selectedTime} IST
                 </p>
               </div>
             )}

@@ -366,8 +366,8 @@ export default function Home() {
           
           {/* Tagline */}
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-5xl font-bold mb-8 leading-tight text-white animate-fade-in-up animate-delay-200">
-            Facilitating commercial<br />
-            legal solutions
+            Facilitating Commercial<br />
+            Legal Solutions
           </h1>
 
           {/* Description */}

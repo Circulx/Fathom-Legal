@@ -68,6 +68,9 @@ export default function ClientIntakePage() {
   // State for slot availability
   const [availableSlots, setAvailableSlots] = useState<Array<{ time: string; available: boolean }>>([])
   const [loadingSlots, setLoadingSlots] = useState(false)
+  
+  // State for calendar navigation
+  const [displayMonth, setDisplayMonth] = useState<Date>(new Date())
 
   // Fetch available slots for selected date
   const fetchAvailableSlots = async (date: string) => {
@@ -97,24 +100,86 @@ export default function ClientIntakePage() {
     setLoadingSlots(false)
   }
 
-  // Get calendar dates (30 days from today)
-  const getCalendarDates = () => {
-    const dates = []
+  // Generate full month calendar with proper week grid
+  const getFullMonthCalendar = (monthDate: Date) => {
+    const year = monthDate.getFullYear()
+    const month = monthDate.getMonth()
+    
+    const firstDay = new Date(year, month, 1)
+    const lastDay = new Date(year, month + 1, 0)
+    const daysInMonth = lastDay.getDate()
+    const startingDayOfWeek = firstDay.getDay()
+    
+    const weeks: Array<Array<{ date: Date | null; dateNum: number | null; isCurrentMonth: boolean; isDisabled: boolean }>> = []
     const today = new Date()
-    for (let i = 1; i <= 30; i++) {
-      const date = new Date(today)
-      date.setDate(today.getDate() + i)
-      const dayOfWeek = date.getDay()
+    today.setHours(0, 0, 0, 0)
+    
+    let currentWeek: Array<{ date: Date | null; dateNum: number | null; isCurrentMonth: boolean; isDisabled: boolean }> = []
+    
+    // Add empty cells for days before month starts
+    for (let i = 0; i < startingDayOfWeek; i++) {
+      currentWeek.push({ date: null, dateNum: null, isCurrentMonth: false, isDisabled: true })
+    }
+    
+    // Add days of current month
+    for (let day = 1; day <= daysInMonth; day++) {
+      const cellDate = new Date(year, month, day)
+      const dayOfWeek = cellDate.getDay()
+      const isWeekend = dayOfWeek === 0 || dayOfWeek === 6
+      const isPast = cellDate < today
+      const isDisabled = isWeekend || isPast
       
-      // Only include weekdays
-      if (dayOfWeek !== 0 && dayOfWeek !== 6) {
-        dates.push(new Date(date))
+      currentWeek.push({
+        date: cellDate,
+        dateNum: day,
+        isCurrentMonth: true,
+        isDisabled: isDisabled
+      })
+      
+      // Start new week on Sunday
+      if (currentWeek.length === 7) {
+        weeks.push(currentWeek)
+        currentWeek = []
       }
     }
-    return dates
+    
+    // Add empty cells for remaining days
+    while (currentWeek.length > 0 && currentWeek.length < 7) {
+      currentWeek.push({ date: null, dateNum: null, isCurrentMonth: false, isDisabled: true })
+    }
+    if (currentWeek.length > 0) {
+      weeks.push(currentWeek)
+    }
+    
+    return weeks
   }
-  
-  const calendarDates = getCalendarDates()
+
+  // Handle month navigation
+  const handlePrevMonth = () => {
+    const today = new Date()
+    const prevMonth = new Date(displayMonth.getFullYear(), displayMonth.getMonth() - 1)
+    
+    // Don't go before current month
+    if (prevMonth.getFullYear() > today.getFullYear() || 
+        (prevMonth.getFullYear() === today.getFullYear() && prevMonth.getMonth() >= today.getMonth())) {
+      setDisplayMonth(prevMonth)
+    }
+  }
+
+  const handleNextMonth = () => {
+    const nextMonth = new Date(displayMonth.getFullYear(), displayMonth.getMonth() + 1)
+    setDisplayMonth(nextMonth)
+  }
+
+  const handleYearMonthChange = (e: React.ChangeEvent<HTMLSelectElement>, isYear: boolean) => {
+    const newMonth = new Date(displayMonth)
+    if (isYear) {
+      newMonth.setFullYear(parseInt(e.target.value))
+    } else {
+      newMonth.setMonth(parseInt(e.target.value))
+    }
+    setDisplayMonth(newMonth)
+  }
 
   // Handle date selection
   const handleDateSelection = (date: Date) => {
@@ -122,6 +187,10 @@ export default function ClientIntakePage() {
     setSchedulingData(prev => ({ ...prev, selectedDate: dateStr, selectedTime: '' }))
     fetchAvailableSlots(dateStr)
   }
+
+  const monthCalendar = getFullMonthCalendar(displayMonth)
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
 
   // Initialize session
   useEffect(() => {
@@ -607,30 +676,97 @@ export default function ClientIntakePage() {
               Select a date and time
             </label>
 
-            {/* Date Selection - Full Calendar */}
+            {/* Date Selection - Full Month Calendar */}
             <div className="border border-gray-200 rounded-lg p-6 mb-6 bg-white">
               <h3 className="font-semibold text-gray-900 mb-4">Select a Date</h3>
-              <div className="grid grid-cols-3 md:grid-cols-7 gap-2">
-                {calendarDates.map((date) => {
-                  const dateStr = date.toISOString().split('T')[0]
-                  const isSelected = schedulingData.selectedDate === dateStr
-                  return (
-                    <button
-                      key={dateStr}
-                      onClick={() => handleDateSelection(date)}
-                      className={`p-3 rounded-lg border-2 font-medium transition-all text-center ${
-                        isSelected
-                          ? 'border-[#A5292A] bg-[#A5292A] text-white'
-                          : 'border-gray-200 bg-white text-gray-900 hover:border-[#A5292A]'
-                      }`}
-                    >
-                      <div className="text-xs mb-1">{date.toLocaleDateString('en-US', { weekday: 'short' })}</div>
-                      <div className="text-sm font-bold">{date.getDate()}</div>
-                    </button>
-                  )
-                })}
+              
+              {/* Month/Year Navigation */}
+              <div className="flex items-center justify-between mb-6">
+                <button
+                  onClick={handlePrevMonth}
+                  className="p-2 rounded-lg border border-gray-300 hover:bg-gray-100 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={displayMonth.getMonth() === today.getMonth() && displayMonth.getFullYear() === today.getFullYear()}
+                >
+                  <ChevronLeft className="w-5 h-5 text-gray-900" />
+                </button>
+                
+                <div className="flex items-center gap-3">
+                  <select
+                    value={displayMonth.getMonth()}
+                    onChange={(e) => handleYearMonthChange(e, false)}
+                    className="px-3 py-2 border border-gray-300 rounded-lg font-semibold text-gray-900 focus:outline-none focus:border-[#A5292A]"
+                  >
+                    {['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'].map((m, i) => (
+                      <option key={i} value={i}>{m}</option>
+                    ))}
+                  </select>
+                  
+                  <select
+                    value={displayMonth.getFullYear()}
+                    onChange={(e) => handleYearMonthChange(e, true)}
+                    className="px-3 py-2 border border-gray-300 rounded-lg font-semibold text-gray-900 focus:outline-none focus:border-[#A5292A]"
+                  >
+                    {Array.from({ length: 5 }, (_, i) => today.getFullYear() + i).map((year) => (
+                      <option key={year} value={year}>{year}</option>
+                    ))}
+                  </select>
+                </div>
+                
+                <button
+                  onClick={handleNextMonth}
+                  className="p-2 rounded-lg border border-gray-300 hover:bg-gray-100 transition-all"
+                >
+                  <ChevronRight className="w-5 h-5 text-gray-900" />
+                </button>
               </div>
-              <p className="text-xs text-gray-500 mt-4">Only weekdays are available. Select a date to view time slots.</p>
+              
+              {/* Calendar Grid */}
+              <div className="bg-gray-50 rounded-lg p-4">
+                {/* Day headers */}
+                <div className="grid grid-cols-7 gap-1 mb-2">
+                  {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
+                    <div key={day} className="text-center text-xs font-bold text-gray-600 py-2">
+                      {day}
+                    </div>
+                  ))}
+                </div>
+                
+                {/* Calendar dates */}
+                <div className="grid grid-cols-7 gap-1">
+                  {monthCalendar.map((week, weekIndex) =>
+                    week.map((day, dayIndex) => {
+                      const isSelected = day.date && schedulingData.selectedDate === day.date.toISOString().split('T')[0]
+                      const isToday = day.date && day.date.getTime() === today.getTime()
+                      
+                      return (
+                        <button
+                          key={`${weekIndex}-${dayIndex}`}
+                          onClick={() => day.date && !day.isDisabled && handleDateSelection(day.date)}
+                          disabled={day.isDisabled}
+                          className={`aspect-square rounded-lg border-2 font-medium transition-all text-center flex items-center justify-center ${
+                            day.isDisabled && !day.isCurrentMonth
+                              ? 'bg-white border-white text-gray-300 cursor-default'
+                              : day.isDisabled
+                              ? 'bg-gray-200 border-gray-300 text-gray-400 cursor-not-allowed'
+                              : isSelected
+                              ? 'border-[#A5292A] bg-[#A5292A] text-white'
+                              : isToday
+                              ? 'border-[#A5292A] bg-[#A5292A]/10 text-[#A5292A]'
+                              : 'border-gray-300 bg-white text-gray-900 hover:border-[#A5292A] hover:bg-[#A5292A]/5'
+                          }`}
+                          title={day.isDisabled && day.isCurrentMonth ? day.date?.getDay() === 0 || day.date?.getDay() === 6 ? 'Weekend - Not available' : 'Past date' : ''}
+                        >
+                          {day.dateNum}
+                        </button>
+                      )
+                    })
+                  )}
+                </div>
+              </div>
+              
+              <p className="text-xs text-gray-500 mt-4">
+                Only weekdays from today onwards are available. Select a date to view time slots.
+              </p>
             </div>
 
             {/* Time Slot Selection with Availability */}

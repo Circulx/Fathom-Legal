@@ -23,8 +23,8 @@ export const Navbar = ({ page }) => {
             </div>
           </Link>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-8">
+          {/* Desktop Navigation - Hidden, Now Hamburger Menu */}
+          <nav className="hidden items-center space-x-8">
             <Link
               className={
                 page === "aboutus"
@@ -210,9 +210,9 @@ export const Navbar = ({ page }) => {
             </Link>
           </nav>
 
-          {/* Mobile menu button */}
+          {/* Hamburger menu button - Always visible */}
           <button
-            className="md:hidden"
+            className="flex items-center justify-center"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
             {isMenuOpen ? (
@@ -223,15 +223,22 @@ export const Navbar = ({ page }) => {
           </button>
         </div>
 
-        {/* Mobile Navigation */}
+        {/* Sidebar Navigation - Opens from hamburger on all screen sizes */}
         {isMenuOpen && (
-          <div className="md:hidden bg-white border-t border-gray-100">
-            <div className="px-2 pt-2 pb-3 space-y-1">
+          <div className="fixed inset-0 bg-black bg-opacity-50 z-40" onClick={() => setIsMenuOpen(false)}>
+            <div className="absolute right-0 top-0 h-full w-80 bg-white shadow-2xl border-l border-gray-200" onClick={(e) => e.stopPropagation()}>
+              <div className="h-20 flex items-center justify-end px-6 border-b border-gray-100">
+                <button onClick={() => setIsMenuOpen(false)}>
+                  <X className="w-6 h-6 text-black" />
+                </button>
+              </div>
+              <div className="overflow-y-auto h-full pb-20">
+              <div className="px-2 pt-4 pb-3 space-y-1">
               <Link
-                className={`block px-3 py-2 font-bold ${
+                className={`block px-6 py-3 font-bold text-lg ${
                   page === "aboutus"
-                    ? "text-[#A5292A]"
-                    : "text-gray-900 hover:text-[#A5292A]"
+                    ? "text-[#A5292A] bg-[#A5292A]/5 border-l-4 border-[#A5292A]"
+                    : "text-gray-900 hover:text-[#A5292A] hover:bg-gray-50"
                 }`}
                 href="/about-us"
                 onClick={() => setIsMenuOpen(false)}
@@ -242,45 +249,49 @@ export const Navbar = ({ page }) => {
               {/* Services Dropdown */}
               <div>
                 <button
-                  className="flex items-center justify-between w-full px-3 py-2 text-gray-900 hover:text-[#A5292A] font-bold"
+                  className={`flex items-center justify-between w-full px-6 py-3 text-lg font-bold ${
+                    page === "services"
+                      ? "text-[#A5292A] bg-[#A5292A]/5 border-l-4 border-[#A5292A]"
+                      : "text-gray-900 hover:text-[#A5292A] hover:bg-gray-50"
+                  }`}
                   onClick={() => setIsServicesOpen(!isServicesOpen)}
                 >
                   Services
                   <ChevronDown className={`w-4 h-4 transition-transform font-bold ${isServicesOpen ? 'rotate-180' : ''}`} />
                 </button>
                 {isServicesOpen && (
-                  <div className="pl-4 space-y-1">
+                  <div className="pl-8 space-y-1 bg-gray-50">
                     <Link
                       href="/services/generalcorporateadvisory"
-                      className="block px-3 py-2 text-gray-900 hover:text-[#A5292A] text-sm"
+                      className="block px-6 py-2.5 text-gray-800 hover:text-[#A5292A] hover:bg-white text-sm font-medium"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       General Corporate Advisory
                     </Link>
                     <Link
                       href="/services/disputeresolution"
-                      className="block px-3 py-2 text-gray-900 hover:text-[#A5292A] text-sm"
+                      className="block px-6 py-2.5 text-gray-800 hover:text-[#A5292A] hover:bg-white text-sm font-medium"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       Dispute Resolution
                     </Link>
                     <Link
                       href="/services/intellectualproperty"
-                      className="block px-3 py-2 text-gray-900 hover:text-[#A5292A] text-sm"
+                      className="block px-6 py-2.5 text-gray-800 hover:text-[#A5292A] hover:bg-white text-sm font-medium"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       Intellectual Property Services
                     </Link>
                     <Link
                       href="/services/realestatesolutions"
-                      className="block px-3 py-2 text-gray-900 hover:text-[#A5292A] text-sm"
+                      className="block px-6 py-2.5 text-gray-800 hover:text-[#A5292A] hover:bg-white text-sm font-medium"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       Real Estate Solution
                     </Link>
                     <Link
                       href="/services/reitsolutions"
-                      className="block px-3 py-2 text-gray-900 hover:text-[#A5292A] text-sm"
+                      className="block px-6 py-2.5 text-gray-800 hover:text-[#A5292A] hover:bg-white text-sm font-medium"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       REIT Solution
@@ -290,10 +301,10 @@ export const Navbar = ({ page }) => {
               </div>
 
               <Link
-                className={`block px-3 py-2 font-bold ${
+                className={`block px-6 py-3 text-lg font-bold ${
                   page === "web3law"
-                    ? "text-[#A5292A]"
-                    : "text-gray-900 hover:text-[#A5292A]"
+                    ? "text-[#A5292A] bg-[#A5292A]/5 border-l-4 border-[#A5292A]"
+                    : "text-gray-900 hover:text-[#A5292A] hover:bg-gray-50"
                 }`}
                 href="/web3law"
                 onClick={() => setIsMenuOpen(false)}
@@ -302,10 +313,10 @@ export const Navbar = ({ page }) => {
               </Link>
 
               <Link
-                className={`block px-3 py-2 font-bold ${
+                className={`block px-6 py-3 text-lg font-bold ${
                   page === "templates"
-                    ? "text-[#A5292A]"
-                    : "text-gray-900 hover:text-[#A5292A]"
+                    ? "text-[#A5292A] bg-[#A5292A]/5 border-l-4 border-[#A5292A]"
+                    : "text-gray-900 hover:text-[#A5292A] hover:bg-gray-50"
                 }`}
                 href="/templates"
                 onClick={() => setIsMenuOpen(false)}
@@ -314,10 +325,10 @@ export const Navbar = ({ page }) => {
               </Link>
 
               <Link
-                className={`block px-3 py-2 font-bold ${
+                className={`block px-6 py-3 text-lg font-bold ${
                   page === "gallery"
-                    ? "text-[#A5292A]"
-                    : "text-gray-900 hover:text-[#A5292A]"
+                    ? "text-[#A5292A] bg-[#A5292A]/5 border-l-4 border-[#A5292A]"
+                    : "text-gray-900 hover:text-[#A5292A] hover:bg-gray-50"
                 }`}
                 href="/gallery"
                 onClick={() => setIsMenuOpen(false)}
@@ -328,45 +339,49 @@ export const Navbar = ({ page }) => {
               {/* Value Services Dropdown */}
               <div>
                 <button
-                  className="flex items-center justify-between w-full px-3 py-2 text-gray-900 hover:text-[#A5292A] font-bold"
+                  className={`flex items-center justify-between w-full px-6 py-3 text-lg font-bold ${
+                    page === "vbs"
+                      ? "text-[#A5292A] bg-[#A5292A]/5 border-l-4 border-[#A5292A]"
+                      : "text-gray-900 hover:text-[#A5292A] hover:bg-gray-50"
+                  }`}
                   onClick={() => setIsValueServicesOpen(!isValueServicesOpen)}
                 >
                   Value Services
                   <ChevronDown className={`w-4 h-4 transition-transform font-bold ${isValueServicesOpen ? 'rotate-180' : ''}`} />
                 </button>
                 {isValueServicesOpen && (
-                  <div className="pl-4 space-y-1">
+                  <div className="pl-8 space-y-1 bg-gray-50">
                     <Link
                       href="/valueboostingsolutions/chieflegalofficerservice"
-                      className="block px-3 py-2 text-gray-900 hover:text-[#A5292A] text-sm"
+                      className="block px-6 py-2.5 text-gray-800 hover:text-[#A5292A] hover:bg-white text-sm font-medium"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       Chief Legal Officer Service
                     </Link>
                     <Link
                       href="/valueboostingsolutions/techlegalblueprint"
-                      className="block px-3 py-2 text-gray-900 hover:text-[#A5292A] text-sm"
+                      className="block px-6 py-2.5 text-gray-800 hover:text-[#A5292A] hover:bg-white text-sm font-medium"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       Tech Legal Blueprint
                     </Link>
                     <Link
                       href="/valueboostingsolutions/vcfundingsupport"
-                      className="block px-3 py-2 text-gray-900 hover:text-[#A5292A] text-sm"
+                      className="block px-6 py-2.5 text-gray-800 hover:text-[#A5292A] hover:bg-white text-sm font-medium"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       VC Funding Support
                     </Link>
                     <Link
                       href="/valueboostingsolutions/pitchdeckservices"
-                      className="block px-3 py-2 text-gray-900 hover:text-[#A5292A] text-sm"
+                      className="block px-6 py-2.5 text-gray-800 hover:text-[#A5292A] hover:bg-white text-sm font-medium"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       Pitch Deck Services
                     </Link>
                     <Link
                       href="/valueboostingsolutions/cybersecurityservices"
-                      className="block px-3 py-2 text-gray-900 hover:text-[#A5292A] text-sm"
+                      className="block px-6 py-2.5 text-gray-800 hover:text-[#A5292A] hover:bg-white text-sm font-medium"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       Cybersecurity Compliance Services
@@ -377,10 +392,10 @@ export const Navbar = ({ page }) => {
               </div>
 
               <Link
-                className={`block px-3 py-2 font-bold ${
+                className={`block px-6 py-3 text-lg font-bold ${
                   page === "thoughtleadership"
-                    ? "text-[#A5292A]"
-                    : "text-gray-900 hover:text-[#A5292A]"
+                    ? "text-[#A5292A] bg-[#A5292A]/5 border-l-4 border-[#A5292A]"
+                    : "text-gray-900 hover:text-[#A5292A] hover:bg-gray-50"
                 }`}
                 href="/thoughtleadership"
                 onClick={() => setIsMenuOpen(false)}
@@ -389,10 +404,10 @@ export const Navbar = ({ page }) => {
               </Link>
 
               <Link
-                className={`block px-3 py-2 font-bold ${
+                className={`block px-6 py-3 text-lg font-bold ${
                   page === "contact"
-                    ? "text-[#A5292A]"
-                    : "text-gray-900 hover:text-[#A5292A]"
+                    ? "text-[#A5292A] bg-[#A5292A]/5 border-l-4 border-[#A5292A]"
+                    : "text-gray-900 hover:text-[#A5292A] hover:bg-gray-50"
                 }`}
                 href="/contact"
                 onClick={() => setIsMenuOpen(false)}
@@ -400,14 +415,18 @@ export const Navbar = ({ page }) => {
                 Contact
               </Link>
 
-              <Link
-                className="block px-2 py-1 font-bold text-white rounded my-2"
-                style={{ backgroundColor: "#A5292A" }}
-                href="/fathom-crm"
-                onClick={() => setIsMenuOpen(false)}
-              >
-              Book a Call
-              </Link>
+              <div className="px-6 py-4 mt-4 border-t border-gray-200">
+                <Link
+                  className="block w-full px-4 py-3 font-bold text-white text-center rounded-lg hover:opacity-90 transition-all"
+                  style={{ backgroundColor: "#A5292A" }}
+                  href="/fathom-crm"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Book a Call
+                </Link>
+              </div>
+            </div>
+              </div>
             </div>
           </div>
         )}

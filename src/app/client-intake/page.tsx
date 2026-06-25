@@ -677,28 +677,28 @@ export default function ClientIntakePage() {
             </label>
 
             {/* Date Selection - Full Month Calendar */}
-            <div className="border border-[#A5292A]/20 rounded-xl p-6 mb-6 bg-gradient-to-br from-white to-[#A5292A]/2 shadow-sm">
-              <h3 className="font-bold text-lg text-[#A5292A] mb-6 flex items-center gap-2">
+            <div className="border border-[#A5292A]/15 rounded-xl p-5 mb-6 bg-white shadow-sm">
+              <h3 className="font-bold text-base text-[#A5292A] mb-5 flex items-center gap-2">
                 <Calendar className="w-5 h-5" />
                 Select Your Preferred Date
               </h3>
               
               {/* Month/Year Navigation */}
-              <div className="flex items-center justify-between mb-6 bg-[#A5292A]/5 p-4 rounded-lg">
+              <div className="flex items-center justify-between mb-5 bg-gradient-to-r from-[#A5292A]/3 to-transparent p-3 rounded-lg border border-[#A5292A]/10">
                 <button
                   onClick={handlePrevMonth}
-                  className="p-2 rounded-lg bg-white border-2 border-[#A5292A] text-[#A5292A] hover:bg-[#A5292A]/10 transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:border-gray-300 disabled:text-gray-400"
+                  className="p-1.5 rounded-md bg-white border-2 border-[#A5292A] text-[#A5292A] hover:bg-[#A5292A]/10 transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:border-gray-300 disabled:text-gray-400"
                   disabled={displayMonth.getMonth() === today.getMonth() && displayMonth.getFullYear() === today.getFullYear()}
                   title="Previous month"
                 >
-                  <ChevronLeft className="w-5 h-5" />
+                  <ChevronLeft className="w-4 h-4" />
                 </button>
                 
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
                   <select
                     value={displayMonth.getMonth()}
                     onChange={(e) => handleYearMonthChange(e, false)}
-                    className="px-4 py-2 border-2 border-[#A5292A] rounded-lg font-bold text-[#A5292A] bg-white focus:outline-none focus:ring-2 focus:ring-[#A5292A]/20 hover:border-[#A5292A]/80 transition-all cursor-pointer"
+                    className="px-3 py-1.5 border-2 border-[#A5292A] rounded-md font-semibold text-sm text-[#A5292A] bg-white focus:outline-none focus:ring-2 focus:ring-[#A5292A]/20 hover:border-[#A5292A]/80 transition-all cursor-pointer"
                   >
                     {['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'].map((m, i) => (
                       <option key={i} value={i} className="text-gray-900">{m}</option>
@@ -708,7 +708,7 @@ export default function ClientIntakePage() {
                   <select
                     value={displayMonth.getFullYear()}
                     onChange={(e) => handleYearMonthChange(e, true)}
-                    className="px-4 py-2 border-2 border-[#A5292A] rounded-lg font-bold text-[#A5292A] bg-white focus:outline-none focus:ring-2 focus:ring-[#A5292A]/20 hover:border-[#A5292A]/80 transition-all cursor-pointer"
+                    className="px-3 py-1.5 border-2 border-[#A5292A] rounded-md font-semibold text-sm text-[#A5292A] bg-white focus:outline-none focus:ring-2 focus:ring-[#A5292A]/20 hover:border-[#A5292A]/80 transition-all cursor-pointer"
                   >
                     {Array.from({ length: 5 }, (_, i) => today.getFullYear() + i).map((year) => (
                       <option key={year} value={year} className="text-gray-900">{year}</option>
@@ -718,26 +718,26 @@ export default function ClientIntakePage() {
                 
                 <button
                   onClick={handleNextMonth}
-                  className="p-2 rounded-lg bg-white border-2 border-[#A5292A] text-[#A5292A] hover:bg-[#A5292A]/10 transition-all"
+                  className="p-1.5 rounded-md bg-white border-2 border-[#A5292A] text-[#A5292A] hover:bg-[#A5292A]/10 transition-all"
                   title="Next month"
                 >
-                  <ChevronRight className="w-5 h-5" />
+                  <ChevronRight className="w-4 h-4" />
                 </button>
               </div>
               
               {/* Calendar Grid */}
-              <div className="bg-white rounded-xl p-5 border border-[#A5292A]/10">
+              <div className="bg-gradient-to-b from-[#A5292A]/2 to-white rounded-lg p-4 border border-[#A5292A]/10">
                 {/* Day headers */}
-                <div className="grid grid-cols-7 gap-2 mb-3">
+                <div className="grid grid-cols-7 gap-1.5 mb-2.5">
                   {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
-                    <div key={day} className="text-center text-sm font-bold text-[#A5292A] py-2 bg-[#A5292A]/5 rounded-lg">
+                    <div key={day} className="text-center text-xs font-bold text-[#A5292A] py-1.5 bg-[#A5292A]/8 rounded-md">
                       {day}
                     </div>
                   ))}
                 </div>
                 
                 {/* Calendar dates */}
-                <div className="grid grid-cols-7 gap-2">
+                <div className="grid grid-cols-7 gap-1.5">
                   {monthCalendar.map((week, weekIndex) =>
                     week.map((day, dayIndex) => {
                       const isSelected = day.date && schedulingData.selectedDate === day.date.toISOString().split('T')[0]
@@ -748,16 +748,16 @@ export default function ClientIntakePage() {
                           key={`${weekIndex}-${dayIndex}`}
                           onClick={() => day.date && !day.isDisabled && handleDateSelection(day.date)}
                           disabled={day.isDisabled}
-                          className={`aspect-square rounded-lg border-2 font-semibold transition-all text-center flex items-center justify-center text-sm ${
+                          className={`h-9 w-9 rounded-md border border-gray-300 font-semibold transition-all text-center flex items-center justify-center text-xs ${
                             day.isDisabled && !day.isCurrentMonth
                               ? 'bg-transparent border-transparent text-transparent cursor-default'
                               : day.isDisabled
-                              ? 'bg-gray-100 border-gray-300 text-gray-400 cursor-not-allowed'
+                              ? 'bg-gray-100 border-gray-200 text-gray-300 cursor-not-allowed'
                               : isSelected
-                              ? 'border-[#A5292A] bg-[#A5292A] text-white shadow-md'
+                              ? 'border-[#A5292A] bg-[#A5292A] text-white shadow-md font-bold'
                               : isToday
-                              ? 'border-[#A5292A] bg-[#A5292A]/15 text-[#A5292A] shadow-sm'
-                              : 'border-gray-300 bg-white text-gray-900 hover:border-[#A5292A] hover:bg-[#A5292A]/8 hover:shadow-sm'
+                              ? 'border-[#A5292A] bg-[#A5292A]/12 text-[#A5292A] font-bold shadow-sm'
+                              : 'border-gray-300 bg-white text-gray-700 hover:border-[#A5292A] hover:bg-[#A5292A]/6'
                           }`}
                           title={day.isDisabled && day.isCurrentMonth ? day.date?.getDay() === 0 || day.date?.getDay() === 6 ? 'Weekend - Not available' : 'Past date' : ''}
                         >
@@ -769,9 +769,9 @@ export default function ClientIntakePage() {
                 </div>
               </div>
               
-              <div className="flex items-start gap-2 mt-4 text-xs text-gray-600 bg-blue-50 p-3 rounded-lg border border-blue-100">
-                <span className="font-semibold mt-0.5">ℹ️</span>
-                <p>Only weekdays from today onwards are available. Select a date to view available time slots.</p>
+              <div className="flex items-start gap-2.5 mt-4 text-xs text-gray-700 bg-blue-50 p-3 rounded-lg border border-blue-200/50">
+                <span className="text-sm">ℹ️</span>
+                <p className="leading-relaxed">Weekdays only from today onwards available. Pick a date to see time slots.</p>
               </div>
             </div>
 

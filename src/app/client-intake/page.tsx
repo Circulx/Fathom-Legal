@@ -2,11 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { ChevronRight, Building2, Zap, Coins, FileText, Gavel, Lightbulb, CheckCircle, AlertCircle, Calendar, Clock, ChevronLeft, ChevronRight as ChevronRightIcon, Video } from 'lucide-react'
+import { ChevronRight, Building2, Zap, Coins, FileText, Gavel, Lightbulb, CheckCircle, AlertCircle, Calendar, Clock, ChevronLeft, Video } from 'lucide-react'
 import { Navbar } from '@/components/Navbar/index'
 import Footer from '@/components/Footer'
-import { getBookableWeekdayDates } from '@/lib/booking-calendar'
-import { formatTimeDisplay } from '@/lib/time-format'
 
 interface FormData {
   selectedServices: string[]
@@ -70,30 +68,9 @@ export default function ClientIntakePage() {
   // State for slot availability
   const [availableSlots, setAvailableSlots] = useState<Array<{ time: string; available: boolean }>>([])
   const [loadingSlots, setLoadingSlots] = useState(false)
-
-
-
-
-// Add these validation helpers at the top of the component (after useState declarations)
-const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
-const phoneRegex = /^\+?[\d\s\-().]{7,15}$/
-
-const isEmailValid = emailRegex.test(formData.email)
-const isPhoneValid = phoneRegex.test(formData.phone)
-
-const isStep2Valid =
-  !!formData.firstName &&
-  !!formData.lastName &&
-  isEmailValid &&
-  isPhoneValid
-
-
-
-
-
-
-
-
+  
+  // State for calendar navigation
+  const [displayMonth, setDisplayMonth] = useState<Date>(new Date())
 
   // Fetch available slots for selected date
   const fetchAvailableSlots = async (date: string) => {
@@ -123,7 +100,86 @@ const isStep2Valid =
     setLoadingSlots(false)
   }
 
-  const calendarDates = getBookableWeekdayDates(3)
+  // Generate full month calendar with proper week grid
+  const getFullMonthCalendar = (monthDate: Date) => {
+    const year = monthDate.getFullYear()
+    const month = monthDate.getMonth()
+    
+    const firstDay = new Date(year, month, 1)
+    const lastDay = new Date(year, month + 1, 0)
+    const daysInMonth = lastDay.getDate()
+    const startingDayOfWeek = firstDay.getDay()
+    
+    const weeks: Array<Array<{ date: Date | null; dateNum: number | null; isCurrentMonth: boolean; isDisabled: boolean }>> = []
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    
+    let currentWeek: Array<{ date: Date | null; dateNum: number | null; isCurrentMonth: boolean; isDisabled: boolean }> = []
+    
+    // Add empty cells for days before month starts
+    for (let i = 0; i < startingDayOfWeek; i++) {
+      currentWeek.push({ date: null, dateNum: null, isCurrentMonth: false, isDisabled: true })
+    }
+    
+    // Add days of current month
+    for (let day = 1; day <= daysInMonth; day++) {
+      const cellDate = new Date(year, month, day)
+      const dayOfWeek = cellDate.getDay()
+      const isWeekend = dayOfWeek === 0 || dayOfWeek === 6
+      const isPast = cellDate < today
+      const isDisabled = isWeekend || isPast
+      
+      currentWeek.push({
+        date: cellDate,
+        dateNum: day,
+        isCurrentMonth: true,
+        isDisabled: isDisabled
+      })
+      
+      // Start new week on Sunday
+      if (currentWeek.length === 7) {
+        weeks.push(currentWeek)
+        currentWeek = []
+      }
+    }
+    
+    // Add empty cells for remaining days
+    while (currentWeek.length > 0 && currentWeek.length < 7) {
+      currentWeek.push({ date: null, dateNum: null, isCurrentMonth: false, isDisabled: true })
+    }
+    if (currentWeek.length > 0) {
+      weeks.push(currentWeek)
+    }
+    
+    return weeks
+  }
+
+  // Handle month navigation
+  const handlePrevMonth = () => {
+    const today = new Date()
+    const prevMonth = new Date(displayMonth.getFullYear(), displayMonth.getMonth() - 1)
+    
+    // Don't go before current month
+    if (prevMonth.getFullYear() > today.getFullYear() || 
+        (prevMonth.getFullYear() === today.getFullYear() && prevMonth.getMonth() >= today.getMonth())) {
+      setDisplayMonth(prevMonth)
+    }
+  }
+
+  const handleNextMonth = () => {
+    const nextMonth = new Date(displayMonth.getFullYear(), displayMonth.getMonth() + 1)
+    setDisplayMonth(nextMonth)
+  }
+
+  const handleYearMonthChange = (e: React.ChangeEvent<HTMLSelectElement>, isYear: boolean) => {
+    const newMonth = new Date(displayMonth)
+    if (isYear) {
+      newMonth.setFullYear(parseInt(e.target.value))
+    } else {
+      newMonth.setMonth(parseInt(e.target.value))
+    }
+    setDisplayMonth(newMonth)
+  }
 
   // Handle date selection
   const handleDateSelection = (date: Date) => {
@@ -131,6 +187,10 @@ const isStep2Valid =
     setSchedulingData(prev => ({ ...prev, selectedDate: dateStr, selectedTime: '' }))
     fetchAvailableSlots(dateStr)
   }
+
+  const monthCalendar = getFullMonthCalendar(displayMonth)
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
 
   // Initialize session
   useEffect(() => {
@@ -282,24 +342,9 @@ const isStep2Valid =
       })
 
       if (!dbResponse.ok) {
-        const errData = await dbResponse.json().catch(() => ({}))
-        setError(errData.error || 'Failed to save scheduling. Please try again.')
+        setError('Failed to save scheduling. Please try again.')
         setIsLoading(false)
         return
-      }
-
-      // Mark intake complete and sync lead to admin CRM
-      try {
-        const step4Response = await fetch('/api/intake/step4', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ sessionId }),
-        })
-        if (!step4Response.ok) {
-          console.error('CRM sync failed after booking')
-        }
-      } catch (syncErr) {
-        console.error('Step 4 / CRM sync error:', syncErr)
       }
 
       // Send confirmation email via Gmail
@@ -469,161 +514,127 @@ const isStep2Valid =
   )
 
   const renderStep2 = () => (
-  <div className="max-w-3xl mx-auto px-4 py-8">
-    <div className="text-right mb-8">
-      <span className="text-sm font-semibold text-gray-600">STEP 2 OF 4</span>
-    </div>
-
-    {renderProgressBar()}
-
-    <h1 className="text-4xl font-bold mb-2 text-gray-900">Your details</h1>
-    <p className="text-gray-600 mb-8">
-      We'll use this to confirm your booking and send your meeting details. Everything you share is kept confidential.
-    </p>
-
-    {error && (
-      <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 flex items-center gap-2">
-        <AlertCircle className="w-5 h-5" />
-        {error}
+    <div className="max-w-3xl mx-auto px-4 py-8">
+      <div className="text-right mb-8">
+        <span className="text-sm font-semibold text-gray-600">STEP 2 OF 4</span>
       </div>
-    )}
 
-    <div className="space-y-6 mb-8">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {renderProgressBar()}
+
+      <h1 className="text-4xl font-bold mb-2 text-gray-900">Your details</h1>
+      <p className="text-gray-600 mb-8">
+        We'll use this to confirm your booking and send your meeting details. Everything you share is kept confidential.
+      </p>
+
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 flex items-center gap-2">
+          <AlertCircle className="w-5 h-5" />
+          {error}
+        </div>
+      )}
+
+      <div className="space-y-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-semibold text-gray-900 mb-2">First name *</label>
+            <input
+              type="text"
+              value={formData.firstName}
+              onChange={(e) => setFormData(prev => ({ ...prev, firstName: e.target.value }))}
+              placeholder="Jane"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#A5292A] focus:ring-1 focus:ring-[#A5292A]"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-semibold text-gray-900 mb-2">Last name *</label>
+            <input
+              type="text"
+              value={formData.lastName}
+              onChange={(e) => setFormData(prev => ({ ...prev, lastName: e.target.value }))}
+              placeholder="Smith"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#A5292A] focus:ring-1 focus:ring-[#A5292A]"
+            />
+          </div>
+        </div>
+
         <div>
-          <label className="block text-sm font-semibold text-gray-900 mb-2">First name *</label>
+          <label className="block text-sm font-semibold text-gray-900 mb-2">Email address *</label>
           <input
-            type="text"
-            value={formData.firstName}
-            onChange={(e) => setFormData(prev => ({ ...prev, firstName: e.target.value }))}
-            placeholder="Jane"
+            type="email"
+            value={formData.email}
+            onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+            placeholder="jane@example.com"
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#A5292A] focus:ring-1 focus:ring-[#A5292A]"
           />
         </div>
+
         <div>
-          <label className="block text-sm font-semibold text-gray-900 mb-2">Last name *</label>
+          <label className="block text-sm font-semibold text-gray-900 mb-2">Phone number *</label>
           <input
-            type="text"
-            value={formData.lastName}
-            onChange={(e) => setFormData(prev => ({ ...prev, lastName: e.target.value }))}
-            placeholder="Smith"
+            type="tel"
+            value={formData.phone}
+            onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
+            placeholder="+91 98765 43210"
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#A5292A] focus:ring-1 focus:ring-[#A5292A]"
+          />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-semibold text-gray-900 mb-2">Company / Organisation</label>
+            <input
+              type="text"
+              value={formData.company}
+              onChange={(e) => setFormData(prev => ({ ...prev, company: e.target.value }))}
+              placeholder="Acme Corp (optional)"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#A5292A] focus:ring-1 focus:ring-[#A5292A]"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-semibold text-gray-900 mb-2">How did you hear about us?</label>
+            <select
+              value={formData.heardAbout}
+              onChange={(e) => setFormData(prev => ({ ...prev, heardAbout: e.target.value }))}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#A5292A] focus:ring-1 focus:ring-[#A5292A]"
+            >
+              <option value="">Select...</option>
+              <option value="google">Google Search</option>
+              <option value="referral">Referral</option>
+              <option value="social">Social Media</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-semibold text-gray-900 mb-2">Brief description of your matter</label>
+          <textarea
+            value={formData.matterDescription}
+            onChange={(e) => setFormData(prev => ({ ...prev, matterDescription: e.target.value }))}
+            placeholder="Briefly describe the legal matter you need help with..."
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#A5292A] focus:ring-1 focus:ring-[#A5292A] resize-none"
+            rows={4}
           />
         </div>
       </div>
 
-      {/* Email field with inline validation */}
-      <div>
-        <label className="block text-sm font-semibold text-gray-900 mb-2">Email address *</label>
-        <input
-          type="email"
-          value={formData.email}
-          onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-          placeholder="jane@example.com"
-          className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-1 transition-colors ${
-            formData.email && !isEmailValid
-              ? 'border-red-400 focus:border-red-400 focus:ring-red-400 bg-red-50'
-              : 'border-gray-300 focus:border-[#A5292A] focus:ring-[#A5292A]'
-          }`}
-        />
-        {formData.email && !isEmailValid && (
-          <div className="flex items-center gap-1.5 mt-1.5 text-red-600 text-sm">
-            <AlertCircle className="w-4 h-4 flex-shrink-0" />
-            Please enter a valid email address (e.g. jane@example.com)
-          </div>
-        )}
-        {formData.email && isEmailValid && (
-          <div className="flex items-center gap-1.5 mt-1.5 text-green-600 text-sm">
-            <CheckCircle className="w-4 h-4 flex-shrink-0" />
-            Valid email
-          </div>
-        )}
-      </div>
-
-      {/* Phone field with inline validation */}
-      <div>
-        <label className="block text-sm font-semibold text-gray-900 mb-2">Phone number *</label>
-        <input
-          type="tel"
-          value={formData.phone}
-          onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
-          placeholder="+91 98765 43210"
-          className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-1 transition-colors ${
-            formData.phone && !isPhoneValid
-              ? 'border-red-400 focus:border-red-400 focus:ring-red-400 bg-red-50'
-              : 'border-gray-300 focus:border-[#A5292A] focus:ring-[#A5292A]'
-          }`}
-        />
-        {formData.phone && !isPhoneValid && (
-          <div className="flex items-center gap-1.5 mt-1.5 text-red-600 text-sm">
-            <AlertCircle className="w-4 h-4 flex-shrink-0" />
-            Enter a valid phone number (7–15 digits, e.g. +91 98765 43210)
-          </div>
-        )}
-        {formData.phone && isPhoneValid && (
-          <div className="flex items-center gap-1.5 mt-1.5 text-green-600 text-sm">
-            <CheckCircle className="w-4 h-4 flex-shrink-0" />
-            Valid phone number
-          </div>
-        )}
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-semibold text-gray-900 mb-2">Company / Organisation</label>
-          <input
-            type="text"
-            value={formData.company}
-            onChange={(e) => setFormData(prev => ({ ...prev, company: e.target.value }))}
-            placeholder="Acme Corp (optional)"
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#A5292A] focus:ring-1 focus:ring-[#A5292A]"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-semibold text-gray-900 mb-2">How did you hear about us?</label>
-          <select
-            value={formData.heardAbout}
-            onChange={(e) => setFormData(prev => ({ ...prev, heardAbout: e.target.value }))}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#A5292A] focus:ring-1 focus:ring-[#A5292A]"
-          >
-            <option value="">Select...</option>
-            <option value="google">Google Search</option>
-            <option value="referral">Referral</option>
-            <option value="social">Social Media</option>
-            <option value="other">Other</option>
-          </select>
-        </div>
-      </div>
-
-      <div>
-        <label className="block text-sm font-semibold text-gray-900 mb-2">Brief description of your matter</label>
-        <textarea
-          value={formData.matterDescription}
-          onChange={(e) => setFormData(prev => ({ ...prev, matterDescription: e.target.value }))}
-          placeholder="Briefly describe the legal matter you need help with..."
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#A5292A] focus:ring-1 focus:ring-[#A5292A] resize-none"
-          rows={4}
-        />
+      <div className="flex items-center justify-between gap-4">
+        <button
+          onClick={() => setCurrentStep(1)}
+          className="text-[#A5292A] font-semibold hover:underline"
+        >
+          ← Back
+        </button>
+        <button
+          onClick={handleStep2Continue}
+          disabled={isLoading}
+          className="px-8 py-3 bg-[#A5292A] text-white rounded-full font-semibold hover:bg-[#8a2123] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        >
+          Continue →
+        </button>
       </div>
     </div>
-
-    <div className="flex items-center justify-between gap-4">
-      <button
-        onClick={() => setCurrentStep(1)}
-        className="text-[#A5292A] font-semibold hover:underline"
-      >
-        ← Back
-      </button>
-      <button
-        onClick={handleStep2Continue}
-        disabled={isLoading || !isStep2Valid}
-        className="px-8 py-3 bg-[#A5292A] text-white rounded-full font-semibold hover:bg-[#8a2123] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-      >
-        Continue →
-      </button>
-    </div>
-  </div>
-)
+  )
 
   const renderStep3 = () => (
       <div className="max-w-3xl mx-auto px-4 py-8">
@@ -665,64 +676,139 @@ const isStep2Valid =
               Select a date and time
             </label>
 
-            {/* Date Selection - Full Calendar */}
+            {/* Date Selection - Full Month Calendar */}
             <div className="border border-gray-200 rounded-lg p-6 mb-6 bg-white">
-              <h3 className="font-semibold text-gray-900 mb-4">Select a Date</h3>
-              <div className="grid grid-cols-3 md:grid-cols-7 gap-2">
-                {calendarDates.map((date) => {
-                  const dateStr = date.toISOString().split('T')[0]
-                  const isSelected = schedulingData.selectedDate === dateStr
-                  return (
-                    <button
-                      key={dateStr}
-                      onClick={() => handleDateSelection(date)}
-                      className={`p-3 rounded-lg border-2 font-medium transition-all text-center ${
-                        isSelected
-                          ? 'border-[#A5292A] bg-[#A5292A] text-white'
-                          : 'border-gray-200 bg-white text-gray-900 hover:border-[#A5292A]'
-                      }`}
-                    >
-                      <div className="text-xs mb-1">{date.toLocaleDateString('en-US', { weekday: 'short' })}</div>
-                      <div className="text-sm font-bold">{date.getDate()}</div>
-                    </button>
-                  )
-                })}
+              <h3 className="font-bold text-base text-[#A5292A] mb-5 flex items-center gap-2">
+                <Calendar className="w-5 h-5" />
+                Select Your Preferred Date
+              </h3>
+              
+              {/* Month/Year Navigation */}
+              <div className="flex items-center justify-center gap-4 mb-6 bg-[#A5292A]/5 p-4 rounded-lg">
+                <button
+                  onClick={handlePrevMonth}
+                  className="p-2 rounded-lg bg-white border-2 border-[#A5292A] text-[#A5292A] hover:bg-[#A5292A]/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:border-gray-300 disabled:text-gray-400"
+                  disabled={displayMonth.getMonth() === today.getMonth() && displayMonth.getFullYear() === today.getFullYear()}
+                  title="Previous month"
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+                
+                <select
+                  value={displayMonth.getMonth()}
+                  onChange={(e) => handleYearMonthChange(e, false)}
+                  className="px-4 py-2 border-2 border-[#A5292A] rounded-lg font-semibold text-[#A5292A] bg-white focus:outline-none focus:ring-2 focus:ring-[#A5292A]/20 cursor-pointer"
+                >
+                  {['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'].map((m, i) => (
+                    <option key={i} value={i}>{m}</option>
+                  ))}
+                </select>
+                
+                <select
+                  value={displayMonth.getFullYear()}
+                  onChange={(e) => handleYearMonthChange(e, true)}
+                  className="px-4 py-2 border-2 border-[#A5292A] rounded-lg font-semibold text-[#A5292A] bg-white focus:outline-none focus:ring-2 focus:ring-[#A5292A]/20 cursor-pointer"
+                >
+                  {Array.from({ length: 5 }, (_, i) => today.getFullYear() + i).map((year) => (
+                    <option key={year} value={year}>{year}</option>
+                  ))}
+                </select>
+                
+                <button
+                  onClick={handleNextMonth}
+                  className="p-2 rounded-lg bg-white border-2 border-[#A5292A] text-[#A5292A] hover:bg-[#A5292A]/10 transition-all"
+                  title="Next month"
+                >
+                  <ChevronRight className="w-5 h-5" />
+                </button>
               </div>
+              
+              {/* Calendar Grid */}
+              <div className="bg-white rounded-lg border border-[#A5292A]/10 p-4">
+                {/* Day headers */}
+                <div className="grid grid-cols-7 gap-2 mb-3">
+                  {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
+                    <div key={day} className="aspect-square flex items-center justify-center text-xs font-bold text-[#A5292A] bg-[#A5292A]/8 rounded-lg">
+                      {day}
+                    </div>
+                  ))}
+                </div>
+                
+                {/* Calendar dates grid */}
+                <div className="grid grid-cols-7 gap-2">
+                  {monthCalendar.map((week, weekIndex) =>
+                    week.map((day, dayIndex) => {
+                      const isSelected = day.date && schedulingData.selectedDate === day.date.toISOString().split('T')[0]
+                      const isToday = day.date && day.date.getTime() === today.getTime()
+                      
+                      return (
+                        <button
+                          key={`${weekIndex}-${dayIndex}`}
+                          onClick={() => day.date && !day.isDisabled && handleDateSelection(day.date)}
+                          disabled={day.isDisabled}
+                          className={`aspect-square rounded-lg border-2 font-semibold transition-all text-center flex items-center justify-center text-sm ${
+                            day.isDisabled && !day.isCurrentMonth
+                              ? 'bg-white border-white text-white cursor-default'
+                              : day.isDisabled
+                              ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'
+                              : isSelected
+                              ? 'border-[#A5292A] bg-[#A5292A] text-white shadow-md'
+                              : isToday
+                              ? 'border-[#A5292A] bg-[#A5292A]/12 text-[#A5292A]'
+                              : 'border-gray-300 bg-white text-gray-900 hover:border-[#A5292A] hover:bg-[#A5292A]/5'
+                          }`}
+                          title={day.isDisabled && day.isCurrentMonth ? day.date?.getDay() === 0 || day.date?.getDay() === 6 ? 'Weekend - Not available' : 'Past date' : ''}
+                        >
+                          {day.dateNum}
+                        </button>
+                      )
+                    })
+                  )}
+                </div>
+              </div>
+              
               <p className="text-xs text-gray-500 mt-4">
-                Weekdays only, up to 3 months ahead. Select a date to view time slots.
+                Only weekdays from today onwards are available. Select a date to view time slots.
               </p>
             </div>
 
             {/* Time Slot Selection with Availability */}
             {schedulingData.selectedDate && (
               <div className="border border-gray-200 rounded-lg p-6 bg-white mb-6">
-                <h3 className="font-semibold text-gray-900 mb-4">
-                  Available Time Slots (20 minutes each) {loadingSlots && '...'}
+                <h3 className="font-bold text-base text-[#A5292A] mb-5 flex items-center gap-2">
+                  <Clock className="w-5 h-5" />
+                  Available Time Slots (20 minutes each) {loadingSlots && <span className="text-sm font-normal text-gray-500">Loading...</span>}
                 </h3>
                 {loadingSlots ? (
-                  <p className="text-gray-500">Loading available slots...</p>
+                  <div className="flex items-center justify-center py-6">
+                    <p className="text-gray-600 font-medium">Loading available slots...</p>
+                  </div>
                 ) : (
                   <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
                     {availableSlots.map((slot) => {
                       const isSelected = schedulingData.selectedTime === slot.time
-                      const displayTime = formatTimeDisplay(slot.time)
+                      // Convert 24-hour format to 12-hour for display
+                      const [hour, minute] = slot.time.split(':').map(Number)
+                      const period = hour >= 12 ? 'PM' : 'AM'
+                      const displayHour = hour > 12 ? hour - 12 : (hour === 0 ? 12 : hour)
+                      const displayTime = `${displayHour}:${minute.toString().padStart(2, '0')} ${period}`
                       
                       return (
                         <button
                           key={slot.time}
                           onClick={() => slot.available && setSchedulingData(prev => ({ ...prev, selectedTime: slot.time }))}
                           disabled={!slot.available}
-                          className={`p-3 rounded-lg border-2 font-medium transition-all text-center ${
+                          className={`py-2.5 px-3 rounded-lg border-2 font-medium transition-all text-center ${
                             isSelected && slot.available
-                              ? 'border-[#A5292A] bg-[#A5292A] text-white'
+                              ? 'border-[#A5292A] bg-[#A5292A] text-white shadow-md'
                               : !slot.available
-                              ? 'border-gray-300 bg-gray-100 text-gray-400 cursor-not-allowed'
-                              : 'border-gray-200 bg-white text-gray-900 hover:border-[#A5292A]'
+                              ? 'border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed'
+                              : 'border-gray-300 bg-white text-gray-900 hover:border-[#A5292A] hover:bg-[#A5292A]/5'
                           }`}
                           title={!slot.available ? 'This slot is booked' : ''}
                         >
-                          <div className="text-xs">{displayTime}</div>
-                          {!slot.available && <div className="text-xs mt-1">✕ Booked</div>}
+                          <div className="text-sm">{displayTime}</div>
+                          {!slot.available && <div className="text-xs mt-1 text-gray-400">Booked</div>}
                         </button>
                       )
                     })}
@@ -734,9 +820,9 @@ const isStep2Valid =
             {/* Selection Summary */}
             {schedulingData.selectedDate && schedulingData.selectedTime && (
               <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
-                <p className="text-sm text-green-800">
-                  <span className="font-semibold">Selected: </span>
-                  {new Date(schedulingData.selectedDate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} at {formatTimeDisplay(schedulingData.selectedTime)} IST
+                <p className="text-sm text-green-800 font-semibold flex items-center gap-2">
+                  <CheckCircle className="w-5 h-5 text-green-600" />
+                  {new Date(schedulingData.selectedDate).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })} at {schedulingData.selectedTime}
                 </p>
               </div>
             )}
@@ -830,7 +916,7 @@ const isStep2Valid =
               </div>
               <div className="bg-gray-100 p-3 rounded">
                 <p className="text-xs text-gray-600 font-bold mb-0.5">TIME</p>
-                <p className="text-sm font-bold text-gray-900">{formatTimeDisplay(schedulingData.selectedTime)}</p>
+                <p className="text-sm font-bold text-gray-900">{schedulingData.selectedTime}</p>
               </div>
               <div className="bg-gray-100 p-3 rounded">
                 <p className="text-xs text-gray-600 font-bold mb-0.5">DURATION</p>

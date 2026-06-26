@@ -38,6 +38,7 @@ import {
   type CrmLead,
   type CrmStatus,
   type LeadDateRangeField,
+  type LeadListFilters,
   type StatusFilter,
 } from './data'
 import { STATUS_STYLES, STATUS_SWATCH, CRM_INPUT_CLASS, CRM_SELECT_CLASS, CRM_TEXTAREA_CLASS, CRM_NOTE_INPUT_CLASS } from './shared'
@@ -210,6 +211,7 @@ export default function CrmLeads({
   onDrawerLeadIdChange,
   leadPool,
   drawerOnly = false,
+  initialFilters = null,
 }: {
   leads: CrmLead[]
   loading: boolean
@@ -230,14 +232,17 @@ export default function CrmLeads({
   onDrawerLeadIdChange?: (id: string | null) => void
   leadPool?: CrmLead[]
   drawerOnly?: boolean
+  initialFilters?: LeadListFilters | null
 }) {
   const pool = leadPool ?? leads
   const knownAssignees = assignees.map((a) => a.name)
   const [addSubmitting, setAddSubmitting] = useState(false)
   const [addError, setAddError] = useState('')
   const [filter, setFilter] = useState<StatusFilter>('all')
+  const [statusesFilter, setStatusesFilter] = useState<CrmStatus[] | null>(null)
   const [sourceFilter, setSourceFilter] = useState('all')
   const [assigneeFilter, setAssigneeFilter] = useState('all')
+  const [practiceAreaFilter, setPracticeAreaFilter] = useState('all')
   const [dateField, setDateField] = useState<LeadDateRangeField>('enquiry')
   const [dateFrom, setDateFrom] = useState('')
   const [dateTo, setDateTo] = useState('')
@@ -284,30 +289,65 @@ export default function CrmLeads({
   const filteredLeads = useMemo(
     () =>
       filterLeads(leads, {
-        status: filter,
+        status: statusesFilter?.length ? 'all' : filter,
+        statuses: statusesFilter ?? undefined,
         source: sourceFilter,
         assignee: assigneeFilter,
+        practiceArea: practiceAreaFilter,
         dateFrom,
         dateTo,
         dateField,
         search: searchQuery,
       }),
-    [leads, filter, sourceFilter, assigneeFilter, dateFrom, dateTo, dateField, searchQuery]
+    [
+      leads,
+      filter,
+      statusesFilter,
+      sourceFilter,
+      assigneeFilter,
+      practiceAreaFilter,
+      dateFrom,
+      dateTo,
+      dateField,
+      searchQuery,
+    ]
   )
 
   const hasExtraFilters =
     sourceFilter !== 'all' ||
     assigneeFilter !== 'all' ||
+    practiceAreaFilter !== 'all' ||
+    Boolean(statusesFilter?.length) ||
     Boolean(dateFrom) ||
     Boolean(dateTo)
 
   const clearExtraFilters = () => {
     setSourceFilter('all')
     setAssigneeFilter('all')
+    setPracticeAreaFilter('all')
+    setStatusesFilter(null)
     setDateFrom('')
     setDateTo('')
     setDateField('enquiry')
+    setFilter('all')
   }
+
+  useEffect(() => {
+    if (!initialFilters) return
+    if (initialFilters.statuses?.length) {
+      setStatusesFilter(initialFilters.statuses)
+      setFilter('all')
+    } else if (initialFilters.status !== undefined) {
+      setStatusesFilter(null)
+      setFilter(initialFilters.status)
+    }
+    if (initialFilters.source !== undefined) setSourceFilter(initialFilters.source)
+    if (initialFilters.assignee !== undefined) setAssigneeFilter(initialFilters.assignee)
+    if (initialFilters.practiceArea !== undefined) setPracticeAreaFilter(initialFilters.practiceArea)
+    if (initialFilters.dateFrom !== undefined) setDateFrom(initialFilters.dateFrom)
+    if (initialFilters.dateTo !== undefined) setDateTo(initialFilters.dateTo)
+    if (initialFilters.dateField !== undefined) setDateField(initialFilters.dateField)
+  }, [initialFilters])
 
   const totalPages = Math.max(1, Math.ceil(filteredLeads.length / pageSize))
   const safePage = Math.min(page, totalPages)
@@ -316,7 +356,19 @@ export default function CrmLeads({
 
   useEffect(() => {
     setPage(1)
-  }, [filter, searchQuery, leads.length, pageSize, sourceFilter, assigneeFilter, dateFrom, dateTo, dateField])
+  }, [
+    filter,
+    statusesFilter,
+    searchQuery,
+    leads.length,
+    pageSize,
+    sourceFilter,
+    assigneeFilter,
+    practiceAreaFilter,
+    dateFrom,
+    dateTo,
+    dateField,
+  ])
 
   useEffect(() => {
     if (!drawerLead) return
@@ -771,9 +823,12 @@ export default function CrmLeads({
             <button
               key={chip.id}
               type="button"
-              onClick={() => setFilter(chip.id)}
+              onClick={() => {
+                setFilter(chip.id)
+                setStatusesFilter(null)
+              }}
               className={`border rounded-full px-3.5 py-1.5 text-[12.5px] transition-colors ${
-                filter === chip.id
+                filter === chip.id && !statusesFilter?.length
                   ? 'bg-[#7a1322] text-white border-[#7a1322]'
                   : 'bg-white text-[#736c63] border-[#e7e1d9] hover:border-[#7a1322] hover:text-[#7a1322]'
               }`}
@@ -844,6 +899,24 @@ export default function CrmLeads({
             {assigneeOptions.map((name) => (
               <option key={name} value={name}>
                 {name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="min-w-[160px]">
+          <label className="block text-[11px] uppercase tracking-wide text-[#736c63] font-semibold mb-1">
+            Practice area
+          </label>
+          <select
+            value={practiceAreaFilter}
+            onChange={(e) => setPracticeAreaFilter(e.target.value)}
+            className={`${CRM_SELECT_CLASS} text-[13px] py-2`}
+          >
+            <option value="all">All areas</option>
+            {PRACTICE_AREAS.map((area) => (
+              <option key={area} value={area}>
+                {area}
               </option>
             ))}
           </select>

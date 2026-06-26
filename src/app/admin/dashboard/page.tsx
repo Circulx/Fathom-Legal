@@ -51,7 +51,7 @@ import {
   Edit
 } from 'lucide-react'
 import { Navbar } from '@/components/Navbar'
-import CrmSection, { type CrmView } from '@/components/CRM/CrmSection'
+import CrmSection, { type CrmNavigateHandler, type CrmView } from '@/components/CRM/CrmSection'
 import { normalizeStatus, type CrmLead } from '@/components/CRM/data'
 import { computeCrmStats } from '@/lib/crm-analytics'
 
@@ -1817,7 +1817,7 @@ export default function AdminDashboard() {
     }
   }
 
-  const handleCrmNavigate = (view: CrmView) => {
+  const handleCrmNavigate: CrmNavigateHandler = (view) => {
     const map: Record<CrmView, string> = {
       overview: 'crm-overview',
       leads: 'crm-leads',

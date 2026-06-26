@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 import {
   Search,
   X,
@@ -13,15 +13,21 @@ import {
   FolderOpen,
   Archive,
 } from 'lucide-react'
-import { getInitials, normalizeStatus, filterLeadsBySearch, UNASSIGNED_ASSIGNEE, type CrmAssigneeRecord, type CrmLead, type LeadPatch } from './data'
+import { getInitials, normalizeStatus, filterLeadsBySearch, UNASSIGNED_ASSIGNEE, type CrmAssigneeRecord, type CrmLead, type LeadListFilters, type LeadPatch } from './data'
 import { StatusBadge } from './shared'
 import CrmLeads from './CrmLeads'
 import CrmConsultations from './CrmConsultations'
 import CrmAnalytics from './CrmAnalytics'
 import { computeCrmStats, computeSourceBreakdown } from '@/lib/crm-analytics'
 import { compareLeadConsultationDates } from '@/lib/crm-consultation-dates'
+import { isoDateRangeLastNDays } from '@/lib/crm-date-ranges'
+import {
+  AWAITING_RESPONSE_STATUSES,
+} from './data'
 
 export type CrmView = 'overview' | 'leads' | 'consultations' | 'analytics'
+
+export type CrmNavigateHandler = (view: CrmView, filters?: LeadListFilters) => void
 
 const VIEW_TITLES: Record<CrmView, { title: string; subtitle: string }> = {
   overview: { title: 'Overview', subtitle: 'A snapshot of your practice today' },
@@ -30,13 +36,46 @@ const VIEW_TITLES: Record<CrmView, { title: string; subtitle: string }> = {
   analytics: { title: 'Analytics', subtitle: 'How your intake is performing' },
 }
 
+function OverviewKpiCard({
+  icon: Icon,
+  iconBg,
+  iconColor,
+  value,
+  label,
+  hint,
+  onClick,
+}: {
+  icon: typeof Inbox
+  iconBg: string
+  iconColor: string
+  value: string | number
+  label: string
+  hint?: ReactNode
+  onClick: () => void
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="bg-white border border-[#e7e1d9] rounded-[14px] p-5 text-left w-full hover:border-[#7a1322]/30 hover:shadow-sm transition-all cursor-pointer"
+    >
+      <div className={`w-9 h-9 rounded-[10px] ${iconBg} flex items-center justify-center mb-3.5`}>
+        <Icon className={`w-5 h-5 ${iconColor}`} />
+      </div>
+      <div className="text-[30px] font-medium text-[#1c1a18] leading-none tracking-tight">{value}</div>
+      <div className="text-[12.5px] text-[#736c63] mt-1.5">{label}</div>
+      {hint}
+    </button>
+  )
+}
+
 function CrmOverview({
   leads,
   onNavigate,
   onLeadClick,
 }: {
   leads: CrmLead[]
-  onNavigate: (view: CrmView) => void
+  onNavigate: CrmNavigateHandler
   onLeadClick?: (lead: CrmLead) => void
 }) {
   const stats = computeCrmStats(leads)
@@ -53,79 +92,79 @@ function CrmOverview({
   return (
     <>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3.5 mb-7">
-        <div className="bg-white border border-[#e7e1d9] rounded-[14px] p-5">
-          <div className="w-9 h-9 rounded-[10px] bg-[#f6ecee] flex items-center justify-center mb-3.5">
-            <Inbox className="w-5 h-5 text-[#7a1322]" />
-          </div>
-          <div className="text-[30px] font-medium text-[#1c1a18] leading-none tracking-tight">
-            {stats.recentCount}
-          </div>
-          <div className="text-[12.5px] text-[#736c63] mt-1.5">New enquiries (7 days)</div>
-        </div>
+        <OverviewKpiCard
+          icon={Inbox}
+          iconBg="bg-[#f6ecee]"
+          iconColor="text-[#7a1322]"
+          value={stats.recentCount}
+          label="New enquiries (7 days)"
+          onClick={() =>
+            onNavigate('leads', {
+              ...isoDateRangeLastNDays(7),
+              dateField: 'enquiry',
+            })
+          }
+        />
 
-        <div className="bg-white border border-[#e7e1d9] rounded-[14px] p-5">
-          <div className="w-9 h-9 rounded-[10px] bg-[#e6eef5] flex items-center justify-center mb-3.5">
-            <CalendarDays className="w-5 h-5 text-[#2f5d8a]" />
-          </div>
-          <div className="text-[30px] font-medium text-[#1c1a18] leading-none tracking-tight">
-            {stats.consultationsScheduled}
-          </div>
-          <div className="text-[12.5px] text-[#736c63] mt-1.5">Consultations scheduled</div>
-        </div>
+        <OverviewKpiCard
+          icon={CalendarDays}
+          iconBg="bg-[#e6eef5]"
+          iconColor="text-[#2f5d8a]"
+          value={stats.consultationsScheduled}
+          label="Consultations scheduled"
+          onClick={() => onNavigate('consultations')}
+        />
 
-        <div className="bg-white border border-[#e7e1d9] rounded-[14px] p-5">
-          <div className="w-9 h-9 rounded-[10px] bg-[#f5ecdb] flex items-center justify-center mb-3.5">
-            <Clock className="w-5 h-5 text-[#9a6b1f]" />
-          </div>
-          <div className="text-[30px] font-medium text-[#1c1a18] leading-none tracking-tight">
-            {stats.awaitingResponse}
-          </div>
-          <div className="text-[12.5px] text-[#736c63] mt-1.5">Awaiting response</div>
-          <div className="inline-flex items-center gap-1 text-[11.5px] font-medium text-[#7a1322] mt-2">
-            <AlertCircle className="w-3.5 h-3.5" />
-            needs follow-up
-          </div>
-        </div>
+        <OverviewKpiCard
+          icon={Clock}
+          iconBg="bg-[#f5ecdb]"
+          iconColor="text-[#9a6b1f]"
+          value={stats.awaitingResponse}
+          label="Awaiting response"
+          hint={
+            <div className="inline-flex items-center gap-1 text-[11.5px] font-medium text-[#7a1322] mt-2">
+              <AlertCircle className="w-3.5 h-3.5" />
+              needs follow-up
+            </div>
+          }
+          onClick={() => onNavigate('leads', { statuses: AWAITING_RESPONSE_STATUSES })}
+        />
 
-        <div className="bg-white border border-[#e7e1d9] rounded-[14px] p-5">
-          <div className="w-9 h-9 rounded-[10px] bg-[#e8f1ea] flex items-center justify-center mb-3.5">
-            <Trophy className="w-5 h-5 text-[#3f7a52]" />
-          </div>
-          <div className="text-[30px] font-medium text-[#1c1a18] leading-none tracking-tight">
-            {stats.retainedRate}%
-          </div>
-          <div className="text-[12.5px] text-[#736c63] mt-1.5">Lead → retained rate</div>
-        </div>
+        <OverviewKpiCard
+          icon={Trophy}
+          iconBg="bg-[#e8f1ea]"
+          iconColor="text-[#3f7a52]"
+          value={`${stats.retainedRate}%`}
+          label="Lead → retained rate"
+          onClick={() => onNavigate('analytics')}
+        />
 
-        <div className="bg-white border border-[#e7e1d9] rounded-[14px] p-5">
-          <div className="w-9 h-9 rounded-[10px] bg-[#e8f1ea] flex items-center justify-center mb-3.5">
-            <CircleCheck className="w-5 h-5 text-[#3f7a52]" />
-          </div>
-          <div className="text-[30px] font-medium text-[#1c1a18] leading-none tracking-tight">
-            {stats.engaged}
-          </div>
-          <div className="text-[12.5px] text-[#736c63] mt-1.5">Engaged</div>
-        </div>
+        <OverviewKpiCard
+          icon={CircleCheck}
+          iconBg="bg-[#e8f1ea]"
+          iconColor="text-[#3f7a52]"
+          value={stats.engaged}
+          label="Engaged"
+          onClick={() => onNavigate('leads', { status: 'engaged' })}
+        />
 
-        <div className="bg-white border border-[#e7e1d9] rounded-[14px] p-5">
-          <div className="w-9 h-9 rounded-[10px] bg-[#e9eef5] flex items-center justify-center mb-3.5">
-            <FolderOpen className="w-5 h-5 text-[#3a5a8a]" />
-          </div>
-          <div className="text-[30px] font-medium text-[#1c1a18] leading-none tracking-tight">
-            {stats.open}
-          </div>
-          <div className="text-[12.5px] text-[#736c63] mt-1.5">Open</div>
-        </div>
+        <OverviewKpiCard
+          icon={FolderOpen}
+          iconBg="bg-[#e9eef5]"
+          iconColor="text-[#3a5a8a]"
+          value={stats.open}
+          label="Open"
+          onClick={() => onNavigate('leads', { status: 'open' })}
+        />
 
-        <div className="bg-white border border-[#e7e1d9] rounded-[14px] p-5">
-          <div className="w-9 h-9 rounded-[10px] bg-[#eee] flex items-center justify-center mb-3.5">
-            <Archive className="w-5 h-5 text-[#8a8178]" />
-          </div>
-          <div className="text-[30px] font-medium text-[#1c1a18] leading-none tracking-tight">
-            {stats.closed}
-          </div>
-          <div className="text-[12.5px] text-[#736c63] mt-1.5">Closed</div>
-        </div>
+        <OverviewKpiCard
+          icon={Archive}
+          iconBg="bg-[#eee]"
+          iconColor="text-[#8a8178]"
+          value={stats.closed}
+          label="Closed"
+          onClick={() => onNavigate('leads', { status: 'closed' })}
+        />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-3.5 mb-7">
@@ -282,7 +321,7 @@ function CrmOverview({
 
 interface CrmSectionProps {
   activeView: CrmView
-  onNavigate: (view: CrmView) => void
+  onNavigate: CrmNavigateHandler
   onLeadsCountChange?: (count: number) => void
 }
 
@@ -293,6 +332,19 @@ export default function CrmSection({ activeView, onNavigate, onLeadsCountChange 
   const [assignees, setAssignees] = useState<CrmAssigneeRecord[]>([])
   const [searchQuery, setSearchQuery] = useState('')
   const [drawerLeadId, setDrawerLeadId] = useState<string | null>(null)
+  const [leadsInitialFilters, setLeadsInitialFilters] = useState<LeadListFilters | null>(null)
+  const [leadsFilterKey, setLeadsFilterKey] = useState(0)
+
+  const handleNavigate: CrmNavigateHandler = useCallback(
+    (view, filters) => {
+      if (filters) {
+        setLeadsInitialFilters(filters)
+        setLeadsFilterKey((k) => k + 1)
+      }
+      onNavigate(view)
+    },
+    [onNavigate]
+  )
 
   const filteredLeads = useMemo(
     () => filterLeadsBySearch(leads, searchQuery),
@@ -496,7 +548,7 @@ export default function CrmSection({ activeView, onNavigate, onLeadsCountChange 
             <>
               <CrmOverview
                 leads={filteredLeads}
-                onNavigate={onNavigate}
+                onNavigate={handleNavigate}
                 onLeadClick={(lead) => setDrawerLeadId(lead.id)}
               />
               {drawerLeadId && (
@@ -509,7 +561,12 @@ export default function CrmSection({ activeView, onNavigate, onLeadsCountChange 
             </>
           )}
           {activeView === 'leads' && (
-            <CrmLeads leads={leads} {...crmLeadsProps} />
+            <CrmLeads
+              key={leadsFilterKey}
+              leads={leads}
+              {...crmLeadsProps}
+              initialFilters={leadsInitialFilters}
+            />
           )}
           {activeView === 'consultations' && (
             <>
@@ -526,7 +583,9 @@ export default function CrmSection({ activeView, onNavigate, onLeadsCountChange 
               )}
             </>
           )}
-          {activeView === 'analytics' && <CrmAnalytics leads={filteredLeads} />}
+          {activeView === 'analytics' && (
+            <CrmAnalytics leads={filteredLeads} onNavigate={handleNavigate} />
+          )}
         </>
       )}
     </div>

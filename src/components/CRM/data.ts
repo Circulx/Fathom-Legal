@@ -139,13 +139,41 @@ export type StatusFilter = 'all' | CrmStatus
 
 export interface LeadListFilters {
   status?: StatusFilter
+  statuses?: CrmStatus[]
   source?: string
   assignee?: string
+  practiceArea?: string
   dateFrom?: string
   dateTo?: string
   dateField?: LeadDateRangeField
   search?: string
 }
+
+export const AWAITING_RESPONSE_STATUSES: CrmStatus[] = [
+  'prospect',
+  'booked',
+  'proposal',
+  'engagement',
+]
+
+export const RETAINED_STATUSES: CrmStatus[] = ['engaged', 'open', 'closed']
+
+export const CONSULTATION_BOOKED_STATUSES: CrmStatus[] = [
+  'booked',
+  'proposal',
+  'engagement',
+  'engaged',
+  'open',
+  'closed',
+]
+
+export const PROPOSAL_SENT_STATUSES: CrmStatus[] = [
+  'proposal',
+  'engagement',
+  'engaged',
+  'open',
+  'closed',
+]
 
 function dateInRange(date: Date | null, from?: string, to?: string): boolean {
   if (!date) return false
@@ -179,8 +207,15 @@ export function leadMatchesAssigneeFilter(lead: CrmLead, assignee: string): bool
 export function filterLeads(leads: CrmLead[], filters: LeadListFilters): CrmLead[] {
   let result = leads
 
-  if (filters.status && filters.status !== 'all') {
+  if (filters.statuses && filters.statuses.length > 0) {
+    const allowed = new Set(filters.statuses)
+    result = result.filter((lead) => allowed.has(lead.status))
+  } else if (filters.status && filters.status !== 'all') {
     result = result.filter((lead) => lead.status === filters.status)
+  }
+
+  if (filters.practiceArea && filters.practiceArea !== 'all') {
+    result = result.filter((lead) => lead.areas.includes(filters.practiceArea!))
   }
 
   if (filters.source && filters.source !== 'all') {

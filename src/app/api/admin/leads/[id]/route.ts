@@ -5,6 +5,10 @@ import connectDB from '@/lib/mongodb'
 import Lead from '@/models/Lead'
 import { formatTimelineWhen, leadDocToCrmLead } from '@/lib/crm-leads'
 import { CRM_STATUSES, type CrmStatus } from '@/components/CRM/data'
+import {
+  applyConsultationSchedule,
+  clearConsultationSchedule,
+} from '@/lib/lead-consultation-schedule'
 
 const VALID_STATUSES: CrmStatus[] = [
   'prospect',
@@ -154,23 +158,62 @@ export async function PATCH(
       lead.actionables = body.actionables
     }
 
-    if (body.date !== undefined) {
-      const date = body.date?.trim() || '—'
-      if (date !== lead.date) {
-        lead.date = date
+    let consultationTimelineAdded = false
+
+    if (body.clearConsultation === true) {
+      const hadConsultation =
+        lead.date !== '—' || lead.consultationDateIso || lead.consultationTime24
+      if (hadConsultation) {
+        await clearConsultationSchedule(lead)
         detailsUpdated = true
+        consultationTimelineAdded = true
+        lead.timeline.push({
+          icon: 'calendar',
+          text: 'Consultation removed',
+          when: formatTimelineWhen(now),
+        })
+      }
+    } else if (body.consultationDateIso !== undefined && body.consultationTime24 !== undefined) {
+      const dateIso = body.consultationDateIso?.trim() || ''
+      const time24 = body.consultationTime24?.trim() || ''
+      if (dateIso && time24) {
+        const scheduleChanged =
+          dateIso !== lead.consultationDateIso || time24 !== lead.consultationTime24
+        if (scheduleChanged) {
+          const { displayDate, displayTime } = await applyConsultationSchedule(
+            lead,
+            dateIso,
+            time24
+          )
+          detailsUpdated = true
+          consultationTimelineAdded = true
+          lead.timeline.push({
+            icon: 'calendar',
+            text: `Consultation set to ${displayDate} at ${displayTime}`,
+            when: formatTimelineWhen(now),
+          })
+        }
+      }
+    } else if (body.date !== undefined || body.time !== undefined) {
+      // Legacy display-only updates (avoid when using consultationDateIso)
+      if (body.date !== undefined) {
+        const date = body.date?.trim() || '—'
+        if (date !== lead.date) {
+          lead.date = date
+          detailsUpdated = true
+        }
+      }
+
+      if (body.time !== undefined) {
+        const time = body.time?.trim() || '—'
+        if (time !== lead.time) {
+          lead.time = time
+          detailsUpdated = true
+        }
       }
     }
 
-    if (body.time !== undefined) {
-      const time = body.time?.trim() || '—'
-      if (time !== lead.time) {
-        lead.time = time
-        detailsUpdated = true
-      }
-    }
-
-    if (detailsUpdated) {
+    if (detailsUpdated && !consultationTimelineAdded) {
       lead.timeline.push({
         icon: 'file',
         text: 'Lead details updated',
@@ -182,6 +225,9 @@ export async function PATCH(
 
     return NextResponse.json({ lead: leadDocToCrmLead(lead) })
   } catch (error) {
+    if (error instanceof Error && error.message === 'This time slot is no longer available') {
+      return NextResponse.json({ error: error.message }, { status: 409 })
+    }
     console.error('Update lead error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }

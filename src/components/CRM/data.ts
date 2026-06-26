@@ -70,6 +70,9 @@ export type LeadPatch = {
   matter?: string
   date?: string
   time?: string
+  consultationDateIso?: string
+  consultationTime24?: string
+  clearConsultation?: boolean
 }
 
 export const PRACTICE_AREAS = [
@@ -128,4 +131,90 @@ export function filterLeadsBySearch(leads: CrmLead[], query: string): CrmLead[] 
 
     return terms.every((term) => haystack.includes(term))
   })
+}
+
+export type LeadDateRangeField = 'enquiry' | 'consultation'
+
+export type StatusFilter = 'all' | CrmStatus
+
+export interface LeadListFilters {
+  status?: StatusFilter
+  source?: string
+  assignee?: string
+  dateFrom?: string
+  dateTo?: string
+  dateField?: LeadDateRangeField
+  search?: string
+}
+
+function dateInRange(date: Date | null, from?: string, to?: string): boolean {
+  if (!date) return false
+  if (!from && !to) return true
+  const time = date.getTime()
+  if (from) {
+    const fromStart = new Date(`${from}T00:00:00`).getTime()
+    if (time < fromStart) return false
+  }
+  if (to) {
+    const toEnd = new Date(`${to}T23:59:59.999`).getTime()
+    if (time > toEnd) return false
+  }
+  return true
+}
+
+export function leadMatchesAssigneeFilter(lead: CrmLead, assignee: string): boolean {
+  if (assignee === 'all') return true
+  if (assignee === 'unassigned') {
+    return (
+      lead.actionables.length === 0 ||
+      lead.actionables.every(
+        (task) => !task.assignee || task.assignee === UNASSIGNED_ASSIGNEE
+      )
+    )
+  }
+  const target = assignee.toLowerCase()
+  return lead.actionables.some((task) => task.assignee.toLowerCase() === target)
+}
+
+export function filterLeads(leads: CrmLead[], filters: LeadListFilters): CrmLead[] {
+  let result = leads
+
+  if (filters.status && filters.status !== 'all') {
+    result = result.filter((lead) => lead.status === filters.status)
+  }
+
+  if (filters.source && filters.source !== 'all') {
+    result = result.filter((lead) => lead.source === filters.source)
+  }
+
+  if (filters.assignee && filters.assignee !== 'all') {
+    result = result.filter((lead) => leadMatchesAssigneeFilter(lead, filters.assignee!))
+  }
+
+  if (filters.dateFrom || filters.dateTo) {
+    const field = filters.dateField ?? 'enquiry'
+    result = result.filter((lead) => {
+      const date =
+        field === 'consultation'
+          ? lead.consultationDateIso
+            ? new Date(`${lead.consultationDateIso}T12:00:00`)
+            : null
+          : new Date(lead.createdAt)
+      return dateInRange(date, filters.dateFrom, filters.dateTo)
+    })
+  }
+
+  if (filters.search?.trim()) {
+    result = filterLeadsBySearch(result, filters.search)
+  }
+
+  return result
+}
+
+export function collectLeadSourceOptions(leads: CrmLead[]): string[] {
+  const sources = new Set(LEAD_SOURCE_OPTIONS)
+  for (const lead of leads) {
+    if (lead.source?.trim()) sources.add(lead.source.trim())
+  }
+  return Array.from(sources).sort((a, b) => a.localeCompare(b))
 }

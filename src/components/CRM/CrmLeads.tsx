@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   X,
   ChevronDown,
@@ -31,22 +31,26 @@ import {
   PRACTICE_AREAS,
   getInitials,
   normalizeStatus,
-  filterLeadsBySearch,
+  filterLeads,
+  collectLeadSourceOptions,
+  UNASSIGNED_ASSIGNEE,
   type CrmAssigneeRecord,
   type CrmLead,
   type CrmStatus,
+  type LeadDateRangeField,
+  type StatusFilter,
 } from './data'
 import { STATUS_STYLES, STATUS_SWATCH, CRM_INPUT_CLASS, CRM_SELECT_CLASS, CRM_TEXTAREA_CLASS, CRM_NOTE_INPUT_CLASS } from './shared'
 import LeadActionables from './LeadActionables'
 import CrmAssigneeManager from './CrmAssigneeManager'
 import type { LeadPatch } from './data'
 import { downloadLeadsCsv } from '@/lib/crm-export'
-import { getBookableWeekdayDates } from '@/lib/booking-calendar'
-import { formatTimeDisplay } from '@/lib/time-format'
+import { formatTimeDisplay, toTime24 } from '@/lib/time-format'
+import BookingMonthCalendar from '@/components/BookingMonthCalendar'
+import { getLeadConsultationDate } from '@/lib/crm-consultation-dates'
+import { toDateKey } from '@/lib/booking-calendar'
 
 const PAGE_SIZE_OPTIONS = [10, 20, 50] as const
-
-type StatusFilter = 'all' | CrmStatus
 
 const FILTER_CHIPS: { id: StatusFilter; label: string }[] = [
   { id: 'all', label: 'All leads' },
@@ -133,6 +137,8 @@ interface AddProspectForm {
   status: CrmStatus
   areas: string[]
   matter: string
+  consultationDateIso: string
+  consultationTime24: string
 }
 
 const emptyForm: AddProspectForm = {
@@ -145,6 +151,8 @@ const emptyForm: AddProspectForm = {
   status: 'prospect',
   areas: [],
   matter: '',
+  consultationDateIso: '',
+  consultationTime24: '',
 }
 
 interface EditLeadForm {
@@ -156,15 +164,22 @@ interface EditLeadForm {
   source: string
   areas: string[]
   matter: string
-  date: string
-  time: string
-}
-
-function getRescheduleCalendarDates() {
-  return getBookableWeekdayDates(3)
+  consultationDateIso: string
+  consultationTime24: string
 }
 
 function leadToEditForm(lead: CrmLead): EditLeadForm {
+  let consultationDateIso = lead.consultationDateIso || ''
+  if (!consultationDateIso && lead.date !== '—') {
+    const parsed = getLeadConsultationDate(lead, new Date())
+    if (parsed) consultationDateIso = toDateKey(parsed)
+  }
+
+  let consultationTime24 = lead.consultationTime24 || ''
+  if (!consultationTime24 && lead.time !== '—') {
+    consultationTime24 = toTime24(lead.time) || ''
+  }
+
   return {
     first: lead.first,
     last: lead.last,
@@ -174,8 +189,8 @@ function leadToEditForm(lead: CrmLead): EditLeadForm {
     source: lead.source,
     areas: [...lead.areas],
     matter: lead.matter === '—' ? '' : lead.matter,
-    date: lead.date === '—' ? '' : lead.date,
-    time: lead.time === '—' ? '' : lead.time,
+    consultationDateIso,
+    consultationTime24,
   }
 }
 
@@ -221,6 +236,11 @@ export default function CrmLeads({
   const [addSubmitting, setAddSubmitting] = useState(false)
   const [addError, setAddError] = useState('')
   const [filter, setFilter] = useState<StatusFilter>('all')
+  const [sourceFilter, setSourceFilter] = useState('all')
+  const [assigneeFilter, setAssigneeFilter] = useState('all')
+  const [dateField, setDateField] = useState<LeadDateRangeField>('enquiry')
+  const [dateFrom, setDateFrom] = useState('')
+  const [dateTo, setDateTo] = useState('')
   const [showModal, setShowModal] = useState(false)
   const [form, setForm] = useState<AddProspectForm>(emptyForm)
   const [formError, setFormError] = useState(false)
@@ -237,6 +257,8 @@ export default function CrmLeads({
   const [rescheduleTime, setRescheduleTime] = useState('')
   const [availableSlots, setAvailableSlots] = useState<Array<{ time: string; available: boolean }>>([])
   const [loadingSlots, setLoadingSlots] = useState(false)
+  const [addAvailableSlots, setAddAvailableSlots] = useState<Array<{ time: string; available: boolean }>>([])
+  const [addLoadingSlots, setAddLoadingSlots] = useState(false)
   const [rescheduleError, setRescheduleError] = useState('')
   const [rescheduleSubmitting, setRescheduleSubmitting] = useState(false)
   const [rescheduleNotice, setRescheduleNotice] = useState('')
@@ -244,12 +266,48 @@ export default function CrmLeads({
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState<number>(20)
 
-  const rescheduleCalendarDates = getRescheduleCalendarDates()
+  const sourceOptions = useMemo(() => collectLeadSourceOptions(leads), [leads])
 
-  const statusFiltered =
-    filter === 'all' ? leads : leads.filter((l) => l.status === filter)
+  const assigneeOptions = useMemo(() => {
+    const names = new Set<string>()
+    for (const record of assignees) names.add(record.name)
+    for (const lead of leads) {
+      for (const task of lead.actionables) {
+        if (task.assignee && task.assignee !== UNASSIGNED_ASSIGNEE) {
+          names.add(task.assignee)
+        }
+      }
+    }
+    return Array.from(names).sort((a, b) => a.localeCompare(b))
+  }, [assignees, leads])
 
-  const filteredLeads = filterLeadsBySearch(statusFiltered, searchQuery)
+  const filteredLeads = useMemo(
+    () =>
+      filterLeads(leads, {
+        status: filter,
+        source: sourceFilter,
+        assignee: assigneeFilter,
+        dateFrom,
+        dateTo,
+        dateField,
+        search: searchQuery,
+      }),
+    [leads, filter, sourceFilter, assigneeFilter, dateFrom, dateTo, dateField, searchQuery]
+  )
+
+  const hasExtraFilters =
+    sourceFilter !== 'all' ||
+    assigneeFilter !== 'all' ||
+    Boolean(dateFrom) ||
+    Boolean(dateTo)
+
+  const clearExtraFilters = () => {
+    setSourceFilter('all')
+    setAssigneeFilter('all')
+    setDateFrom('')
+    setDateTo('')
+    setDateField('enquiry')
+  }
 
   const totalPages = Math.max(1, Math.ceil(filteredLeads.length / pageSize))
   const safePage = Math.min(page, totalPages)
@@ -258,7 +316,7 @@ export default function CrmLeads({
 
   useEffect(() => {
     setPage(1)
-  }, [filter, searchQuery, leads.length, pageSize])
+  }, [filter, searchQuery, leads.length, pageSize, sourceFilter, assigneeFilter, dateFrom, dateTo, dateField])
 
   useEffect(() => {
     if (!drawerLead) return
@@ -359,6 +417,65 @@ export default function CrmLeads({
     }
   }
 
+  const fetchAddSlots = async (date: string) => {
+    setAddLoadingSlots(true)
+    try {
+      const response = await fetch('/api/intake/check-availability', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ date }),
+      })
+      const data = await response.json()
+      if (data.success) {
+        setAddAvailableSlots(data.slots)
+      }
+    } catch (error) {
+      console.error('Failed to fetch slots:', error)
+      const slots: Array<{ time: string; available: boolean }> = []
+      for (let hour = 9; hour < 17; hour++) {
+        for (let min = 0; min < 60; min += 20) {
+          slots.push({
+            time: `${hour.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')}`,
+            available: true,
+          })
+        }
+      }
+      setAddAvailableSlots(slots)
+    } finally {
+      setAddLoadingSlots(false)
+    }
+  }
+
+  const closeAddModal = () => {
+    setShowModal(false)
+    setForm(emptyForm)
+    setFormError(false)
+    setAddError('')
+    setAddAvailableSlots([])
+  }
+
+  const handleAddDateSelect = (dateStr: string) => {
+    setForm((prev) => ({
+      ...prev,
+      consultationDateIso: dateStr,
+      consultationTime24: '',
+    }))
+    fetchAddSlots(dateStr)
+  }
+
+  const handleAddStatusChange = (status: CrmStatus) => {
+    setForm((prev) => ({
+      ...prev,
+      status,
+      ...(status !== 'booked'
+        ? { consultationDateIso: '', consultationTime24: '' }
+        : {}),
+    }))
+    if (status !== 'booked') {
+      setAddAvailableSlots([])
+    }
+  }
+
   const startReschedule = () => {
     if (!drawerLead) return
     setIsRescheduling(true)
@@ -425,16 +542,38 @@ export default function CrmLeads({
 
   const startEdit = () => {
     if (!drawerLead) return
-    setEditForm(leadToEditForm(drawerLead))
+    const form = leadToEditForm(drawerLead)
+    setEditForm(form)
     setEditError('')
     setIsEditing(true)
     setShowDeleteConfirm(false)
+    setIsRescheduling(false)
+    if (form.consultationDateIso) {
+      fetchAvailableSlots(form.consultationDateIso)
+    } else {
+      setAvailableSlots([])
+    }
   }
 
   const cancelEdit = () => {
     setIsEditing(false)
     setEditForm(null)
     setEditError('')
+    setAvailableSlots([])
+  }
+
+  const handleEditDateSelect = (dateStr: string) => {
+    setEditForm((prev) =>
+      prev ? { ...prev, consultationDateIso: dateStr, consultationTime24: '' } : prev
+    )
+    fetchAvailableSlots(dateStr)
+  }
+
+  const clearEditConsultation = () => {
+    setEditForm((prev) =>
+      prev ? { ...prev, consultationDateIso: '', consultationTime24: '' } : prev
+    )
+    setAvailableSlots([])
   }
 
   const saveEdit = async () => {
@@ -445,10 +584,19 @@ export default function CrmLeads({
       return
     }
 
+    const hadConsultation =
+      Boolean(drawerLead.consultationDateIso) || drawerLead.date !== '—'
+    const wantsConsultation = Boolean(editForm.consultationDateIso)
+
+    if (wantsConsultation && !editForm.consultationTime24) {
+      setEditError('Select a time slot for the consultation.')
+      return
+    }
+
     setEditSubmitting(true)
     setEditError('')
     try {
-      const updated = await onPatchLead(drawerLead.id, {
+      const patch: LeadPatch = {
         first: editForm.first.trim(),
         last: editForm.last.trim(),
         email: editForm.email.trim(),
@@ -457,12 +605,20 @@ export default function CrmLeads({
         source: editForm.source,
         areas: editForm.areas.length > 0 ? editForm.areas : ['Corporate advisory'],
         matter: editForm.matter.trim(),
-        date: editForm.date.trim() || '—',
-        time: editForm.time.trim() || '—',
-      })
+      }
+
+      if (wantsConsultation) {
+        patch.consultationDateIso = editForm.consultationDateIso
+        patch.consultationTime24 = editForm.consultationTime24
+      } else if (hadConsultation) {
+        patch.clearConsultation = true
+      }
+
+      const updated = await onPatchLead(drawerLead.id, patch)
       setDrawerLead(updated)
       setIsEditing(false)
       setEditForm(null)
+      setAvailableSlots([])
     } catch (error) {
       setEditError(error instanceof Error ? error.message : 'Failed to save changes')
     } finally {
@@ -510,24 +666,38 @@ export default function CrmLeads({
       return
     }
 
+    if (form.status === 'booked') {
+      if (!form.consultationDateIso || !form.consultationTime24) {
+        setAddError('Select a consultation date and time slot.')
+        return
+      }
+    }
+
     setAddSubmitting(true)
     setAddError('')
 
     try {
+      const payload: Record<string, unknown> = {
+        first: form.first.trim(),
+        last: form.last.trim(),
+        email: form.email.trim(),
+        phone: form.phone.trim(),
+        company: form.company.trim(),
+        source: form.source,
+        status: form.status,
+        areas: form.areas.length > 0 ? form.areas : ['Corporate advisory'],
+        matter: form.matter.trim(),
+      }
+
+      if (form.status === 'booked') {
+        payload.consultationDateIso = form.consultationDateIso
+        payload.consultationTime24 = form.consultationTime24
+      }
+
       const response = await fetch('/api/admin/leads', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          first: form.first.trim(),
-          last: form.last.trim(),
-          email: form.email.trim(),
-          phone: form.phone.trim(),
-          company: form.company.trim(),
-          source: form.source,
-          status: form.status,
-          areas: form.areas.length > 0 ? form.areas : ['Corporate advisory'],
-          matter: form.matter.trim(),
-        }),
+        body: JSON.stringify(payload),
       })
 
       if (!response.ok) {
@@ -544,9 +714,7 @@ export default function CrmLeads({
       }
 
       onLeadAdded(newLead)
-      setShowModal(false)
-      setForm(emptyForm)
-      setFormError(false)
+      closeAddModal()
     } catch (error) {
       console.error('Add prospect error:', error)
       setAddError(error instanceof Error ? error.message : 'Failed to add prospect')
@@ -633,6 +801,7 @@ export default function CrmLeads({
             setForm(emptyForm)
             setFormError(false)
             setAddError('')
+            setAddAvailableSlots([])
             setShowModal(true)
           }}
           className="inline-flex items-center gap-1.5 bg-gradient-to-br from-[#7a1322] to-[#5c0e1a] text-white rounded-full px-4 py-2 text-[13px] font-medium shadow-md hover:-translate-y-px transition-transform"
@@ -640,6 +809,93 @@ export default function CrmLeads({
           <span className="text-[17px] leading-none font-semibold">+</span>
           Add prospect
         </button>
+      </div>
+
+      <div className="flex flex-wrap items-end gap-3 mb-4 p-3.5 bg-[#fbf9f6] border border-[#e7e1d9] rounded-[10px]">
+        <div className="min-w-[140px]">
+          <label className="block text-[11px] uppercase tracking-wide text-[#736c63] font-semibold mb-1">
+            Source
+          </label>
+          <select
+            value={sourceFilter}
+            onChange={(e) => setSourceFilter(e.target.value)}
+            className={`${CRM_SELECT_CLASS} text-[13px] py-2`}
+          >
+            <option value="all">All sources</option>
+            {sourceOptions.map((source) => (
+              <option key={source} value={source}>
+                {source}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="min-w-[140px]">
+          <label className="block text-[11px] uppercase tracking-wide text-[#736c63] font-semibold mb-1">
+            Assignee
+          </label>
+          <select
+            value={assigneeFilter}
+            onChange={(e) => setAssigneeFilter(e.target.value)}
+            className={`${CRM_SELECT_CLASS} text-[13px] py-2`}
+          >
+            <option value="all">All assignees</option>
+            <option value="unassigned">Unassigned tasks</option>
+            {assigneeOptions.map((name) => (
+              <option key={name} value={name}>
+                {name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="min-w-[130px]">
+          <label className="block text-[11px] uppercase tracking-wide text-[#736c63] font-semibold mb-1">
+            Date type
+          </label>
+          <select
+            value={dateField}
+            onChange={(e) => setDateField(e.target.value as LeadDateRangeField)}
+            className={`${CRM_SELECT_CLASS} text-[13px] py-2`}
+          >
+            <option value="enquiry">Enquiry date</option>
+            <option value="consultation">Consultation date</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-[11px] uppercase tracking-wide text-[#736c63] font-semibold mb-1">
+            From
+          </label>
+          <input
+            type="date"
+            value={dateFrom}
+            onChange={(e) => setDateFrom(e.target.value)}
+            className={`${CRM_INPUT_CLASS} text-[13px] py-2 w-[148px]`}
+          />
+        </div>
+
+        <div>
+          <label className="block text-[11px] uppercase tracking-wide text-[#736c63] font-semibold mb-1">
+            To
+          </label>
+          <input
+            type="date"
+            value={dateTo}
+            onChange={(e) => setDateTo(e.target.value)}
+            className={`${CRM_INPUT_CLASS} text-[13px] py-2 w-[148px]`}
+          />
+        </div>
+
+        {hasExtraFilters && (
+          <button
+            type="button"
+            onClick={clearExtraFilters}
+            className="text-[12.5px] font-medium text-[#7a1322] hover:underline pb-2"
+          >
+            Clear filters
+          </button>
+        )}
       </div>
 
       <div className="flex flex-wrap items-center gap-2.5 mb-4">
@@ -701,8 +957,8 @@ export default function CrmLeads({
                   <td colSpan={5} className="px-4 py-12 text-center text-[#736c63] text-sm">
                     {searchQuery.trim()
                       ? `No leads match “${searchQuery.trim()}”.`
-                      : filter !== 'all'
-                      ? `No leads with status “${FILTER_CHIPS.find((c) => c.id === filter)?.label ?? filter}”.`
+                      : filter !== 'all' || hasExtraFilters
+                      ? 'No leads match the current filters.'
                       : 'No prospects yet. Use "Add prospect" to create one.'}
                   </td>
                 </tr>
@@ -814,12 +1070,12 @@ export default function CrmLeads({
       {/* Add prospect modal */}
       {showModal && (
         <div className="fixed inset-0 bg-[#1c1a18]/45 z-50 flex items-start justify-center p-8 overflow-y-auto">
-          <div className="bg-[#fbf9f6] text-[#1c1a18] [color-scheme:light] rounded-[14px] w-full max-w-[540px] shadow-2xl">
+          <div className="bg-[#fbf9f6] text-[#1c1a18] [color-scheme:light] rounded-[14px] w-full max-w-[560px] shadow-2xl">
             <div className="flex items-center px-6 py-5 border-b border-[#e7e1d9]">
               <h3 className="text-xl font-medium text-[#1c1a18]">Add a prospect</h3>
               <button
                 type="button"
-                onClick={() => setShowModal(false)}
+                onClick={closeAddModal}
                 className="ml-auto w-8 h-8 rounded-full border border-[#e7e1d9] bg-white flex items-center justify-center text-[#736c63] hover:border-[#7a1322] hover:text-[#7a1322]"
               >
                 <X className="w-4 h-4" />
@@ -916,9 +1172,7 @@ export default function CrmLeads({
                   </label>
                   <select
                     value={form.status}
-                    onChange={(e) =>
-                      setForm((p) => ({ ...p, status: e.target.value as CrmStatus }))
-                    }
+                    onChange={(e) => handleAddStatusChange(e.target.value as CrmStatus)}
                     className={CRM_SELECT_CLASS}
                   >
                     <option value="prospect">Prospect</option>
@@ -926,6 +1180,54 @@ export default function CrmLeads({
                   </select>
                 </div>
               </div>
+
+              {form.status === 'booked' && (
+                <div className="border border-[#e7e1d9] rounded-[10px] p-3 bg-white">
+                  <p className="text-[12.5px] font-medium text-[#1c1a18] mb-2">
+                    Schedule consultation *
+                  </p>
+                  <BookingMonthCalendar
+                    selectedDate={form.consultationDateIso}
+                    onDateSelect={handleAddDateSelect}
+                    variant="crm"
+                    compact
+                    showTitle={false}
+                    helperText="Pick a weekday, then choose an available time slot."
+                  />
+                  {form.consultationDateIso && (
+                    <div className="mt-3">
+                      <p className="text-[12px] text-[#736c63] mb-2">
+                        Time slot {addLoadingSlots ? '(loading…)' : '*'}
+                      </p>
+                      <div className="grid grid-cols-3 gap-1.5 max-h-[120px] overflow-y-auto">
+                        {addAvailableSlots.map((slot) => {
+                          const isSelected = form.consultationTime24 === slot.time
+                          return (
+                            <button
+                              key={slot.time}
+                              type="button"
+                              disabled={!slot.available}
+                              onClick={() =>
+                                slot.available &&
+                                setForm((p) => ({ ...p, consultationTime24: slot.time }))
+                              }
+                              className={`p-2 rounded-lg border text-[11px] transition-colors ${
+                                isSelected
+                                  ? 'border-[#7a1322] bg-[#7a1322] text-white font-medium'
+                                  : !slot.available
+                                  ? 'border-[#e7e1d9] bg-[#f5f5f5] text-[#9ca3af] cursor-not-allowed'
+                                  : 'border-[#e7e1d9] bg-white hover:border-[#7a1322]'
+                              }`}
+                            >
+                              {formatTimeDisplay(slot.time)}
+                            </button>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
 
               <div>
                 <label className="block text-[12.5px] font-medium text-[#1c1a18] mb-1.5">
@@ -970,7 +1272,7 @@ export default function CrmLeads({
             <div className="flex justify-end gap-2.5 px-6 py-4 border-t border-[#e7e1d9]">
               <button
                 type="button"
-                onClick={() => setShowModal(false)}
+                onClick={closeAddModal}
                 className="px-5 py-2.5 text-[13.5px] font-medium border border-[#e7e1d9] rounded-full bg-white hover:border-[#7a1322] hover:text-[#7a1322]"
                 disabled={addSubmitting}
               >
@@ -1146,29 +1448,67 @@ export default function CrmLeads({
                       className={CRM_TEXTAREA_CLASS}
                     />
                   </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-[12.5px] font-medium text-[#1c1a18] mb-1.5">
-                        Consultation date
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="block text-[12.5px] font-medium text-[#1c1a18]">
+                        Consultation
                       </label>
-                      <input
-                        value={editForm.date}
-                        onChange={(e) => setEditForm((p) => p && { ...p, date: e.target.value })}
-                        placeholder="e.g. Wed, Jul 1"
-                        className={CRM_INPUT_CLASS}
-                      />
+                      {(editForm.consultationDateIso || editForm.consultationTime24) && (
+                        <button
+                          type="button"
+                          onClick={clearEditConsultation}
+                          className="text-[11.5px] font-medium text-[#7a1322] hover:underline"
+                        >
+                          Clear
+                        </button>
+                      )}
                     </div>
-                    <div>
-                      <label className="block text-[12.5px] font-medium text-[#1c1a18] mb-1.5">
-                        Consultation time
-                      </label>
-                      <input
-                        value={editForm.time}
-                        onChange={(e) => setEditForm((p) => p && { ...p, time: e.target.value })}
-                        placeholder="e.g. 10:00 AM"
-                        className={CRM_INPUT_CLASS}
-                      />
-                    </div>
+                    <BookingMonthCalendar
+                      selectedDate={editForm.consultationDateIso}
+                      onDateSelect={handleEditDateSelect}
+                      variant="crm"
+                      compact
+                      showTitle={false}
+                      helperText="Optional. Weekdays only — pick a date, then a time slot."
+                    />
+                    {editForm.consultationDateIso && (
+                      <div className="mt-3">
+                        <p className="text-[12px] text-[#736c63] mb-2">
+                          Time slot {loadingSlots ? '(loading…)' : ''}
+                        </p>
+                        <div className="grid grid-cols-3 gap-1.5 max-h-[120px] overflow-y-auto">
+                          {availableSlots.map((slot) => {
+                            const isSelected = editForm.consultationTime24 === slot.time
+                            const isCurrentSlot =
+                              drawerLead.consultationDateIso === editForm.consultationDateIso &&
+                              drawerLead.consultationTime24 === slot.time
+                            const selectable = slot.available || isCurrentSlot
+                            return (
+                              <button
+                                key={slot.time}
+                                type="button"
+                                disabled={!selectable}
+                                onClick={() =>
+                                  selectable &&
+                                  setEditForm((p) =>
+                                    p ? { ...p, consultationTime24: slot.time } : p
+                                  )
+                                }
+                                className={`p-2 rounded-lg border text-[11px] transition-colors ${
+                                  isSelected
+                                    ? 'border-[#7a1322] bg-[#7a1322] text-white font-medium'
+                                    : !selectable
+                                    ? 'border-[#e7e1d9] bg-[#f5f5f5] text-[#9ca3af] cursor-not-allowed'
+                                    : 'border-[#e7e1d9] bg-white hover:border-[#7a1322]'
+                                }`}
+                              >
+                                {formatTimeDisplay(slot.time)}
+                              </button>
+                            )
+                          })}
+                        </div>
+                      </div>
+                    )}
                   </div>
                   {editError && (
                     <p className="text-[12px] text-[#7a1322] font-medium">{editError}</p>
@@ -1260,27 +1600,14 @@ export default function CrmLeads({
                 {isRescheduling ? (
                   <div className="bg-[#fbf9f6] border border-[#e7e1d9] rounded-[10px] p-4 space-y-4">
                     <p className="text-[13px] font-medium text-[#1c1a18]">Pick a new date and time</p>
-                    <div className="grid grid-cols-4 sm:grid-cols-5 gap-1.5 max-h-[140px] overflow-y-auto">
-                      {rescheduleCalendarDates.map((date) => {
-                        const dateStr = date.toISOString().split('T')[0]
-                        const isSelected = rescheduleDate === dateStr
-                        return (
-                          <button
-                            key={dateStr}
-                            type="button"
-                            onClick={() => handleRescheduleDateSelect(dateStr)}
-                            className={`p-2 rounded-lg border text-center text-[11px] transition-colors ${
-                              isSelected
-                                ? 'border-[#7a1322] bg-[#f6ecee] text-[#7a1322] font-semibold'
-                                : 'border-[#e7e1d9] bg-white hover:border-[#7a1322]'
-                            }`}
-                          >
-                            <div className="font-medium">{date.toLocaleDateString('en-US', { weekday: 'short' })}</div>
-                            <div>{date.getDate()}</div>
-                          </button>
-                        )
-                      })}
-                    </div>
+                    <BookingMonthCalendar
+                      selectedDate={rescheduleDate}
+                      onDateSelect={handleRescheduleDateSelect}
+                      variant="crm"
+                      compact
+                      showTitle={false}
+                      helperText="Weekdays only. Select a date to view available slots."
+                    />
                     {rescheduleDate && (
                       <div>
                         <p className="text-[12px] text-[#736c63] mb-2">

@@ -5,6 +5,7 @@ import connectDB from '@/lib/mongodb'
 import Lead from '@/models/Lead'
 import { formatTimelineWhen, leadDocToCrmLead } from '@/lib/crm-leads'
 import type { CrmStatus } from '@/components/CRM/data'
+import { applyConsultationSchedule } from '@/lib/lead-consultation-schedule'
 
 const VALID_STATUSES: CrmStatus[] = [
   'prospect',
@@ -65,6 +66,8 @@ export async function POST(request: NextRequest) {
       ? body.areas
       : ['Corporate advisory']
     const matter = body.matter?.trim() || '—'
+    const consultationDateIso = body.consultationDateIso?.trim() || ''
+    const consultationTime24 = body.consultationTime24?.trim() || ''
 
     const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!first || !last || !emailRe.test(email)) {
@@ -78,6 +81,22 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid status' }, { status: 400 })
     }
 
+    const resolvedStatus = status || 'prospect'
+
+    if (resolvedStatus === 'booked' && (!consultationDateIso || !consultationTime24)) {
+      return NextResponse.json(
+        { error: 'Consultation date and time are required when status is booked' },
+        { status: 400 }
+      )
+    }
+
+    if (consultationDateIso && !consultationTime24) {
+      return NextResponse.json(
+        { error: 'Consultation time is required when a date is provided' },
+        { status: 400 }
+      )
+    }
+
     const now = new Date()
     const lead = await Lead.create({
       first,
@@ -86,7 +105,7 @@ export async function POST(request: NextRequest) {
       phone,
       company,
       source,
-      status: status || 'prospect',
+      status: resolvedStatus,
       areas,
       matter,
       date: '—',
@@ -101,11 +120,28 @@ export async function POST(request: NextRequest) {
       actionables: [],
     })
 
+    if (consultationDateIso && consultationTime24) {
+      const { displayDate, displayTime } = await applyConsultationSchedule(
+        lead,
+        consultationDateIso,
+        consultationTime24
+      )
+      lead.timeline.push({
+        icon: 'calendar',
+        text: `Consultation set to ${displayDate} at ${displayTime}`,
+        when: formatTimelineWhen(now),
+      })
+      await lead.save()
+    }
+
     return NextResponse.json(
       { lead: leadDocToCrmLead(lead) },
       { status: 201 }
     )
   } catch (error) {
+    if (error instanceof Error && error.message === 'This time slot is no longer available') {
+      return NextResponse.json({ error: error.message }, { status: 409 })
+    }
     console.error('Create lead error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }

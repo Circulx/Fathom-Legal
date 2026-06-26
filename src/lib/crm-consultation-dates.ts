@@ -1,5 +1,6 @@
 import type { CrmLead } from '@/components/CRM/data'
 import { parseTimeToMinutes } from '@/lib/time-format'
+import { toDateKey } from '@/lib/booking-calendar'
 
 export { parseTimeToMinutes } from '@/lib/time-format'
 
@@ -49,6 +50,37 @@ export function leadConsultationMatchesDay(lead: CrmLead, calendarDay: Date): bo
     leadDate.getMonth() === calendarDay.getMonth() &&
     leadDate.getDate() === calendarDay.getDate()
   )
+}
+
+export function getLeadConsultationDateKey(
+  lead: CrmLead,
+  nearDate: Date = new Date()
+): string | null {
+  if (lead.consultationDateIso) return lead.consultationDateIso
+  const resolved = getLeadConsultationDate(lead, nearDate)
+  return resolved ? toDateKey(resolved) : null
+}
+
+export function groupLeadsByConsultationDate(
+  leads: CrmLead[],
+  referenceDate: Date = new Date()
+): Map<string, CrmLead[]> {
+  const map = new Map<string, CrmLead[]>()
+
+  for (const lead of leads) {
+    if (lead.date === '—') continue
+    const key = getLeadConsultationDateKey(lead, referenceDate)
+    if (!key) continue
+    const list = map.get(key) ?? []
+    list.push(lead)
+    map.set(key, list)
+  }
+
+  for (const list of map.values()) {
+    list.sort((a, b) => parseTimeToMinutes(a.time) - parseTimeToMinutes(b.time))
+  }
+
+  return map
 }
 
 export function compareLeadConsultationDates(

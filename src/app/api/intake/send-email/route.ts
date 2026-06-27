@@ -13,16 +13,14 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const gmailUser = process.env.GMAIL_USER?.trim()
-    // Remove all spaces from app password (it comes as "vtck vzpb mdxv bgzr")
-    const gmailPassword = process.env.GMAIL_APP_PASSWORD?.replace(/\s+/g, '')
+    const zohoEmail = process.env.ZOHO_EMAIL?.trim()
+    const zohoPassword = process.env.ZOHO_PASSWORD?.trim()
 
-    if (!gmailUser || !gmailPassword) {
-      console.error('[v0] Gmail credentials not configured', {
-        hasUser: !!process.env.GMAIL_USER,
-        hasPassword: !!process.env.GMAIL_APP_PASSWORD,
-        userValue: gmailUser,
-        passwordLength: gmailPassword?.length || 0
+    if (!zohoEmail || !zohoPassword) {
+      console.error('[v0] Zoho credentials not configured', {
+        hasEmail: !!process.env.ZOHO_EMAIL,
+        hasPassword: !!process.env.ZOHO_PASSWORD,
+        emailValue: zohoEmail
       })
       return NextResponse.json(
         { error: 'Email service not configured' },
@@ -30,14 +28,16 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log('[v0] Gmail auth initializing for user:', gmailUser)
+    console.log('[v0] Zoho email auth initializing for user:', zohoEmail)
 
-    // Create transporter using Gmail service
+    // Create transporter using Zoho Mail service
     const transporter = nodemailer.createTransport({
-      service: 'gmail',
+      host: process.env.ZOHO_SMTP_HOST || 'smtp.zoho.com',
+      port: parseInt(process.env.ZOHO_SMTP_PORT || '465'),
+      secure: true,
       auth: {
-        user: gmailUser,
-        pass: gmailPassword
+        user: zohoEmail,
+        pass: zohoPassword
       }
     })
 
@@ -353,17 +353,17 @@ export async function POST(request: NextRequest) {
     try {
       console.log('[v0] Sending email to:', email)
       const result = await transporter.sendMail({
-        from: gmailUser,
+        from: zohoEmail,
         to: email,
         subject: `Consultation Confirmed - ${formattedDate} at ${selectedTime} IST | Fathom Legal`,
         html: emailHTML,
-        replyTo: gmailUser
+        replyTo: zohoEmail
       })
-      console.log('[v0] Email sent successfully:', result.messageId)
+      console.log('[v0] Email sent successfully via Zoho:', result.messageId)
       emailSent = true
     } catch (emailErr) {
       emailError = emailErr instanceof Error ? emailErr.message : 'Unknown email error'
-      console.error('[v0] Email sending failed:', {
+      console.error('[v0] Zoho email sending failed:', {
         error: emailError,
         code: emailErr instanceof Error && 'code' in emailErr ? (emailErr as any).code : 'N/A',
         response: emailErr instanceof Error && 'response' in emailErr ? (emailErr as any).response : 'N/A'

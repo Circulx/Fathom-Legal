@@ -209,6 +209,7 @@ export default function CrmLeads({
   onLeadDeleted,
   onRescheduleLead,
   onResendConfirmationEmail,
+  onSendLeadEmail,
   onMergeLead,
   searchQuery = '',
   onSearchQueryChange,
@@ -233,6 +234,11 @@ export default function CrmLeads({
   ) => Promise<{ lead: CrmLead; emailSent: boolean; emailError: string | null }>
   onResendConfirmationEmail?: (
     id: string
+  ) => Promise<{ lead: CrmLead; emailSent: boolean; emailError: string | null }>
+  onSendLeadEmail?: (
+    id: string,
+    subject: string,
+    body: string
   ) => Promise<{ lead: CrmLead; emailSent: boolean; emailError: string | null }>
   onMergeLead?: (keeperId: string, mergeLeadId: string) => Promise<CrmLead>
   searchQuery?: string
@@ -278,6 +284,12 @@ export default function CrmLeads({
   const [rescheduleNotice, setRescheduleNotice] = useState('')
   const [resendSubmitting, setResendSubmitting] = useState(false)
   const [resendNotice, setResendNotice] = useState('')
+  const [isComposing, setIsComposing] = useState(false)
+  const [composeSubject, setComposeSubject] = useState('')
+  const [composeBody, setComposeBody] = useState('')
+  const [composeSubmitting, setComposeSubmitting] = useState(false)
+  const [composeError, setComposeError] = useState('')
+  const [composeNotice, setComposeNotice] = useState('')
   const [showDuplicatesOnly, setShowDuplicatesOnly] = useState(false)
   const [mergeConfirmId, setMergeConfirmId] = useState<string | null>(null)
   const [mergeSubmitting, setMergeSubmitting] = useState(false)
@@ -430,6 +442,11 @@ export default function CrmLeads({
         setRescheduleError('')
         setRescheduleNotice('')
         setResendNotice('')
+        setIsComposing(false)
+        setComposeSubject('')
+        setComposeBody('')
+        setComposeError('')
+        setComposeNotice('')
         setMergeConfirmId(null)
         setMergeError('')
       }
@@ -439,6 +456,11 @@ export default function CrmLeads({
       setEditForm(null)
       setShowDeleteConfirm(false)
       setIsRescheduling(false)
+      setIsComposing(false)
+      setComposeSubject('')
+      setComposeBody('')
+      setComposeError('')
+      setComposeNotice('')
     }
   }, [drawerLeadId, pool, onDrawerLeadIdChange])
 
@@ -477,6 +499,11 @@ export default function CrmLeads({
       setEditForm(null)
       setShowDeleteConfirm(false)
       setIsRescheduling(false)
+      setIsComposing(false)
+      setComposeSubject('')
+      setComposeBody('')
+      setComposeError('')
+      setComposeNotice('')
     }
   }
 
@@ -572,6 +599,7 @@ export default function CrmLeads({
     if (!drawerLead) return
     setIsRescheduling(true)
     setIsEditing(false)
+    setIsComposing(false)
     setShowDeleteConfirm(false)
     setRescheduleError('')
     const prefilledDate = drawerLead.consultationDateIso || ''
@@ -640,6 +668,7 @@ export default function CrmLeads({
     setIsEditing(true)
     setShowDeleteConfirm(false)
     setIsRescheduling(false)
+    setIsComposing(false)
     if (form.consultationDateIso) {
       fetchAvailableSlots(form.consultationDateIso)
     } else {
@@ -744,7 +773,7 @@ export default function CrmLeads({
     )
   }
 
-  const openEmailClient = (lead: CrmLead) => {
+  const buildDefaultCompose = (lead: CrmLead) => {
     const subject =
       lead.date !== '—'
         ? `Your consultation with Fathom Legal - ${lead.date}`
@@ -757,8 +786,66 @@ export default function CrmLeads({
       }
       body += '\n\n'
     }
-    const composeUrl = `https://mail.zoho.in/zm/#compose?to=${encodeURIComponent(lead.email)}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
-    window.open(composeUrl, '_blank', 'noopener,noreferrer')
+    return { subject, body }
+  }
+
+  const startCompose = () => {
+    if (!drawerLead) return
+    const { subject, body } = buildDefaultCompose(drawerLead)
+    setComposeSubject(subject)
+    setComposeBody(body)
+    setComposeError('')
+    setComposeNotice('')
+    setIsComposing(true)
+    setIsEditing(false)
+    setIsRescheduling(false)
+    setShowDeleteConfirm(false)
+    setRescheduleNotice('')
+    setResendNotice('')
+  }
+
+  const cancelCompose = () => {
+    setIsComposing(false)
+    setComposeSubject('')
+    setComposeBody('')
+    setComposeError('')
+    setComposeNotice('')
+  }
+
+  const handleSendCompose = async () => {
+    if (!drawerLead || !onSendLeadEmail) return
+    if (!composeSubject.trim()) {
+      setComposeError('Subject is required.')
+      return
+    }
+    if (!composeBody.trim()) {
+      setComposeError('Message is required.')
+      return
+    }
+
+    setComposeSubmitting(true)
+    setComposeError('')
+    setComposeNotice('')
+    try {
+      const { lead: updated, emailSent, emailError } = await onSendLeadEmail(
+        drawerLead.id,
+        composeSubject.trim(),
+        composeBody.trim()
+      )
+      setDrawerLead(updated)
+      setIsComposing(false)
+      setComposeSubject('')
+      setComposeBody('')
+      setComposeNotice(
+        emailSent
+          ? 'Email sent to the client from client.accounts@fathomlegal.com.'
+          : `Could not send email${emailError ? ` (${emailError})` : ''}. Check Zoho credentials or try again.`
+      )
+    } catch (error) {
+      setComposeError(error instanceof Error ? error.message : 'Failed to send email')
+    } finally {
+      setComposeSubmitting(false)
+    }
   }
 
   const handleResendConfirmation = async () => {
@@ -1510,7 +1597,7 @@ export default function CrmLeads({
           <aside className="fixed top-0 right-0 bottom-0 w-[440px] max-w-[92vw] bg-[#fbf9f6] text-[#2a2724] [color-scheme:light] z-[60] flex flex-col shadow-2xl">
             <div className="bg-gradient-to-br from-[#7a1322] to-[#5c0e1a] text-white p-6 relative">
               <div className="absolute top-5 right-5 flex items-center gap-2">
-                {!isEditing && (
+                {!isEditing && !isComposing && (
                   <button
                     type="button"
                     onClick={startEdit}
@@ -1542,7 +1629,61 @@ export default function CrmLeads({
             </div>
 
             <div className="flex-1 overflow-y-auto p-5 space-y-5">
-              {isEditing && editForm ? (
+              {isComposing ? (
+                <section className="space-y-4">
+                  <h4 className="text-[11px] uppercase tracking-widest text-[#736c63] font-semibold">
+                    Compose email
+                  </h4>
+                  <p className="text-[12.5px] text-[#736c63]">
+                    Sends from <span className="font-medium text-[#1c1a18]">client.accounts@fathomlegal.com</span> to{' '}
+                    <span className="font-medium text-[#1c1a18]">{drawerLead.email}</span>
+                  </p>
+                  <div>
+                    <label className="block text-[12.5px] font-medium text-[#1c1a18] mb-1.5">
+                      Subject *
+                    </label>
+                    <input
+                      type="text"
+                      value={composeSubject}
+                      onChange={(e) => setComposeSubject(e.target.value)}
+                      className={CRM_INPUT_CLASS}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[12.5px] font-medium text-[#1c1a18] mb-1.5">
+                      Message *
+                    </label>
+                    <textarea
+                      value={composeBody}
+                      onChange={(e) => setComposeBody(e.target.value)}
+                      rows={10}
+                      className={CRM_TEXTAREA_CLASS}
+                    />
+                  </div>
+                  {composeError && (
+                    <p className="text-[12px] text-[#7a1322] font-medium">{composeError}</p>
+                  )}
+                  <div className="flex gap-2 pt-1">
+                    <button
+                      type="button"
+                      onClick={() => void handleSendCompose()}
+                      disabled={composeSubmitting || !onSendLeadEmail}
+                      className="inline-flex items-center gap-2 px-4 py-2.5 text-[13px] font-medium text-white rounded-full bg-gradient-to-br from-[#7a1322] to-[#5c0e1a] disabled:opacity-50"
+                    >
+                      <Send className="w-4 h-4" />
+                      {composeSubmitting ? 'Sending…' : 'Send email'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={cancelCompose}
+                      disabled={composeSubmitting}
+                      className="px-4 py-2.5 text-[13px] font-medium border border-[#e7e1d9] rounded-full bg-white hover:border-[#7a1322] hover:text-[#7a1322]"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </section>
+              ) : isEditing && editForm ? (
                 <section className="space-y-4">
                   <h4 className="text-[11px] uppercase tracking-widest text-[#736c63] font-semibold">
                     Edit lead details
@@ -1854,16 +1995,17 @@ export default function CrmLeads({
                 </div>
               </section>
 
-              {(rescheduleNotice || resendNotice) && !isRescheduling && (
+              {(rescheduleNotice || resendNotice || composeNotice) && !isRescheduling && !isComposing && (
                 <div
                   className={`rounded-[10px] p-3 text-[13px] ${
-                    (rescheduleNotice || resendNotice || '').includes('notified by email') ||
-                    (rescheduleNotice || resendNotice || '').includes('sent to the client')
+                    (rescheduleNotice || resendNotice || composeNotice || '').includes('notified by email') ||
+                    (rescheduleNotice || resendNotice || composeNotice || '').includes('sent to the client') ||
+                    (rescheduleNotice || resendNotice || composeNotice || '').includes('Email sent')
                       ? 'bg-[#f0f6f1] border border-[#86efac] text-[#166534]'
                       : 'bg-[#fef3c7] border border-[#fcd34d] text-[#92400e]'
                   }`}
                 >
-                  {rescheduleNotice || resendNotice}
+                  {rescheduleNotice || resendNotice || composeNotice}
                 </div>
               )}
 
@@ -2091,7 +2233,7 @@ export default function CrmLeads({
               )}
             </div>
 
-            {!isEditing && !isRescheduling && (
+            {!isEditing && !isRescheduling && !isComposing && (
             <div className="p-4 border-t border-[#e7e1d9] flex flex-wrap gap-2.5 bg-[#fbf9f6]">
               {drawerLead.date !== '—' && onResendConfirmationEmail && (
                 <button
@@ -2104,16 +2246,18 @@ export default function CrmLeads({
                   {resendSubmitting ? 'Sending…' : 'Resend confirmation'}
                 </button>
               )}
-              <button
-                type="button"
-                onClick={() => openEmailClient(drawerLead)}
-                className={`inline-flex items-center justify-center gap-2 py-3 text-[13.5px] font-medium border border-[#e7e1d9] rounded-full bg-white hover:border-[#7a1322] hover:text-[#7a1322] ${
-                  drawerLead.date !== '—' && onResendConfirmationEmail ? 'px-5' : 'flex-1'
-                }`}
-              >
-                <Mail className="w-4 h-4" />
-                Compose
-              </button>
+              {onSendLeadEmail && (
+                <button
+                  type="button"
+                  onClick={startCompose}
+                  className={`inline-flex items-center justify-center gap-2 py-3 text-[13.5px] font-medium border border-[#e7e1d9] rounded-full bg-white hover:border-[#7a1322] hover:text-[#7a1322] ${
+                    drawerLead.date !== '—' && onResendConfirmationEmail ? 'px-5' : 'flex-1'
+                  }`}
+                >
+                  <Mail className="w-4 h-4" />
+                  Compose
+                </button>
+              )}
               <button
                 type="button"
                 onClick={startReschedule}

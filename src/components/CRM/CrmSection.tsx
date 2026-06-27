@@ -519,6 +519,29 @@ export default function CrmSection({
     }
   }, [])
 
+  const sendLeadEmail = useCallback(async (id: string, subject: string, body: string) => {
+    const response = await fetch(`/api/admin/leads/${id}/send-email`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ subject, body }),
+    })
+    const data = await response.json().catch(() => ({}))
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to send email')
+    }
+    const updated: CrmLead = {
+      ...data.lead,
+      status: normalizeStatus(data.lead.status),
+      actionables: data.lead.actionables ?? [],
+    }
+    setLeads((prev) => prev.map((l) => (l.id === id ? updated : l)))
+    return {
+      lead: updated,
+      emailSent: Boolean(data.emailSent),
+      emailError: data.emailError ?? null,
+    }
+  }, [])
+
   const mergeLead = useCallback(async (keeperId: string, mergeLeadId: string) => {
     const response = await fetch(`/api/admin/leads/${keeperId}/merge`, {
       method: 'POST',
@@ -550,6 +573,7 @@ export default function CrmSection({
     onLeadDeleted: deleteLead,
     onRescheduleLead: rescheduleLead,
     onResendConfirmationEmail: resendConfirmationEmail,
+    onSendLeadEmail: sendLeadEmail,
     onMergeLead: mergeLead,
     searchQuery,
     onSearchQueryChange: setSearchQuery,

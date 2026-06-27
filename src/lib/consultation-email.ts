@@ -154,17 +154,19 @@ function buildRescheduleEmailHtml(params: RescheduleEmailParams): string {
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <style>
-          body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; background-color: #f5f5f5; margin: 0; padding: 0; }
-          .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); overflow: hidden; }
-          .header { background: linear-gradient(135deg, #A5292A 0%, #8a2123 100%); color: white; padding: 40px 30px; text-align: center; }
-          .header h1 { font-size: 28px; font-weight: 700; margin-bottom: 10px; }
+          body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; background-color: #f5f5f5; margin: 0; padding: 0; }
+          .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; }
+          .header { background-color: #A5292A; color: white; padding: 36px 30px; text-align: center; }
+          .header h1 { font-size: 26px; font-weight: 700; margin: 0 0 8px 0; }
+          .header p { font-size: 14px; margin: 0; opacity: 0.95; }
           .content { padding: 30px; }
-          .details-box { background-color: #f9f9f9; border-left: 4px solid #A5292A; padding: 20px; border-radius: 4px; margin: 20px 0; }
-          .detail-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #efefef; font-size: 14px; }
-          .detail-row:last-child { border-bottom: none; }
-          .meeting-section { background: linear-gradient(135deg, #A5292A 0%, #8a2123 100%); color: white; padding: 25px; border-radius: 8px; text-align: center; margin: 25px 0; }
-          .meeting-link { display: inline-block; background-color: #ffffff; color: #A5292A; padding: 14px 36px; text-decoration: none; border-radius: 6px; font-weight: 700; font-size: 16px; margin-bottom: 12px; }
-          .meeting-url { background-color: rgba(255,255,255,0.15); padding: 12px; border-radius: 6px; word-break: break-all; font-size: 13px; font-family: monospace; }
+          .details-box { background-color: #f9f9f9; border-left: 4px solid #A5292A; padding: 20px; margin: 20px 0; }
+          .details-title { font-size: 14px; font-weight: 600; color: #222; margin: 0 0 12px 0; text-transform: uppercase; letter-spacing: 0.5px; }
+          .detail-item { font-size: 14px; margin-bottom: 10px; color: #555; line-height: 1.6; }
+          .detail-label { font-weight: 600; color: #222; }
+          .meeting-section { background-color: #A5292A; color: white; padding: 25px; text-align: center; margin: 25px 0; }
+          .meeting-link { display: inline-block; background-color: #ffffff; color: #A5292A; padding: 14px 36px; text-decoration: none; border-radius: 6px; font-weight: 700; font-size: 16px; margin: 12px 0; }
+          .meeting-url { background-color: #8a2123; padding: 12px; word-break: break-all; font-size: 13px; color: #ffffff; }
           .footer { background-color: #f9f9f9; padding: 25px; text-align: center; border-top: 1px solid #eee; font-size: 12px; color: #666; }
         </style>
       </head>
@@ -175,27 +177,28 @@ function buildRescheduleEmailHtml(params: RescheduleEmailParams): string {
             <p>Your new appointment time with Fathom Legal</p>
           </div>
           <div class="content">
-            <p>Dear ${params.firstName},</p>
-            <p style="margin-top: 12px;">Your consultation with Fathom Legal has been <strong>rescheduled</strong>. Please note your updated appointment details below.</p>
+            <p style="margin: 0 0 12px 0;">Dear ${params.firstName},</p>
+            <p style="margin: 0 0 16px 0;">Your consultation with Fathom Legal has been <strong>rescheduled</strong>. Please note your updated appointment details below.</p>
             ${previousSlot}
             <div class="details-box">
-              <div class="detail-row"><span><strong>Name</strong></span><span>${params.firstName} ${params.lastName}</span></div>
-              <div class="detail-row"><span><strong>New date</strong></span><span>${formattedDate}</span></div>
-              <div class="detail-row"><span><strong>New time</strong></span><span>${displayTime} IST</span></div>
-              <div class="detail-row"><span><strong>Duration</strong></span><span>20 minutes</span></div>
-              <div class="detail-row"><span><strong>Services</strong></span><span>${matter}</span></div>
+              <p class="details-title">Updated appointment</p>
+              <div class="detail-item"><span class="detail-label">Name:</span> ${params.firstName} ${params.lastName}</div>
+              <div class="detail-item"><span class="detail-label">New date:</span> ${formattedDate}</div>
+              <div class="detail-item"><span class="detail-label">New time:</span> ${displayTime} IST</div>
+              <div class="detail-item"><span class="detail-label">Duration:</span> 20 minutes</div>
+              <div class="detail-item" style="margin-bottom: 0;"><span class="detail-label">Services:</span> ${matter}</div>
             </div>
             <div class="meeting-section">
-              <h3 style="margin-bottom: 16px;">Your Google Meet link</h3>
-              <a href="${params.googleMeetLink}" class="meeting-link">Join Meeting</a>
+              <p style="margin: 0 0 8px 0; font-size: 16px; font-weight: 600;">Your Google Meet link</p>
+              <a href="${params.googleMeetLink}" class="meeting-link" style="color: #A5292A;">Join Meeting</a>
               <div class="meeting-url">${params.googleMeetLink}</div>
             </div>
-            <p style="font-size: 13px; color: #666;">If you have any questions or need to make further changes, please reply to this email at least 24 hours before your appointment.</p>
+            <p style="font-size: 13px; color: #666; margin: 0;">If you have any questions or need to make further changes, please reply to this email at least 24 hours before your appointment.</p>
             ${params.sessionId ? `<p style="font-size: 12px; color: #999; margin-top: 20px;">Session ID: ${params.sessionId}</p>` : ''}
           </div>
           <div class="footer">
-            <strong>Fathom Legal - Advocates & Corporate Consultants</strong>
-            <p>© ${new Date().getFullYear()} Fathom Legal. All rights reserved.</p>
+            <strong>Fathom Legal - Advocates &amp; Corporate Consultants</strong>
+            <p style="margin: 8px 0 0 0;">© ${new Date().getFullYear()} Fathom Legal. All rights reserved.</p>
           </div>
         </div>
       </body>
@@ -203,10 +206,19 @@ function buildRescheduleEmailHtml(params: RescheduleEmailParams): string {
   `
 }
 
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+}
+
 async function sendZohoHtmlEmail(options: {
   to: string
   subject: string
   html: string
+  text?: string
 }): Promise<EmailSendResult> {
   const zoho = getZohoTransporter()
   if (!zoho) {
@@ -219,6 +231,7 @@ async function sendZohoHtmlEmail(options: {
       from: zoho.fromEmail,
       to: options.to,
       subject: options.subject,
+      text: options.text,
       html: options.html,
       replyTo: zoho.fromEmail,
     })
@@ -228,6 +241,22 @@ async function sendZohoHtmlEmail(options: {
     console.error('Zoho email send failed:', emailError)
     return { emailSent: false, emailError }
   }
+}
+
+export async function sendCustomEmail(options: {
+  to: string
+  subject: string
+  body: string
+}): Promise<EmailSendResult> {
+  const text = options.body.trim()
+  const html = `<div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; white-space: pre-wrap;">${escapeHtml(text)}</div>`
+
+  return sendZohoHtmlEmail({
+    to: options.to,
+    subject: options.subject.trim(),
+    text,
+    html,
+  })
 }
 
 export async function sendConsultationConfirmationEmail(

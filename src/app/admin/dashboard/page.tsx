@@ -52,8 +52,14 @@ import {
 } from 'lucide-react'
 import { Navbar } from '@/components/Navbar'
 import CrmSection, { type CrmNavigateHandler, type CrmView } from '@/components/CRM/CrmSection'
-import { normalizeStatus, type CrmLead } from '@/components/CRM/data'
+import {
+  AWAITING_RESPONSE_STATUSES,
+  normalizeStatus,
+  type CrmLead,
+  type LeadListFilters,
+} from '@/components/CRM/data'
 import { computeCrmStats } from '@/lib/crm-analytics'
+import { isoDateRangeLastNDays } from '@/lib/crm-date-ranges'
 
 interface Template {
   _id: string
@@ -532,6 +538,8 @@ export default function AdminDashboard() {
   const [crmExpanded, setCrmExpanded] = useState(false)
   const [crmLeadCount, setCrmLeadCount] = useState(0)
   const [crmLeads, setCrmLeads] = useState<CrmLead[]>([])
+  const [crmSeedFilters, setCrmSeedFilters] = useState<LeadListFilters | null>(null)
+  const [crmSeedFilterKey, setCrmSeedFilterKey] = useState(0)
   
   // Templates state
   const [templates, setTemplates] = useState<Template[]>([])
@@ -1817,7 +1825,11 @@ export default function AdminDashboard() {
     }
   }
 
-  const handleCrmNavigate: CrmNavigateHandler = (view) => {
+  const navigateCrm: CrmNavigateHandler = (view, filters) => {
+    if (view === 'leads' && filters !== undefined) {
+      setCrmSeedFilters(filters)
+      setCrmSeedFilterKey((k) => k + 1)
+    }
     const map: Record<CrmView, string> = {
       overview: 'crm-overview',
       leads: 'crm-leads',
@@ -1901,7 +1913,18 @@ export default function AdminDashboard() {
                       <button
                         key={item.id}
                         type="button"
-                        onClick={() => handleSectionChange(item.id)}
+                        onClick={() =>
+                          navigateCrm(
+                            item.id === 'crm-overview'
+                              ? 'overview'
+                              : item.id === 'crm-leads'
+                              ? 'leads'
+                              : item.id === 'crm-consultations'
+                              ? 'consultations'
+                              : 'analytics',
+                            item.id === 'crm-leads' ? null : undefined
+                          )
+                        }
                         className={`w-full flex items-center px-3 py-2.5 text-left transition-all duration-200 ${
                           activeSection === item.id
                             ? 'bg-gray-100 text-gray-900 font-semibold'
@@ -2043,7 +2066,7 @@ export default function AdminDashboard() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                   <button
                     type="button"
-                    onClick={() => handleSectionChange('crm-leads')}
+                    onClick={() => navigateCrm('leads', null)}
                     className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 text-left hover:border-[#7a1322]/30 hover:shadow-md transition-all"
                   >
                     <div className="flex items-center justify-between">
@@ -2060,7 +2083,12 @@ export default function AdminDashboard() {
 
                   <button
                     type="button"
-                    onClick={() => handleSectionChange('crm-leads')}
+                    onClick={() =>
+                      navigateCrm('leads', {
+                        ...isoDateRangeLastNDays(7),
+                        dateField: 'enquiry',
+                      })
+                    }
                     className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 text-left hover:border-[#7a1322]/30 hover:shadow-md transition-all"
                   >
                     <div className="flex items-center justify-between">
@@ -2077,7 +2105,7 @@ export default function AdminDashboard() {
 
                   <button
                     type="button"
-                    onClick={() => handleSectionChange('crm-consultations')}
+                    onClick={() => navigateCrm('consultations')}
                     className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 text-left hover:border-[#7a1322]/30 hover:shadow-md transition-all"
                   >
                     <div className="flex items-center justify-between">
@@ -2094,7 +2122,9 @@ export default function AdminDashboard() {
 
                   <button
                     type="button"
-                    onClick={() => handleSectionChange('crm-leads')}
+                    onClick={() =>
+                      navigateCrm('leads', { statuses: AWAITING_RESPONSE_STATUSES })
+                    }
                     className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 text-left hover:border-[#7a1322]/30 hover:shadow-md transition-all"
                   >
                     <div className="flex items-center justify-between">
@@ -2782,8 +2812,10 @@ export default function AdminDashboard() {
             {isCrmSection(activeSection) && (
               <CrmSection
                 activeView={getCrmView(activeSection)}
-                onNavigate={handleCrmNavigate}
+                onNavigate={navigateCrm}
                 onLeadsCountChange={setCrmLeadCount}
+                seedLeadsFilters={crmSeedFilters}
+                seedLeadsFilterKey={crmSeedFilterKey}
               />
             )}
 

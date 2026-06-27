@@ -24,6 +24,7 @@ import {
   Download,
   ChevronLeft,
   ChevronRight,
+  GitMerge,
 } from 'lucide-react'
 import {
   CRM_STATUSES,
@@ -46,6 +47,7 @@ import LeadActionables from './LeadActionables'
 import CrmAssigneeManager from './CrmAssigneeManager'
 import type { LeadPatch } from './data'
 import { downloadLeadsCsv } from '@/lib/crm-export'
+import { getDuplicateLeadIds, getDuplicateSiblings } from '@/lib/crm-duplicate-leads'
 import { formatTimeDisplay, toTime24 } from '@/lib/time-format'
 import BookingMonthCalendar from '@/components/BookingMonthCalendar'
 import { getLeadConsultationDate } from '@/lib/crm-consultation-dates'
@@ -71,6 +73,7 @@ const TIMELINE_ICONS: Record<string, typeof Inbox> = {
   mail: Mail,
   file: FileText,
   check: CircleCheck,
+  users: Users,
 }
 
 function StatusDropdown({
@@ -205,6 +208,8 @@ export default function CrmLeads({
   onLeadAdded,
   onLeadDeleted,
   onRescheduleLead,
+  onResendConfirmationEmail,
+  onMergeLead,
   searchQuery = '',
   onSearchQueryChange,
   drawerLeadId = null,
@@ -226,6 +231,10 @@ export default function CrmLeads({
     date: string,
     time: string
   ) => Promise<{ lead: CrmLead; emailSent: boolean; emailError: string | null }>
+  onResendConfirmationEmail?: (
+    id: string
+  ) => Promise<{ lead: CrmLead; emailSent: boolean; emailError: string | null }>
+  onMergeLead?: (keeperId: string, mergeLeadId: string) => Promise<CrmLead>
   searchQuery?: string
   onSearchQueryChange?: (query: string) => void
   drawerLeadId?: string | null
@@ -267,6 +276,12 @@ export default function CrmLeads({
   const [rescheduleError, setRescheduleError] = useState('')
   const [rescheduleSubmitting, setRescheduleSubmitting] = useState(false)
   const [rescheduleNotice, setRescheduleNotice] = useState('')
+  const [resendSubmitting, setResendSubmitting] = useState(false)
+  const [resendNotice, setResendNotice] = useState('')
+  const [showDuplicatesOnly, setShowDuplicatesOnly] = useState(false)
+  const [mergeConfirmId, setMergeConfirmId] = useState<string | null>(null)
+  const [mergeSubmitting, setMergeSubmitting] = useState(false)
+  const [mergeError, setMergeError] = useState('')
   const [showAssigneeManager, setShowAssigneeManager] = useState(false)
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState<number>(20)
@@ -286,31 +301,50 @@ export default function CrmLeads({
     return Array.from(names).sort((a, b) => a.localeCompare(b))
   }, [assignees, leads])
 
-  const filteredLeads = useMemo(
-    () =>
-      filterLeads(leads, {
-        status: statusesFilter?.length ? 'all' : filter,
-        statuses: statusesFilter ?? undefined,
-        source: sourceFilter,
-        assignee: assigneeFilter,
-        practiceArea: practiceAreaFilter,
-        dateFrom,
-        dateTo,
-        dateField,
-        search: searchQuery,
-      }),
-    [
-      leads,
-      filter,
-      statusesFilter,
-      sourceFilter,
-      assigneeFilter,
-      practiceAreaFilter,
+  const duplicateLeadIds = useMemo(() => getDuplicateLeadIds(leads), [leads])
+  const duplicateGroupCount = useMemo(() => {
+    const emails = new Set<string>()
+    for (const id of duplicateLeadIds) {
+      const lead = leads.find((l) => l.id === id)
+      if (lead) emails.add(lead.email.trim().toLowerCase())
+    }
+    return emails.size
+  }, [duplicateLeadIds, leads])
+
+  const filteredLeads = useMemo(() => {
+    let result = filterLeads(leads, {
+      status: statusesFilter?.length ? 'all' : filter,
+      statuses: statusesFilter ?? undefined,
+      source: sourceFilter,
+      assignee: assigneeFilter,
+      practiceArea: practiceAreaFilter,
       dateFrom,
       dateTo,
       dateField,
-      searchQuery,
-    ]
+      search: searchQuery,
+    })
+    if (showDuplicatesOnly) {
+      result = result.filter((lead) => duplicateLeadIds.has(lead.id))
+    }
+    return result
+  }, [
+    leads,
+    filter,
+    statusesFilter,
+    sourceFilter,
+    assigneeFilter,
+    practiceAreaFilter,
+    dateFrom,
+    dateTo,
+    dateField,
+    searchQuery,
+    showDuplicatesOnly,
+    duplicateLeadIds,
+  ])
+
+  const drawerDuplicates = useMemo(
+    () => (drawerLead ? getDuplicateSiblings(drawerLead, pool) : []),
+    [drawerLead, pool]
   )
 
   const hasExtraFilters =
@@ -319,7 +353,8 @@ export default function CrmLeads({
     practiceAreaFilter !== 'all' ||
     Boolean(statusesFilter?.length) ||
     Boolean(dateFrom) ||
-    Boolean(dateTo)
+    Boolean(dateTo) ||
+    showDuplicatesOnly
 
   const clearExtraFilters = () => {
     setSourceFilter('all')
@@ -330,6 +365,7 @@ export default function CrmLeads({
     setDateTo('')
     setDateField('enquiry')
     setFilter('all')
+    setShowDuplicatesOnly(false)
   }
 
   useEffect(() => {
@@ -368,6 +404,7 @@ export default function CrmLeads({
     dateFrom,
     dateTo,
     dateField,
+    showDuplicatesOnly,
   ])
 
   useEffect(() => {
@@ -392,6 +429,9 @@ export default function CrmLeads({
         setRescheduleTime('')
         setRescheduleError('')
         setRescheduleNotice('')
+        setResendNotice('')
+        setMergeConfirmId(null)
+        setMergeError('')
       }
     } else {
       setDrawerLead(null)
@@ -705,10 +745,65 @@ export default function CrmLeads({
   }
 
   const openEmailClient = (lead: CrmLead) => {
-    const subject = 'Re: Your enquiry with Fathom Legal'
-    const body = `Hi ${lead.first},\n\n`
-    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(lead.email)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
-    window.open(gmailUrl, '_blank', 'noopener,noreferrer')
+    const subject =
+      lead.date !== '—'
+        ? `Your consultation with Fathom Legal - ${lead.date}`
+        : 'Re: Your enquiry with Fathom Legal'
+    let body = `Hi ${lead.first},\n\n`
+    if (lead.date !== '—') {
+      body += `Regarding your consultation on ${lead.date} at ${lead.time} IST`
+      if (lead.googleMeetLink) {
+        body += `:\n${lead.googleMeetLink}`
+      }
+      body += '\n\n'
+    }
+    const composeUrl = `https://mail.zoho.in/zm/#compose?to=${encodeURIComponent(lead.email)}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+    window.open(composeUrl, '_blank', 'noopener,noreferrer')
+  }
+
+  const handleResendConfirmation = async () => {
+    if (!drawerLead || !onResendConfirmationEmail) return
+    if (drawerLead.date === '—') {
+      setResendNotice('This lead does not have a scheduled consultation.')
+      return
+    }
+
+    setResendSubmitting(true)
+    setResendNotice('')
+    setRescheduleNotice('')
+    try {
+      const { lead: updated, emailSent, emailError } = await onResendConfirmationEmail(
+        drawerLead.id
+      )
+      setDrawerLead(updated)
+      setResendNotice(
+        emailSent
+          ? 'Confirmation email sent to the client from client.accounts@fathomlegal.com.'
+          : `Could not send confirmation email${emailError ? ` (${emailError})` : ''}. Check Zoho credentials or contact the client directly.`
+      )
+    } catch (error) {
+      setResendNotice(error instanceof Error ? error.message : 'Failed to resend confirmation email')
+    } finally {
+      setResendSubmitting(false)
+    }
+  }
+
+  const handleMergeDuplicate = async (mergeLeadId: string) => {
+    if (!drawerLead || !onMergeLead) return
+
+    setMergeSubmitting(true)
+    setMergeError('')
+    try {
+      const updated = await onMergeLead(drawerLead.id, mergeLeadId)
+      setDrawerLead(updated)
+      setMergeConfirmId(null)
+      setRescheduleNotice('')
+      setResendNotice('')
+    } catch (error) {
+      setMergeError(error instanceof Error ? error.message : 'Failed to merge leads')
+    } finally {
+      setMergeSubmitting(false)
+    }
   }
 
   const handleAddProspect = async () => {
@@ -826,9 +921,10 @@ export default function CrmLeads({
               onClick={() => {
                 setFilter(chip.id)
                 setStatusesFilter(null)
+                setShowDuplicatesOnly(false)
               }}
               className={`border rounded-full px-3.5 py-1.5 text-[12.5px] transition-colors ${
-                filter === chip.id && !statusesFilter?.length
+                filter === chip.id && !statusesFilter?.length && !showDuplicatesOnly
                   ? 'bg-[#7a1322] text-white border-[#7a1322]'
                   : 'bg-white text-[#736c63] border-[#e7e1d9] hover:border-[#7a1322] hover:text-[#7a1322]'
               }`}
@@ -836,6 +932,30 @@ export default function CrmLeads({
               {chip.label}
             </button>
           ))}
+          <button
+            type="button"
+            onClick={() => {
+              setShowDuplicatesOnly((prev) => !prev)
+              setStatusesFilter(null)
+              setFilter('all')
+            }}
+            className={`border rounded-full px-3.5 py-1.5 text-[12.5px] transition-colors inline-flex items-center gap-1.5 ${
+              showDuplicatesOnly
+                ? 'bg-[#7a1322] text-white border-[#7a1322]'
+                : 'bg-white text-[#736c63] border-[#e7e1d9] hover:border-[#7a1322] hover:text-[#7a1322]'
+            }`}
+          >
+            Duplicates
+            {duplicateGroupCount > 0 && (
+              <span
+                className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full min-w-[18px] text-center ${
+                  showDuplicatesOnly ? 'bg-white/20 text-white' : 'bg-[#f6ecee] text-[#7a1322]'
+                }`}
+              >
+                {duplicateGroupCount}
+              </span>
+            )}
+          </button>
         </div>
         <button
           type="button"
@@ -1050,6 +1170,11 @@ export default function CrmLeads({
                       <div>
                         <div className="text-[13.5px] font-medium text-[#1c1a18]">
                           {lead.first} {lead.last}
+                          {duplicateLeadIds.has(lead.id) && (
+                            <span className="ml-2 text-[10px] font-semibold uppercase tracking-wide text-[#9a6b1f] bg-[#f5ecdb] px-1.5 py-0.5 rounded-full align-middle">
+                              Duplicate
+                            </span>
+                          )}
                         </div>
                         <div className="text-[11.5px] text-[#736c63]">{lead.email}</div>
                       </div>
@@ -1608,6 +1733,81 @@ export default function CrmLeads({
                 </section>
               ) : (
                 <>
+              {drawerDuplicates.length > 0 && onMergeLead && (
+                <section className="mb-4">
+                  <h4 className="text-[11px] uppercase tracking-widest text-[#736c63] font-semibold mb-2">
+                    Possible duplicates
+                  </h4>
+                  <p className="text-[12.5px] text-[#736c63] mb-3">
+                    {drawerDuplicates.length} other record
+                    {drawerDuplicates.length === 1 ? '' : 's'} share{' '}
+                    <span className="font-medium text-[#1c1a18]">{drawerLead.email}</span>
+                  </p>
+                  <div className="space-y-2">
+                    {drawerDuplicates.map((dup) => (
+                      <div
+                        key={dup.id}
+                        className="bg-[#fff8eb] border border-[#fcd34d] rounded-[10px] p-3"
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="min-w-0">
+                            <p className="text-[13.5px] font-medium text-[#1c1a18]">
+                              {dup.first} {dup.last}
+                            </p>
+                            <p className="text-[12px] text-[#736c63] mt-0.5">
+                              {CRM_STATUSES[normalizeStatus(dup.status)]}
+                              {dup.date !== '—' ? ` · ${dup.date} at ${dup.time}` : ''}
+                            </p>
+                          </div>
+                        </div>
+                        {mergeConfirmId === dup.id ? (
+                          <div className="mt-3 pt-3 border-t border-[#fcd34d]/60">
+                            <p className="text-[12.5px] text-[#2a2724] mb-3">
+                              Merge <strong>{dup.first} {dup.last}</strong> into this lead?
+                              The other record will be deleted and its notes/tasks combined here.
+                            </p>
+                            <div className="flex gap-2">
+                              <button
+                                type="button"
+                                onClick={() => void handleMergeDuplicate(dup.id)}
+                                disabled={mergeSubmitting}
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-medium text-white rounded-full bg-[#7a1322] hover:bg-[#5c0e1a] disabled:opacity-50"
+                              >
+                                <GitMerge className="w-3.5 h-3.5" />
+                                {mergeSubmitting ? 'Merging…' : 'Confirm merge'}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setMergeConfirmId(null)}
+                                disabled={mergeSubmitting}
+                                className="px-3 py-1.5 text-[12px] font-medium border border-[#e7e1d9] rounded-full bg-white"
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setMergeConfirmId(dup.id)
+                              setMergeError('')
+                            }}
+                            className="mt-2.5 inline-flex items-center gap-1.5 text-[12.5px] font-medium text-[#7a1322] hover:text-[#5c0e1a]"
+                          >
+                            <GitMerge className="w-3.5 h-3.5" />
+                            Merge into this lead
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                  {mergeError && (
+                    <p className="text-[12px] text-[#7a1322] font-medium mt-2">{mergeError}</p>
+                  )}
+                </section>
+              )}
+
               <section>
                 <h4 className="text-[11px] uppercase tracking-widest text-[#736c63] font-semibold mb-2">
                   Contact
@@ -1654,15 +1854,16 @@ export default function CrmLeads({
                 </div>
               </section>
 
-              {rescheduleNotice && !isRescheduling && (
+              {(rescheduleNotice || resendNotice) && !isRescheduling && (
                 <div
                   className={`rounded-[10px] p-3 text-[13px] ${
-                    rescheduleNotice.includes('notified by email')
+                    (rescheduleNotice || resendNotice || '').includes('notified by email') ||
+                    (rescheduleNotice || resendNotice || '').includes('sent to the client')
                       ? 'bg-[#f0f6f1] border border-[#86efac] text-[#166534]'
                       : 'bg-[#fef3c7] border border-[#fcd34d] text-[#92400e]'
                   }`}
                 >
-                  {rescheduleNotice}
+                  {rescheduleNotice || resendNotice}
                 </div>
               )}
 
@@ -1891,19 +2092,33 @@ export default function CrmLeads({
             </div>
 
             {!isEditing && !isRescheduling && (
-            <div className="p-4 border-t border-[#e7e1d9] flex gap-2.5 bg-[#fbf9f6]">
+            <div className="p-4 border-t border-[#e7e1d9] flex flex-wrap gap-2.5 bg-[#fbf9f6]">
+              {drawerLead.date !== '—' && onResendConfirmationEmail && (
+                <button
+                  type="button"
+                  onClick={() => void handleResendConfirmation()}
+                  disabled={resendSubmitting}
+                  className="flex-1 min-w-[140px] inline-flex items-center justify-center gap-2 py-3 text-[13.5px] font-medium text-white rounded-full bg-gradient-to-br from-[#7a1322] to-[#5c0e1a] disabled:opacity-50"
+                >
+                  <Mail className="w-4 h-4" />
+                  {resendSubmitting ? 'Sending…' : 'Resend confirmation'}
+                </button>
+              )}
               <button
                 type="button"
                 onClick={() => openEmailClient(drawerLead)}
-                className="flex-1 inline-flex items-center justify-center gap-2 py-3 text-[13.5px] font-medium text-white rounded-full bg-gradient-to-br from-[#7a1322] to-[#5c0e1a]"
+                className={`inline-flex items-center justify-center gap-2 py-3 text-[13.5px] font-medium border border-[#e7e1d9] rounded-full bg-white hover:border-[#7a1322] hover:text-[#7a1322] ${
+                  drawerLead.date !== '—' && onResendConfirmationEmail ? 'px-5' : 'flex-1'
+                }`}
               >
                 <Mail className="w-4 h-4" />
-                Email client
+                Compose
               </button>
               <button
                 type="button"
                 onClick={startReschedule}
-                className="inline-flex items-center gap-2 px-5 py-3 text-[13.5px] font-medium border border-[#e7e1d9] rounded-full bg-white hover:border-[#7a1322] hover:text-[#7a1322]"
+                disabled={drawerLead.date === '—'}
+                className="inline-flex items-center gap-2 px-5 py-3 text-[13.5px] font-medium border border-[#e7e1d9] rounded-full bg-white hover:border-[#7a1322] hover:text-[#7a1322] disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 <Calendar className="w-4 h-4" />
                 Reschedule

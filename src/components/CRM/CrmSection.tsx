@@ -27,7 +27,7 @@ import {
 
 export type CrmView = 'overview' | 'leads' | 'consultations' | 'analytics'
 
-export type CrmNavigateHandler = (view: CrmView, filters?: LeadListFilters) => void
+export type CrmNavigateHandler = (view: CrmView, filters?: LeadListFilters | null) => void
 
 const VIEW_TITLES: Record<CrmView, { title: string; subtitle: string }> = {
   overview: { title: 'Overview', subtitle: 'A snapshot of your practice today' },
@@ -323,9 +323,18 @@ interface CrmSectionProps {
   activeView: CrmView
   onNavigate: CrmNavigateHandler
   onLeadsCountChange?: (count: number) => void
+  /** Filters passed from the admin dashboard home KPI cards */
+  seedLeadsFilters?: LeadListFilters | null
+  seedLeadsFilterKey?: number
 }
 
-export default function CrmSection({ activeView, onNavigate, onLeadsCountChange }: CrmSectionProps) {
+export default function CrmSection({
+  activeView,
+  onNavigate,
+  onLeadsCountChange,
+  seedLeadsFilters = null,
+  seedLeadsFilterKey = 0,
+}: CrmSectionProps) {
   const { title, subtitle } = VIEW_TITLES[activeView]
   const [leads, setLeads] = useState<CrmLead[]>([])
   const [leadsLoading, setLeadsLoading] = useState(true)
@@ -341,10 +350,16 @@ export default function CrmSection({ activeView, onNavigate, onLeadsCountChange 
         setLeadsInitialFilters(filters)
         setLeadsFilterKey((k) => k + 1)
       }
-      onNavigate(view)
+      onNavigate(view, filters)
     },
     [onNavigate]
   )
+
+  useEffect(() => {
+    if (!seedLeadsFilterKey) return
+    setLeadsInitialFilters(seedLeadsFilters)
+    setLeadsFilterKey(seedLeadsFilterKey)
+  }, [seedLeadsFilters, seedLeadsFilterKey])
 
   const filteredLeads = useMemo(
     () => filterLeadsBySearch(leads, searchQuery),
@@ -483,6 +498,48 @@ export default function CrmSection({ activeView, onNavigate, onLeadsCountChange 
     }
   }, [])
 
+  const resendConfirmationEmail = useCallback(async (id: string) => {
+    const response = await fetch(`/api/admin/leads/${id}/resend-email`, {
+      method: 'POST',
+    })
+    const data = await response.json().catch(() => ({}))
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to resend confirmation email')
+    }
+    const updated: CrmLead = {
+      ...data.lead,
+      status: normalizeStatus(data.lead.status),
+      actionables: data.lead.actionables ?? [],
+    }
+    setLeads((prev) => prev.map((l) => (l.id === id ? updated : l)))
+    return {
+      lead: updated,
+      emailSent: Boolean(data.emailSent),
+      emailError: data.emailError ?? null,
+    }
+  }, [])
+
+  const mergeLead = useCallback(async (keeperId: string, mergeLeadId: string) => {
+    const response = await fetch(`/api/admin/leads/${keeperId}/merge`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mergeLeadId }),
+    })
+    const data = await response.json().catch(() => ({}))
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to merge leads')
+    }
+    const updated: CrmLead = {
+      ...data.lead,
+      status: normalizeStatus(data.lead.status),
+      actionables: data.lead.actionables ?? [],
+    }
+    setLeads((prev) =>
+      prev.filter((l) => l.id !== mergeLeadId).map((l) => (l.id === keeperId ? updated : l))
+    )
+    return updated
+  }, [])
+
   const crmLeadsProps = {
     loading: leadsLoading,
     assignees,
@@ -492,6 +549,8 @@ export default function CrmSection({ activeView, onNavigate, onLeadsCountChange 
     onLeadAdded: addLeadToList,
     onLeadDeleted: deleteLead,
     onRescheduleLead: rescheduleLead,
+    onResendConfirmationEmail: resendConfirmationEmail,
+    onMergeLead: mergeLead,
     searchQuery,
     onSearchQueryChange: setSearchQuery,
     drawerLeadId,

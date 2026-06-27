@@ -258,7 +258,7 @@ export default function ClientIntakePage() {
         return
       }
 
-      // Send confirmation email via Gmail
+      // Send confirmation email via Zoho
       let emailSent = false
       try {
         const emailResponse = await fetch('/api/intake/send-email', {

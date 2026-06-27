@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 import nodemailer from 'nodemailer'
-import { formatTimeDisplay } from '@/lib/time-format'
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,16 +13,15 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const gmailUser = process.env.GMAIL_USER?.trim()
-    // Remove all spaces from app password (it comes as "vtck vzpb mdxv bgzr")
-    const gmailPassword = process.env.GMAIL_APP_PASSWORD?.replace(/\s+/g, '')
+    const zohoEmail = process.env.ZOHO_EMAIL?.trim()
+    const zohoPassword = process.env.ZOHO_PASSWORD?.trim()
+    const zohoSmtpHost = process.env.ZOHO_SMTP_HOST?.trim() || 'smtp.zoho.com'
+    const zohoSmtpPort = parseInt(process.env.ZOHO_SMTP_PORT?.trim() || '465')
 
-    if (!gmailUser || !gmailPassword) {
-      console.error('[v0] Gmail credentials not configured', {
-        hasUser: !!process.env.GMAIL_USER,
-        hasPassword: !!process.env.GMAIL_APP_PASSWORD,
-        userValue: gmailUser,
-        passwordLength: gmailPassword?.length || 0
+    if (!zohoEmail || !zohoPassword) {
+      console.error('[v0] Zoho credentials not configured', {
+        hasEmail: !!process.env.ZOHO_EMAIL,
+        hasPassword: !!process.env.ZOHO_PASSWORD
       })
       return NextResponse.json(
         { error: 'Email service not configured' },
@@ -31,15 +29,20 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log('[v0] Gmail auth initializing for user:', gmailUser)
+    console.log('[v0] Zoho email auth initializing for user:', zohoEmail)
+    console.log('[v0] Zoho SMTP config:', { host: zohoSmtpHost, port: zohoSmtpPort, secure: true })
 
-    // Create transporter using Gmail service
+    // Create transporter using Zoho Mail service
     const transporter = nodemailer.createTransport({
-      service: 'gmail',
+      host: zohoSmtpHost,
+      port: zohoSmtpPort,
+      secure: true,
       auth: {
-        user: gmailUser,
-        pass: gmailPassword
-      }
+        user: zohoEmail,
+        pass: zohoPassword
+      },
+      logger: true,
+      debug: true
     })
 
     // Format date
@@ -50,7 +53,6 @@ export async function POST(request: NextRequest) {
       month: 'long',
       day: 'numeric'
     })
-    const displayTime = formatTimeDisplay(selectedTime)
 
     // Create professional email HTML
     const emailHTML = `
@@ -288,7 +290,7 @@ export async function POST(request: NextRequest) {
                 </div>
                 <div class="detail-row">
                   <span class="detail-label">Time:</span>
-                  <span class="detail-value">${displayTime} IST</span>
+                  <span class="detail-value">${selectedTime} IST</span>
                 </div>
                 <div class="detail-row">
                   <span class="detail-label">Duration:</span>
@@ -354,21 +356,25 @@ export async function POST(request: NextRequest) {
     
     try {
       console.log('[v0] Sending email to:', email)
+      console.log('[v0] From address:', zohoEmail)
       const result = await transporter.sendMail({
-        from: gmailUser,
+        from: zohoEmail,
         to: email,
-        subject: `Consultation Confirmed - ${formattedDate} at ${displayTime} IST | Fathom Legal`,
+        subject: `Consultation Confirmed - ${formattedDate} at ${selectedTime} IST | Fathom Legal`,
         html: emailHTML,
-        replyTo: gmailUser
+        replyTo: zohoEmail
       })
-      console.log('[v0] Email sent successfully:', result.messageId)
+      console.log('[v0] Email sent successfully via Zoho:', result.messageId)
       emailSent = true
     } catch (emailErr) {
       emailError = emailErr instanceof Error ? emailErr.message : 'Unknown email error'
-      console.error('[v0] Email sending failed:', {
+      console.error('[v0] Zoho email sending failed:', {
         error: emailError,
         code: emailErr instanceof Error && 'code' in emailErr ? (emailErr as any).code : 'N/A',
-        response: emailErr instanceof Error && 'response' in emailErr ? (emailErr as any).response : 'N/A'
+        response: emailErr instanceof Error && 'response' in emailErr ? (emailErr as any).response : 'N/A',
+        statusCode: emailErr instanceof Error && 'statusCode' in emailErr ? (emailErr as any).statusCode : 'N/A',
+        smtpServer: zohoSmtpHost,
+        smtpPort: zohoSmtpPort
       })
       // Continue - email failure should not block confirmation
     }

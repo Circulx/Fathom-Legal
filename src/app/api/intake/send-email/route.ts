@@ -15,12 +15,13 @@ export async function POST(request: NextRequest) {
 
     const zohoEmail = process.env.ZOHO_EMAIL?.trim()
     const zohoPassword = process.env.ZOHO_PASSWORD?.trim()
+    const zohoSmtpHost = process.env.ZOHO_SMTP_HOST?.trim() || 'smtp.zoho.com'
+    const zohoSmtpPort = parseInt(process.env.ZOHO_SMTP_PORT?.trim() || '465')
 
     if (!zohoEmail || !zohoPassword) {
       console.error('[v0] Zoho credentials not configured', {
         hasEmail: !!process.env.ZOHO_EMAIL,
-        hasPassword: !!process.env.ZOHO_PASSWORD,
-        emailValue: zohoEmail
+        hasPassword: !!process.env.ZOHO_PASSWORD
       })
       return NextResponse.json(
         { error: 'Email service not configured' },
@@ -29,16 +30,19 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('[v0] Zoho email auth initializing for user:', zohoEmail)
+    console.log('[v0] Zoho SMTP config:', { host: zohoSmtpHost, port: zohoSmtpPort, secure: true })
 
     // Create transporter using Zoho Mail service
     const transporter = nodemailer.createTransport({
-      host: process.env.ZOHO_SMTP_HOST || 'smtp.zoho.com',
-      port: parseInt(process.env.ZOHO_SMTP_PORT || '465'),
+      host: zohoSmtpHost,
+      port: zohoSmtpPort,
       secure: true,
       auth: {
         user: zohoEmail,
         pass: zohoPassword
-      }
+      },
+      logger: true,
+      debug: true
     })
 
     // Format date
@@ -352,6 +356,7 @@ export async function POST(request: NextRequest) {
     
     try {
       console.log('[v0] Sending email to:', email)
+      console.log('[v0] From address:', zohoEmail)
       const result = await transporter.sendMail({
         from: zohoEmail,
         to: email,
@@ -366,7 +371,10 @@ export async function POST(request: NextRequest) {
       console.error('[v0] Zoho email sending failed:', {
         error: emailError,
         code: emailErr instanceof Error && 'code' in emailErr ? (emailErr as any).code : 'N/A',
-        response: emailErr instanceof Error && 'response' in emailErr ? (emailErr as any).response : 'N/A'
+        response: emailErr instanceof Error && 'response' in emailErr ? (emailErr as any).response : 'N/A',
+        statusCode: emailErr instanceof Error && 'statusCode' in emailErr ? (emailErr as any).statusCode : 'N/A',
+        smtpServer: zohoSmtpHost,
+        smtpPort: zohoSmtpPort
       })
       // Continue - email failure should not block confirmation
     }

@@ -34,6 +34,7 @@ import {
   normalizeStatus,
   filterLeads,
   collectLeadSourceOptions,
+  collectAssigneeNames,
   UNASSIGNED_ASSIGNEE,
   type CrmAssigneeRecord,
   type CrmLead,
@@ -300,18 +301,14 @@ export default function CrmLeads({
 
   const sourceOptions = useMemo(() => collectLeadSourceOptions(leads), [leads])
 
-  const assigneeOptions = useMemo(() => {
-    const names = new Set<string>()
-    for (const record of assignees) names.add(record.name)
-    for (const lead of leads) {
-      for (const task of lead.actionables) {
-        if (task.assignee && task.assignee !== UNASSIGNED_ASSIGNEE) {
-          names.add(task.assignee)
-        }
-      }
-    }
-    return Array.from(names).sort((a, b) => a.localeCompare(b))
-  }, [assignees, leads])
+  const assigneeOptions = useMemo(
+    () =>
+      collectAssigneeNames(
+        assignees.map((a) => a.name),
+        leads.flatMap((lead) => lead.actionables)
+      ),
+    [assignees, leads]
+  )
 
   const duplicateLeadIds = useMemo(() => getDuplicateLeadIds(leads), [leads])
   const duplicateGroupCount = useMemo(() => {
@@ -1104,7 +1101,7 @@ export default function CrmLeads({
             <option value="all">All assignees</option>
             <option value="unassigned">Unassigned tasks</option>
             {assigneeOptions.map((name) => (
-              <option key={name} value={name}>
+              <option key={name.toLowerCase()} value={name}>
                 {name}
               </option>
             ))}

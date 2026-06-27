@@ -2,26 +2,13 @@
 
 import { useMemo, useState } from 'react'
 import { Plus, Trash2, User } from 'lucide-react'
-import { UNASSIGNED_ASSIGNEE, type CrmActionable } from './data'
+import { UNASSIGNED_ASSIGNEE, collectAssigneeNames, type CrmActionable } from './data'
 
 interface LeadActionablesProps {
   actionables: CrmActionable[]
   knownAssignees: string[]
   onChange: (actionables: CrmActionable[]) => void
   onEnsureAssignee?: (name: string) => Promise<void>
-}
-
-function buildAssigneeSuggestions(knownAssignees: string[], actionables: CrmActionable[]) {
-  const names = new Set<string>()
-  for (const name of knownAssignees) {
-    if (name && name !== UNASSIGNED_ASSIGNEE) names.add(name)
-  }
-  for (const task of actionables) {
-    if (task.assignee && task.assignee !== UNASSIGNED_ASSIGNEE) {
-      names.add(task.assignee)
-    }
-  }
-  return Array.from(names).sort((a, b) => a.localeCompare(b))
 }
 
 function toAssigneeInputValue(assignee: string) {
@@ -43,7 +30,7 @@ export default function LeadActionables({
   const [newAssignee, setNewAssignee] = useState('')
 
   const assigneeSuggestions = useMemo(
-    () => buildAssigneeSuggestions(knownAssignees, actionables),
+    () => collectAssigneeNames(knownAssignees, actionables),
     [knownAssignees, actionables]
   )
 

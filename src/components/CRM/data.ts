@@ -253,3 +253,23 @@ export function collectLeadSourceOptions(leads: CrmLead[]): string[] {
   }
   return Array.from(sources).sort((a, b) => a.localeCompare(b))
 }
+
+/** Merge official assignees and task assignees, deduplicating by case-insensitive name. */
+export function collectAssigneeNames(
+  officialNames: string[],
+  taskActionables: CrmActionable[] = []
+): string[] {
+  const canonical = new Map<string, string>()
+
+  const add = (raw: string) => {
+    const name = raw.trim()
+    if (!name || name === UNASSIGNED_ASSIGNEE) return
+    const key = name.toLowerCase()
+    if (!canonical.has(key)) canonical.set(key, name)
+  }
+
+  for (const name of officialNames) add(name)
+  for (const task of taskActionables) add(task.assignee)
+
+  return Array.from(canonical.values()).sort((a, b) => a.localeCompare(b))
+}

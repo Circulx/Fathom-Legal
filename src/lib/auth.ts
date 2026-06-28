@@ -101,7 +101,9 @@ export const authOptions: NextAuthOptions = {
     })
   ],
   session: {
-    strategy: 'jwt'
+    strategy: 'jwt',
+    maxAge: 8 * 60 * 60, // 8 hours — hard cap on session lifetime
+    updateAge: 30 * 60, // refresh token every 30 minutes while active
   },
   pages: {
     signIn: '/admin/login',

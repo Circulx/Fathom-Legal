@@ -16,6 +16,13 @@ export default function AdminLogin() {
   const [isCheckingFirstUser, setIsCheckingFirstUser] = useState(true)
   const router = useRouter()
 
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('reason') === 'idle') {
+      setError('You were signed out after 30 minutes of inactivity.')
+    }
+  }, [])
+
   // Check if this is the first user
   useEffect(() => {
     const checkFirstUser = async () => {

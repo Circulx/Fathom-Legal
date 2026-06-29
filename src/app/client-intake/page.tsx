@@ -26,6 +26,11 @@ interface SchedulingData {
   googleMeetLink: string
 }
 
+const FORM_FIELD_CLASS =
+  'w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:outline-none focus:border-[#A5292A] focus:ring-1 focus:ring-[#A5292A]'
+
+const FORM_TEXTAREA_CLASS = `${FORM_FIELD_CLASS} resize-none`
+
 export default function ClientIntakePage() {
   const [currentStep, setCurrentStep] = useState(1)
   const [sessionId, setSessionId] = useState<string>('')
@@ -407,7 +412,7 @@ export default function ClientIntakePage() {
           value={formData.customNeeds}
           onChange={(e) => setFormData(prev => ({ ...prev, customNeeds: e.target.value }))}
           placeholder="e.g. I need help reviewing an employment agreement for a new hire..."
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#A5292A] focus:ring-1 focus:ring-[#A5292A] resize-none"
+          className={FORM_TEXTAREA_CLASS}
           rows={4}
         />
       </div>
@@ -453,7 +458,7 @@ export default function ClientIntakePage() {
               value={formData.firstName}
               onChange={(e) => setFormData(prev => ({ ...prev, firstName: e.target.value }))}
               placeholder="Jane"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#A5292A] focus:ring-1 focus:ring-[#A5292A]"
+              className={FORM_FIELD_CLASS}
             />
           </div>
           <div>
@@ -463,7 +468,7 @@ export default function ClientIntakePage() {
               value={formData.lastName}
               onChange={(e) => setFormData(prev => ({ ...prev, lastName: e.target.value }))}
               placeholder="Smith"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#A5292A] focus:ring-1 focus:ring-[#A5292A]"
+              className={FORM_FIELD_CLASS}
             />
           </div>
         </div>
@@ -475,7 +480,7 @@ export default function ClientIntakePage() {
             value={formData.email}
             onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
             placeholder="jane@example.com"
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#A5292A] focus:ring-1 focus:ring-[#A5292A]"
+            className={FORM_FIELD_CLASS}
           />
         </div>
 
@@ -486,7 +491,7 @@ export default function ClientIntakePage() {
             value={formData.phone}
             onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
             placeholder="+91 98765 43210"
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#A5292A] focus:ring-1 focus:ring-[#A5292A]"
+            className={FORM_FIELD_CLASS}
           />
         </div>
 
@@ -498,7 +503,7 @@ export default function ClientIntakePage() {
               value={formData.company}
               onChange={(e) => setFormData(prev => ({ ...prev, company: e.target.value }))}
               placeholder="Acme Corp (optional)"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#A5292A] focus:ring-1 focus:ring-[#A5292A]"
+              className={FORM_FIELD_CLASS}
             />
           </div>
           <div>
@@ -506,7 +511,7 @@ export default function ClientIntakePage() {
             <select
               value={formData.heardAbout}
               onChange={(e) => setFormData(prev => ({ ...prev, heardAbout: e.target.value }))}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#A5292A] focus:ring-1 focus:ring-[#A5292A]"
+              className={FORM_FIELD_CLASS}
             >
               <option value="">Select...</option>
               <option value="google">Google Search</option>
@@ -523,7 +528,7 @@ export default function ClientIntakePage() {
             value={formData.matterDescription}
             onChange={(e) => setFormData(prev => ({ ...prev, matterDescription: e.target.value }))}
             placeholder="Briefly describe the legal matter you need help with..."
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#A5292A] focus:ring-1 focus:ring-[#A5292A] resize-none"
+            className={FORM_TEXTAREA_CLASS}
             rows={4}
           />
         </div>
@@ -660,7 +665,7 @@ export default function ClientIntakePage() {
               value={schedulingData.confirmedEmail}
               onChange={(e) => setSchedulingData(prev => ({ ...prev, confirmedEmail: e.target.value }))}
               placeholder={formData.email || 'your@email.com'}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#A5292A] focus:ring-1 focus:ring-[#A5292A]"
+              className={FORM_FIELD_CLASS}
             />
             <p className="text-xs text-gray-500 mt-2">Confirmation email and Google Meet link will be sent to this address</p>
           </div>

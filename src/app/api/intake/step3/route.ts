@@ -1,6 +1,5 @@
 import { connectDB } from '@/lib/mongodb'
 import { syncLeadFromIntake } from '@/lib/intake-to-lead'
-import { DEFAULT_GOOGLE_MEET_LINK } from '@/lib/consultation-meet-link'
 import IntakeSubmission from '@/models/IntakeSubmission'
 import BookedSlot from '@/models/BookedSlot'
 import { NextRequest, NextResponse } from 'next/server'
@@ -31,7 +30,7 @@ export async function POST(request: NextRequest) {
         selectedDate,
         selectedTime,
         confirmedEmail,
-        googleMeetLink: googleMeetLink || DEFAULT_GOOGLE_MEET_LINK,
+        googleMeetLink: googleMeetLink || 'https://meet.google.com/wkd-evwz-dxw',
         completedAt: new Date(),
       },
       { new: true }
@@ -66,7 +65,7 @@ export async function POST(request: NextRequest) {
         firstName: submission.firstName,
         lastName: submission.lastName,
         sessionId,
-        googleMeetLink: googleMeetLink || DEFAULT_GOOGLE_MEET_LINK,
+        googleMeetLink: googleMeetLink || 'https://meet.google.com/wkd-evwz-dxw',
         services: submission.selectedServices,
       })
       console.log('[v0] Booked slot created:', { date: selectedDate, time: timeForSlot })

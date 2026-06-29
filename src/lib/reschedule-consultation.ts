@@ -5,7 +5,8 @@ import {
   applyConsultationSchedule,
   bookedSlotSessionId,
 } from '@/lib/lead-consultation-schedule'
-import { DEFAULT_GOOGLE_MEET_LINK } from '@/lib/consultation-meet-link'
+
+const RESCHEDULE_GOOGLE_MEET_LINK = 'https://meet.google.com/nbh-bwpx-wgo'
 
 export interface RescheduleResult {
   lead: ILead
@@ -22,7 +23,7 @@ export async function rescheduleLeadConsultation(
   const previousTime = lead.time
   const now = new Date()
 
-  lead.googleMeetLink = DEFAULT_GOOGLE_MEET_LINK
+  lead.googleMeetLink = RESCHEDULE_GOOGLE_MEET_LINK
   const { displayDate, displayTime } = await applyConsultationSchedule(lead, dateIso, time24)
 
   lead.timeline.push({
@@ -33,7 +34,7 @@ export async function rescheduleLeadConsultation(
 
   await lead.save()
 
-  const meetLink = lead.googleMeetLink?.trim() || DEFAULT_GOOGLE_MEET_LINK
+  const meetLink = lead.googleMeetLink?.trim() || RESCHEDULE_GOOGLE_MEET_LINK
   const matter =
     lead.matter && lead.matter !== '—'
       ? lead.matter

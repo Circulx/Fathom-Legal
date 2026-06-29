@@ -1,5 +1,4 @@
 import mongoose, { Schema, Document } from 'mongoose'
-import { DEFAULT_GOOGLE_MEET_LINK } from '@/lib/consultation-meet-link'
 
 export interface IBookedSlot extends Document {
   date: string // Format: YYYY-MM-DD
@@ -47,7 +46,7 @@ const BookedSlotSchema = new Schema<IBookedSlot>(
     },
     googleMeetLink: {
       type: String,
-      default: DEFAULT_GOOGLE_MEET_LINK,
+      default: 'https://meet.google.com/wkd-evwz-dxw',
     },
     services: [{
       type: String,

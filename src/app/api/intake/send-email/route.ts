@@ -319,205 +319,303 @@ export async function POST(request: NextRequest) {
           <meta charset="UTF-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <style>
-            body {
-              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-              background-color: #f5f5f5;
+            * {
               margin: 0;
               padding: 0;
-              line-height: 1.6;
+              box-sizing: border-box;
+            }
+            body {
+              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+              background-color: #f8f8f8;
               color: #333;
+              line-height: 1.6;
+            }
+            .wrapper {
+              background-color: #f8f8f8;
+              padding: 20px;
             }
             .container {
               max-width: 600px;
               margin: 0 auto;
               background-color: #ffffff;
-              overflow: hidden;
             }
-            .header {
-              padding: 30px;
-              border-bottom: 2px solid #A5292A;
-              background-color: #fafafa;
+            .email-header {
+              display: flex;
+              justify-content: space-between;
+              align-items: flex-start;
+              padding: 40px 40px 30px;
+              border-bottom: 1px solid #e8e8e8;
             }
-            .header h1 {
-              font-size: 24px;
-              font-weight: 600;
-              margin: 0 0 8px 0;
-              color: #222;
+            .logo-section {
+              flex: 0 0 auto;
             }
-            .header p {
-              font-size: 14px;
-              margin: 0;
-              color: #666;
+            .logo {
+              font-size: 18px;
+              font-weight: 700;
+              color: #A5292A;
+              letter-spacing: 1px;
+            }
+            .header-info {
+              flex: 1;
+              text-align: right;
+            }
+            .header-label {
+              font-size: 11px;
+              color: #999;
+              text-transform: uppercase;
+              letter-spacing: 1px;
+              margin-bottom: 4px;
+            }
+            .header-date {
+              font-size: 11px;
+              color: #999;
+              text-transform: uppercase;
+              letter-spacing: 1px;
             }
             .content {
-              padding: 30px;
+              padding: 40px;
             }
-            .greeting {
-              font-size: 15px;
+            .badge {
+              display: inline-block;
+              background-color: #fff3f3;
+              color: #A5292A;
+              font-size: 11px;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 1px;
+              padding: 6px 12px;
               margin-bottom: 20px;
-              line-height: 1.6;
-              color: #333;
             }
-            .greeting p {
-              margin: 0 0 12px 0;
-            }
-            .details-section {
-              margin: 25px 0;
-              line-height: 1.8;
-            }
-            .details-section-title {
-              font-size: 14px;
-              font-weight: 600;
-              color: #222;
-              margin-bottom: 12px;
-              text-transform: uppercase;
-              letter-spacing: 0.5px;
-            }
-            .detail-item {
-              font-size: 14px;
+            .headline {
+              font-size: 28px;
+              font-weight: 300;
+              line-height: 1.4;
               margin-bottom: 8px;
-              color: #555;
-              padding: 8px;
-              background-color: #f9f9f9;
-              border-left: 3px solid #A5292A;
-            }
-            .detail-label {
-              font-weight: 600;
               color: #222;
-              display: inline;
             }
-            .detail-value {
-              color: #555;
-              display: inline;
+            .highlight {
+              color: #A5292A;
+              font-style: italic;
+              font-weight: 500;
             }
-            .meet-link-section {
-              margin: 28px 0;
-              padding: 20px;
-              background-color: #f9f9f9;
-              border-left: 3px solid #A5292A;
-            }
-            .meet-link-label {
-              font-weight: 600;
+            .subheading {
               font-size: 14px;
-              color: #222;
-              margin-bottom: 12px;
-              display: block;
-              text-transform: uppercase;
-              letter-spacing: 0.5px;
+              color: #666;
+              margin-bottom: 30px;
+              line-height: 1.5;
             }
-            .meet-link {
+            .section {
+              margin-bottom: 35px;
+            }
+            .section-title {
+              font-size: 11px;
+              color: #999;
+              text-transform: uppercase;
+              letter-spacing: 1px;
+              margin-bottom: 18px;
+              font-weight: 600;
+            }
+            .field {
+              margin-bottom: 16px;
+              display: flex;
+              align-items: flex-start;
+            }
+            .field-label {
+              font-size: 11px;
+              color: #999;
+              text-transform: uppercase;
+              letter-spacing: 1px;
+              width: 100px;
+              flex-shrink: 0;
+              margin-right: 20px;
+              font-weight: 600;
+            }
+            .field-value {
+              font-size: 14px;
+              color: #333;
+              font-weight: 500;
+            }
+            .field-value a {
               color: #A5292A;
               text-decoration: none;
-              font-weight: 500;
-              word-break: break-all;
-              display: inline-block;
-              padding: 3px 0;
               border-bottom: 1px solid #A5292A;
             }
-            .meet-link:hover {
+            .field-value a:hover {
               opacity: 0.8;
             }
-            .action-button {
-              display: inline-block;
-              margin-top: 12px;
-              padding: 10px 20px;
-              background-color: #A5292A;
-              color: white;
-              text-decoration: none;
-              border-radius: 6px;
-              font-weight: 600;
+            .cta-section {
+              margin: 40px 0;
+              padding-top: 30px;
+              border-top: 1px solid #e8e8e8;
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+            }
+            .cta-text {
+              flex: 1;
+            }
+            .cta-text-label {
               font-size: 14px;
-            }
-            .action-button:hover {
-              opacity: 0.9;
-            }
-            .footer-note {
-              margin: 28px 0 0 0;
-              padding-top: 20px;
-              border-top: 1px solid #eee;
-              font-size: 13px;
-              color: #666;
-              line-height: 1.6;
-            }
-            .footer {
-              background-color: #fafafa;
-              padding: 30px;
-              border-top: 1px solid #eee;
-              text-align: center;
-              font-size: 12px;
-              color: #666;
-              line-height: 1.6;
-            }
-            .footer-company {
               font-weight: 600;
               color: #222;
-              display: block;
-              margin-bottom: 8px;
+              margin-bottom: 2px;
+            }
+            .cta-text-desc {
+              font-size: 13px;
+              color: #666;
+            }
+            .cta-button {
+              flex: 0 0 auto;
+              margin-left: 20px;
+            }
+            .button {
+              display: inline-block;
+              background-color: #A5292A;
+              color: #ffffff;
+              padding: 12px 24px;
+              text-decoration: none;
+              font-weight: 600;
+              font-size: 13px;
+              text-transform: uppercase;
+              letter-spacing: 1px;
+              border: none;
+              cursor: pointer;
+              transition: opacity 0.3s;
+            }
+            .button:hover {
+              opacity: 0.9;
             }
             .divider {
               height: 1px;
-              background-color: #eee;
-              margin: 0;
+              background-color: #e8e8e8;
+              margin: 30px 0;
             }
-            a {
-              color: #A5292A;
-              text-decoration: none;
+            .footer-content {
+              padding: 0 40px 30px;
             }
-            a:hover {
-              text-decoration: underline;
+            .footer-text {
+              font-size: 12px;
+              color: #999;
+              margin-bottom: 8px;
+              line-height: 1.5;
+            }
+            .email-footer {
+              background-color: #fafafa;
+              padding: 20px 40px;
+              border-top: 1px solid #e8e8e8;
+              text-align: center;
+            }
+            .footer-brand {
+              font-size: 11px;
+              color: #999;
+              margin-bottom: 4px;
+            }
+            .footer-copy {
+              font-size: 10px;
+              color: #bbb;
+            }
+            .footer-brand strong {
+              color: #333;
+              font-weight: 600;
             }
           </style>
         </head>
         <body>
-          <div class="container">
-            <div class="header">
-              <h1>New Consultation Scheduled</h1>
-              <p>A new client has booked a consultation meeting</p>
-            </div>
-
-            <div class="content">
-              <div class="greeting">
-                <p>Hi Team,</p>
-                <p>A new consultation has been scheduled. Please review the client details and prepare for the meeting.</p>
+          <div class="wrapper">
+            <div class="container">
+              <!-- Header with Logo and Date -->
+              <div class="email-header">
+                <div class="logo-section">
+                  <div class="logo">FATHOM LEGAL</div>
+                </div>
+                <div class="header-info">
+                  <div class="header-label">Booking Confirmation</div>
+                  <div class="header-date">${formattedDate}</div>
+                </div>
               </div>
 
-              <div class="details-section">
-                <div class="details-section-title">Client Information</div>
-                <div class="detail-item"><span class="detail-label">Name:</span> <span class="detail-value">${firstName} ${lastName}</span></div>
-                <div class="detail-item"><span class="detail-label">Email:</span> <span class="detail-value">${email}</span></div>
+              <!-- Main Content -->
+              <div class="content">
+                <!-- Badge -->
+                <div class="badge">NEW CONSULTATION BOOKED</div>
+
+                <!-- Headline -->
+                <div class="headline">
+                  A client has scheduled a <span class="highlight">meeting.</span>
+                </div>
+
+                <!-- Subheading -->
+                <div class="subheading">
+                  <p>Please review the details below and prepare for the session.<br>The client's contact and meeting information are confirmed.</p>
+                </div>
+
+                <!-- Client Section -->
+                <div class="section">
+                  <div class="section-title">Client</div>
+                  <div class="field">
+                    <div class="field-label">Name</div>
+                    <div class="field-value">${firstName} ${lastName}</div>
+                  </div>
+                  <div class="field">
+                    <div class="field-label">Email</div>
+                    <div class="field-value"><a href="mailto:${email}">${email}</a></div>
+                  </div>
+                  <div class="field">
+                    <div class="field-label">Matter</div>
+                    <div class="field-value">${matter}</div>
+                  </div>
+                </div>
+
+                <!-- Meeting Section -->
+                <div class="section">
+                  <div class="section-title">Meeting</div>
+                  <div class="field">
+                    <div class="field-label">Date</div>
+                    <div class="field-value">${formattedDate}</div>
+                  </div>
+                  <div class="field">
+                    <div class="field-label">Time</div>
+                    <div class="field-value">${selectedTime} IST</div>
+                  </div>
+                  <div class="field">
+                    <div class="field-label">Duration</div>
+                    <div class="field-value">20 minutes</div>
+                  </div>
+                  <div class="field">
+                    <div class="field-label">Advocate</div>
+                    <div class="field-value">Ishita</div>
+                  </div>
+                </div>
+
+                <!-- CTA Section with Google Meet Link -->
+                <div class="cta-section">
+                  <div class="cta-text">
+                    <div class="cta-text-label">Join the Video Call</div>
+                    <div class="cta-text-desc">Your meeting link is ready and waiting.</div>
+                  </div>
+                  <div class="cta-button">
+                    <a href="${googleMeetLink}" target="_blank" class="button">JOIN MEETING →</a>
+                  </div>
+                </div>
+
+                <div class="divider"></div>
+
+                <!-- Session Info -->
+                <div class="footer-content">
+                  <div class="footer-text">
+                    <strong>Session ID:</strong> <code style="font-family: monospace; color: #666;">${sessionId}</code>
+                  </div>
+                  <div class="footer-text" style="margin-top: 12px;">
+                    <strong>Automated notification:</strong> <a href="mailto:client.accounts@fathomlegal.com" style="color: #999; text-decoration: none;">client.accounts@fathomlegal.com</a>
+                  </div>
+                </div>
               </div>
 
-              <div class="details-section">
-                <div class="details-section-title">Meeting Details</div>
-                <div class="detail-item"><span class="detail-label">Date:</span> <span class="detail-value">${formattedDate}</span></div>
-                <div class="detail-item"><span class="detail-label">Time:</span> <span class="detail-value">${selectedTime} IST</span></div>
-                <div class="detail-item"><span class="detail-label">Duration:</span> <span class="detail-value">20 minutes</span></div>
-                <div class="detail-item"><span class="detail-label">Service Required:</span> <span class="detail-value">${matter}</span></div>
+              <!-- Footer -->
+              <div class="email-footer">
+                <div class="footer-brand">© 2026 <strong>Fathom Legal</strong>. All rights reserved.</div>
+                <div class="footer-copy">Corporate Consultants</div>
               </div>
-
-              <div class="meet-link-section">
-                <span class="meet-link-label">Google Meet Link</span>
-                <p style="margin: 0; font-size: 14px; color: #555;">
-                  <a href="${googleMeetLink}" target="_blank" class="meet-link">${googleMeetLink}</a>
-                </p>
-              </div>
-
-              <div class="details-section">
-                <div class="details-section-title">Session Information</div>
-                <div class="detail-item"><span class="detail-label">Session ID:</span> <span class="detail-value" style="font-family: monospace;">${sessionId}</span></div>
-              </div>
-
-              <div class="footer-note">
-                <p><strong>Next Steps:</strong> Review the client details above and prepare relevant resources for the consultation. Ensure you join the Google Meet link 5 minutes before the scheduled time.</p>
-              </div>
-            </div>
-
-            <div class="divider"></div>
-
-            <div class="footer">
-              <span class="footer-company">Fathom Legal - Advocates & Corporate Consultants</span>
-              <p>Internal Team Notification</p>
-              <p style="font-size: 11px; color: #999; margin: 8px 0 0 0;">© 2024 Fathom Legal. All rights reserved.</p>
             </div>
           </div>
         </body>

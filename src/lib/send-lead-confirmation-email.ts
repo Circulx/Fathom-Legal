@@ -3,8 +3,7 @@ import { formatTimelineWhen } from '@/lib/crm-leads'
 import { sendConsultationConfirmationEmail } from '@/lib/consultation-email'
 import { bookedSlotSessionId } from '@/lib/lead-consultation-schedule'
 import { toTime24 } from '@/lib/time-format'
-
-const DEFAULT_MEET_LINK = 'https://meet.google.com/wkd-evwz-dxw'
+import { DEFAULT_GOOGLE_MEET_LINK } from '@/lib/consultation-meet-link'
 
 export function leadHasBookedConsultation(lead: ILead): boolean {
   return lead.date !== '—'
@@ -21,7 +20,7 @@ export async function sendLeadConsultationConfirmationEmail(lead: ILead) {
     throw new Error('This lead has no consultation time on file')
   }
 
-  const meetLink = lead.googleMeetLink?.trim() || DEFAULT_MEET_LINK
+  const meetLink = lead.googleMeetLink?.trim() || DEFAULT_GOOGLE_MEET_LINK
   const matter =
     lead.matter && lead.matter !== '—'
       ? lead.matter

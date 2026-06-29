@@ -3,6 +3,7 @@ import type { ILead } from '@/models/Lead'
 import Lead from '@/models/Lead'
 import { LEAD_SOURCE_OPTIONS } from '@/components/CRM/data'
 import { formatTimelineWhen } from '@/lib/crm-leads'
+import { DEFAULT_GOOGLE_MEET_LINK } from '@/lib/consultation-meet-link'
 import { formatTimeDisplay } from '@/lib/time-format'
 
 const SERVICE_ID_TO_AREA: Record<string, string> = {
@@ -75,7 +76,7 @@ export async function syncLeadFromIntake(
   const date = formatConsultationDate(dateIso)
   const time = formatConsultationTime(time24)
   const meetLink =
-    submission.googleMeetLink?.trim() || 'https://meet.google.com/wkd-evwz-dxw'
+    submission.googleMeetLink?.trim() || DEFAULT_GOOGLE_MEET_LINK
   const areas = mapServicesToAreas(submission.selectedServices)
   const matter = buildMatter(submission)
   const source = mapHeardAboutToSource(submission.heardAbout)

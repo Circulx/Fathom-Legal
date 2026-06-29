@@ -6,6 +6,7 @@ import { ChevronRight, Building2, Zap, Coins, FileText, Gavel, Lightbulb, CheckC
 import { Navbar } from '@/components/Navbar/index'
 import Footer from '@/components/Footer'
 import BookingMonthCalendar from '@/components/BookingMonthCalendar'
+import { DEFAULT_GOOGLE_MEET_LINK } from '@/lib/consultation-meet-link'
 
 interface FormData {
   selectedServices: string[]
@@ -224,7 +225,7 @@ export default function ClientIntakePage() {
     }
   }
 
-  const googleMeetLink = 'https://meet.google.com/wkd-evwz-dxw'
+  const googleMeetLink = DEFAULT_GOOGLE_MEET_LINK
 
   const handleStep3Continue = async () => {
     if (!schedulingData.selectedDate || !schedulingData.selectedTime || !schedulingData.confirmedEmail) {

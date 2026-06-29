@@ -2,8 +2,9 @@ import type { ILead } from '@/models/Lead'
 import BookedSlot from '@/models/BookedSlot'
 import IntakeSubmission from '@/models/IntakeSubmission'
 import { formatConsultationDate, formatConsultationTime } from '@/lib/intake-to-lead'
+import { DEFAULT_GOOGLE_MEET_LINK } from '@/lib/consultation-meet-link'
 
-const DEFAULT_MEET_LINK = 'https://meet.google.com/wkd-evwz-dxw'
+export { DEFAULT_GOOGLE_MEET_LINK as DEFAULT_MEET_LINK }
 
 export function bookedSlotSessionId(lead: ILead): string {
   return lead.intakeSessionId || `crm_${String(lead._id)}`
@@ -35,7 +36,7 @@ export async function applyConsultationSchedule(
   const sessionId = bookedSlotSessionId(lead)
   const displayDate = formatConsultationDate(dateIso)
   const displayTime = formatConsultationTime(time24)
-  const meetLink = lead.googleMeetLink?.trim() || DEFAULT_MEET_LINK
+  const meetLink = lead.googleMeetLink?.trim() || DEFAULT_GOOGLE_MEET_LINK
 
   await BookedSlot.findOneAndUpdate(
     { sessionId },

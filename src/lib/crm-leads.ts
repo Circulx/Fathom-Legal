@@ -1,7 +1,6 @@
 import type { ILead } from '@/models/Lead'
 import type { CrmLead } from '@/components/CRM/data'
-
-const DEFAULT_MEET_LINK = 'https://meet.google.com/wkd-evwz-dxw'
+import { DEFAULT_GOOGLE_MEET_LINK } from '@/lib/consultation-meet-link'
 
 export function formatLeadAgo(date: Date): string {
   const diffMs = Date.now() - date.getTime()
@@ -44,7 +43,7 @@ export function leadDocToCrmLead(doc: ILead | Record<string, unknown>): CrmLead 
     consultationTime24: lead.consultationTime24 || '',
     googleMeetLink:
       lead.googleMeetLink ||
-      (lead.date && lead.date !== '—' ? DEFAULT_MEET_LINK : ''),
+      (lead.date && lead.date !== '—' ? DEFAULT_GOOGLE_MEET_LINK : ''),
     status: lead.status,
     ago: formatLeadAgo(createdAt),
     createdAt: createdAt.toISOString(),

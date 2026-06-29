@@ -2483,15 +2483,15 @@ export default function AdminDashboard() {
                               />
                             </div>
                           ) : blog.imageUrl ? (
-                            <div className="mb-4">
+                            <div className="mb-4 aspect-video w-full overflow-hidden rounded-lg bg-gray-100">
                               <img
                                 src={blog.imageUrl}
                                 alt={blog.title}
-                                className="w-full h-32 object-cover rounded-lg"
+                                className="w-full h-full object-contain"
                               />
                             </div>
                           ) : (
-                            <div className="mb-4 h-32 bg-gray-100 rounded-lg flex items-center justify-center">
+                            <div className="mb-4 aspect-video w-full bg-gray-100 rounded-lg flex items-center justify-center">
                               <Newspaper className="h-12 w-12 text-gray-400" />
                             </div>
                           )}
@@ -2649,15 +2649,15 @@ export default function AdminDashboard() {
                               />
                             </div>
                           ) : blog.imageUrl ? (
-                            <div className="mb-4">
+                            <div className="mb-4 aspect-video w-full overflow-hidden rounded-lg bg-gray-100">
                               <img
                                 src={blog.imageUrl}
                                 alt={blog.title}
-                                className="w-full h-32 object-cover rounded-lg"
+                                className="w-full h-full object-contain"
                               />
                             </div>
                           ) : (
-                            <div className="mb-4 h-32 bg-gray-100 rounded-lg flex items-center justify-center">
+                            <div className="mb-4 aspect-video w-full bg-gray-100 rounded-lg flex items-center justify-center">
                               <Newspaper className="h-12 w-12 text-gray-400" />
                             </div>
                           )}

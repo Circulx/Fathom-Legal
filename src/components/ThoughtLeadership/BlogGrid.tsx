@@ -90,7 +90,7 @@ export default function BlogGrid({
             key={index}
             className="bg-white shadow-sm border border-gray-100 overflow-hidden animate-pulse"
           >
-            <div className="w-full h-36 md:h-40 bg-gray-200"></div>
+            <div className="w-full h-auto aspect-video bg-gray-200"></div>
             <div className="w-full p-4">
               <div className="h-5 w-3/4 bg-gray-200 rounded mb-2"></div>
               <div className="h-3 w-1/2 bg-gray-200 rounded mb-2"></div>
@@ -136,18 +136,18 @@ export default function BlogGrid({
             }}
           >
             <div className="flex flex-col">
-              <div className="w-full relative h-36 md:h-40">
+              <div className="w-full relative aspect-video bg-gray-100">
                 {blog.imageUrl ? (
                   <Image
                     src={blog.imageUrl}
                     alt={blog.title}
                     fill
-                    className="object-cover"
+                    className="object-contain"
                     unoptimized={blog.imageUrl?.startsWith('data:')}
                     sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                   />
                 ) : blog.logoUrl ? (
-                  <div className="w-full h-full bg-white flex items-center justify-center p-3 relative">
+                  <div className="absolute inset-0 flex items-center justify-center p-3">
                     <Image
                       src={blog.logoUrl}
                       alt={blog.title}
@@ -158,7 +158,7 @@ export default function BlogGrid({
                     />
                   </div>
                 ) : (
-                  <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+                  <div className="absolute inset-0 flex items-center justify-center">
                     <span className="text-gray-400 text-sm">No Image</span>
                   </div>
                 )}

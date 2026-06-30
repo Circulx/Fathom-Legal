@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
         selectedDate,
         selectedTime,
         confirmedEmail,
-        googleMeetLink: googleMeetLink || 'https://meet.google.com/wkd-evwz-dxw',
+        googleMeetLink: googleMeetLink || 'https://meet.google.com/qnr-nwvr-pps',
         completedAt: new Date(),
       },
       { new: true }
@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
         firstName: submission.firstName,
         lastName: submission.lastName,
         sessionId,
-        googleMeetLink: googleMeetLink || 'https://meet.google.com/wkd-evwz-dxw',
+        googleMeetLink: googleMeetLink || 'https://meet.google.com/qnr-nwvr-pps',
         services: submission.selectedServices,
       })
       console.log('[v0] Booked slot created:', { date: selectedDate, time: timeForSlot })

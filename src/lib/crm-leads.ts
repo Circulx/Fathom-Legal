@@ -1,4 +1,4 @@
-import type { ILead } from '@/models/Lead'
+import type { ILead, ILeadActionable } from '@/models/Lead'
 import type { CrmLead } from '@/components/CRM/data'
 
 const DEFAULT_MEET_LINK = 'https://meet.google.com/wkd-evwz-dxw'
@@ -21,7 +21,77 @@ export function formatTimelineWhen(date: Date): string {
     day: 'numeric',
     hour: 'numeric',
     minute: '2-digit',
+    timeZone: 'Asia/Kolkata',
   })
+}
+
+export function getActionableTimelineEntries(
+  previous: ILeadActionable[],
+  next: ILeadActionable[],
+  fallbackWhen: Date
+): CrmLead['timeline'] {
+  const entries: CrmLead['timeline'] = []
+  const prevById = new Map(
+    previous.map((task) => [
+      task.id,
+      {
+        id: String(task.id),
+        text: String(task.text),
+        completed: Boolean(task.completed),
+        assignee: String(task.assignee ?? 'Unassigned'),
+        completedAt: task.completedAt ? String(task.completedAt) : '',
+      },
+    ])
+  )
+
+  for (const rawTask of next) {
+    const task = {
+      id: String(rawTask.id),
+      text: String(rawTask.text),
+      completed: Boolean(rawTask.completed),
+      assignee: String(rawTask.assignee ?? 'Unassigned'),
+      completedAt: rawTask.completedAt ? String(rawTask.completedAt) : '',
+    }
+    const old = prevById.get(task.id)
+    if (!old) {
+      entries.push({
+        icon: 'file',
+        text: `Task added: ${task.text}`,
+        when: formatTimelineWhen(fallbackWhen),
+      })
+      continue
+    }
+
+    if (!old.completed && task.completed) {
+      const completedAt = task.completedAt ? new Date(task.completedAt) : fallbackWhen
+      entries.push({
+        icon: 'check',
+        text: `Task completed: ${task.text}`,
+        when: formatTimelineWhen(
+          Number.isNaN(completedAt.getTime()) ? fallbackWhen : completedAt
+        ),
+      })
+    } else if (old.completed && !task.completed) {
+      entries.push({
+        icon: 'file',
+        text: `Task reopened: ${task.text}`,
+        when: formatTimelineWhen(fallbackWhen),
+      })
+    }
+  }
+
+  return entries
+}
+
+export function normalizeActionables(actionables: ILeadActionable[]): ILeadActionable[] {
+  if (!Array.isArray(actionables)) return []
+  return actionables.map((task) => ({
+    id: String(task.id),
+    text: String(task.text),
+    completed: Boolean(task.completed),
+    assignee: String(task.assignee ?? 'Unassigned').trim() || 'Unassigned',
+    completedAt: task.completed ? String(task.completedAt ?? '') : '',
+  }))
 }
 
 export function leadDocToCrmLead(doc: ILead | Record<string, unknown>): CrmLead {

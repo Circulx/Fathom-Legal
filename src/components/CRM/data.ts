@@ -28,6 +28,7 @@ export interface CrmActionable {
   text: string
   completed: boolean
   assignee: string
+  completedAt?: string
 }
 
 export const UNASSIGNED_ASSIGNEE = 'Unassigned'

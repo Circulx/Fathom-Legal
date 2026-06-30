@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
 import connectDB from '@/lib/mongodb'
 import Lead from '@/models/Lead'
-import { formatTimelineWhen, leadDocToCrmLead } from '@/lib/crm-leads'
+import { formatTimelineWhen, leadDocToCrmLead, getActionableTimelineEntries, normalizeActionables } from '@/lib/crm-leads'
 import { CRM_STATUSES, type CrmStatus } from '@/components/CRM/data'
 import {
   applyConsultationSchedule,
@@ -155,7 +155,21 @@ export async function PATCH(
     }
 
     if (body.actionables !== undefined) {
-      lead.actionables = body.actionables
+      const previousActionables = normalizeActionables([...(lead.actionables ?? [])])
+      const nextActionables = normalizeActionables(body.actionables)
+      const timelineEntries = getActionableTimelineEntries(
+        previousActionables,
+        nextActionables,
+        now
+      )
+      for (const entry of timelineEntries) {
+        lead.timeline.push(entry)
+      }
+      lead.actionables = nextActionables
+      lead.markModified('actionables')
+      if (timelineEntries.length > 0) {
+        lead.markModified('timeline')
+      }
     }
 
     let consultationTimelineAdded = false
@@ -229,7 +243,8 @@ export async function PATCH(
       return NextResponse.json({ error: error.message }, { status: 409 })
     }
     console.error('Update lead error:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    const message = error instanceof Error ? error.message : 'Internal server error'
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }
 

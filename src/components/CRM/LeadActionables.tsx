@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react'
 import { Plus, Trash2, User } from 'lucide-react'
 import { UNASSIGNED_ASSIGNEE, collectAssigneeNames, type CrmActionable } from './data'
+import { formatTimelineWhen } from '@/lib/crm-leads'
 
 interface LeadActionablesProps {
   actionables: CrmActionable[]
@@ -64,8 +65,17 @@ export default function LeadActionables({
   }
 
   const toggleTask = (id: string) => {
+    const completedAt = new Date().toISOString()
     onChange(
-      actionables.map((a) => (a.id === id ? { ...a, completed: !a.completed } : a))
+      actionables.map((a) => {
+        if (a.id !== id) return a
+        const completed = !a.completed
+        return {
+          ...a,
+          completed,
+          completedAt: completed ? completedAt : undefined,
+        }
+      })
     )
   }
 
@@ -128,6 +138,11 @@ export default function LeadActionables({
               >
                 {task.text}
               </p>
+              {task.completed && task.completedAt && !Number.isNaN(new Date(task.completedAt).getTime()) && (
+                <p className="text-[10.5px] text-[#9a9289] mt-0.5">
+                  Completed {formatTimelineWhen(new Date(task.completedAt))}
+                </p>
+              )}
               <div className="flex items-center gap-2 mt-1">
                 <User className="w-3 h-3 text-[#9a9289] flex-shrink-0" />
                 <input

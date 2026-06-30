@@ -20,6 +20,7 @@ export interface ILeadActionable {
   text: string
   completed: boolean
   assignee: string
+  completedAt?: string
 }
 
 export interface ILead extends Document {
@@ -59,6 +60,7 @@ const ActionableSchema = new Schema<ILeadActionable>(
     text: { type: String, required: true },
     completed: { type: Boolean, default: false },
     assignee: { type: String, default: 'Unassigned' },
+    completedAt: { type: String, default: '' },
   },
   { _id: false }
 )

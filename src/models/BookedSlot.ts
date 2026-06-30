@@ -46,7 +46,7 @@ const BookedSlotSchema = new Schema<IBookedSlot>(
     },
     googleMeetLink: {
       type: String,
-      default: 'https://meet.google.com/wkd-evwz-dxw',
+      default: 'https://meet.google.com/qnr-nwvr-pps',
     },
     services: [{
       type: String,

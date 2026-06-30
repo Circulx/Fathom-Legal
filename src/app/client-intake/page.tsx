@@ -2,10 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { ChevronRight, Building2, Zap, Coins, FileText, Gavel, Lightbulb, CheckCircle, AlertCircle, Calendar, Clock, Video } from 'lucide-react'
+import { ChevronRight, Building2, Zap, Coins, FileText, Gavel, Lightbulb, CheckCircle, AlertCircle, Calendar, Clock, ChevronLeft, Video } from 'lucide-react'
 import { Navbar } from '@/components/Navbar/index'
 import Footer from '@/components/Footer'
-import BookingMonthCalendar from '@/components/BookingMonthCalendar'
 
 interface FormData {
   selectedServices: string[]
@@ -25,11 +24,6 @@ interface SchedulingData {
   confirmedEmail: string
   googleMeetLink: string
 }
-
-const FORM_FIELD_CLASS =
-  'w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:outline-none focus:border-[#A5292A] focus:ring-1 focus:ring-[#A5292A]'
-
-const FORM_TEXTAREA_CLASS = `${FORM_FIELD_CLASS} resize-none`
 
 export default function ClientIntakePage() {
   const [currentStep, setCurrentStep] = useState(1)
@@ -74,6 +68,9 @@ export default function ClientIntakePage() {
   // State for slot availability
   const [availableSlots, setAvailableSlots] = useState<Array<{ time: string; available: boolean }>>([])
   const [loadingSlots, setLoadingSlots] = useState(false)
+  
+  // State for calendar navigation
+  const [displayMonth, setDisplayMonth] = useState<Date>(new Date())
 
   // Fetch available slots for selected date
   const fetchAvailableSlots = async (date: string) => {
@@ -103,10 +100,97 @@ export default function ClientIntakePage() {
     setLoadingSlots(false)
   }
 
-  const handleDateSelection = (dateStr: string) => {
+  // Generate full month calendar with proper week grid
+  const getFullMonthCalendar = (monthDate: Date) => {
+    const year = monthDate.getFullYear()
+    const month = monthDate.getMonth()
+    
+    const firstDay = new Date(year, month, 1)
+    const lastDay = new Date(year, month + 1, 0)
+    const daysInMonth = lastDay.getDate()
+    const startingDayOfWeek = firstDay.getDay()
+    
+    const weeks: Array<Array<{ date: Date | null; dateNum: number | null; isCurrentMonth: boolean; isDisabled: boolean }>> = []
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    
+    let currentWeek: Array<{ date: Date | null; dateNum: number | null; isCurrentMonth: boolean; isDisabled: boolean }> = []
+    
+    // Add empty cells for days before month starts
+    for (let i = 0; i < startingDayOfWeek; i++) {
+      currentWeek.push({ date: null, dateNum: null, isCurrentMonth: false, isDisabled: true })
+    }
+    
+    // Add days of current month
+    for (let day = 1; day <= daysInMonth; day++) {
+      const cellDate = new Date(year, month, day)
+      const dayOfWeek = cellDate.getDay()
+      const isWeekend = dayOfWeek === 0 || dayOfWeek === 6
+      const isPast = cellDate < today
+      const isDisabled = isWeekend || isPast
+      
+      currentWeek.push({
+        date: cellDate,
+        dateNum: day,
+        isCurrentMonth: true,
+        isDisabled: isDisabled
+      })
+      
+      // Start new week on Sunday
+      if (currentWeek.length === 7) {
+        weeks.push(currentWeek)
+        currentWeek = []
+      }
+    }
+    
+    // Add empty cells for remaining days
+    while (currentWeek.length > 0 && currentWeek.length < 7) {
+      currentWeek.push({ date: null, dateNum: null, isCurrentMonth: false, isDisabled: true })
+    }
+    if (currentWeek.length > 0) {
+      weeks.push(currentWeek)
+    }
+    
+    return weeks
+  }
+
+  // Handle month navigation
+  const handlePrevMonth = () => {
+    const today = new Date()
+    const prevMonth = new Date(displayMonth.getFullYear(), displayMonth.getMonth() - 1)
+    
+    // Don't go before current month
+    if (prevMonth.getFullYear() > today.getFullYear() || 
+        (prevMonth.getFullYear() === today.getFullYear() && prevMonth.getMonth() >= today.getMonth())) {
+      setDisplayMonth(prevMonth)
+    }
+  }
+
+  const handleNextMonth = () => {
+    const nextMonth = new Date(displayMonth.getFullYear(), displayMonth.getMonth() + 1)
+    setDisplayMonth(nextMonth)
+  }
+
+  const handleYearMonthChange = (e: React.ChangeEvent<HTMLSelectElement>, isYear: boolean) => {
+    const newMonth = new Date(displayMonth)
+    if (isYear) {
+      newMonth.setFullYear(parseInt(e.target.value))
+    } else {
+      newMonth.setMonth(parseInt(e.target.value))
+    }
+    setDisplayMonth(newMonth)
+  }
+
+  // Handle date selection
+  const handleDateSelection = (date: Date) => {
+    const dateStr = date.toISOString().split('T')[0]
     setSchedulingData(prev => ({ ...prev, selectedDate: dateStr, selectedTime: '' }))
     fetchAvailableSlots(dateStr)
   }
+
+  const monthCalendar = getFullMonthCalendar(displayMonth)
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
 
   // Initialize session
   useEffect(() => {
@@ -229,7 +313,7 @@ export default function ClientIntakePage() {
     }
   }
 
-  const googleMeetLink = 'https://meet.google.com/wkd-evwz-dxw'
+  const googleMeetLink = 'https://meet.google.com/qnr-nwvr-pps'
 
   const handleStep3Continue = async () => {
     if (!schedulingData.selectedDate || !schedulingData.selectedTime || !schedulingData.confirmedEmail) {
@@ -263,7 +347,7 @@ export default function ClientIntakePage() {
         return
       }
 
-      // Send confirmation email via Zoho
+      // Send confirmation email via Gmail
       let emailSent = false
       try {
         const emailResponse = await fetch('/api/intake/send-email', {
@@ -412,7 +496,7 @@ export default function ClientIntakePage() {
           value={formData.customNeeds}
           onChange={(e) => setFormData(prev => ({ ...prev, customNeeds: e.target.value }))}
           placeholder="e.g. I need help reviewing an employment agreement for a new hire..."
-          className={FORM_TEXTAREA_CLASS}
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#A5292A] focus:ring-1 focus:ring-[#A5292A] resize-none"
           rows={4}
         />
       </div>
@@ -458,7 +542,7 @@ export default function ClientIntakePage() {
               value={formData.firstName}
               onChange={(e) => setFormData(prev => ({ ...prev, firstName: e.target.value }))}
               placeholder="Jane"
-              className={FORM_FIELD_CLASS}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#A5292A] focus:ring-1 focus:ring-[#A5292A]"
             />
           </div>
           <div>
@@ -468,7 +552,7 @@ export default function ClientIntakePage() {
               value={formData.lastName}
               onChange={(e) => setFormData(prev => ({ ...prev, lastName: e.target.value }))}
               placeholder="Smith"
-              className={FORM_FIELD_CLASS}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#A5292A] focus:ring-1 focus:ring-[#A5292A]"
             />
           </div>
         </div>
@@ -480,7 +564,7 @@ export default function ClientIntakePage() {
             value={formData.email}
             onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
             placeholder="jane@example.com"
-            className={FORM_FIELD_CLASS}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#A5292A] focus:ring-1 focus:ring-[#A5292A]"
           />
         </div>
 
@@ -491,7 +575,7 @@ export default function ClientIntakePage() {
             value={formData.phone}
             onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
             placeholder="+91 98765 43210"
-            className={FORM_FIELD_CLASS}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#A5292A] focus:ring-1 focus:ring-[#A5292A]"
           />
         </div>
 
@@ -503,7 +587,7 @@ export default function ClientIntakePage() {
               value={formData.company}
               onChange={(e) => setFormData(prev => ({ ...prev, company: e.target.value }))}
               placeholder="Acme Corp (optional)"
-              className={FORM_FIELD_CLASS}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#A5292A] focus:ring-1 focus:ring-[#A5292A]"
             />
           </div>
           <div>
@@ -511,7 +595,7 @@ export default function ClientIntakePage() {
             <select
               value={formData.heardAbout}
               onChange={(e) => setFormData(prev => ({ ...prev, heardAbout: e.target.value }))}
-              className={FORM_FIELD_CLASS}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#A5292A] focus:ring-1 focus:ring-[#A5292A]"
             >
               <option value="">Select...</option>
               <option value="google">Google Search</option>
@@ -528,7 +612,7 @@ export default function ClientIntakePage() {
             value={formData.matterDescription}
             onChange={(e) => setFormData(prev => ({ ...prev, matterDescription: e.target.value }))}
             placeholder="Briefly describe the legal matter you need help with..."
-            className={FORM_TEXTAREA_CLASS}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#A5292A] focus:ring-1 focus:ring-[#A5292A] resize-none"
             rows={4}
           />
         </div>
@@ -587,17 +671,106 @@ export default function ClientIntakePage() {
         <div className="space-y-8 mb-8">
           {/* Custom Calendar */}
           <div>
-            <label className="flex items-center gap-2 text-sm font-semibold text-gray-900 mb-4">
+            <label className="flex items-center gap-2 text-sm font-semibold text-gray-900 mb-1">
               <Calendar className="w-5 h-5" />
               Select a date and time
             </label>
 
             {/* Date Selection - Full Month Calendar */}
-            <BookingMonthCalendar
-              selectedDate={schedulingData.selectedDate}
-              onDateSelect={handleDateSelection}
-              variant="intake"
-            />
+            <div className="border border-gray-200 rounded-lg p-6 mb-6 bg-white">
+              <h3 className="font-bold text-base text-[#A5292A] mb-5 flex items-center gap-2">
+                <Calendar className="w-5 h-5" />
+                Select Your Preferred Date
+              </h3>
+              
+              {/* Month/Year Navigation */}
+              <div className="flex items-center justify-center gap-4 mb-6 bg-[#A5292A]/5 p-4 rounded-lg">
+                <button
+                  onClick={handlePrevMonth}
+                  className="p-2 rounded-lg bg-white border-2 border-[#A5292A] text-[#A5292A] hover:bg-[#A5292A]/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:border-gray-300 disabled:text-gray-400"
+                  disabled={displayMonth.getMonth() === today.getMonth() && displayMonth.getFullYear() === today.getFullYear()}
+                  title="Previous month"
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+                
+                <select
+                  value={displayMonth.getMonth()}
+                  onChange={(e) => handleYearMonthChange(e, false)}
+                  className="px-4 py-2 border-2 border-[#A5292A] rounded-lg font-semibold text-[#A5292A] bg-white focus:outline-none focus:ring-2 focus:ring-[#A5292A]/20 cursor-pointer"
+                >
+                  {['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'].map((m, i) => (
+                    <option key={i} value={i}>{m}</option>
+                  ))}
+                </select>
+                
+                <select
+                  value={displayMonth.getFullYear()}
+                  onChange={(e) => handleYearMonthChange(e, true)}
+                  className="px-4 py-2 border-2 border-[#A5292A] rounded-lg font-semibold text-[#A5292A] bg-white focus:outline-none focus:ring-2 focus:ring-[#A5292A]/20 cursor-pointer"
+                >
+                  {Array.from({ length: 5 }, (_, i) => today.getFullYear() + i).map((year) => (
+                    <option key={year} value={year}>{year}</option>
+                  ))}
+                </select>
+                
+                <button
+                  onClick={handleNextMonth}
+                  className="p-2 rounded-lg bg-white border-2 border-[#A5292A] text-[#A5292A] hover:bg-[#A5292A]/10 transition-all"
+                  title="Next month"
+                >
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+              </div>
+              
+              {/* Calendar Grid */}
+              <div className="bg-white rounded-lg border border-[#A5292A]/10 p-4">
+                {/* Day headers */}
+                <div className="grid grid-cols-7 gap-2 mb-3">
+                  {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
+                    <div key={day} className="aspect-square flex items-center justify-center text-xs font-bold text-[#A5292A] bg-[#A5292A]/8 rounded-lg">
+                      {day}
+                    </div>
+                  ))}
+                </div>
+                
+                {/* Calendar dates grid */}
+                <div className="grid grid-cols-7 gap-2">
+                  {monthCalendar.map((week, weekIndex) =>
+                    week.map((day, dayIndex) => {
+                      const isSelected = day.date && schedulingData.selectedDate === day.date.toISOString().split('T')[0]
+                      const isToday = day.date && day.date.getTime() === today.getTime()
+                      
+                      return (
+                        <button
+                          key={`${weekIndex}-${dayIndex}`}
+                          onClick={() => day.date && !day.isDisabled && handleDateSelection(day.date)}
+                          disabled={day.isDisabled}
+                          className={`aspect-square rounded-lg border-2 font-semibold transition-all text-center flex items-center justify-center text-sm ${
+                            day.isDisabled && !day.isCurrentMonth
+                              ? 'bg-white border-white text-white cursor-default'
+                              : day.isDisabled
+                              ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'
+                              : isSelected
+                              ? 'border-[#A5292A] bg-[#A5292A] text-white shadow-md'
+                              : isToday
+                              ? 'border-[#A5292A] bg-[#A5292A]/12 text-[#A5292A]'
+                              : 'border-gray-300 bg-white text-gray-900 hover:border-[#A5292A] hover:bg-[#A5292A]/5'
+                          }`}
+                          title={day.isDisabled && day.isCurrentMonth ? day.date?.getDay() === 0 || day.date?.getDay() === 6 ? 'Weekend - Not available' : 'Past date' : ''}
+                        >
+                          {day.dateNum}
+                        </button>
+                      )
+                    })
+                  )}
+                </div>
+              </div>
+              
+              <p className="text-xs text-gray-500 mt-4">
+                Only weekdays from today onwards are available. Select a date to view time slots.
+              </p>
+            </div>
 
             {/* Time Slot Selection with Availability */}
             {schedulingData.selectedDate && (
@@ -665,7 +838,7 @@ export default function ClientIntakePage() {
               value={schedulingData.confirmedEmail}
               onChange={(e) => setSchedulingData(prev => ({ ...prev, confirmedEmail: e.target.value }))}
               placeholder={formData.email || 'your@email.com'}
-              className={FORM_FIELD_CLASS}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#A5292A] focus:ring-1 focus:ring-[#A5292A]"
             />
             <p className="text-xs text-gray-500 mt-2">Confirmation email and Google Meet link will be sent to this address</p>
           </div>

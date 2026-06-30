@@ -33,7 +33,7 @@ export interface CrmActionable {
 
 export const UNASSIGNED_ASSIGNEE = 'Unassigned'
 
-export type CrmAssigneeRecord = { id: string; name: string }
+export type CrmAssigneeRecord = { id: string; name: string; emails: string[]; email?: string }
 
 export interface CrmLead {
   id: string

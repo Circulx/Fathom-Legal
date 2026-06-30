@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useMemo } from 'react'
 import { useSession, signOut } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import { TextStyle } from '@tiptap/extension-text-style'
@@ -52,6 +52,7 @@ import {
 } from 'lucide-react'
 import { Navbar } from '@/components/Navbar'
 import CrmSection, { type CrmNavigateHandler, type CrmView } from '@/components/CRM/CrmSection'
+import { parseCrmDashboardDeepLink } from '@/lib/crm-deep-link'
 import {
   AWAITING_RESPONSE_STATUSES,
   normalizeStatus,
@@ -532,6 +533,7 @@ function RichTextEditor({
 export default function AdminDashboard() {
   const { data: session, status } = useSession()
   const router = useRouter()
+  const searchParams = useSearchParams()
   
   // All state declarations must be at the top, before any conditional logic
   const [activeSection, setActiveSection] = useState('dashboard')
@@ -540,6 +542,10 @@ export default function AdminDashboard() {
   const [crmLeads, setCrmLeads] = useState<CrmLead[]>([])
   const [crmSeedFilters, setCrmSeedFilters] = useState<LeadListFilters | null>(null)
   const [crmSeedFilterKey, setCrmSeedFilterKey] = useState(0)
+  const [crmSeedLeadId, setCrmSeedLeadId] = useState<string | null>(null)
+  const [crmSeedTaskId, setCrmSeedTaskId] = useState<string | null>(null)
+  const [crmSeedLeadKey, setCrmSeedLeadKey] = useState(0)
+  const processedCrmDeepLink = useRef<string | null>(null)
   
   // Templates state
   const [templates, setTemplates] = useState<Template[]>([])
@@ -761,6 +767,25 @@ export default function AdminDashboard() {
       fetchThoughtLeadershipPhotos()
     }
   }, [activeSection, session, status])
+
+  useEffect(() => {
+    if (status !== 'authenticated') return
+
+    const { view, leadId, taskId } = parseCrmDashboardDeepLink(searchParams)
+    if (view !== 'leads' || !leadId) return
+
+    const linkKey = searchParams.toString()
+    if (!linkKey || processedCrmDeepLink.current === linkKey) return
+
+    processedCrmDeepLink.current = linkKey
+    setCrmSeedLeadId(leadId)
+    setCrmSeedTaskId(taskId)
+    setCrmSeedLeadKey((key) => key + 1)
+    setCrmExpanded(true)
+    setActiveSection('crm-leads')
+    router.replace('/admin/dashboard', { scroll: false })
+    processedCrmDeepLink.current = null
+  }, [status, searchParams, router])
   
   // Show loading while checking authentication
   if (status === 'loading') {
@@ -2816,6 +2841,9 @@ export default function AdminDashboard() {
                 onLeadsCountChange={setCrmLeadCount}
                 seedLeadsFilters={crmSeedFilters}
                 seedLeadsFilterKey={crmSeedFilterKey}
+                seedLeadId={crmSeedLeadId}
+                seedTaskId={crmSeedTaskId}
+                seedLeadKey={crmSeedLeadKey}
               />
             )}
 

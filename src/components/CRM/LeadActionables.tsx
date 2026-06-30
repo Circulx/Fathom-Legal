@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Plus, Trash2, User } from 'lucide-react'
 import { UNASSIGNED_ASSIGNEE, collectAssigneeNames, type CrmActionable } from './data'
 import { formatTimelineWhen } from '@/lib/crm-leads'
@@ -10,6 +10,7 @@ interface LeadActionablesProps {
   knownAssignees: string[]
   onChange: (actionables: CrmActionable[]) => void
   onEnsureAssignee?: (name: string) => Promise<void>
+  highlightTaskId?: string | null
 }
 
 function toAssigneeInputValue(assignee: string) {
@@ -26,9 +27,33 @@ export default function LeadActionables({
   knownAssignees,
   onChange,
   onEnsureAssignee,
+  highlightTaskId = null,
 }: LeadActionablesProps) {
   const [newTask, setNewTask] = useState('')
   const [newAssignee, setNewAssignee] = useState('')
+  const [assigneeDrafts, setAssigneeDrafts] = useState<Record<string, string>>({})
+  const [activeHighlightId, setActiveHighlightId] = useState<string | null>(null)
+
+  useEffect(() => {
+    setAssigneeDrafts({})
+  }, [actionables])
+
+  useEffect(() => {
+    if (!highlightTaskId) return
+    const taskExists = actionables.some((task) => task.id === highlightTaskId)
+    if (!taskExists) return
+
+    setActiveHighlightId(highlightTaskId)
+    const frame = requestAnimationFrame(() => {
+      const el = document.getElementById(`crm-task-${highlightTaskId}`)
+      el?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    })
+    const timer = window.setTimeout(() => setActiveHighlightId(null), 4000)
+    return () => {
+      cancelAnimationFrame(frame)
+      window.clearTimeout(timer)
+    }
+  }, [highlightTaskId, actionables])
 
   const assigneeSuggestions = useMemo(
     () => collectAssigneeNames(knownAssignees, actionables),
@@ -83,9 +108,32 @@ export default function LeadActionables({
     onChange(actionables.filter((a) => a.id !== id))
   }
 
-  const updateAssignee = (id: string, raw: string) => {
+  const setAssigneeDraft = (id: string, raw: string) => {
+    setAssigneeDrafts((prev) => ({ ...prev, [id]: raw }))
+  }
+
+  const commitAssignee = async (id: string, raw: string) => {
     const assignee = fromAssigneeInputValue(raw)
-    onChange(actionables.map((a) => (a.id === id ? { ...a, assignee } : a)))
+    const current = actionables.find((task) => task.id === id)
+    if (!current || current.assignee === assignee) {
+      setAssigneeDrafts((prev) => {
+        const next = { ...prev }
+        delete next[id]
+        return next
+      })
+      return
+    }
+
+    if (assignee !== UNASSIGNED_ASSIGNEE) {
+      await persistAssignee(raw)
+    }
+
+    onChange(actionables.map((task) => (task.id === id ? { ...task, assignee } : task)))
+    setAssigneeDrafts((prev) => {
+      const next = { ...prev }
+      delete next[id]
+      return next
+    })
   }
 
   return (
@@ -111,7 +159,12 @@ export default function LeadActionables({
         {actionables.map((task) => (
           <div
             key={task.id}
-            className="group flex gap-2.5 py-2.5 border-b border-[#efebe4] last:border-b-0"
+            id={`crm-task-${task.id}`}
+            className={`group flex gap-2.5 py-2.5 border-b border-[#efebe4] last:border-b-0 transition-colors ${
+              activeHighlightId === task.id
+                ? 'bg-[#fdf6f7] ring-2 ring-[#7a1322]/40 rounded-lg -mx-2 px-2'
+                : ''
+            }`}
           >
             <button
               type="button"
@@ -148,9 +201,16 @@ export default function LeadActionables({
                 <input
                   type="text"
                   list="crm-assignee-suggestions"
-                  value={toAssigneeInputValue(task.assignee)}
-                  onChange={(e) => updateAssignee(task.id, e.target.value)}
-                  onBlur={(e) => void persistAssignee(e.target.value)}
+                  value={
+                    assigneeDrafts[task.id] ?? toAssigneeInputValue(task.assignee)
+                  }
+                  onChange={(e) => setAssigneeDraft(task.id, e.target.value)}
+                  onBlur={(e) => void commitAssignee(task.id, e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.currentTarget.blur()
+                    }
+                  }}
                   placeholder="Assign to…"
                   className={`flex-1 min-w-0 text-[11.5px] bg-transparent border-none p-0 focus:outline-none focus:ring-0 placeholder:text-[#9a9289] ${
                     task.assignee === UNASSIGNED_ASSIGNEE ? 'text-[#9a9289]' : 'text-[#736c63]'

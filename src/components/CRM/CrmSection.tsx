@@ -326,6 +326,10 @@ interface CrmSectionProps {
   /** Filters passed from the admin dashboard home KPI cards */
   seedLeadsFilters?: LeadListFilters | null
   seedLeadsFilterKey?: number
+  /** Open a specific lead (and optional task) from an email deep link */
+  seedLeadId?: string | null
+  seedTaskId?: string | null
+  seedLeadKey?: number
 }
 
 export default function CrmSection({
@@ -334,6 +338,9 @@ export default function CrmSection({
   onLeadsCountChange,
   seedLeadsFilters = null,
   seedLeadsFilterKey = 0,
+  seedLeadId = null,
+  seedTaskId = null,
+  seedLeadKey = 0,
 }: CrmSectionProps) {
   const { title, subtitle } = VIEW_TITLES[activeView]
   const [leads, setLeads] = useState<CrmLead[]>([])
@@ -341,6 +348,7 @@ export default function CrmSection({
   const [assignees, setAssignees] = useState<CrmAssigneeRecord[]>([])
   const [searchQuery, setSearchQuery] = useState('')
   const [drawerLeadId, setDrawerLeadId] = useState<string | null>(null)
+  const [highlightTaskId, setHighlightTaskId] = useState<string | null>(null)
   const [leadsInitialFilters, setLeadsInitialFilters] = useState<LeadListFilters | null>(null)
   const [leadsFilterKey, setLeadsFilterKey] = useState(0)
 
@@ -361,6 +369,12 @@ export default function CrmSection({
     setLeadsFilterKey(seedLeadsFilterKey)
   }, [seedLeadsFilters, seedLeadsFilterKey])
 
+  useEffect(() => {
+    if (!seedLeadKey || !seedLeadId) return
+    setDrawerLeadId(seedLeadId)
+    setHighlightTaskId(seedTaskId ?? null)
+  }, [seedLeadId, seedTaskId, seedLeadKey])
+
   const filteredLeads = useMemo(
     () => filterLeadsBySearch(leads, searchQuery),
     [leads, searchQuery]
@@ -372,7 +386,17 @@ export default function CrmSection({
       const response = await fetch('/api/admin/assignees')
       if (!response.ok) return
       const data = await response.json()
-      setAssignees(data.assignees ?? [])
+      setAssignees(
+        (data.assignees ?? []).map((assignee: CrmAssigneeRecord) => ({
+          ...assignee,
+          emails:
+            assignee.emails?.length > 0
+              ? assignee.emails
+              : assignee.email
+                ? [assignee.email]
+                : [],
+        }))
+      )
     } catch (error) {
       console.error('Error fetching assignees:', error)
     }
@@ -404,7 +428,7 @@ export default function CrmSection({
     fetchAssignees()
   }, [fetchLeads, fetchAssignees])
 
-  const addAssignee = useCallback(async (name: string) => {
+  const addAssignee = useCallback(async (name: string, emails: string[] = []) => {
     const trimmed = name.trim()
     if (!trimmed || trimmed.toLowerCase() === UNASSIGNED_ASSIGNEE.toLowerCase()) return
 
@@ -416,7 +440,7 @@ export default function CrmSection({
     const response = await fetch('/api/admin/assignees', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: trimmed }),
+      body: JSON.stringify({ name: trimmed, emails }),
     })
     const data = await response.json().catch(() => ({}))
     if (!response.ok) {
@@ -426,6 +450,27 @@ export default function CrmSection({
       [...prev, data.assignee].sort((a, b) => a.name.localeCompare(b.name))
     )
   }, [assignees])
+
+  const updateAssigneeEmails = useCallback(async (id: string, emails: string[]) => {
+    const response = await fetch(`/api/admin/assignees/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ emails }),
+    })
+    const data = await response.json().catch(() => ({}))
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to update assignee emails')
+    }
+    const updated = data.assignee as CrmAssigneeRecord
+    if (emails.length > 0 && updated.emails.length === 0) {
+      throw new Error('Emails were not saved. Please restart the dev server and try again.')
+    }
+    setAssignees((prev) =>
+      prev
+        .map((assignee) => (assignee.id === id ? updated : assignee))
+        .sort((a, b) => a.name.localeCompare(b.name))
+    )
+  }, [])
 
   const deleteAssignee = useCallback(async (id: string) => {
     const response = await fetch(`/api/admin/assignees/${id}`, { method: 'DELETE' })
@@ -567,6 +612,7 @@ export default function CrmSection({
     loading: leadsLoading,
     assignees,
     onEnsureAssignee: addAssignee,
+    onUpdateAssigneeEmails: updateAssigneeEmails,
     onDeleteAssignee: deleteAssignee,
     onPatchLead: patchLead,
     onLeadAdded: addLeadToList,
@@ -578,7 +624,11 @@ export default function CrmSection({
     searchQuery,
     onSearchQueryChange: setSearchQuery,
     drawerLeadId,
-    onDrawerLeadIdChange: setDrawerLeadId,
+    onDrawerLeadIdChange: (id: string | null) => {
+      setDrawerLeadId(id)
+      if (!id) setHighlightTaskId(null)
+    },
+    highlightTaskId,
     leadPool: leads,
   }
 

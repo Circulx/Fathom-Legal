@@ -1,5 +1,6 @@
 import type { ILead, ILeadActionable } from '@/models/Lead'
 import type { CrmLead } from '@/components/CRM/data'
+import { UNASSIGNED_ASSIGNEE } from '@/components/CRM/data'
 
 const DEFAULT_MEET_LINK = 'https://meet.google.com/wkd-evwz-dxw'
 
@@ -81,6 +82,54 @@ export function getActionableTimelineEntries(
   }
 
   return entries
+}
+
+function isAssignedAssignee(assignee: string): boolean {
+  const normalized = assignee.trim().toLowerCase()
+  return Boolean(normalized) && normalized !== UNASSIGNED_ASSIGNEE.toLowerCase()
+}
+
+export interface ActionableAssignmentChange {
+  taskId: string
+  taskText: string
+  assignee: string
+}
+
+export function getActionableAssignmentChanges(
+  previous: ILeadActionable[],
+  next: ILeadActionable[]
+): ActionableAssignmentChange[] {
+  const changes: ActionableAssignmentChange[] = []
+  const prevById = new Map(
+    previous.map((task) => [
+      task.id,
+      {
+        assignee: String(task.assignee ?? UNASSIGNED_ASSIGNEE),
+        text: String(task.text),
+      },
+    ])
+  )
+
+  for (const rawTask of next) {
+    const task = {
+      id: String(rawTask.id),
+      text: String(rawTask.text),
+      assignee: String(rawTask.assignee ?? UNASSIGNED_ASSIGNEE).trim() || UNASSIGNED_ASSIGNEE,
+    }
+    if (!isAssignedAssignee(task.assignee)) continue
+
+    const old = prevById.get(task.id)
+    if (!old) {
+      changes.push({ taskId: task.id, taskText: task.text, assignee: task.assignee })
+      continue
+    }
+
+    if (old.assignee.toLowerCase() !== task.assignee.toLowerCase()) {
+      changes.push({ taskId: task.id, taskText: task.text, assignee: task.assignee })
+    }
+  }
+
+  return changes
 }
 
 export function normalizeActionables(actionables: ILeadActionable[]): ILeadActionable[] {

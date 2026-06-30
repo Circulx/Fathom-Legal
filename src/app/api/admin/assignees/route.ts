@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
 import connectDB from '@/lib/mongodb'
 import CrmAssignee from '@/models/CrmAssignee'
+import { formatAssigneeRecord, normalizeEmailList } from '@/lib/assignee-emails'
 
 async function requireAdmin() {
   const session = await getServerSession(authOptions)
@@ -24,10 +25,7 @@ export async function GET() {
     const assignees = await CrmAssignee.find().sort({ name: 1 }).lean()
 
     return NextResponse.json({
-      assignees: assignees.map((assignee) => ({
-        id: String(assignee._id),
-        name: assignee.name,
-      })),
+      assignees: assignees.map((assignee) => formatAssigneeRecord(assignee)),
     })
   } catch (error) {
     console.error('Get assignees error:', error)
@@ -44,6 +42,7 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json()
     const name = typeof body.name === 'string' ? body.name.trim() : ''
+    const emails = normalizeEmailList(body.emails ?? body.email)
     if (!name) {
       return NextResponse.json({ error: 'Name is required' }, { status: 400 })
     }
@@ -60,10 +59,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Assignee already exists' }, { status: 409 })
     }
 
-    const assignee = await CrmAssignee.create({ name })
+    const assignee = await CrmAssignee.create({
+      name,
+      emails,
+      email: emails[0] || '',
+    })
 
     return NextResponse.json({
-      assignee: { id: String(assignee._id), name: assignee.name },
+      assignee: formatAssigneeRecord(assignee),
     })
   } catch (error) {
     console.error('Create assignee error:', error)

@@ -40,8 +40,12 @@ export async function middleware(request: NextRequest) {
         console.log('🔒 Unauthorized access attempt to admin route:', pathname)
         console.log('Token:', token ? 'Present but invalid role' : 'Not present')
         
-        // Redirect to login page
+        // Redirect to login page, preserving the intended destination
         const loginUrl = new URL('/admin/login', request.url)
+        const returnPath = `${pathname}${request.nextUrl.search}`
+        if (returnPath.startsWith('/admin') && !returnPath.startsWith('/admin/login')) {
+          loginUrl.searchParams.set('callbackUrl', returnPath)
+        }
         return NextResponse.redirect(loginUrl)
       }
       

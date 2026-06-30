@@ -3,7 +3,10 @@ import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
 import connectDB from '@/lib/mongodb'
 import Lead from '@/models/Lead'
-import { formatTimelineWhen, leadDocToCrmLead, getActionableTimelineEntries, normalizeActionables } from '@/lib/crm-leads'
+import { formatTimelineWhen, leadDocToCrmLead, getActionableTimelineEntries, getActionableAssignmentChanges, normalizeActionables, type ActionableAssignmentChange } from '@/lib/crm-leads'
+import { resolveAssigneeEmails } from '@/lib/resolve-assignee-email'
+import { sendTaskAssignmentEmail } from '@/lib/task-assignment-email'
+import { buildCrmTaskDeepLink } from '@/lib/crm-deep-link'
 import { CRM_STATUSES, type CrmStatus } from '@/components/CRM/data'
 import {
   applyConsultationSchedule,
@@ -49,6 +52,7 @@ export async function PATCH(
     const body = await request.json()
     const now = new Date()
     let detailsUpdated = false
+    let assignmentChanges: ActionableAssignmentChange[] = []
 
     if (body.first !== undefined) {
       const first = body.first?.trim()
@@ -170,6 +174,10 @@ export async function PATCH(
       if (timelineEntries.length > 0) {
         lead.markModified('timeline')
       }
+      assignmentChanges = getActionableAssignmentChanges(
+        previousActionables,
+        nextActionables
+      )
     }
 
     let consultationTimelineAdded = false
@@ -236,6 +244,60 @@ export async function PATCH(
     }
 
     await lead.save()
+
+    if (assignmentChanges.length > 0) {
+      const leadName = `${lead.first} ${lead.last}`.trim()
+      const baseUrl = process.env.NEXTAUTH_URL || 'https://fathomlegal.com'
+      const emailTimelineEntries: { icon: string; text: string; when: string }[] = []
+
+      for (const change of assignmentChanges) {
+        const assigneeEmails = await resolveAssigneeEmails(change.assignee)
+        if (assigneeEmails.length > 0) {
+          const crmUrl = buildCrmTaskDeepLink({
+            baseUrl,
+            leadId: id,
+            taskId: change.taskId,
+          })
+          const { emailSent } = await sendTaskAssignmentEmail({
+            assigneeName: change.assignee,
+            assigneeEmails,
+            taskText: change.taskText,
+            leadName,
+            leadMatter: lead.matter,
+            crmUrl,
+          })
+          const recipientLabel =
+            assigneeEmails.length > 1
+              ? `${change.assignee} (${assigneeEmails.length} emails)`
+              : change.assignee
+          emailTimelineEntries.push({
+            icon: 'mail',
+            text: emailSent
+              ? `Task assignment emailed to ${recipientLabel}`
+              : `Task assigned to ${change.assignee} (email could not be sent)`,
+            when: formatTimelineWhen(now),
+          })
+        } else {
+          emailTimelineEntries.push({
+            icon: 'mail',
+            text: `Task assigned to ${change.assignee} (no email on file)`,
+            when: formatTimelineWhen(now),
+          })
+        }
+      }
+
+      if (emailTimelineEntries.length > 0) {
+        const refreshed = await Lead.findByIdAndUpdate(
+          id,
+          { $push: { timeline: { $each: emailTimelineEntries } } },
+          { new: true }
+        )
+        if (!refreshed) {
+          return NextResponse.json({ error: 'Lead not found' }, { status: 404 })
+        }
+        return NextResponse.json({ lead: leadDocToCrmLead(refreshed) })
+      }
+    }
 
     return NextResponse.json({ lead: leadDocToCrmLead(lead) })
   } catch (error) {

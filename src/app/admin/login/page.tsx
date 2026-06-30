@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { signIn, getSession } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Eye, EyeOff, Lock, Mail, AlertCircle, User } from 'lucide-react'
 
 export default function AdminLogin() {
@@ -15,6 +15,15 @@ export default function AdminLogin() {
   const [isFirstUser, setIsFirstUser] = useState(false)
   const [isCheckingFirstUser, setIsCheckingFirstUser] = useState(true)
   const router = useRouter()
+  const searchParams = useSearchParams()
+
+  const getCallbackUrl = () => {
+    const callback = searchParams.get('callbackUrl')
+    if (callback && callback.startsWith('/admin') && !callback.startsWith('/admin/login')) {
+      return callback
+    }
+    return '/admin/dashboard'
+  }
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
@@ -96,7 +105,7 @@ export default function AdminLogin() {
           
           if (result?.ok) {
             console.log('✅ Login successful, redirecting to dashboard')
-            router.push('/admin/dashboard')
+            router.push(getCallbackUrl())
           } else {
             console.error('❌ Login failed after account creation:', result?.error)
             setError(result?.message || 'Account created but login failed. Please try logging in.')
@@ -126,7 +135,7 @@ export default function AdminLogin() {
 
         if (result?.ok) {
           console.log('✅ Login successful, redirecting to dashboard')
-          router.push('/admin/dashboard')
+          router.push(getCallbackUrl())
         } else {
           console.error('❌ Login failed:', result?.error)
           // Map NextAuth error codes to user-friendly messages

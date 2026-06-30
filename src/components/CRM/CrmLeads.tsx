@@ -204,6 +204,7 @@ export default function CrmLeads({
   loading: leadsLoading,
   assignees,
   onEnsureAssignee,
+  onUpdateAssigneeEmails,
   onDeleteAssignee,
   onPatchLead,
   onLeadAdded,
@@ -216,6 +217,7 @@ export default function CrmLeads({
   onSearchQueryChange,
   drawerLeadId = null,
   onDrawerLeadIdChange,
+  highlightTaskId = null,
   leadPool,
   drawerOnly = false,
   initialFilters = null,
@@ -223,7 +225,8 @@ export default function CrmLeads({
   leads: CrmLead[]
   loading: boolean
   assignees: CrmAssigneeRecord[]
-  onEnsureAssignee: (name: string) => Promise<void>
+  onEnsureAssignee: (name: string, emails?: string[]) => Promise<void>
+  onUpdateAssigneeEmails: (id: string, emails: string[]) => Promise<void>
   onDeleteAssignee: (id: string) => Promise<void>
   onPatchLead: (id: string, patch: LeadPatch) => Promise<CrmLead>
   onLeadAdded: (lead: CrmLead) => void
@@ -246,6 +249,7 @@ export default function CrmLeads({
   onSearchQueryChange?: (query: string) => void
   drawerLeadId?: string | null
   onDrawerLeadIdChange?: (id: string | null) => void
+  highlightTaskId?: string | null
   leadPool?: CrmLead[]
   drawerOnly?: boolean
   initialFilters?: LeadListFilters | null
@@ -296,6 +300,10 @@ export default function CrmLeads({
   const [mergeSubmitting, setMergeSubmitting] = useState(false)
   const [mergeError, setMergeError] = useState('')
   const [showAssigneeManager, setShowAssigneeManager] = useState(false)
+  const actionablesSaveRef = useRef<{
+    inFlight: boolean
+    pending: CrmLead['actionables'] | null
+  }>({ inFlight: false, pending: null })
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState<number>(20)
 
@@ -965,14 +973,35 @@ export default function CrmLeads({
     }
   }
 
-  const updateActionables = async (actionables: CrmLead['actionables']) => {
-    if (!drawerLead) return
+  const flushActionables = async (leadId: string) => {
+    const state = actionablesSaveRef.current
+    if (state.inFlight) return
+
+    const toSave = state.pending
+    if (!toSave) return
+
+    state.inFlight = true
+    state.pending = null
+
     try {
-      const updated = await onPatchLead(drawerLead.id, { actionables })
+      const updated = await onPatchLead(leadId, { actionables: toSave })
       setDrawerLead(updated)
     } catch (error) {
       console.error('Failed to update actionables:', error)
+    } finally {
+      state.inFlight = false
+      if (state.pending) {
+        void flushActionables(leadId)
+      }
     }
+  }
+
+  const updateActionables = (actionables: CrmLead['actionables']) => {
+    if (!drawerLead) return
+    const leadId = drawerLead.id
+    setDrawerLead((prev) => (prev ? { ...prev, actionables } : prev))
+    actionablesSaveRef.current.pending = actionables
+    void flushActionables(leadId)
   }
 
   const toggleArea = (area: string) => {
@@ -1581,6 +1610,7 @@ export default function CrmLeads({
         onClose={() => setShowAssigneeManager(false)}
         assignees={assignees}
         onAdd={onEnsureAssignee}
+        onUpdateEmails={onUpdateAssigneeEmails}
         onDelete={onDeleteAssignee}
       />
 
@@ -2146,6 +2176,7 @@ export default function CrmLeads({
                 knownAssignees={knownAssignees}
                 onEnsureAssignee={onEnsureAssignee}
                 onChange={updateActionables}
+                highlightTaskId={highlightTaskId}
               />
 
               <section>

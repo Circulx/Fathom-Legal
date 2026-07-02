@@ -18,7 +18,8 @@ export async function resolveAssigneeEmails(assigneeName: string): Promise<strin
     return assigneeEmails
   }
 
-  const admin = await Admin.findOne({ name: namePattern, isActive: true }).lean()
+  const adminDoc = await Admin.findOne({ name: namePattern, isActive: true }).lean()
+  const admin = adminDoc as { email?: string } | null
   if (admin?.email?.trim()) {
     return [admin.email.trim().toLowerCase()]
   }

@@ -66,7 +66,9 @@ export default function ClientIntakePage() {
   const timeSlots = generateTimeSlots()
 
   // State for slot availability
-  const [availableSlots, setAvailableSlots] = useState<Array<{ time: string; available: boolean }>>([])
+  const [availableSlots, setAvailableSlots] = useState<Array<{
+    reason: string; time: string; available: boolean
+  }>>([])
   const [loadingSlots, setLoadingSlots] = useState(false)
   
   // State for calendar navigation
@@ -88,7 +90,7 @@ export default function ClientIntakePage() {
     } catch (err) {
       console.error('[v0] Error fetching slots:', err)
       // Fallback: show all slots as available
-      const slots: Array<{ time: string; available: boolean }> = []
+      const slots: Array<{ time: string; available: boolean; reason?: string }> = []
       for (let hour = 9; hour < 17; hour++) {
         for (let min = 0; min < 60; min += 20) {
           const timeStr = `${hour.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')}`
@@ -183,7 +185,13 @@ export default function ClientIntakePage() {
 
   // Handle date selection
   const handleDateSelection = (date: Date) => {
-    const dateStr = date.toISOString().split('T')[0]
+    // Build the date string from local date parts (NOT toISOString, which
+    // converts to UTC first and can shift "today" to the previous/next day
+    // for users in non-UTC timezones, breaking the 1-hour-ahead slot check).
+    const year = date.getFullYear()
+    const month = (date.getMonth() + 1).toString().padStart(2, '0')
+    const day = date.getDate().toString().padStart(2, '0')
+    const dateStr = `${year}-${month}-${day}`
     setSchedulingData(prev => ({ ...prev, selectedDate: dateStr, selectedTime: '' }))
     fetchAvailableSlots(dateStr)
   }
@@ -738,7 +746,7 @@ export default function ClientIntakePage() {
                 <div className="grid grid-cols-7 gap-2">
                   {monthCalendar.map((week, weekIndex) =>
                     week.map((day, dayIndex) => {
-                      const isSelected = day.date && schedulingData.selectedDate === day.date.toISOString().split('T')[0]
+                      const isSelected = day.date && schedulingData.selectedDate === `${day.date.getFullYear()}-${(day.date.getMonth() + 1).toString().padStart(2, '0')}-${day.date.getDate().toString().padStart(2, '0')}`
                       const isToday = day.date && day.date.getTime() === today.getTime()
                       
                       return (
@@ -793,6 +801,18 @@ export default function ClientIntakePage() {
                       const displayHour = hour > 12 ? hour - 12 : (hour === 0 ? 12 : hour)
                       const displayTime = `${displayHour}:${minute.toString().padStart(2, '0')} ${period}`
                       
+                      // Determine message based on reason
+                      let disabledMessage = ''
+                      if (!slot.available) {
+                        if (slot.reason === 'booked') {
+                          disabledMessage = 'This slot is booked'
+                        } else if (slot.reason === 'past') {
+                          disabledMessage = 'Not available - too soon (need 1 hour ahead)'
+                        } else {
+                          disabledMessage = 'This slot is not available'
+                        }
+                      }
+                      
                       return (
                         <button
                           key={slot.time}
@@ -805,10 +825,9 @@ export default function ClientIntakePage() {
                               ? 'border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed'
                               : 'border-gray-300 bg-white text-gray-900 hover:border-[#A5292A] hover:bg-[#A5292A]/5'
                           }`}
-                          title={!slot.available ? 'This slot is booked' : ''}
+                          title={disabledMessage}
                         >
                           <div className="text-sm">{displayTime}</div>
-                          {!slot.available && <div className="text-xs mt-1 text-gray-400">Booked</div>}
                         </button>
                       )
                     })}

@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useEffect, useRef, useMemo, Suspense } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useSession, signOut } from 'next-auth/react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import { TextStyle } from '@tiptap/extension-text-style'
@@ -30,9 +30,6 @@ import {
   ShoppingCart,
   Clock,
   TrendingUp,
-  Inbox,
-  CalendarDays,
-  AlertCircle,
   Plus,
   Upload,
   Download,
@@ -51,16 +48,7 @@ import {
   Edit
 } from 'lucide-react'
 import { Navbar } from '@/components/Navbar'
-import CrmSection, { type CrmNavigateHandler, type CrmView } from '@/components/CRM/CrmSection'
-import { parseCrmDashboardDeepLink } from '@/lib/crm-deep-link'
-import {
-  AWAITING_RESPONSE_STATUSES,
-  normalizeStatus,
-  type CrmLead,
-  type LeadListFilters,
-} from '@/components/CRM/data'
-import { computeCrmStats } from '@/lib/crm-analytics'
-import { isoDateRangeLastNDays } from '@/lib/crm-date-ranges'
+import CrmSection, { type CrmView } from '@/components/CRM/CrmSection'
 
 interface Template {
   _id: string
@@ -530,22 +518,14 @@ function RichTextEditor({
   )
 }
 
-function AdminDashboard() {
+export default function AdminDashboard() {
   const { data: session, status } = useSession()
   const router = useRouter()
-  const searchParams = useSearchParams()
   
   // All state declarations must be at the top, before any conditional logic
   const [activeSection, setActiveSection] = useState('dashboard')
   const [crmExpanded, setCrmExpanded] = useState(false)
   const [crmLeadCount, setCrmLeadCount] = useState(0)
-  const [crmLeads, setCrmLeads] = useState<CrmLead[]>([])
-  const [crmSeedFilters, setCrmSeedFilters] = useState<LeadListFilters | null>(null)
-  const [crmSeedFilterKey, setCrmSeedFilterKey] = useState(0)
-  const [crmSeedLeadId, setCrmSeedLeadId] = useState<string | null>(null)
-  const [crmSeedTaskId, setCrmSeedTaskId] = useState<string | null>(null)
-  const [crmSeedLeadKey, setCrmSeedLeadKey] = useState(0)
-  const processedCrmDeepLink = useRef<string | null>(null)
   
   // Templates state
   const [templates, setTemplates] = useState<Template[]>([])
@@ -739,23 +719,9 @@ function AdminDashboard() {
 
     fetch('/api/admin/leads')
       .then((response) => (response.ok ? response.json() : { leads: [] }))
-      .then((data) => {
-        const loaded = (data.leads ?? []).map((lead: CrmLead) => ({
-          ...lead,
-          status: normalizeStatus(lead.status),
-          actionables: lead.actionables ?? [],
-          createdAt: lead.createdAt ?? new Date().toISOString(),
-        }))
-        setCrmLeads(loaded)
-        setCrmLeadCount(loaded.length)
-      })
-      .catch(() => {
-        setCrmLeads([])
-        setCrmLeadCount(0)
-      })
+      .then((data) => setCrmLeadCount(data.leads?.length ?? 0))
+      .catch(() => setCrmLeadCount(0))
   }, [session, status])
-
-  const crmStats = useMemo(() => computeCrmStats(crmLeads), [crmLeads])
 
   // Load dashboard data when section changes to dashboard
   useEffect(() => {
@@ -767,25 +733,6 @@ function AdminDashboard() {
       fetchThoughtLeadershipPhotos()
     }
   }, [activeSection, session, status])
-
-  useEffect(() => {
-    if (status !== 'authenticated') return
-
-    const { view, leadId, taskId } = parseCrmDashboardDeepLink(searchParams)
-    if (view !== 'leads' || !leadId) return
-
-    const linkKey = searchParams.toString()
-    if (!linkKey || processedCrmDeepLink.current === linkKey) return
-
-    processedCrmDeepLink.current = linkKey
-    setCrmSeedLeadId(leadId)
-    setCrmSeedTaskId(taskId)
-    setCrmSeedLeadKey((key) => key + 1)
-    setCrmExpanded(true)
-    setActiveSection('crm-leads')
-    router.replace('/admin/dashboard', { scroll: false })
-    processedCrmDeepLink.current = null
-  }, [status, searchParams, router])
   
   // Show loading while checking authentication
   if (status === 'loading') {
@@ -1850,11 +1797,7 @@ function AdminDashboard() {
     }
   }
 
-  const navigateCrm: CrmNavigateHandler = (view, filters) => {
-    if (view === 'leads' && filters !== undefined) {
-      setCrmSeedFilters(filters)
-      setCrmSeedFilterKey((k) => k + 1)
-    }
+  const handleCrmNavigate = (view: CrmView) => {
     const map: Record<CrmView, string> = {
       overview: 'crm-overview',
       leads: 'crm-leads',
@@ -1938,18 +1881,7 @@ function AdminDashboard() {
                       <button
                         key={item.id}
                         type="button"
-                        onClick={() =>
-                          navigateCrm(
-                            item.id === 'crm-overview'
-                              ? 'overview'
-                              : item.id === 'crm-leads'
-                              ? 'leads'
-                              : item.id === 'crm-consultations'
-                              ? 'consultations'
-                              : 'analytics',
-                            item.id === 'crm-leads' ? null : undefined
-                          )
-                        }
+                        onClick={() => handleSectionChange(item.id)}
                         className={`w-full flex items-center px-3 py-2.5 text-left transition-all duration-200 ${
                           activeSection === item.id
                             ? 'bg-gray-100 text-gray-900 font-semibold'
@@ -2071,101 +2003,6 @@ function AdminDashboard() {
                       </div>
                     </div>
                   </div>
-                </div>
-
-                <div className="mt-10 mb-4 flex items-center justify-between">
-                  <div>
-                    <h2 className="text-xl font-semibold text-gray-900">CRM & Leads</h2>
-                    <p className="text-sm text-gray-500">Practice intake at a glance</p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => handleSectionChange('crm-overview')}
-                    className="text-sm font-medium hover:underline"
-                    style={{ color: '#7a1322' }}
-                  >
-                    Open CRM →
-                  </button>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                  <button
-                    type="button"
-                    onClick={() => navigateCrm('leads', null)}
-                    className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 text-left hover:border-[#7a1322]/30 hover:shadow-md transition-all"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-gray-600 mb-1">Total leads</p>
-                        <p className="text-3xl font-bold text-gray-900 mb-2">{crmLeadCount}</p>
-                        <p className="text-sm text-gray-500">All enquiries</p>
-                      </div>
-                      <div className="w-12 h-12 rounded-full flex items-center justify-center bg-[#f6ecee]">
-                        <Users className="w-6 h-6" style={{ color: '#7a1322' }} />
-                      </div>
-                    </div>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() =>
-                      navigateCrm('leads', {
-                        ...isoDateRangeLastNDays(7),
-                        dateField: 'enquiry',
-                      })
-                    }
-                    className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 text-left hover:border-[#7a1322]/30 hover:shadow-md transition-all"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-gray-600 mb-1">New enquiries</p>
-                        <p className="text-3xl font-bold text-gray-900 mb-2">{crmStats.recentCount}</p>
-                        <p className="text-sm text-gray-500">Last 7 days</p>
-                      </div>
-                      <div className="w-12 h-12 rounded-full flex items-center justify-center bg-[#f6ecee]">
-                        <Inbox className="w-6 h-6" style={{ color: '#7a1322' }} />
-                      </div>
-                    </div>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => navigateCrm('consultations')}
-                    className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 text-left hover:border-[#7a1322]/30 hover:shadow-md transition-all"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-gray-600 mb-1">Consultations</p>
-                        <p className="text-3xl font-bold text-gray-900 mb-2">{crmStats.consultationsScheduled}</p>
-                        <p className="text-sm text-gray-500">Scheduled</p>
-                      </div>
-                      <div className="w-12 h-12 rounded-full flex items-center justify-center bg-[#e6eef5]">
-                        <CalendarDays className="w-6 h-6" style={{ color: '#2f5d8a' }} />
-                      </div>
-                    </div>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() =>
-                      navigateCrm('leads', { statuses: AWAITING_RESPONSE_STATUSES })
-                    }
-                    className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 text-left hover:border-[#7a1322]/30 hover:shadow-md transition-all"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-gray-600 mb-1">Awaiting response</p>
-                        <p className="text-3xl font-bold text-gray-900 mb-2">{crmStats.awaitingResponse}</p>
-                        <p className="text-sm text-gray-500 flex items-center gap-1">
-                          <AlertCircle className="w-3.5 h-3.5" style={{ color: '#7a1322' }} />
-                          Needs follow-up
-                        </p>
-                      </div>
-                      <div className="w-12 h-12 rounded-full flex items-center justify-center bg-[#f5ecdb]">
-                        <Clock className="w-6 h-6" style={{ color: '#9a6b1f' }} />
-                      </div>
-                    </div>
-                  </button>
                 </div>
               </>
             )}
@@ -2508,15 +2345,15 @@ function AdminDashboard() {
                               />
                             </div>
                           ) : blog.imageUrl ? (
-                            <div className="mb-4 aspect-video w-full overflow-hidden rounded-lg bg-gray-100">
+                            <div className="mb-4">
                               <img
                                 src={blog.imageUrl}
                                 alt={blog.title}
-                                className="w-full h-full object-contain"
+                                className="w-full h-32 object-cover rounded-lg"
                               />
                             </div>
                           ) : (
-                            <div className="mb-4 aspect-video w-full bg-gray-100 rounded-lg flex items-center justify-center">
+                            <div className="mb-4 h-32 bg-gray-100 rounded-lg flex items-center justify-center">
                               <Newspaper className="h-12 w-12 text-gray-400" />
                             </div>
                           )}
@@ -2674,15 +2511,15 @@ function AdminDashboard() {
                               />
                             </div>
                           ) : blog.imageUrl ? (
-                            <div className="mb-4 aspect-video w-full overflow-hidden rounded-lg bg-gray-100">
+                            <div className="mb-4">
                               <img
                                 src={blog.imageUrl}
                                 alt={blog.title}
-                                className="w-full h-full object-contain"
+                                className="w-full h-32 object-cover rounded-lg"
                               />
                             </div>
                           ) : (
-                            <div className="mb-4 aspect-video w-full bg-gray-100 rounded-lg flex items-center justify-center">
+                            <div className="mb-4 h-32 bg-gray-100 rounded-lg flex items-center justify-center">
                               <Newspaper className="h-12 w-12 text-gray-400" />
                             </div>
                           )}
@@ -2837,13 +2674,8 @@ function AdminDashboard() {
             {isCrmSection(activeSection) && (
               <CrmSection
                 activeView={getCrmView(activeSection)}
-                onNavigate={navigateCrm}
+                onNavigate={handleCrmNavigate}
                 onLeadsCountChange={setCrmLeadCount}
-                seedLeadsFilters={crmSeedFilters}
-                seedLeadsFilterKey={crmSeedFilterKey}
-                seedLeadId={crmSeedLeadId}
-                seedTaskId={crmSeedTaskId}
-                seedLeadKey={crmSeedLeadKey}
               />
             )}
 
@@ -4644,16 +4476,5 @@ function AdminDashboard() {
         </div>
       )}
     </div>
-  )
-}
-
-// useSearchParams() requires this page to be wrapped in a Suspense
-// boundary, otherwise Next.js fails during static export/prerender
-// with: "useSearchParams() should be wrapped in a suspense boundary".
-export default function AdminDashboardPage() {
-  return (
-    <Suspense fallback={null}>
-      <AdminDashboard />
-    </Suspense>
   )
 }

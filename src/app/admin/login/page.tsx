@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { signIn, getSession } from 'next-auth/react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { Eye, EyeOff, Lock, Mail, AlertCircle, User } from 'lucide-react'
 
 export default function AdminLogin() {
@@ -15,10 +15,10 @@ export default function AdminLogin() {
   const [isFirstUser, setIsFirstUser] = useState(false)
   const [isCheckingFirstUser, setIsCheckingFirstUser] = useState(true)
   const router = useRouter()
-  const searchParams = useSearchParams()
 
   const getCallbackUrl = () => {
-    const callback = searchParams.get('callbackUrl')
+    if (typeof window === 'undefined') return '/admin/dashboard'
+    const callback = new URLSearchParams(window.location.search).get('callbackUrl')
     if (callback && callback.startsWith('/admin') && !callback.startsWith('/admin/login')) {
       return callback
     }

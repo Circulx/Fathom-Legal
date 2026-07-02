@@ -12,15 +12,20 @@ export async function resolveAssigneeEmails(assigneeName: string): Promise<strin
 
   const namePattern = new RegExp(`^${escapeRegex(name)}$`, 'i')
 
-  const assignee = await CrmAssignee.findOne({ name: namePattern }).lean()
+  const assignee = await CrmAssignee.findOne({ name: namePattern })
+    .select('email emails')
+    .lean<{ email?: string; emails?: string[] }>()
   const assigneeEmails = assignee ? getAssigneeEmailsFromDoc(assignee) : []
   if (assigneeEmails.length > 0) {
     return assigneeEmails
   }
 
-  const admin = await Admin.findOne({ name: namePattern, isActive: true }).lean()
-  if (admin?.email?.trim()) {
-    return [admin.email.trim().toLowerCase()]
+  const admin = await Admin.findOne({ name: namePattern, isActive: true })
+    .select('email')
+    .lean<{ email?: string }>()
+  const adminEmail = admin?.email?.trim()
+  if (adminEmail) {
+    return [adminEmail.toLowerCase()]
   }
 
   return []

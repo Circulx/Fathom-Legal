@@ -3,6 +3,8 @@ import { Navbar } from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import { Calendar, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
+import connectDB from '@/lib/mongodb'
+import BlogModel from '@/models/Blog'
 
 interface Blog {
   _id: string
@@ -16,24 +18,33 @@ interface Blog {
   createdAt: string
 }
 
+// Fetch blogs directly from the database instead of calling our own
+// `/api/blogs` route internally. Building an absolute URL from
+// process.env.NEXTAUTH_URL breaks during the Next.js build/prerender
+// step (the env var isn't available then), producing
+// `ERR_INVALID_URL: undefined/api/blogs`. Querying the DB directly
+// avoids that fragile self-fetch entirely.
 async function getBlogs(): Promise<Blog[]> {
   try {
-    const response = await fetch(`${process.env.NEXTAUTH_URL}/api/blogs`, {
-      next: { revalidate: 3600 } // Revalidate every hour
+    await connectDB()
+
+    const blogs = await BlogModel.find({
+      isActive: true,
+      isDeleted: { $ne: true },
+      content: { $exists: true, $ne: null },
+      slug: { $exists: true, $ne: null }
     })
+      .sort({ createdAt: -1 })
+      .lean()
 
-    if (!response.ok) {
-      return []
-    }
-
-    const data = await response.json()
-    // Filter only blogs with content (not external links)
-    return data.blogs?.filter((blog: any) => blog.content && blog.slug) || []
+    return JSON.parse(JSON.stringify(blogs)) as Blog[]
   } catch (error) {
     console.error('Error fetching blogs:', error)
     return []
   }
 }
+
+export const revalidate = 3600 // Revalidate every hour
 
 export default async function BlogPage() {
   const blogs = await getBlogs()

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef, useMemo } from 'react'
+import { useState, useEffect, useRef, useMemo, Suspense } from 'react'
 import { useSession, signOut } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEditor, EditorContent } from '@tiptap/react'
@@ -530,7 +530,7 @@ function RichTextEditor({
   )
 }
 
-export default function AdminDashboard() {
+function AdminDashboard() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -4644,5 +4644,16 @@ export default function AdminDashboard() {
         </div>
       )}
     </div>
+  )
+}
+
+// useSearchParams() requires this page to be wrapped in a Suspense
+// boundary, otherwise Next.js fails during static export/prerender
+// with: "useSearchParams() should be wrapped in a suspense boundary".
+export default function AdminDashboardPage() {
+  return (
+    <Suspense fallback={null}>
+      <AdminDashboard />
+    </Suspense>
   )
 }

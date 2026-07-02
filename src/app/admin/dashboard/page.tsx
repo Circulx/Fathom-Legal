@@ -49,6 +49,7 @@ import {
 } from 'lucide-react'
 import { Navbar } from '@/components/Navbar'
 import CrmSection, { type CrmView } from '@/components/CRM/CrmSection'
+import { parseCrmDashboardDeepLink } from '@/lib/crm-deep-link'
 
 interface Template {
   _id: string
@@ -526,6 +527,10 @@ export default function AdminDashboard() {
   const [activeSection, setActiveSection] = useState('dashboard')
   const [crmExpanded, setCrmExpanded] = useState(false)
   const [crmLeadCount, setCrmLeadCount] = useState(0)
+  const [crmSeedLeadId, setCrmSeedLeadId] = useState<string | null>(null)
+  const [crmSeedTaskId, setCrmSeedTaskId] = useState<string | null>(null)
+  const [crmSeedLeadKey, setCrmSeedLeadKey] = useState(0)
+  const processedCrmDeepLink = useRef<string | null>(null)
   
   // Templates state
   const [templates, setTemplates] = useState<Template[]>([])
@@ -701,13 +706,23 @@ export default function AdminDashboard() {
     
     if (status === 'unauthenticated' || !session) {
       console.log('🔒 No session found, redirecting to login')
-      router.push('/admin/login')
+      const returnPath = `${window.location.pathname}${window.location.search}`
+      if (returnPath.startsWith('/admin') && !returnPath.startsWith('/admin/login')) {
+        router.push(`/admin/login?callbackUrl=${encodeURIComponent(returnPath)}`)
+      } else {
+        router.push('/admin/login')
+      }
       return
     }
     
     if (session.user?.role !== 'admin' && session.user?.role !== 'super-admin') {
       console.log('🔒 Invalid role, redirecting to login')
-      router.push('/admin/login')
+      const returnPath = `${window.location.pathname}${window.location.search}`
+      if (returnPath.startsWith('/admin') && !returnPath.startsWith('/admin/login')) {
+        router.push(`/admin/login?callbackUrl=${encodeURIComponent(returnPath)}`)
+      } else {
+        router.push('/admin/login')
+      }
       return
     }
     
@@ -722,6 +737,26 @@ export default function AdminDashboard() {
       .then((data) => setCrmLeadCount(data.leads?.length ?? 0))
       .catch(() => setCrmLeadCount(0))
   }, [session, status])
+
+  useEffect(() => {
+    if (status !== 'authenticated') return
+
+    const searchParams = new URLSearchParams(window.location.search)
+    const { view, leadId, taskId } = parseCrmDashboardDeepLink(searchParams)
+    if (view !== 'leads' || !leadId) return
+
+    const linkKey = searchParams.toString()
+    if (!linkKey || processedCrmDeepLink.current === linkKey) return
+
+    processedCrmDeepLink.current = linkKey
+    setCrmSeedLeadId(leadId)
+    setCrmSeedTaskId(taskId)
+    setCrmSeedLeadKey((key) => key + 1)
+    setCrmExpanded(true)
+    setActiveSection('crm-leads')
+    router.replace('/admin/dashboard', { scroll: false })
+    processedCrmDeepLink.current = null
+  }, [status, router])
 
   // Load dashboard data when section changes to dashboard
   useEffect(() => {
@@ -2676,6 +2711,9 @@ export default function AdminDashboard() {
                 activeView={getCrmView(activeSection)}
                 onNavigate={handleCrmNavigate}
                 onLeadsCountChange={setCrmLeadCount}
+                seedLeadId={crmSeedLeadId}
+                seedTaskId={crmSeedTaskId}
+                seedLeadKey={crmSeedLeadKey}
               />
             )}
 

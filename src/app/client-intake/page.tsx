@@ -67,7 +67,7 @@ export default function ClientIntakePage() {
 
   // State for slot availability
   const [availableSlots, setAvailableSlots] = useState<Array<{
-    reason: string; time: string; available: boolean
+    reason?: string; time: string; available: boolean
   }>>([])
   const [loadingSlots, setLoadingSlots] = useState(false)
   

@@ -23,7 +23,7 @@ export const Navbar = ({ page }) => {
                 Fathom <span style={{ color: "#A5292A" }}>Legal</span>
               </div>
               <div className="text-[11px] font-medium tracking-wide text-gray-600">
-                Advocates &amp; Corporate consultants
+                Advocates &amp; Corporate Consultants
               </div>
             </div>
           </Link>

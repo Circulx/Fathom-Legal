@@ -18,8 +18,13 @@ export const Navbar = ({ page }) => {
             <div className="w-12 h-12">
               <Image src="/cropped-icon-red-192x192.png" alt="Fathom Legal Logo" width={48} height={48} />
             </div>
-            <div className="text-2xl font-bold text-gray-800">
-              Fathom <span style={{ color: "#A5292A" }}>Legal</span>
+            <div className="text-gray-800 leading-tight">
+              <div className="text-2xl font-bold">
+                Fathom <span style={{ color: "#A5292A" }}>Legal</span>
+              </div>
+              <div className="text-[11px] font-medium tracking-wide text-gray-600">
+                Advocates &amp; Corporate consultants
+              </div>
             </div>
           </Link>
 

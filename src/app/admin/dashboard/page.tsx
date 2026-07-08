@@ -815,19 +815,24 @@ export default function AdminDashboard() {
     { id: 'crm-internal-overview', label: 'Overview', icon: LayoutDashboard },
     { id: 'crm-internal-client', label: 'Client Deliverables', icon: FileText },
     { id: 'crm-internal-firm', label: 'Practice & Firm Work', icon: Clock },
+    { id: 'crm-internal-calendar', label: 'Calendar', icon: Calendar },
+    { id: 'crm-internal-associates', label: 'Associates', icon: Users },
   ]
 
   const isCrmSection = (section: string) => section.startsWith('crm-')
 
   const getCrmView = (section: string): CrmView => {
     const map: Record<string, CrmView> = {
-      'crm-overview': 'overview',
-      'crm-leads': 'leads',
-      'crm-consultations': 'consultations',
-      'crm-analytics': 'analytics',
-      'crm-internal-overview': 'internal-overview',
-      'crm-internal-client': 'internal-client',
-      'crm-internal-firm': 'internal-firm',
+      'crm-overview': 'overview' as const,
+      'crm-leads': 'leads' as const,
+      'crm-consultations': 'consultations' as const,
+      'crm-analytics': 'analytics' as const,
+      'crm-internal-overview': 'internal-overview' as const,
+      'crm-internal-client': 'internal-client' as const,
+      'crm-internal-firm': 'internal-firm' as const,
+      'crm-internal-calendar': 'internal-calendar' as unknown as CrmView,
+      // cast to CrmView to satisfy type union from CrmSection
+      'crm-internal-associates': 'internal-associates' as unknown as CrmView,
     }
     return map[section] || 'overview'
   }
@@ -2018,19 +2023,9 @@ export default function AdminDashboard() {
         </div>
 
         {/* Main Content Area */}
-        <div
-          className={`flex-1 flex flex-col ${
-            isCrmSection(activeSection) ? 'bg-[#fbf9f6]' : 'bg-white'
-          }`}
-        >
+        <div className="flex-1 flex flex-col">
           {/* Main Content */}
-          <div
-            className={`w-full flex-1 ${
-              isCrmSection(activeSection)
-                ? 'max-w-none'
-                : 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8'
-            }`}
-          >
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
             {activeSection === 'dashboard' && (
               <>
                 {/* Dashboard Header */}

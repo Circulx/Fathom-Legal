@@ -18,7 +18,7 @@ export function InternalWorkCalendar({ tasks, associates }: InternalWorkCalendar
 
   const getTasksForDay = (day: number) => {
     const dateStr = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
-    return tasks.filter(t => (t as any).dueDate === dateStr)
+    return tasks.filter(t => t.due.startsWith(dateStr))
   }
 
   const previousMonth = () => {

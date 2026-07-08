@@ -751,10 +751,12 @@ export default function AdminDashboard() {
 
     processedCrmDeepLink.current = linkKey
 
-    if (view === 'leads' && leadId) {
-      setCrmSeedLeadId(leadId)
-      setCrmSeedTaskId(taskId)
-      setCrmSeedLeadKey((key) => key + 1)
+    if (view === 'leads') {
+      if (leadId) {
+        setCrmSeedLeadId(leadId)
+        setCrmSeedTaskId(taskId)
+        setCrmSeedLeadKey((key) => key + 1)
+      }
       setCrmExpanded(true)
       setActiveSection('crm-leads')
     } else if (view === 'internal-overview') {
@@ -766,6 +768,12 @@ export default function AdminDashboard() {
     } else if (view === 'internal-firm') {
       setCrmExpanded(true)
       setActiveSection('crm-internal-firm')
+    } else if (view === 'internal-calendar') {
+      setCrmExpanded(true)
+      setActiveSection('crm-internal-calendar')
+    } else if (view === 'internal-associates') {
+      setCrmExpanded(true)
+      setActiveSection('crm-internal-associates')
     } else {
       processedCrmDeepLink.current = null
       return
@@ -823,16 +831,15 @@ export default function AdminDashboard() {
 
   const getCrmView = (section: string): CrmView => {
     const map: Record<string, CrmView> = {
-      'crm-overview': 'overview' as const,
-      'crm-leads': 'leads' as const,
-      'crm-consultations': 'consultations' as const,
-      'crm-analytics': 'analytics' as const,
-      'crm-internal-overview': 'internal-overview' as const,
-      'crm-internal-client': 'internal-client' as const,
-      'crm-internal-firm': 'internal-firm' as const,
-      'crm-internal-calendar': 'internal-calendar' as unknown as CrmView,
-      // cast to CrmView to satisfy type union from CrmSection
-      'crm-internal-associates': 'internal-associates' as unknown as CrmView,
+      'crm-overview': 'overview',
+      'crm-leads': 'leads',
+      'crm-consultations': 'consultations',
+      'crm-analytics': 'analytics',
+      'crm-internal-overview': 'internal-overview',
+      'crm-internal-client': 'internal-client',
+      'crm-internal-firm': 'internal-firm',
+      'crm-internal-calendar': 'internal-calendar',
+      'crm-internal-associates': 'internal-associates',
     }
     return map[section] || 'overview'
   }
@@ -1884,6 +1891,8 @@ export default function AdminDashboard() {
       'internal-overview': 'crm-internal-overview',
       'internal-client': 'crm-internal-client',
       'internal-firm': 'crm-internal-firm',
+      'internal-calendar': 'crm-internal-calendar',
+      'internal-associates': 'crm-internal-associates',
     }
     handleSectionChange(map[view])
   }

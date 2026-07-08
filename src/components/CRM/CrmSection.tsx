@@ -28,6 +28,8 @@ import { InternalWorkProvider } from './internal-work/InternalWorkContext'
 import { InternalWorkOverview } from './internal-work/InternalWorkOverview'
 import InternalWorkRegister from './internal-work/InternalWorkRegister'
 import { InternalWorkLoadingGate } from './internal-work/InternalWorkLoadingGate'
+import { InternalWorkCalendar } from './internal-work/InternalWorkCalendar'
+import { InternalWorkAssociates } from './internal-work/InternalWorkAssociates'
 
 export type CrmView =
   | 'overview'
@@ -37,6 +39,8 @@ export type CrmView =
   | 'internal-overview'
   | 'internal-client'
   | 'internal-firm'
+  | 'internal-calendar'
+  | 'internal-associates'
 
 export type CrmNavigateHandler = (view: CrmView, filters?: LeadListFilters | null) => void
 
@@ -56,6 +60,14 @@ const VIEW_TITLES: Record<CrmView, { title: string; subtitle: string }> = {
   'internal-firm': {
     title: 'Practice & Firm Work',
     subtitle: 'LinkedIn, BD, research, study/CPD, marketing and firm ops',
+  },
+  'internal-calendar': {
+    title: 'Deadline calendar',
+    subtitle: 'Everything due, last cut by date. Client work and firm work side by side',
+  },
+  'internal-associates': {
+    title: 'Team',
+    subtitle: 'Add associates here so they appear as assignees on both client and firm-work tasks',
   },
 }
 
@@ -659,7 +671,7 @@ export default function CrmSection({
 
   return (
     <InternalWorkProvider>
-    <div className="bg-[#fbf9f6] text-[#2a2724] [color-scheme:light] min-h-full px-4 sm:px-6 lg:px-8 py-8">
+    <div className="bg-[#fbf9f6] text-[#2a2724] [color-scheme:light] -mx-4 sm:-mx-6 lg:-mx-8 -my-8 px-4 sm:px-6 lg:px-8 py-8 min-h-[calc(100vh-5rem)]">
       <div className="flex items-center gap-4 mb-7">
         <div>
           <h1 className="text-[21px] font-medium text-[#1c1a18] tracking-tight">{title}</h1>
@@ -716,6 +728,16 @@ export default function CrmSection({
           {activeView === 'internal-firm' && (
             <InternalWorkLoadingGate>
               <InternalWorkRegister section="admin" />
+            </InternalWorkLoadingGate>
+          )}
+          {activeView === 'internal-calendar' && (
+            <InternalWorkLoadingGate>
+              <InternalWorkCalendar />
+            </InternalWorkLoadingGate>
+          )}
+          {activeView === 'internal-associates' && (
+            <InternalWorkLoadingGate>
+              <InternalWorkAssociates />
             </InternalWorkLoadingGate>
           )}
           {activeView === 'overview' && (

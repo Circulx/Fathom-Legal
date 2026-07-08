@@ -24,8 +24,19 @@ import { isoDateRangeLastNDays } from '@/lib/crm-date-ranges'
 import {
   AWAITING_RESPONSE_STATUSES,
 } from './data'
+import { InternalWorkProvider } from './internal-work/InternalWorkContext'
+import { InternalWorkOverview } from './internal-work/InternalWorkOverview'
+import InternalWorkRegister from './internal-work/InternalWorkRegister'
+import { InternalWorkLoadingGate } from './internal-work/InternalWorkLoadingGate'
 
-export type CrmView = 'overview' | 'leads' | 'consultations' | 'analytics'
+export type CrmView =
+  | 'overview'
+  | 'leads'
+  | 'consultations'
+  | 'analytics'
+  | 'internal-overview'
+  | 'internal-client'
+  | 'internal-firm'
 
 export type CrmNavigateHandler = (view: CrmView, filters?: LeadListFilters | null) => void
 
@@ -34,6 +45,18 @@ const VIEW_TITLES: Record<CrmView, { title: string; subtitle: string }> = {
   leads: { title: 'Leads & enquiries', subtitle: 'Track every enquiry from first contact to retained' },
   consultations: { title: 'Consultations', subtitle: 'Your scheduled client meetings' },
   analytics: { title: 'Analytics', subtitle: 'How your intake is performing' },
+  'internal-overview': {
+    title: 'Overview',
+    subtitle: 'How work is split between client matters and non-billable practice work',
+  },
+  'internal-client': {
+    title: 'Client Deliverables',
+    subtitle: 'Tasks tied to a specific client or matter',
+  },
+  'internal-firm': {
+    title: 'Practice & Firm Work',
+    subtitle: 'LinkedIn, BD, research, study/CPD, marketing and firm ops',
+  },
 }
 
 function OverviewKpiCard({
@@ -632,7 +655,10 @@ export default function CrmSection({
     leadPool: leads,
   }
 
+  const isInternalView = activeView.startsWith('internal-')
+
   return (
+    <InternalWorkProvider>
     <div className="bg-[#fbf9f6] text-[#2a2724] [color-scheme:light] -mx-4 sm:-mx-6 lg:-mx-8 -my-8 px-4 sm:px-6 lg:px-8 py-8 min-h-[calc(100vh-5rem)]">
       <div className="flex items-center gap-4 mb-7">
         <div>
@@ -640,7 +666,7 @@ export default function CrmSection({
           <p className="text-[12.5px] text-[#736c63] mt-0.5">{subtitle}</p>
         </div>
         <div className="ml-auto flex items-center gap-2.5">
-          {activeView !== 'leads' && (
+          {activeView !== 'leads' && !isInternalView && (
           <div className="hidden sm:flex items-center gap-2 bg-white border border-[#e7e1d9] rounded-full px-3.5 py-2 w-[260px] focus-within:border-[#7a1322] focus-within:ring-2 focus-within:ring-[#f6ecee]">
             <Search className="w-4 h-4 text-[#736c63] flex-shrink-0" />
             <input
@@ -673,10 +699,25 @@ export default function CrmSection({
         </p>
       )}
 
-      {leadsLoading && activeView !== 'leads' ? (
+      {leadsLoading && activeView !== 'leads' && !isInternalView ? (
         <div className="py-20 text-center text-[#736c63] text-sm">Loading CRM data…</div>
       ) : (
         <>
+          {activeView === 'internal-overview' && (
+            <InternalWorkLoadingGate>
+              <InternalWorkOverview />
+            </InternalWorkLoadingGate>
+          )}
+          {activeView === 'internal-client' && (
+            <InternalWorkLoadingGate>
+              <InternalWorkRegister section="client" />
+            </InternalWorkLoadingGate>
+          )}
+          {activeView === 'internal-firm' && (
+            <InternalWorkLoadingGate>
+              <InternalWorkRegister section="admin" />
+            </InternalWorkLoadingGate>
+          )}
           {activeView === 'overview' && (
             <>
               <CrmOverview
@@ -722,5 +763,6 @@ export default function CrmSection({
         </>
       )}
     </div>
+    </InternalWorkProvider>
   )
 }

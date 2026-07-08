@@ -42,6 +42,7 @@ export async function GET(request: NextRequest) {
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
+      .lean()
 
     const total = await Template.countDocuments(query)
 
@@ -57,7 +58,20 @@ export async function GET(request: NextRequest) {
 
   } catch (error) {
     console.error('Get templates error:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    const isDbError =
+      error instanceof Error &&
+      (error.name === 'MongoServerSelectionError' ||
+        error.name === 'MongoNetworkError' ||
+        error.message.includes('ENOTFOUND') ||
+        error.message.includes('ETIMEDOUT'))
+    return NextResponse.json(
+      {
+        error: isDbError
+          ? 'Database connection failed. Check your network and MongoDB Atlas status, then try again.'
+          : 'Internal server error',
+      },
+      { status: isDbError ? 503 : 500 }
+    )
   }
 }
 

@@ -535,6 +535,7 @@ export default function AdminDashboard() {
   // Templates state
   const [templates, setTemplates] = useState<Template[]>([])
   const [templatesLoading, setTemplatesLoading] = useState(true)
+  const [templatesError, setTemplatesError] = useState<string | null>(null)
   const [showTemplateUploadModal, setShowTemplateUploadModal] = useState(false)
   const [templateUploading, setTemplateUploading] = useState(false)
   const [showTemplateEditModal, setShowTemplateEditModal] = useState(false)
@@ -743,17 +744,33 @@ export default function AdminDashboard() {
 
     const searchParams = new URLSearchParams(window.location.search)
     const { view, leadId, taskId } = parseCrmDashboardDeepLink(searchParams)
-    if (view !== 'leads' || !leadId) return
+    if (!view) return
 
     const linkKey = searchParams.toString()
     if (!linkKey || processedCrmDeepLink.current === linkKey) return
 
     processedCrmDeepLink.current = linkKey
-    setCrmSeedLeadId(leadId)
-    setCrmSeedTaskId(taskId)
-    setCrmSeedLeadKey((key) => key + 1)
-    setCrmExpanded(true)
-    setActiveSection('crm-leads')
+
+    if (view === 'leads' && leadId) {
+      setCrmSeedLeadId(leadId)
+      setCrmSeedTaskId(taskId)
+      setCrmSeedLeadKey((key) => key + 1)
+      setCrmExpanded(true)
+      setActiveSection('crm-leads')
+    } else if (view === 'internal-overview') {
+      setCrmExpanded(true)
+      setActiveSection('crm-internal-overview')
+    } else if (view === 'internal-client') {
+      setCrmExpanded(true)
+      setActiveSection('crm-internal-client')
+    } else if (view === 'internal-firm') {
+      setCrmExpanded(true)
+      setActiveSection('crm-internal-firm')
+    } else {
+      processedCrmDeepLink.current = null
+      return
+    }
+
     router.replace('/admin/dashboard', { scroll: false })
     processedCrmDeepLink.current = null
   }, [status, router])
@@ -794,6 +811,12 @@ export default function AdminDashboard() {
     { id: 'crm-analytics', label: 'Analytics', icon: BarChart3 },
   ]
 
+  const crmInternalWorkItems = [
+    { id: 'crm-internal-overview', label: 'Overview', icon: LayoutDashboard },
+    { id: 'crm-internal-client', label: 'Client Deliverables', icon: FileText },
+    { id: 'crm-internal-firm', label: 'Practice & Firm Work', icon: Clock },
+  ]
+
   const isCrmSection = (section: string) => section.startsWith('crm-')
 
   const getCrmView = (section: string): CrmView => {
@@ -802,29 +825,44 @@ export default function AdminDashboard() {
       'crm-leads': 'leads',
       'crm-consultations': 'consultations',
       'crm-analytics': 'analytics',
+      'crm-internal-overview': 'internal-overview',
+      'crm-internal-client': 'internal-client',
+      'crm-internal-firm': 'internal-firm',
     }
     return map[section] || 'overview'
   }
 
   // Fetch templates
-  const fetchTemplates = async () => {
+  const fetchTemplates = async (retries = 2) => {
+    setTemplatesLoading(true)
+    setTemplatesError(null)
+    let stopLoading = true
     try {
-      setTemplatesLoading(true)
-      console.log('Fetching templates...')
-      const response = await fetch('/api/admin/templates')
-      console.log('Template response status:', response.status)
+      const response = await fetch('/api/admin/templates?limit=1000')
       if (response.ok) {
         const data = await response.json()
-        console.log('Template data received:', data)
         setTemplates(data.templates || [])
-        console.log('Templates set:', data.templates?.length || 0)
-      } else {
-        console.error('Template fetch failed:', response.status, response.statusText)
+        return
       }
+      if (retries > 0 && (response.status === 500 || response.status === 503)) {
+        stopLoading = false
+        await new Promise((resolve) => setTimeout(resolve, 2000))
+        return fetchTemplates(retries - 1)
+      }
+      const data = await response.json().catch(() => ({}))
+      const message = data.error || `Failed to load templates (${response.status})`
+      setTemplatesError(message)
+      console.error('Template fetch failed:', response.status, message)
     } catch (error) {
+      if (retries > 0) {
+        stopLoading = false
+        await new Promise((resolve) => setTimeout(resolve, 2000))
+        return fetchTemplates(retries - 1)
+      }
+      setTemplatesError('Failed to load templates. Check your connection and try again.')
       console.error('Error fetching templates:', error)
     } finally {
-      setTemplatesLoading(false)
+      if (stopLoading) setTemplatesLoading(false)
     }
   }
 
@@ -1838,6 +1876,9 @@ export default function AdminDashboard() {
       leads: 'crm-leads',
       consultations: 'crm-consultations',
       analytics: 'crm-analytics',
+      'internal-overview': 'crm-internal-overview',
+      'internal-client': 'crm-internal-client',
+      'internal-firm': 'crm-internal-firm',
     }
     handleSectionChange(map[view])
   }
@@ -1930,6 +1971,27 @@ export default function AdminDashboard() {
                             {item.badge}
                           </span>
                         )}
+                      </button>
+                    );
+                  })}
+                  <p className="px-3 pt-4 pb-1 text-[10px] font-semibold uppercase tracking-wider text-gray-400">
+                    Internal work
+                  </p>
+                  {crmInternalWorkItems.map((item) => {
+                    const Icon = item.icon;
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => handleSectionChange(item.id)}
+                        className={`w-full flex items-center px-3 py-2.5 text-left transition-all duration-200 ${
+                          activeSection === item.id
+                            ? 'bg-gray-100 text-gray-900 font-semibold'
+                            : 'text-gray-600 hover:bg-gray-50 hover:text-gray-800'
+                        }`}
+                      >
+                        <Icon className="w-4 h-4 mr-3" />
+                        <span className="font-medium text-sm">{item.label}</span>
                       </button>
                     );
                   })}
@@ -2061,7 +2123,19 @@ export default function AdminDashboard() {
                 </div>
 
                 {/* Templates Grid */}
-                {templatesLoading ? (
+                {templatesError ? (
+                  <div className="text-center py-16 px-4">
+                    <p className="text-red-600 mb-4">{templatesError}</p>
+                    <button
+                      type="button"
+                      onClick={() => fetchTemplates()}
+                      className="px-5 py-2.5 rounded-xl text-white"
+                      style={{ backgroundColor: '#A5292A' }}
+                    >
+                      Retry
+                    </button>
+                  </div>
+                ) : templatesLoading ? (
                   <div className="flex justify-center items-center py-20">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2" style={{ borderColor: '#A5292A' }}></div>
                   </div>

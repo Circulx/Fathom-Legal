@@ -2,6 +2,7 @@ import mongoose from 'mongoose'
 
 declare global {
   var mongoose: any
+  var mongooseConnectionListeners: boolean | undefined
 }
 
 const MONGODB_URI = process.env.MONGODB_URI
@@ -14,6 +15,20 @@ let cached = global.mongoose
 
 if (!cached) {
   cached = global.mongoose = { conn: null, promise: null }
+}
+
+if (!global.mongooseConnectionListeners) {
+  global.mongooseConnectionListeners = true
+  mongoose.connection.on('disconnected', () => {
+    console.warn('⚠️ MongoDB disconnected, clearing connection cache')
+    cached.conn = null
+    cached.promise = null
+  })
+  mongoose.connection.on('error', (err) => {
+    console.error('❌ MongoDB connection error:', err)
+    cached.conn = null
+    cached.promise = null
+  })
 }
 
 async function connectDB() {
@@ -34,8 +49,12 @@ async function connectDB() {
   }
 
   if (!cached.promise) {
-    const opts = {
+    const opts: mongoose.ConnectOptions = {
       bufferCommands: false,
+      serverSelectionTimeoutMS: 15000,
+      socketTimeoutMS: 45000,
+      maxPoolSize: 10,
+      family: 4,
     }
 
     console.log('🔗 Connecting to MongoDB with URI:', MONGODB_URI?.replace(/\/\/[^:]+:[^@]+@/, '//***:***@'))
@@ -50,6 +69,7 @@ async function connectDB() {
     cached.conn = await cached.promise
   } catch (e) {
     cached.promise = null
+    cached.conn = null
     throw e
   }
 

@@ -58,6 +58,7 @@ export function InternalWorkAssociates({
       email: associate.email || '',
     })
     setEditingId(associate.id)
+    setIsAdding(false)
   }
 
   const handleDelete = async (id: string) => {

@@ -1,197 +1,177 @@
 'use client'
 
 import { useState } from 'react'
-import { Plus, Trash2, Edit2 } from 'lucide-react'
+import { useInternalWork } from './InternalWorkContext'
+import { initials } from './utils'
 import type { InternalAssociate } from './types'
 
-interface InternalWorkAssociatesProps {
-  associates: InternalAssociate[]
-  onAddAssociate: (name: string, role: string, email?: string) => Promise<void>
-  onDeleteAssociate: (id: string) => Promise<void>
-  onUpdateAssociate: (id: string, data: Partial<Pick<InternalAssociate, 'name' | 'role' | 'email'>>) => Promise<void>
+const ROLE_COLORS: Record<string, string> = {
+  'Senior Associate': '#7a1322',
+  'Associate': '#2f5d8a',
+  'Paralegal': '#9a6b1f',
+  'Junior': '#3f7a52',
+  'Counsel': '#5a3a8a',
+  'Partner': '#8C3B3B',
 }
 
-export function InternalWorkAssociates({
-  associates,
-  onAddAssociate,
-  onDeleteAssociate,
-  onUpdateAssociate,
-}: InternalWorkAssociatesProps) {
-  const [isAdding, setIsAdding] = useState(false)
-  const [editingId, setEditingId] = useState<string | null>(null)
-  const [formData, setFormData] = useState({ name: '', role: '', email: '' })
-  const [loading, setLoading] = useState(false)
+const AVATAR_BG_COLORS = [
+  '#f6ecee', '#e6eef5', '#f5ecdb', '#e8f1ea', '#e9eef5', '#efe8f5', '#f0e8ec', '#e5eef5',
+]
 
-  const resetForm = () => {
-    setFormData({ name: '', role: '', email: '' })
-    setIsAdding(false)
-    setEditingId(null)
-  }
+export function InternalWorkAssociates() {
+  const { associates, tasks, addAssociate, deleteAssociate } = useInternalWork()
+  const [newName, setNewName] = useState('')
+  const [newRole, setNewRole] = useState('')
+  const [addError, setAddError] = useState('')
+  const [adding, setAdding] = useState(false)
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!formData.name.trim() || !formData.role.trim()) return
-
-    setLoading(true)
+  const handleAddAssociate = async () => {
+    const name = newName.trim()
+    const role = newRole.trim()
+    if (!name) {
+      setAddError('Please enter a full name')
+      return
+    }
+    if (!role) {
+      setAddError('Please enter a role')
+      return
+    }
+    setAddError('')
+    setAdding(true)
     try {
-      if (editingId) {
-        await onUpdateAssociate(editingId, {
-          name: formData.name,
-          role: formData.role,
-          email: formData.email || undefined,
-        })
-      } else {
-        await onAddAssociate(formData.name, formData.role, formData.email || undefined)
-      }
-      resetForm()
-    } catch (error) {
-      console.error('Error saving associate:', error)
+      await addAssociate(name, role)
+      setNewName('')
+      setNewRole('')
+    } catch (err) {
+      setAddError(err instanceof Error ? err.message : 'Failed to add associate')
     } finally {
-      setLoading(false)
+      setAdding(false)
     }
   }
 
-  const startEdit = (associate: InternalAssociate) => {
-    setFormData({
-      name: associate.name,
-      role: associate.role,
-      email: associate.email || '',
-    })
-    setEditingId(associate.id)
-    setIsAdding(false)
-  }
-
-  const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this associate?')) return
+  const handleDeleteAssociate = async (id: string, name: string) => {
+    if (!window.confirm(`Remove ${name}? Their open tasks will be unassigned.`)) return
     try {
-      await onDeleteAssociate(id)
-    } catch (error) {
-      console.error('Error deleting associate:', error)
+      await deleteAssociate(id)
+    } catch (err) {
+      setAddError(err instanceof Error ? err.message : 'Failed to remove associate')
     }
   }
 
-  const roleColors: Record<string, string> = {
-    'Senior Associate': 'bg-[#d4b3c2] text-[#5a2f3d]',
-    'Associate': 'bg-[#c5d8eb] text-[#2a4a6d]',
-    'Paralegal': 'bg-[#d4dfc4] text-[#3d5a29]',
-    'Partner': 'bg-[#e8c4b5] text-[#6b3d2a]',
+  const getAssociateStats = (associate: InternalAssociate) => {
+    const associateTasks = tasks.filter((t) => t.assignee === associate.id)
+    const clientOpen = associateTasks.filter((t) => t.section === 'client' && t.status !== 'done').length
+    const firmOpen = associateTasks.filter((t) => t.section === 'admin' && t.status !== 'done').length
+    return { clientOpen, firmOpen }
+  }
+
+  const getAvatarBgColor = (id: string) => {
+    const hash = id.charCodeAt(0) + id.charCodeAt(id.length - 1)
+    return AVATAR_BG_COLORS[hash % AVATAR_BG_COLORS.length]
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h3 className="text-[18px] font-medium text-[#1c1a18]">Team Members</h3>
-        {!isAdding && !editingId && (
-          <button
-            onClick={() => setIsAdding(true)}
-            className="flex items-center gap-2 bg-[#a8476c] hover:bg-[#8c2a4d] text-white px-4 py-2 rounded-[8px] transition-colors"
-            type="button"
-          >
-            <Plus className="w-4 h-4" />
-            <span className="text-[13px] font-medium">Add member</span>
-          </button>
+    <div>
+      <div className="bg-white border border-[#e7e1d9] rounded-[14px] overflow-hidden mb-6">
+        <div className="p-5 border-b border-[#efebe4]">
+          <div>
+            <div className="text-xs font-semibold text-[#736c63] uppercase tracking-wider">Associates</div>
+            <h2 className="text-xl font-medium text-[#1c1a18] mt-1">Team</h2>
+            <p className="text-sm text-[#736c63] mt-1">
+              Add associates here so they appear as assignees on both client and firm-work tasks.
+            </p>
+          </div>
+        </div>
+
+        {/* Associates Grid */}
+        {associates.length > 0 ? (
+          <div className="p-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {associates.map((associate) => {
+                const stats = getAssociateStats(associate)
+                const roleColor = ROLE_COLORS[associate.role] || '#736c63'
+                const avatarBg = getAvatarBgColor(associate.id)
+
+                return (
+                  <div
+                    key={associate.id}
+                    className="border border-[#e7e1d9] rounded-lg p-4 hover:shadow-sm transition-shadow"
+                  >
+                    <div className="flex items-start gap-3 mb-3">
+                      <div
+                        className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 font-semibold text-sm"
+                        style={{ backgroundColor: avatarBg, color: roleColor }}
+                      >
+                        {initials(associate.name)}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-medium text-[#1c1a18] truncate">{associate.name}</h3>
+                        <p className="text-xs text-[#736c63]" style={{ color: roleColor }}>
+                          {associate.role}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => handleDeleteAssociate(associate.id, associate.name)}
+                        className="text-[#736c63] hover:text-[#7a1322] text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
+                      >
+                        ×
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="flex flex-col">
+                        <span className="text-xs text-[#736c63] mb-0.5">Client tasks open</span>
+                        <span className="text-lg font-semibold text-[#1c1a18]">{stats.clientOpen}</span>
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-xs text-[#736c63] mb-0.5">Firm tasks open</span>
+                        <span className="text-lg font-semibold text-[#1c1a18]">{stats.firmOpen}</span>
+                      </div>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        ) : (
+          <div className="p-8 text-center">
+            <p className="text-sm text-[#736c63]">No associates yet. Add one below to get started.</p>
+          </div>
         )}
       </div>
 
-      {/* Add/Edit Form */}
-      {(isAdding || editingId) && (
-        <form onSubmit={handleSubmit} className="border border-[#e7e1d9] rounded-[12px] p-4 bg-[#fafaf8]">
-          <div className="grid grid-cols-3 gap-4 mb-4">
-            <input
-              type="text"
-              placeholder="Full name"
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className="px-3 py-2 border border-[#e7e1d9] rounded-[8px] text-[13px]"
-              required
-            />
-            <input
-              type="text"
-              placeholder="Role (e.g. Associate)"
-              value={formData.role}
-              onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-              className="px-3 py-2 border border-[#e7e1d9] rounded-[8px] text-[13px]"
-              required
-            />
-            <input
-              type="email"
-              placeholder="Email (for notifications)"
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              className="px-3 py-2 border border-[#e7e1d9] rounded-[8px] text-[13px]"
-            />
+      {/* Add Associate Form */}
+      <div className="bg-white border border-[#e7e1d9] rounded-[14px] p-5">
+        <h3 className="font-medium text-[#1c1a18] mb-4">Add associate</h3>
+        {addError && (
+          <div className="mb-4 p-3 bg-[#ffe6e6] text-[#8C3B3B] text-sm rounded">
+            {addError}
           </div>
-          <div className="flex gap-2">
-            <button
-              type="submit"
-              disabled={loading}
-              className="bg-[#a8476c] hover:bg-[#8c2a4d] text-white px-4 py-2 rounded-[8px] text-[13px] font-medium transition-colors disabled:opacity-50"
-            >
-              {loading ? 'Saving...' : editingId ? 'Update' : 'Add'}
-            </button>
-            <button
-              type="button"
-              onClick={resetForm}
-              className="bg-[#f5f5f5] hover:bg-[#e7e1d9] text-[#1c1a18] px-4 py-2 rounded-[8px] text-[13px] font-medium transition-colors"
-            >
-              Cancel
-            </button>
-          </div>
-        </form>
-      )}
-
-      {/* Associates Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {associates.map((associate) => (
-          <div
-            key={associate.id}
-            className="border border-[#e7e1d9] rounded-[12px] p-4 hover:shadow-sm transition-shadow"
+        )}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <input
+            type="text"
+            placeholder="Full name"
+            value={newName}
+            onChange={(e) => setNewName(e.target.value)}
+            className="px-3 py-2 border border-[#e7e1d9] rounded text-sm focus:outline-none focus:ring-1 focus:ring-[#7a1322]"
+          />
+          <input
+            type="text"
+            placeholder="Role (e.g. Associate, Paralegal)"
+            value={newRole}
+            onChange={(e) => setNewRole(e.target.value)}
+            className="px-3 py-2 border border-[#e7e1d9] rounded text-sm focus:outline-none focus:ring-1 focus:ring-[#7a1322]"
+          />
+          <button
+            onClick={handleAddAssociate}
+            disabled={adding}
+            className="px-4 py-2 bg-[#7a1322] text-white rounded font-medium text-sm hover:bg-[#5c0e1a] transition-colors disabled:opacity-50"
           >
-            <div className="flex items-start justify-between mb-3">
-              <div className="w-10 h-10 rounded-full bg-[#a8476c] text-white flex items-center justify-center text-[12px] font-semibold">
-                {associate.name
-                  .split(' ')
-                  .map((n) => n[0])
-                  .join('')
-                  .toUpperCase()}
-              </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => startEdit(associate)}
-                  className="p-2 hover:bg-[#f5f5f5] rounded-lg transition-colors"
-                  type="button"
-                >
-                  <Edit2 className="w-4 h-4 text-[#736c63]" />
-                </button>
-                <button
-                  onClick={() => handleDelete(associate.id)}
-                  className="p-2 hover:bg-[#ffebee] rounded-lg transition-colors"
-                  type="button"
-                >
-                  <Trash2 className="w-4 h-4 text-[#c62828]" />
-                </button>
-              </div>
-            </div>
-            <div className="space-y-2">
-              <h4 className="text-[14px] font-semibold text-[#1c1a18]">{associate.name}</h4>
-              <div className="flex items-center gap-2">
-                <span className={`inline-block px-2 py-1 rounded-[6px] text-[12px] font-medium ${roleColors[associate.role] || roleColors['Associate']}`}>
-                  {associate.role}
-                </span>
-              </div>
-              {associate.email && (
-                <p className="text-[12px] text-[#736c63]">{associate.email}</p>
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {associates.length === 0 && !isAdding && (
-        <div className="text-center py-8">
-          <p className="text-[#736c63] text-[14px]">No team members added yet</p>
+            {adding ? 'Adding...' : 'Add'}
+          </button>
         </div>
-      )}
+      </div>
     </div>
   )
 }

@@ -101,7 +101,7 @@ export default function AboutUs() {
     {
       icon: <Target className="w-8 h-8" />,
       title: "Result-Oriented Solutions",
-      description: "Our focus is on delivering practical, efficient, and effective legal solutions that drive business success."
+      description: "Our focus is on delivering practical,efficient, and effective legal solutions that drive business success."
     },
   ];
 

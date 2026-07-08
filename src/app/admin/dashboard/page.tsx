@@ -2018,9 +2018,19 @@ export default function AdminDashboard() {
         </div>
 
         {/* Main Content Area */}
-        <div className="flex-1 flex flex-col">
+        <div
+          className={`flex-1 flex flex-col ${
+            isCrmSection(activeSection) ? 'bg-[#fbf9f6]' : 'bg-white'
+          }`}
+        >
           {/* Main Content */}
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+          <div
+            className={`w-full flex-1 ${
+              isCrmSection(activeSection)
+                ? 'max-w-none'
+                : 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8'
+            }`}
+          >
             {activeSection === 'dashboard' && (
               <>
                 {/* Dashboard Header */}

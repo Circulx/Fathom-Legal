@@ -1,4 +1,8 @@
-import type { InternalAssociate, InternalTask } from '@/components/CRM/internal-work/types'
+import type {
+  InternalAssociate,
+  InternalTask,
+  InternalWorkCategory,
+} from '@/components/CRM/internal-work/types'
 
 export function formatInternalWorkAssociate(doc: {
   _id: unknown
@@ -12,6 +16,22 @@ export function formatInternalWorkAssociate(doc: {
     name: doc.name,
     role: doc.role,
     ...(email ? { email } : {}),
+  }
+}
+
+export function formatInternalWorkCategory(doc: {
+  _id: unknown
+  section: InternalWorkCategory['section']
+  slug: string
+  label: string
+  className: string
+}): InternalWorkCategory {
+  return {
+    id: String(doc._id),
+    section: doc.section,
+    slug: doc.slug,
+    label: doc.label,
+    className: doc.className,
   }
 }
 

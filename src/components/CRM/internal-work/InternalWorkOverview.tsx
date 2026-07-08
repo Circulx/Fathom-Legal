@@ -4,10 +4,11 @@ import { useState } from 'react'
 import { isValidEmail } from '@/lib/assignee-emails'
 import { useInternalWork } from './InternalWorkContext'
 import { assocName, docketId, fmtDate, initials, isOverdue } from './utils'
-import type { InternalAssociate, InternalTask } from './types'
+import type { InternalAssociate, InternalTask, InternalWorkCategory, TaskSection } from './types'
 
 export function InternalWorkOverview() {
-  const { tasks, associates, addAssociate, updateAssociate, deleteAssociate } = useInternalWork()
+  const { tasks, associates, categories, addAssociate, updateAssociate, deleteAssociate, addCategory, deleteCategory } =
+    useInternalWork()
   const [newName, setNewName] = useState('')
   const [newRole, setNewRole] = useState('')
   const [newEmail, setNewEmail] = useState('')
@@ -216,6 +217,25 @@ export function InternalWorkOverview() {
         </div>
       </Panel>
 
+      <Panel title="Task categories" hint="Add your own categories per stream">
+        <div className="space-y-5">
+          <CategoryManager
+            title="Client Deliverables"
+            section="client"
+            categories={categories.filter((category) => category.section === 'client')}
+            onAdd={addCategory}
+            onDelete={deleteCategory}
+          />
+          <CategoryManager
+            title="Practice & Firm Work"
+            section="admin"
+            categories={categories.filter((category) => category.section === 'admin')}
+            onAdd={addCategory}
+            onDelete={deleteCategory}
+          />
+        </div>
+      </Panel>
+
       <Panel title="Workload by associate" hint="Client vs practice & firm">
         {associates.length === 0 ? (
           <p className="text-[13px] text-[#736c63]">Add team members above to see workload breakdown.</p>
@@ -267,6 +287,96 @@ export function InternalWorkOverview() {
           </div>
         )}
       </Panel>
+    </div>
+  )
+}
+
+function CategoryManager({
+  title,
+  section,
+  categories,
+  onAdd,
+  onDelete,
+}: {
+  title: string
+  section: TaskSection
+  categories: InternalWorkCategory[]
+  onAdd: (section: TaskSection, label: string) => Promise<InternalWorkCategory>
+  onDelete: (id: string) => Promise<void>
+}) {
+  const [newLabel, setNewLabel] = useState('')
+  const [adding, setAdding] = useState(false)
+  const [error, setError] = useState('')
+
+  const handleAdd = async () => {
+    const label = newLabel.trim()
+    if (!label) return
+    setAdding(true)
+    setError('')
+    try {
+      await onAdd(section, label)
+      setNewLabel('')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to add category')
+    } finally {
+      setAdding(false)
+    }
+  }
+
+  const handleDelete = async (id: string) => {
+    if (!window.confirm('Remove this category?')) return
+    setError('')
+    try {
+      await onDelete(id)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to remove category')
+    }
+  }
+
+  return (
+    <div>
+      <h3 className="text-[14px] font-semibold text-[#1c1a18] mb-2">{title}</h3>
+      {categories.length === 0 ? (
+        <p className="text-[13px] text-[#736c63] mb-3">No categories yet.</p>
+      ) : (
+        <div className="flex flex-wrap gap-2 mb-3">
+          {categories.map((category) => (
+            <span
+              key={category.id}
+              className={`inline-flex items-center gap-2 text-[11.5px] font-semibold px-2.5 py-1 rounded-full border ${category.className}`}
+            >
+              {category.label}
+              <button
+                type="button"
+                onClick={() => void handleDelete(category.id)}
+                className="text-[10px] opacity-70 hover:opacity-100"
+                aria-label={`Remove ${category.label}`}
+              >
+                ✕
+              </button>
+            </span>
+          ))}
+        </div>
+      )}
+      {error && <p className="text-[12px] text-[#8C3B3B] mb-2">{error}</p>}
+      <div className="flex flex-wrap gap-2">
+        <input
+          type="text"
+          value={newLabel}
+          onChange={(e) => setNewLabel(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && void handleAdd()}
+          placeholder="New category name"
+          className="flex-1 min-w-[180px] px-3 py-2 border border-[#e7e1d9] rounded-[6px] text-[13px] bg-white"
+        />
+        <button
+          type="button"
+          onClick={() => void handleAdd()}
+          disabled={!newLabel.trim() || adding}
+          className="px-4 py-2 rounded-[6px] bg-[#7a1322] text-white text-[13px] font-semibold disabled:opacity-50"
+        >
+          {adding ? 'Adding…' : 'Add category'}
+        </button>
+      </div>
     </div>
   )
 }

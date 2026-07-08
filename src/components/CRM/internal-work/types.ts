@@ -11,6 +11,14 @@ export interface InternalAssociate {
   email?: string
 }
 
+export interface InternalWorkCategory {
+  id: string
+  section: TaskSection
+  slug: string
+  label: string
+  className: string
+}
+
 export interface InternalTask {
   id: string
   taskNumber: number

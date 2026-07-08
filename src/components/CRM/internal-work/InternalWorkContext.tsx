@@ -9,7 +9,14 @@ import {
   useState,
   type ReactNode,
 } from 'react'
-import type { InternalAssociate, InternalTask, RegisterViewMode, SortState, TaskSection } from './types'
+import type {
+  InternalAssociate,
+  InternalTask,
+  InternalWorkCategory,
+  RegisterViewMode,
+  SortState,
+  TaskSection,
+} from './types'
 
 const TASKS_KEY = 'fathom-internal-work-tasks-v2'
 const ASSOCIATES_KEY = 'fathom-internal-work-associates-v2'
@@ -17,6 +24,7 @@ const ASSOCIATES_KEY = 'fathom-internal-work-associates-v2'
 interface InternalWorkContextValue {
   tasks: InternalTask[]
   associates: InternalAssociate[]
+  categories: InternalWorkCategory[]
   loading: boolean
   error: string | null
   registerView: Record<TaskSection, RegisterViewMode>
@@ -34,6 +42,8 @@ interface InternalWorkContextValue {
     patch: Partial<Pick<InternalAssociate, 'name' | 'role' | 'email'>>
   ) => Promise<InternalAssociate>
   deleteAssociate: (id: string) => Promise<void>
+  addCategory: (section: TaskSection, label: string) => Promise<InternalWorkCategory>
+  deleteCategory: (id: string) => Promise<void>
 }
 
 const InternalWorkContext = createContext<InternalWorkContextValue | null>(null)
@@ -67,6 +77,7 @@ async function parseError(response: Response, fallback: string) {
 export function InternalWorkProvider({ children }: { children: ReactNode }) {
   const [tasks, setTasks] = useState<InternalTask[]>([])
   const [associates, setAssociates] = useState<InternalAssociate[]>([])
+  const [categories, setCategories] = useState<InternalWorkCategory[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [registerView, setRegisterViewState] = useState<Record<TaskSection, RegisterViewMode>>({
@@ -86,15 +97,20 @@ export function InternalWorkProvider({ children }: { children: ReactNode }) {
     setLoading(true)
     setError(null)
     try {
-      const [associatesRes, tasksRes] = await Promise.all([
+      const [associatesRes, tasksRes, categoriesRes] = await Promise.all([
         fetch('/api/admin/internal-work/associates'),
         fetch('/api/admin/internal-work/tasks'),
+        fetch('/api/admin/internal-work/categories'),
       ])
 
-      if (!associatesRes.ok || !tasksRes.ok) {
+      if (!associatesRes.ok || !tasksRes.ok || !categoriesRes.ok) {
         throw new Error(
           await parseError(
-            !associatesRes.ok ? associatesRes : tasksRes,
+            !associatesRes.ok
+              ? associatesRes
+              : !tasksRes.ok
+                ? tasksRes
+                : categoriesRes,
             'Failed to load internal work data'
           )
         )
@@ -102,8 +118,10 @@ export function InternalWorkProvider({ children }: { children: ReactNode }) {
 
       const associatesData = await associatesRes.json()
       const tasksData = await tasksRes.json()
+      const categoriesData = await categoriesRes.json()
       let nextAssociates = associatesData.associates ?? []
       let nextTasks = tasksData.tasks ?? []
+      let nextCategories = categoriesData.categories ?? []
 
       if (nextAssociates.length === 0 && nextTasks.length === 0) {
         const legacy = loadLegacyLocalStorage()
@@ -127,6 +145,7 @@ export function InternalWorkProvider({ children }: { children: ReactNode }) {
 
       setAssociates(nextAssociates)
       setTasks(nextTasks)
+      setCategories(nextCategories)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load internal work data')
     } finally {
@@ -261,10 +280,38 @@ export function InternalWorkProvider({ children }: { children: ReactNode }) {
     )
   }, [])
 
+  const addCategory = useCallback(async (section: TaskSection, label: string) => {
+    const response = await fetch('/api/admin/internal-work/categories', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ section, label }),
+    })
+    if (!response.ok) {
+      throw new Error(await parseError(response, 'Failed to add category'))
+    }
+    const data = await response.json()
+    const saved = data.category as InternalWorkCategory
+    setCategories((prev) =>
+      [...prev, saved].sort((a, b) => a.label.localeCompare(b.label))
+    )
+    return saved
+  }, [])
+
+  const deleteCategory = useCallback(async (id: string) => {
+    const response = await fetch(`/api/admin/internal-work/categories/${id}`, {
+      method: 'DELETE',
+    })
+    if (!response.ok) {
+      throw new Error(await parseError(response, 'Failed to remove category'))
+    }
+    setCategories((prev) => prev.filter((category) => category.id !== id))
+  }, [])
+
   const value = useMemo(
     () => ({
       tasks,
       associates,
+      categories,
       loading,
       error,
       registerView,
@@ -279,10 +326,13 @@ export function InternalWorkProvider({ children }: { children: ReactNode }) {
       addAssociate,
       updateAssociate,
       deleteAssociate,
+      addCategory,
+      deleteCategory,
     }),
     [
       tasks,
       associates,
+      categories,
       loading,
       error,
       registerView,
@@ -297,6 +347,8 @@ export function InternalWorkProvider({ children }: { children: ReactNode }) {
       addAssociate,
       updateAssociate,
       deleteAssociate,
+      addCategory,
+      deleteCategory,
     ]
   )
 

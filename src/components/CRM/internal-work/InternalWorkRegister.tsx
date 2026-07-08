@@ -5,10 +5,10 @@ import { LayoutGrid, List, Plus, Trash2 } from 'lucide-react'
 import { useInternalWork } from './InternalWorkContext'
 import {
   FILTER_STATUSES,
-  SECTION_CATEGORIES,
   STATUS_PILL_CLASS,
   BOARD_STATUSES,
 } from './constants'
+import { getCategoryMap } from './category-utils'
 import {
   assocName,
   compareTasks,
@@ -18,8 +18,9 @@ import {
   isOverdue,
   todayStr,
 } from './utils'
-import type { InternalTask, TaskPriority, TaskSection, TaskStatus } from './types'
-import { notifyInternalWorkAssignment } from './notify-assignment'
+import type { InternalAssociate, InternalTask, TaskPriority, TaskSection, TaskStatus } from './types'
+import { notifyInternalWorkAssignment, notifyInternalWorkUpdate } from './notify-assignment'
+import { getTaskChanges } from './task-changes'
 
 interface InternalWorkRegisterProps {
   section: TaskSection
@@ -29,6 +30,7 @@ export default function InternalWorkRegister({ section }: InternalWorkRegisterPr
   const {
     tasks,
     associates,
+    categories: allCategories,
     registerView,
     statusFilter,
     sortState,
@@ -46,7 +48,10 @@ export default function InternalWorkRegister({ section }: InternalWorkRegisterPr
   const [editing, setEditing] = useState<InternalTask | null>(null)
   const [saveError, setSaveError] = useState<string | null>(null)
 
-  const categories = SECTION_CATEGORIES[section]
+  const categories = useMemo(
+    () => getCategoryMap(allCategories, section),
+    [allCategories, section]
+  )
   const viewMode = registerView[section]
   const currentStatusFilter = statusFilter[section]
   const currentSort = sortState[section]
@@ -114,24 +119,13 @@ export default function InternalWorkRegister({ section }: InternalWorkRegisterPr
       setModalOpen(false)
       setEditing(null)
 
-      const nextAssignee = saved.assignee ?? ''
-      if (!nextAssignee || nextAssignee === previousAssignee) return
-
-      const associate = associates.find((a) => a.id === nextAssignee)
-      if (!associate?.email?.trim()) return
-
-      const { emailSent, error } = await notifyInternalWorkAssignment({
-        assignee: associate,
-        taskTitle: saved.title,
-        section: saved.section,
-        categoryLabel: categories[saved.category]?.label ?? saved.category,
-        dueDate: fmtDate(saved.due),
-        priority: saved.priority,
+      await sendTaskNotifications({
+        before: editing,
+        saved,
+        previousAssignee,
+        associates,
+        categories,
       })
-
-      if (!emailSent && error) {
-        console.warn('Internal work assignment email failed:', error)
-      }
     } catch (err) {
       setSaveError(err instanceof Error ? err.message : 'Failed to save task')
     }
@@ -141,7 +135,14 @@ export default function InternalWorkRegister({ section }: InternalWorkRegisterPr
     if (task.status === status) return
     setSaveError(null)
     try {
-      await saveTask({ ...task, status })
+      const saved = await saveTask({ ...task, status })
+      await sendTaskNotifications({
+        before: task,
+        saved,
+        previousAssignee: task.assignee,
+        associates,
+        categories,
+      })
     } catch (err) {
       setSaveError(err instanceof Error ? err.message : 'Failed to update status')
     }
@@ -488,7 +489,8 @@ function TaskModal({
   onDelete?: () => boolean | void
 }) {
   const [title, setTitle] = useState(task?.title ?? '')
-  const [category, setCategory] = useState(task?.category ?? Object.keys(categories)[0] ?? '')
+  const [category, setCategory] = useState(task?.category ?? '')
+  const categoryOptions = Object.entries(categories)
   const [assignee, setAssignee] = useState(task?.assignee ?? associates[0]?.id ?? '')
   const [priority, setPriority] = useState<TaskPriority>(task?.priority ?? 'med')
   const [due, setDue] = useState(task?.due ?? todayStr())
@@ -521,17 +523,24 @@ function TaskModal({
           </Field>
           <div className="grid grid-cols-2 gap-3">
             <Field label="Category">
-              <select
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                className="w-full px-3 py-2 border border-[#e7e1d9] rounded-[6px] text-[13px] bg-white"
-              >
-                {Object.entries(categories).map(([key, cat]) => (
-                  <option key={key} value={key}>
-                    {cat.label}
-                  </option>
-                ))}
-              </select>
+              {categoryOptions.length === 0 ? (
+                <p className="text-[11px] text-[#94702C]">
+                  Add categories on Internal work → Overview first.
+                </p>
+              ) : (
+                <select
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  className="w-full px-3 py-2 border border-[#e7e1d9] rounded-[6px] text-[13px] bg-white"
+                >
+                  <option value="">Select category</option>
+                  {categoryOptions.map(([key, cat]) => (
+                    <option key={key} value={key}>
+                      {cat.label}
+                    </option>
+                  ))}
+                </select>
+              )}
             </Field>
             <Field label="Assignee">
               <select
@@ -617,7 +626,7 @@ function TaskModal({
           )}
           <button
             type="button"
-            disabled={!title.trim()}
+            disabled={!title.trim() || !category}
             onClick={() =>
               onSave({
                 id: task?.id,
@@ -639,6 +648,70 @@ function TaskModal({
       </div>
     </div>
   )
+}
+
+async function sendTaskNotifications({
+  before,
+  saved,
+  previousAssignee,
+  associates,
+  categories,
+}: {
+  before: InternalTask | null
+  saved: InternalTask
+  previousAssignee: string
+  associates: InternalAssociate[]
+  categories: Record<string, { label: string }>
+}) {
+  const assignee = associates.find((a) => a.id === saved.assignee)
+  if (!assignee?.email?.trim()) return
+
+  const assigneeChanged = Boolean(saved.assignee && saved.assignee !== previousAssignee)
+
+  if (assigneeChanged) {
+    const { emailSent, error } = await notifyInternalWorkAssignment({
+      assignee,
+      taskTitle: saved.title,
+      section: saved.section,
+      categoryLabel: categories[saved.category]?.label ?? saved.category,
+      dueDate: fmtDate(saved.due),
+      priority: saved.priority,
+    })
+    if (!emailSent && error) {
+      console.warn('Internal work assignment email failed:', error)
+    }
+    return
+  }
+
+  if (!before) return
+
+  const changes = getTaskChanges(
+    before,
+    {
+      title: saved.title,
+      category: saved.category,
+      assignee: saved.assignee,
+      priority: saved.priority,
+      due: saved.due,
+      status: saved.status,
+      notes: saved.notes,
+      section: saved.section,
+    },
+    categories,
+    associates
+  )
+
+  if (changes.length === 0) return
+
+  const { emailSent, error } = await notifyInternalWorkUpdate({
+    assignee,
+    taskTitle: saved.title,
+    section: saved.section,
+    changes,
+  })
+  if (!emailSent && error) {
+    console.warn('Internal work update email failed:', error)
+  }
 }
 
 function TaskStatusSelect({

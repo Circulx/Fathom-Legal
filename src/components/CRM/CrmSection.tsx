@@ -659,7 +659,7 @@ export default function CrmSection({
 
   return (
     <InternalWorkProvider>
-    <div className="bg-[#fbf9f6] text-[#2a2724] [color-scheme:light] -mx-4 sm:-mx-6 lg:-mx-8 -my-8 px-4 sm:px-6 lg:px-8 py-8 min-h-[calc(100vh-5rem)]">
+    <div className="bg-[#fbf9f6] text-[#2a2724] [color-scheme:light] min-h-full px-4 sm:px-6 lg:px-8 py-8">
       <div className="flex items-center gap-4 mb-7">
         <div>
           <h1 className="text-[21px] font-medium text-[#1c1a18] tracking-tight">{title}</h1>

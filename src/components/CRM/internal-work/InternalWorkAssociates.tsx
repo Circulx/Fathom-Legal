@@ -1,22 +1,23 @@
 'use client'
 
 import { useState } from 'react'
+import { Trash2 } from 'lucide-react'
 import { useInternalWork } from './InternalWorkContext'
 import { initials } from './utils'
 import type { InternalAssociate } from './types'
 
 const ROLE_COLORS: Record<string, string> = {
-  'Senior Associate': '#7a1322',
-  'Associate': '#2f5d8a',
-  'Paralegal': '#9a6b1f',
-  'Junior': '#3f7a52',
-  'Counsel': '#5a3a8a',
-  'Partner': '#8C3B3B',
+  'Senior Associate': '#8C2A2A',
+  'Associate': '#4C5F6B',
+  'Paralegal': '#94702C',
+  'Associate Attorney': '#4B6650',
 }
 
-const AVATAR_BG_COLORS = [
-  '#f6ecee', '#e6eef5', '#f5ecdb', '#e8f1ea', '#e9eef5', '#efe8f5', '#f0e8ec', '#e5eef5',
-]
+const AVATAR_BG_COLORS = ['#F3E4E1', '#E1E7E9', '#F1E6CD', '#E2E9DF']
+
+const getAvatarBgColor = (id: string) => {
+  return AVATAR_BG_COLORS[id.charCodeAt(0) % AVATAR_BG_COLORS.length]
+}
 
 export function InternalWorkAssociates() {
   const { associates, tasks, addAssociate, deleteAssociate } = useInternalWork()
@@ -65,20 +66,15 @@ export function InternalWorkAssociates() {
     return { clientOpen, firmOpen }
   }
 
-  const getAvatarBgColor = (id: string) => {
-    const hash = id.charCodeAt(0) + id.charCodeAt(id.length - 1)
-    return AVATAR_BG_COLORS[hash % AVATAR_BG_COLORS.length]
-  }
-
   return (
-    <div className="bg-white border border-[#e7e1d9] rounded-[14px] overflow-hidden">
+    <div style={{ backgroundColor: '#FBF9F4', border: '1px solid #D9D0BC', borderRadius: '3px', boxShadow: '0 1px 2px rgba(34,31,29,0.06), 0 6px 20px rgba(34,31,29,0.05)', overflow: 'hidden' }}>
       {/* Header */}
-      <div className="p-5 border-b border-[#efebe4]">
-        <div className="flex items-center justify-between">
+      <div style={{ padding: '22px 24px', borderBottom: '1px solid #D9D0BC' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
           <div>
-            <div className="text-xs font-semibold text-[#736c63] uppercase tracking-wider">Associates</div>
-            <h2 className="text-xl font-medium text-[#1c1a18] mt-1">Team</h2>
-            <p className="text-sm text-[#736c63] mt-1">
+            <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.14em', color: '#8C2A2A', fontWeight: '600', marginBottom: '6px' }}>Associates</div>
+            <h2 style={{ fontSize: '28px', fontWeight: '600', margin: '0', color: '#221F1D' }}>Team</h2>
+            <p style={{ fontSize: '13.5px', color: '#4A4642', marginTop: '6px', maxWidth: '560px', lineHeight: '1.5' }}>
               Add associates here so they appear as assignees on both client and firm-work tasks.
             </p>
           </div>
@@ -87,47 +83,92 @@ export function InternalWorkAssociates() {
 
       {/* Associates Grid */}
       {associates.length > 0 ? (
-        <div className="p-5 border-b border-[#efebe4]">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div style={{ padding: '22px 24px', borderBottom: '1px solid #D9D0BC' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
             {associates.map((associate) => {
               const stats = getAssociateStats(associate)
-              const roleColor = ROLE_COLORS[associate.role] || '#736c63'
+              const roleColor = ROLE_COLORS[associate.role] || '#4A4642'
               const avatarBg = getAvatarBgColor(associate.id)
 
               return (
                 <div
                   key={associate.id}
-                  className="border border-[#e7e1d9] rounded-lg p-4 hover:shadow-sm transition-shadow"
+                  style={{
+                    backgroundColor: '#FBF9F4',
+                    border: '1px solid #D9D0BC',
+                    borderRadius: '3px',
+                    padding: '18px',
+                    boxShadow: '0 1px 2px rgba(34,31,29,0.06), 0 6px 20px rgba(34,31,29,0.05)',
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.boxShadow = '0 4px 12px rgba(34,31,29,0.12)')}
+                  onMouseLeave={(e) => (e.currentTarget.style.boxShadow = '0 1px 2px rgba(34,31,29,0.06), 0 6px 20px rgba(34,31,29,0.05)')}
                 >
-                  <div className="flex items-start gap-3 mb-3">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
                     <div
-                      className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 font-semibold text-sm"
-                      style={{ backgroundColor: avatarBg, color: roleColor }}
+                      style={{
+                        width: '42px',
+                        height: '42px',
+                        borderRadius: '50%',
+                        border: `1.5px solid ${roleColor}`,
+                        color: roleColor,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontFamily: "'Source Serif 4', serif",
+                        fontWeight: '600',
+                        fontSize: '14px',
+                        backgroundColor: avatarBg,
+                        flexShrink: 0,
+                      }}
                     >
                       {initials(associate.name)}
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-medium text-[#1c1a18] truncate">{associate.name}</h3>
-                      <p className="text-xs text-[#736c63]" style={{ color: roleColor }}>
-                        {associate.role}
-                      </p>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <h3 style={{ fontSize: '15px', fontWeight: '600', margin: '0', color: '#221F1D', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {associate.name}
+                      </h3>
+                      <p style={{ fontSize: '11.5px', color: roleColor, margin: '2px 0 0', fontWeight: '500' }}>{associate.role}</p>
                     </div>
                     <button
                       onClick={() => handleDeleteAssociate(associate.id, associate.name)}
-                      className="text-[#736c63] hover:text-[#7a1322] text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        cursor: 'pointer',
+                        color: '#4A4642',
+                        padding: '4px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0,
+                        opacity: 0,
+                        transition: 'opacity 0.2s',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.opacity = '1'
+                        e.currentTarget.style.color = '#8C2A2A'
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.opacity = '0'
+                        e.currentTarget.style.color = '#4A4642'
+                      }}
                     >
-                      ×
+                      <Trash2 size={14} />
                     </button>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="flex flex-col">
-                      <span className="text-xs text-[#736c63] mb-0.5">Client tasks open</span>
-                      <span className="text-lg font-semibold text-[#1c1a18]">{stats.clientOpen}</span>
+                  <div style={{ display: 'flex', gap: '18px', fontSize: '12px', color: '#4A4642', borderTop: '1px solid #D9D0BC', paddingTop: '10px' }}>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ color: '#4A4642', fontSize: '12px', marginBottom: '4px' }}>Client tasks open</div>
+                      <div style={{ fontFamily: "'Source Serif 4', serif", color: '#221F1D', fontSize: '15px', fontWeight: '600', display: 'block' }}>
+                        {stats.clientOpen}
+                      </div>
                     </div>
-                    <div className="flex flex-col">
-                      <span className="text-xs text-[#736c63] mb-0.5">Firm tasks open</span>
-                      <span className="text-lg font-semibold text-[#1c1a18]">{stats.firmOpen}</span>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ color: '#4A4642', fontSize: '12px', marginBottom: '4px' }}>Firm tasks open</div>
+                      <div style={{ fontFamily: "'Source Serif 4', serif", color: '#221F1D', fontSize: '15px', fontWeight: '600', display: 'block' }}>
+                        {stats.firmOpen}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -136,38 +177,81 @@ export function InternalWorkAssociates() {
           </div>
         </div>
       ) : (
-        <div className="p-8 text-center border-b border-[#efebe4]">
-          <p className="text-sm text-[#736c63]">No associates yet. Add one below to get started.</p>
+        <div style={{ padding: '40px 20px', textAlign: 'center', color: '#4A4642', fontSize: '13px', borderBottom: '1px solid #D9D0BC' }}>
+          No associates yet. Add one below to get started.
         </div>
       )}
 
       {/* Add Associate Form */}
-      <div className="p-5">
-        <h3 className="font-medium text-[#1c1a18] mb-4">Add associate</h3>
+      <div style={{ padding: '22px 24px' }}>
+        <h3 style={{ fontSize: '16px', fontWeight: '600', margin: '0 0 16px', color: '#221F1D' }}>Add associate</h3>
         {addError && (
-          <div className="mb-4 p-3 bg-[#ffe6e6] text-[#8C3B3B] text-sm rounded">
+          <div style={{ marginBottom: '14px', padding: '9px 11px', backgroundColor: '#F1DEDC', color: '#8C3B3B', fontSize: '13px', borderRadius: '3px' }}>
             {addError}
           </div>
         )}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <input
-            type="text"
-            placeholder="Full name"
-            value={newName}
-            onChange={(e) => setNewName(e.target.value)}
-            className="px-3 py-2 border border-[#e7e1d9] rounded text-sm focus:outline-none focus:ring-1 focus:ring-[#7a1322]"
-          />
-          <input
-            type="text"
-            placeholder="Role (e.g. Associate, Paralegal)"
-            value={newRole}
-            onChange={(e) => setNewRole(e.target.value)}
-            className="px-3 py-2 border border-[#e7e1d9] rounded text-sm focus:outline-none focus:ring-1 focus:ring-[#7a1322]"
-          />
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: '8px' }}>
+          <div style={{ flex: 1 }}>
+            <input
+              type="text"
+              placeholder="Full name"
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '8px 10px',
+                border: '1px solid #D9D0BC',
+                borderRadius: '3px',
+                fontSize: '12.5px',
+                fontFamily: 'inherit',
+                backgroundColor: '#FBF9F4',
+                color: '#221F1D',
+                outline: 'none',
+              }}
+              onFocus={(e) => (e.currentTarget.style.boxShadow = 'inset 0 0 0 1px #8C2A2A')}
+              onBlur={(e) => (e.currentTarget.style.boxShadow = 'none')}
+            />
+          </div>
+          <div style={{ flex: 1 }}>
+            <input
+              type="text"
+              placeholder="Role (e.g. Associate, Paralegal)"
+              value={newRole}
+              onChange={(e) => setNewRole(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '8px 10px',
+                border: '1px solid #D9D0BC',
+                borderRadius: '3px',
+                fontSize: '12.5px',
+                fontFamily: 'inherit',
+                backgroundColor: '#FBF9F4',
+                color: '#221F1D',
+                outline: 'none',
+              }}
+              onFocus={(e) => (e.currentTarget.style.boxShadow = 'inset 0 0 0 1px #8C2A2A')}
+              onBlur={(e) => (e.currentTarget.style.boxShadow = 'none')}
+            />
+          </div>
           <button
             onClick={handleAddAssociate}
             disabled={adding}
-            className="px-4 py-2 bg-[#7a1322] text-white rounded font-medium text-sm hover:bg-[#5c0e1a] transition-colors disabled:opacity-50"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '7px',
+              padding: '9px 16px',
+              borderRadius: '3px',
+              fontSize: '13px',
+              fontWeight: '600',
+              border: 'none',
+              backgroundColor: '#8C2A2A',
+              color: '#FBF3F1',
+              cursor: adding ? 'not-allowed' : 'pointer',
+              opacity: adding ? 0.6 : 1,
+            }}
+            onMouseEnter={(e) => !adding && (e.currentTarget.style.backgroundColor = '#6E1F1F')}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#8C2A2A')}
           >
             {adding ? 'Adding...' : 'Add'}
           </button>

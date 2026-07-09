@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react'
 import { ChevronLeft, ChevronRight, Search, Plus } from 'lucide-react'
 import { useInternalWork } from './InternalWorkContext'
 import { fmtDate, isOverdue } from './utils'
+import { NewTaskModal } from './NewTaskModal'
 import type { InternalTask } from './types'
 
 const MONTH_NAMES = [
@@ -23,6 +24,7 @@ export function InternalWorkCalendar() {
   const [currentDate, setCurrentDate] = useState(new Date())
   const [filterType, setFilterType] = useState<'all' | 'client' | 'firm' | 'everyone'>('all')
   const [searchQuery, setSearchQuery] = useState('')
+  const [showNewTaskModal, setShowNewTaskModal] = useState(false)
 
   const year = currentDate.getFullYear()
   const month = currentDate.getMonth()
@@ -123,7 +125,7 @@ export function InternalWorkCalendar() {
                 Everything due, last cut by date. Client work and firm work side by side — click a day to see or assign what&apos;s due.
               </p>
             </div>
-            <button style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', padding: '9px 16px', borderRadius: '3px', fontSize: '13px', fontWeight: '600', border: 'none', backgroundColor: '#8C2A2A', color: '#FBF3F1', cursor: 'pointer', flexShrink: 0 }} onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#6E1F1F')} onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#8C2A2A')}>
+            <button onClick={() => setShowNewTaskModal(true)} style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', padding: '9px 16px', borderRadius: '3px', fontSize: '13px', fontWeight: '600', border: 'none', backgroundColor: '#8C2A2A', color: '#FBF3F1', cursor: 'pointer', flexShrink: 0 }} onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#6E1F1F')} onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#8C2A2A')}>
               <Plus size={13} />
               New task
             </button>
@@ -380,6 +382,9 @@ export function InternalWorkCalendar() {
           </div>
         </div>
       </div>
+
+      {/* New Task Modal */}
+      <NewTaskModal isOpen={showNewTaskModal} onClose={() => setShowNewTaskModal(false)} />
     </div>
   )
 }

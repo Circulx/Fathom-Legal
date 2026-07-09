@@ -41,7 +41,7 @@ export function InternalWorkCalendar() {
       if (filterType === 'firm' && task.section !== 'admin') return false
       if (searchQuery.trim()) {
         const query = searchQuery.toLowerCase()
-        return task.title.toLowerCase().includes(query) || task.notes?.toLowerCase().includes(query)
+        return task.title.toLowerCase().includes(query) || task.description?.toLowerCase().includes(query)
       }
       return true
     })
@@ -118,19 +118,23 @@ export function InternalWorkCalendar() {
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-4 gap-5">
+    <div className="grid grid-cols-1 lg:grid-cols-4 gap-0">
       <div className="lg:col-span-3">
         <div className="bg-white border border-[#e7e1d9] rounded-[14px] overflow-hidden">
           {/* Header */}
           <div className="p-5 border-b border-[#efebe4]">
             <div className="flex items-center justify-between mb-4">
-              <div>
+              <div className="flex-1">
                 <div className="text-xs font-semibold text-[#736c63] uppercase tracking-wider">Calendar</div>
                 <h2 className="text-xl font-medium text-[#1c1a18] mt-1">Deadline calendar</h2>
                 <p className="text-sm text-[#736c63] mt-1">
                   Everything due, last cut by date. Client work and firm work side by side — click a day to see or assign what&apos;s due.
                 </p>
               </div>
+              <button className="flex-shrink-0 px-4 py-2 bg-[#7a1322] text-white rounded font-medium text-sm hover:bg-[#5c0e1a] transition-colors flex items-center gap-2 ml-4">
+                <Plus className="w-4 h-4" />
+                New task
+              </button>
             </div>
 
             {/* Filters */}
@@ -251,7 +255,7 @@ export function InternalWorkCalendar() {
       </div>
 
       {/* Right Sidebar */}
-      <div className="lg:col-span-1 space-y-5">
+      <div className="lg:col-span-1 space-y-0">
         {/* Month at a Glance */}
         <div className="bg-white border border-[#e7e1d9] rounded-[14px] p-5">
           <h3 className="font-medium text-[#1c1a18] mb-4">Month at a glance</h3>

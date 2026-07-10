@@ -751,12 +751,10 @@ export default function AdminDashboard() {
 
     processedCrmDeepLink.current = linkKey
 
-    if (view === 'leads') {
-      if (leadId) {
-        setCrmSeedLeadId(leadId)
-        setCrmSeedTaskId(taskId)
-        setCrmSeedLeadKey((key) => key + 1)
-      }
+    if (view === 'leads' && leadId) {
+      setCrmSeedLeadId(leadId)
+      setCrmSeedTaskId(taskId)
+      setCrmSeedLeadKey((key) => key + 1)
       setCrmExpanded(true)
       setActiveSection('crm-leads')
     } else if (view === 'internal-overview') {
@@ -2034,7 +2032,7 @@ export default function AdminDashboard() {
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col">
           {/* Main Content */}
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+          <div className={`w-full ${isCrmSection(activeSection) ? 'px-0 py-0' : 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8'}`}>
             {activeSection === 'dashboard' && (
               <>
                 {/* Dashboard Header */}

@@ -671,8 +671,8 @@ export default function CrmSection({
 
   return (
     <InternalWorkProvider>
-    <div className="bg-[#fbf9f6] text-[#2a2724] [color-scheme:light] -mx-4 sm:-mx-6 lg:-mx-8 -my-8 px-4 sm:px-6 lg:px-8 py-8 min-h-[calc(100vh-5rem)]">
-      <div className="flex items-center gap-4 mb-7">
+    <div className="bg-[#fbf9f6] text-[#2a2724] [color-scheme:light] -mx-4 sm:-mx-6 lg:-mx-8 -my-8 px-0 sm:px-0 lg:px-0 py-8 min-h-[calc(100vh-5rem)]">
+      <div className="flex items-center gap-4 mb-7 px-4 sm:px-6 lg:px-8">
         <div>
           <h1 className="text-[21px] font-medium text-[#1c1a18] tracking-tight">{title}</h1>
           <p className="text-[12.5px] text-[#736c63] mt-0.5">{subtitle}</p>
@@ -704,17 +704,18 @@ export default function CrmSection({
       </div>
 
       {isSearching && !leadsLoading && (
-        <p className="text-[12.5px] text-[#736c63] mb-4">
+        <p className="text-[12.5px] text-[#736c63] mb-4 px-4 sm:px-6 lg:px-8">
           {filteredLeads.length === 0
-            ? `No results for “${searchQuery.trim()}”`
-            : `${filteredLeads.length} result${filteredLeads.length === 1 ? '' : 's'} for “${searchQuery.trim()}”`}
+            ? `No results for "${searchQuery.trim()}"`
+            : `${filteredLeads.length} result${filteredLeads.length === 1 ? '' : 's'} for "${searchQuery.trim()}"`}
         </p>
       )}
 
-      {leadsLoading && activeView !== 'leads' && !isInternalView ? (
-        <div className="py-20 text-center text-[#736c63] text-sm">Loading CRM data…</div>
-      ) : (
-        <>
+      <div className="px-4 sm:px-6 lg:px-8">
+        {leadsLoading && activeView !== 'leads' && !isInternalView ? (
+          <div className="py-20 text-center text-[#736c63] text-sm">Loading CRM data…</div>
+        ) : (
+          <>
           {activeView === 'internal-overview' && (
             <InternalWorkLoadingGate>
               <InternalWorkOverview />
@@ -783,7 +784,8 @@ export default function CrmSection({
             <CrmAnalytics leads={filteredLeads} onNavigate={handleNavigate} />
           )}
         </>
-      )}
+        )}
+      </div>
     </div>
     </InternalWorkProvider>
   )

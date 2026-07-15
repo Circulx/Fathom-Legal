@@ -162,7 +162,7 @@ export function InternalWorkCalendar() {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 style={{
                   width: '100%',
-                  paddingLeft: '10px',
+                  paddingLeft: '32px',
                   paddingRight: '10px',
                   paddingTop: '7px',
                   paddingBottom: '7px',

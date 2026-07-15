@@ -130,27 +130,29 @@ export function InternalWorkAssociates() {
                       <p style={{ fontSize: '11.5px', color: roleColor, margin: '2px 0 0', fontWeight: '500' }}>{associate.role}</p>
                     </div>
                     <button
-                      onClick={() => handleDeleteAssociate(associate.id, associate.name)}
+                      type="button"
+                      onClick={() => void handleDeleteAssociate(associate.id, associate.name)}
+                      aria-label={`Remove ${associate.name}`}
+                      title="Remove associate"
                       style={{
                         background: 'none',
-                        border: 'none',
+                        border: '1px solid #D9D0BC',
+                        borderRadius: '3px',
                         cursor: 'pointer',
-                        color: '#4A4642',
-                        padding: '4px',
+                        color: '#8C2A2A',
+                        padding: '6px 8px',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         flexShrink: 0,
-                        opacity: 0,
-                        transition: 'opacity 0.2s',
                       }}
                       onMouseEnter={(e) => {
-                        e.currentTarget.style.opacity = '1'
-                        e.currentTarget.style.color = '#8C2A2A'
+                        e.currentTarget.style.backgroundColor = '#F1DEDC'
+                        e.currentTarget.style.borderColor = '#8C2A2A'
                       }}
                       onMouseLeave={(e) => {
-                        e.currentTarget.style.opacity = '0'
-                        e.currentTarget.style.color = '#4A4642'
+                        e.currentTarget.style.backgroundColor = 'transparent'
+                        e.currentTarget.style.borderColor = '#D9D0BC'
                       }}
                     >
                       <Trash2 size={14} />

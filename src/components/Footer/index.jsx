@@ -1,8 +1,8 @@
 import React from "react";
-import Link from "next/link";
 import Image from "next/image";
 import logo from "../../assets/cropped-icon-red-192x192.png";
 import { FaLinkedin, FaInstagram, FaFacebook, FaYoutube, FaWhatsapp } from "react-icons/fa";
+import FooterLegalLinks from "./FooterLegalLinks";
 
 const Footer = () => {
   return (
@@ -81,32 +81,7 @@ const Footer = () => {
 
           <div>
             <h4 className="text-lg font-semibold mb-2 text-white">Legal</h4>
-            <ul className="space-y-2 text-gray-300 text-sm">
-              <li>
-                <Link 
-                  href="/privacy-policy" 
-                  className="hover:text-white transition-colors"
-                >
-                  Privacy Policy
-                </Link>
-              </li>
-              <li>
-                <Link 
-                  href="/terms-of-service" 
-                  className="hover:text-white transition-colors"
-                >
-                  Terms of Service
-                </Link>
-              </li>
-              <li>
-                <Link 
-                  href="/refund-cancellation-policy" 
-                  className="hover:text-white transition-colors"
-                >
-                  Refund and Cancellation Policy
-                </Link>
-              </li>
-            </ul>
+            <FooterLegalLinks />
           </div>
         </div>
 

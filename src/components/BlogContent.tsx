@@ -1,16 +1,19 @@
 'use client'
 
+import { enhanceInlineTypography } from '@/lib/enhance-inline-typography'
+
 export function BlogContent({ content }: { content: string }) {
+  const html = enhanceInlineTypography(content || '')
 
   return (
     <div className="relative">
-      {/* Blog Content */}
-      <article className={`prose prose-lg prose-slate max-w-none
+      <article
+        className={`blog-rich-content prose prose-lg prose-slate max-w-none
         prose-headings:font-bold prose-headings:text-gray-900 prose-headings:mt-8 prose-headings:mb-4
-        prose-h1:text-4xl prose-h1:mb-6 prose-h1:mt-0
-        prose-h2:text-3xl prose-h2:mt-12 prose-h2:mb-4 prose-h2:border-b prose-h2:border-gray-200 prose-h2:pb-2
-        prose-h3:text-2xl prose-h3:mt-8 prose-h3:mb-3
-        prose-h4:text-xl prose-h4:mt-6 prose-h4:mb-2
+        prose-h1:mb-6 prose-h1:mt-0
+        prose-h2:mt-12 prose-h2:mb-4 prose-h2:border-b prose-h2:border-gray-200 prose-h2:pb-2
+        prose-h3:mt-8 prose-h3:mb-3
+        prose-h4:mt-6 prose-h4:mb-2
         prose-p:text-gray-700 prose-p:leading-normal prose-p:mb-4
         [&_p[data-bordered=true]]:border-2 [&_p[data-bordered=true]]:border-[#A5292A] [&_p[data-bordered=true]]:rounded-lg [&_p[data-bordered=true]]:p-4 [&_p[data-bordered=true]]:my-6 [&_p[data-bordered=true]]:bg-red-50 [&_p[data-bordered=true]]:shadow-sm
         prose-a:text-[#A5292A] prose-a:no-underline prose-a:font-semibold hover:prose-a:underline
@@ -28,12 +31,10 @@ export function BlogContent({ content }: { content: string }) {
         prose-table:w-full prose-table:my-6 prose-table:border-collapse
         prose-thead:border-b prose-thead:border-gray-300
         prose-th:px-4 prose-th:py-2 prose-th:text-left prose-th:font-semibold prose-th:text-gray-900
-        prose-td:px-4 prose-td:py-2 prose-td:border-b prose-td:border-gray-200 prose-td:text-gray-700`}>
-        <div 
-          dangerouslySetInnerHTML={{ __html: content }}
-        />
+        prose-td:px-4 prose-td:py-2 prose-td:border-b prose-td:border-gray-200 prose-td:text-gray-700`}
+      >
+        <div dangerouslySetInnerHTML={{ __html: html }} />
       </article>
     </div>
   )
 }
-

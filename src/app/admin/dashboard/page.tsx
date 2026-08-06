@@ -2748,20 +2748,42 @@ export default function AdminDashboard() {
                     />
                     <button
                       type="button"
-                      onClick={() => setGalleryBlogEditForm(prev => ({ ...prev, removeImage: true }))}
+                      onClick={() => setGalleryBlogEditForm(prev => ({ ...prev, removeImage: true, image: null }))}
                       className="text-sm text-red-600 hover:text-red-700"
                     >
                       Remove Image
                     </button>
                   </div>
                 )}
+                {galleryBlogEditForm.removeImage && galleryBlogEditForm.existingImageUrl && (
+                  <div className="mb-3 flex items-center justify-between gap-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2">
+                    <p className="text-sm text-red-700">Image will be removed on save unless you upload a new one.</p>
+                    <button
+                      type="button"
+                      onClick={() => setGalleryBlogEditForm(prev => ({ ...prev, removeImage: false, image: null }))}
+                      className="text-sm font-medium text-red-700 hover:text-red-800 whitespace-nowrap"
+                    >
+                      Undo
+                    </button>
+                  </div>
+                )}
                 {(!galleryBlogEditForm.existingImageUrl || galleryBlogEditForm.removeImage) && (
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => setGalleryBlogEditForm(prev => ({ ...prev, image: e.target.files?.[0] || null }))}
-                    className="w-full px-3 py-2 border border-black rounded-lg focus:ring-2 focus:ring-gray-400 focus:border-black bg-white text-black"
-                  />
+                  <div className="space-y-2">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => setGalleryBlogEditForm(prev => ({
+                        ...prev,
+                        image: e.target.files?.[0] || null,
+                      }))}
+                      className="w-full px-3 py-2 border border-black rounded-lg focus:ring-2 focus:ring-gray-400 focus:border-black bg-white text-black"
+                    />
+                    {galleryBlogEditForm.image && (
+                      <p className="text-sm text-gray-600">
+                        New image selected: {galleryBlogEditForm.image.name}
+                      </p>
+                    )}
+                  </div>
                 )}
               </div>
 
@@ -4051,20 +4073,42 @@ export default function AdminDashboard() {
                     />
                     <button
                       type="button"
-                      onClick={() => setThoughtLeadershipBlogEditForm(prev => ({ ...prev, removeImage: true }))}
+                      onClick={() => setThoughtLeadershipBlogEditForm(prev => ({ ...prev, removeImage: true, image: null }))}
                       className="text-sm text-red-600 hover:text-red-700"
                     >
                       Remove Image
                     </button>
                   </div>
                 )}
+                {thoughtLeadershipBlogEditForm.removeImage && thoughtLeadershipBlogEditForm.existingImageUrl && (
+                  <div className="mb-3 flex items-center justify-between gap-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2">
+                    <p className="text-sm text-red-700">Image will be removed on save unless you upload a new one.</p>
+                    <button
+                      type="button"
+                      onClick={() => setThoughtLeadershipBlogEditForm(prev => ({ ...prev, removeImage: false, image: null }))}
+                      className="text-sm font-medium text-red-700 hover:text-red-800 whitespace-nowrap"
+                    >
+                      Undo
+                    </button>
+                  </div>
+                )}
                 {(!thoughtLeadershipBlogEditForm.existingImageUrl || thoughtLeadershipBlogEditForm.removeImage) && (
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => setThoughtLeadershipBlogEditForm(prev => ({ ...prev, image: e.target.files?.[0] || null }))}
-                    className="w-full px-3 py-2 border border-black rounded-lg focus:ring-2 focus:ring-gray-400 focus:border-black bg-white text-black"
-                  />
+                  <div className="space-y-2">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => setThoughtLeadershipBlogEditForm(prev => ({
+                        ...prev,
+                        image: e.target.files?.[0] || null,
+                      }))}
+                      className="w-full px-3 py-2 border border-black rounded-lg focus:ring-2 focus:ring-gray-400 focus:border-black bg-white text-black"
+                    />
+                    {thoughtLeadershipBlogEditForm.image && (
+                      <p className="text-sm text-gray-600">
+                        New image selected: {thoughtLeadershipBlogEditForm.image.name}
+                      </p>
+                    )}
+                  </div>
                 )}
               </div>
 

@@ -313,9 +313,14 @@ select option:checked {
 .ProseMirror {
   outline: none;
   min-height: 200px;
-  font-size: 14px;
+  font-size: 16px;
   color: #000;
-  line-height: 1.4;
+  line-height: 1.5;
+}
+
+.ProseMirror span[style*="font-size"],
+.blog-rich-content span[style*="font-size"] {
+  line-height: 1.35;
 }
 
 .ProseMirror p.is-editor-empty:first-child::before {

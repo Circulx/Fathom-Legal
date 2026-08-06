@@ -110,9 +110,10 @@ export async function PUT(request: NextRequest) {
     }
 
     let imageUrl = galleryBlog.imageUrl || ''
-    if (removeImage) {
-      imageUrl = ''
-    } else if (image && image.size > 0) {
+    const oldSlug = galleryBlog.slug
+
+    // Prefer a new upload over removeImage (supports remove-then-replace)
+    if (image && image.size > 0) {
       const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
       if (!allowedTypes.includes(image.type)) {
         return NextResponse.json({
@@ -135,6 +136,8 @@ export async function PUT(request: NextRequest) {
         contentType: image.type,
       })
       imageUrl = blob.url
+    } else if (removeImage) {
+      imageUrl = ''
     }
 
     const oldTitle = galleryBlog.title
@@ -168,6 +171,8 @@ export async function PUT(request: NextRequest) {
     try {
       revalidatePath('/gallery')
       revalidatePath('/api/gallery-blogs')
+      if (oldSlug) revalidatePath(`/gallery-blog/${oldSlug}`)
+      if (galleryBlog.slug) revalidatePath(`/gallery-blog/${galleryBlog.slug}`)
     } catch (revalidateError) {
       console.warn('Gallery blog revalidation warning:', revalidateError)
     }
@@ -190,6 +195,11 @@ export async function PUT(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
+    const session = await getServerSession(authOptions)
+    if (!session || (session.user?.role !== 'admin' && session.user?.role !== 'super-admin')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     await connectDB()
     
     const { searchParams } = new URL(request.url)

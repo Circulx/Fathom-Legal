@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import { TextStyle } from '@tiptap/extension-text-style'
@@ -9,7 +9,7 @@ import Placeholder from '@tiptap/extension-placeholder'
 import { Bold, Italic, Strikethrough, Image as ImageIcon } from 'lucide-react'
 import { ResizableImage } from '@/lib/tiptap-extensions/ResizableImage'
 import { BorderedParagraph } from '@/lib/tiptap-extensions/BorderedParagraph'
-import { FontSize } from '@/lib/tiptap-extensions/FontSize'
+import { FontSize, normalizeFontSizeValue } from '@/lib/tiptap-extensions/FontSize'
 
 export default function RichTextEditor({
   value,
@@ -20,6 +20,8 @@ export default function RichTextEditor({
   onChange: (html: string) => void
   placeholder?: string
 }) {
+  const lastEmittedHtml = useRef<string | null>(null)
+
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
@@ -46,12 +48,14 @@ export default function RichTextEditor({
     ],
     content: value,
     onUpdate: ({ editor }) => {
-      onChange(editor.getHTML())
+      const html = editor.getHTML()
+      lastEmittedHtml.current = html
+      onChange(html)
     },
     editorProps: {
       attributes: {
-        class:
-          'prose prose-sm sm:prose lg:prose-lg xl:prose-2xl mx-auto focus:outline-none min-h-[200px] px-4 py-3',
+        // Avoid Tailwind prose size classes here — they hide TipTap font-size changes.
+        class: 'focus:outline-none min-h-[200px] px-4 py-3',
       },
     },
   })
@@ -78,9 +82,12 @@ export default function RichTextEditor({
   }
 
   useEffect(() => {
-    if (editor && value !== editor.getHTML()) {
-      editor.commands.setContent(value, { emitUpdate: false })
-    }
+    if (!editor) return
+    // Don't reset the editor from its own onChange updates (can drop font-size marks).
+    if (value === lastEmittedHtml.current) return
+    if (value === editor.getHTML()) return
+    editor.commands.setContent(value || '', { emitUpdate: false })
+    lastEmittedHtml.current = value || ''
   }, [value, editor])
 
   const fontFamilies = [
@@ -112,6 +119,8 @@ export default function RichTextEditor({
     return null
   }
 
+  const currentFontSize = normalizeFontSizeValue(editor.getAttributes('textStyle').fontSize) || ''
+
   return (
     <div className="border border-gray-300 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-red-500 focus-within:border-red-500 bg-white">
       <div className="border-b border-gray-300 bg-gray-50 p-2 flex flex-wrap items-center gap-2">
@@ -135,7 +144,7 @@ export default function RichTextEditor({
         </select>
 
         <select
-          value={editor.getAttributes('textStyle').fontSize || ''}
+          value={currentFontSize}
           onChange={(e) => {
             if (e.target.value) {
               editor.chain().focus().setFontSize(e.target.value).run()
@@ -144,7 +153,7 @@ export default function RichTextEditor({
             }
           }}
           className="px-2 py-1 text-sm border border-gray-300 rounded bg-white text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-red-500"
-          title="Font Size"
+          title="Font Size — select text first, then choose a size"
         >
           <option value="">Size</option>
           {fontSizes.map((size) => (

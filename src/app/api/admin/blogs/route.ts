@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
 import connectDB from '@/lib/mongodb'
 import Blog from '@/models/Blog'
+import { put } from '@vercel/blob'
 import { revalidatePath } from 'next/cache'
 
 export async function GET(request: NextRequest) {
@@ -96,80 +97,54 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'Blog not found' }, { status: 404 })
     }
 
-    // Handle image upload if provided
+    // Prefer a new upload over removeImage (supports remove-then-replace)
     let imageUrl = blog.imageUrl || ''
-    
-    if (removeImage) {
-      imageUrl = ''
-    } else if (image && image.size > 0) {
-      // Validate image type
+    const oldSlug = blog.slug
+
+    if (image && image.size > 0) {
       const allowedTypes = [
         'image/jpeg',
-        'image/jpg', 
+        'image/jpg',
         'image/png',
         'image/gif',
         'image/webp'
       ]
 
       if (!allowedTypes.includes(image.type)) {
-        return NextResponse.json({ 
-          error: 'Invalid image type. Only JPEG, PNG, GIF, and WebP images are allowed.' 
+        return NextResponse.json({
+          error: 'Invalid image type. Only JPEG, PNG, GIF, and WebP images are allowed.'
         }, { status: 400 })
       }
 
-      // Validate image size (5MB limit)
-      const maxSize = 5 * 1024 * 1024 // 5MB
+      const maxSize = 5 * 1024 * 1024
       if (image.size > maxSize) {
-        return NextResponse.json({ 
-          error: 'Image size too large. Maximum size is 5MB.' 
+        return NextResponse.json({
+          error: 'Image size too large. Maximum size is 5MB.'
         }, { status: 400 })
       }
 
       try {
-        const bytes = await image.arrayBuffer()
-        const buffer = Buffer.from(bytes)
-        
-        // Check if we're on Vercel (serverless environment)
-        const isVercel = process.env.VERCEL === '1'
-        
-        // Always use base64 for production compatibility
-        // This ensures images work on both local and production
-        // NOTE: For better performance with large images, consider using cloud storage (S3, Cloudinary, etc.)
-        const base64 = buffer.toString('base64')
-        imageUrl = `data:${image.type};base64,${base64}`
-        
-        // Also save to filesystem for local development (optional, for easier file management)
-        if (!isVercel) {
-          // Optional: Also save to filesystem for local development
-          try {
-            const { writeFile, mkdir } = await import('fs/promises')
-            const { join } = await import('path')
-            const uploadsDir = join(process.cwd(), 'public', 'uploads', 'blogs')
-            await mkdir(uploadsDir, { recursive: true })
-            const timestamp = Date.now()
-            const fileExtension = image.name.split('.').pop() || 'jpg'
-            const fileName = `blog-${timestamp}.${fileExtension}`
-            const filePath = join(uploadsDir, fileName)
-            await writeFile(filePath, buffer)
-            // Note: We still use base64 URL above for consistency
-          } catch (fsError) {
-            // Ignore filesystem errors, base64 URL is already set
-            console.warn('Could not save to filesystem, using base64 only:', fsError)
-          }
-        }
+        const timestamp = Date.now()
+        const imageFileName = `blogs/${timestamp}-${image.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`
+        const imageBytes = await image.arrayBuffer()
+        const blob = await put(imageFileName, imageBytes, {
+          access: 'public',
+          contentType: image.type,
+        })
+        imageUrl = blob.url
       } catch (fileError) {
         console.error('File upload error:', fileError)
-        return NextResponse.json({ 
+        return NextResponse.json({
           error: 'Failed to upload image. Please try again.',
           details: fileError instanceof Error ? fileError.message : 'Unknown file error'
         }, { status: 500 })
       }
+    } else if (removeImage) {
+      imageUrl = ''
     }
 
-    // Store old title for comparison
     const oldTitle = blog.title
 
-    // Update blog
     blog.title = title
     blog.description = description
     blog.category = category as 'WEBINAR' | 'INTERVIEW' | 'FEATURE' | 'ARTICLE' | 'NEWS'
@@ -177,7 +152,6 @@ export async function PUT(request: NextRequest) {
     blog.externalUrl = externalUrl || undefined
     blog.imageUrl = imageUrl || undefined
 
-    // Regenerate slug if title changed and blog has content
     if (title !== oldTitle && blog.content && !blog.externalUrl) {
       const { generateUniqueSlug } = await import('@/lib/slug')
       const existingBlogs = await Blog.find({ slug: { $exists: true }, _id: { $ne: id } }, 'slug')
@@ -187,11 +161,11 @@ export async function PUT(request: NextRequest) {
 
     await blog.save()
 
-    // Revalidate the thought leadership page to show updated blog immediately
     try {
       revalidatePath('/thoughtleadership')
       revalidatePath('/api/thought-leadership-blogs')
-      console.log('✅ Revalidated thought leadership page after update')
+      if (oldSlug) revalidatePath(`/blog/${oldSlug}`)
+      if (blog.slug) revalidatePath(`/blog/${blog.slug}`)
     } catch (revalidateError) {
       console.warn('⚠️ Revalidation warning:', revalidateError)
     }

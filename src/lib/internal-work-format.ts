@@ -46,6 +46,8 @@ export function formatInternalWorkTask(doc: {
   due: string
   status: InternalTask['status']
   notes?: string | null
+  leadId?: string | null
+  completedAt?: string | null
 }): InternalTask {
   return {
     id: String(doc._id),
@@ -58,6 +60,8 @@ export function formatInternalWorkTask(doc: {
     due: doc.due,
     status: doc.status,
     notes: doc.notes?.trim() || '',
+    leadId: doc.leadId?.trim() || '',
+    completedAt: doc.completedAt?.trim() || '',
   }
 }
 

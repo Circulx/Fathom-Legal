@@ -475,6 +475,10 @@ export default function AdminDashboard() {
     processedCrmDeepLink.current = null
   }, [status, router])
 
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [activeSection])
+
   // Load dashboard data when section changes to dashboard
   useEffect(() => {
     if (activeSection === 'dashboard' && session && status === 'authenticated') {
@@ -1551,6 +1555,7 @@ export default function AdminDashboard() {
 
   // Load data when section is selected
   const handleSectionChange = (section: string) => {
+    window.scrollTo(0, 0)
     setActiveSection(section)
     if (isCrmSection(section)) {
       setCrmExpanded(true)

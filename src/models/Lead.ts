@@ -7,6 +7,8 @@ export type LeadStatus =
   | 'engagement'
   | 'engaged'
   | 'open'
+  | 'invoice_generated'
+  | 'invoice_paid'
   | 'closed'
 
 export interface ILeadTimelineItem {
@@ -38,6 +40,8 @@ export interface ILead extends Document {
   consultationDateIso?: string
   consultationTime24?: string
   googleMeetLink?: string
+  associationStartDate?: string
+  associationEndDate?: string
   status: LeadStatus
   timeline: ILeadTimelineItem[]
   actionables: ILeadActionable[]
@@ -81,9 +85,21 @@ const LeadSchema = new Schema<ILead>(
     consultationDateIso: { type: String, default: '' },
     consultationTime24: { type: String, default: '' },
     googleMeetLink: { type: String, default: '' },
+    associationStartDate: { type: String, default: '' },
+    associationEndDate: { type: String, default: '' },
     status: {
       type: String,
-      enum: ['prospect', 'booked', 'proposal', 'engagement', 'engaged', 'open', 'closed'],
+      enum: [
+        'prospect',
+        'booked',
+        'proposal',
+        'engagement',
+        'engaged',
+        'open',
+        'invoice_generated',
+        'invoice_paid',
+        'closed',
+      ],
       default: 'prospect',
     },
     timeline: { type: [TimelineSchema], default: [] },

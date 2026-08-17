@@ -19,14 +19,17 @@ import {
   todayStr,
 } from './utils'
 import type { InternalAssociate, InternalTask, TaskPriority, TaskSection, TaskStatus } from './types'
+import type { CrmLead } from '@/components/CRM/data'
+import ClientMonthlyReportExport from './ClientMonthlyReportExport'
 import { notifyInternalWorkAssignment, notifyInternalWorkUpdate } from './notify-assignment'
 import { getTaskChanges } from './task-changes'
 
 interface InternalWorkRegisterProps {
   section: TaskSection
+  leads?: CrmLead[]
 }
 
-export default function InternalWorkRegister({ section }: InternalWorkRegisterProps) {
+export default function InternalWorkRegister({ section, leads = [] }: InternalWorkRegisterProps) {
   const {
     tasks,
     associates,
@@ -52,6 +55,13 @@ export default function InternalWorkRegister({ section }: InternalWorkRegisterPr
     () => getCategoryMap(allCategories, section),
     [allCategories, section]
   )
+  const leadLabelById = useMemo(() => {
+    const map = new Map<string, string>()
+    for (const lead of leads) {
+      map.set(lead.id, `${lead.first} ${lead.last}`.trim())
+    }
+    return map
+  }, [leads])
   const viewMode = registerView[section]
   const currentStatusFilter = statusFilter[section]
   const currentSort = sortState[section]
@@ -148,8 +158,25 @@ export default function InternalWorkRegister({ section }: InternalWorkRegisterPr
     }
   }
 
+  const listColumns = useMemo(() => {
+    const cols = [
+      { key: 'title', label: 'Task' },
+      ...(section === 'client' ? [{ key: 'client', label: 'Client' } as const] : []),
+      { key: 'category', label: 'Category' },
+      { key: 'assignee', label: 'Assignee' },
+      { key: 'priority', label: 'Priority' },
+      { key: 'due', label: 'Due' },
+      { key: 'status', label: 'Status' },
+      { key: 'actions', label: '' },
+    ]
+    return cols
+  }, [section])
+
   return (
     <div className="space-y-5">
+      {section === 'client' && leads.length > 0 && (
+        <ClientMonthlyReportExport leads={leads} />
+      )}
       {saveError && (
         <p className="text-[13px] text-[#8C3B3B] bg-[#F1DEDC] border border-[#e7e1d9] rounded-[6px] px-3 py-2">
           {saveError}
@@ -244,28 +271,20 @@ export default function InternalWorkRegister({ section }: InternalWorkRegisterPr
           <table className="w-full border-collapse">
             <thead>
               <tr className="bg-[#EDE7DA] border-b border-[#e7e1d9]">
-                {[
-                  { key: 'title', label: 'Task' },
-                  { key: 'category', label: 'Category' },
-                  { key: 'assignee', label: 'Assignee' },
-                  { key: 'priority', label: 'Priority' },
-                  { key: 'due', label: 'Due' },
-                  { key: 'status', label: 'Status' },
-                  { key: 'actions', label: '' },
-                ].map((col) => (
+                {listColumns.map((col) => (
                   <th
                     key={col.key}
                     className={`text-left text-[11px] uppercase tracking-wide text-[#736c63] font-semibold px-4 py-3 ${
-                      col.key !== 'actions' ? 'cursor-pointer' : ''
+                      col.key !== 'actions' && col.key !== 'client' ? 'cursor-pointer' : ''
                     }`}
                     onClick={() => {
-                      if (col.key !== 'actions') {
+                      if (col.key !== 'actions' && col.key !== 'client') {
                         toggleSort(section, col.key as typeof currentSort.key)
                       }
                     }}
                   >
                     {col.label}
-                    {col.key !== 'actions' && (
+                    {col.key !== 'actions' && col.key !== 'client' && (
                       <span className="ml-1 text-[9px] text-[#A69E8E]">↕</span>
                     )}
                   </th>
@@ -275,7 +294,7 @@ export default function InternalWorkRegister({ section }: InternalWorkRegisterPr
             <tbody>
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-4 py-10 text-center text-[13px] text-[#736c63]">
+                  <td colSpan={listColumns.length} className="px-4 py-10 text-center text-[13px] text-[#736c63]">
                     {tasks.filter((t) => t.section === section).length === 0
                       ? 'No tasks yet. Click “New task” to add one.'
                       : 'No tasks match these filters.'}
@@ -313,6 +332,11 @@ export default function InternalWorkRegister({ section }: InternalWorkRegisterPr
                           </div>
                         </div>
                       </td>
+                      {section === 'client' && (
+                        <td className="px-4 py-3 text-[13px] text-[#736c63]">
+                          {task.leadId ? leadLabelById.get(task.leadId) || '—' : '—'}
+                        </td>
+                      )}
                       <td className="px-4 py-3 text-[13px] text-[#736c63]">{cat?.label ?? task.category}</td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
@@ -452,6 +476,7 @@ export default function InternalWorkRegister({ section }: InternalWorkRegisterPr
           task={editing}
           associates={associates}
           categories={categories}
+          leads={section === 'client' ? leads : []}
           onClose={() => setModalOpen(false)}
           onSave={handleSave}
           onDelete={
@@ -476,6 +501,7 @@ function TaskModal({
   task,
   associates,
   categories,
+  leads,
   onClose,
   onSave,
   onDelete,
@@ -484,6 +510,7 @@ function TaskModal({
   task: InternalTask | null
   associates: { id: string; name: string; email?: string }[]
   categories: Record<string, { label: string; className: string }>
+  leads: CrmLead[]
   onClose: () => void
   onSave: (task: Omit<InternalTask, 'id' | 'taskNumber'> & { id?: string }) => void | Promise<void>
   onDelete?: () => boolean | void
@@ -492,6 +519,7 @@ function TaskModal({
   const [category, setCategory] = useState(task?.category ?? '')
   const categoryOptions = Object.entries(categories)
   const [assignee, setAssignee] = useState(task?.assignee ?? associates[0]?.id ?? '')
+  const [leadId, setLeadId] = useState(task?.leadId ?? '')
   const [priority, setPriority] = useState<TaskPriority>(task?.priority ?? 'med')
   const [due, setDue] = useState(task?.due ?? todayStr())
   const [status, setStatus] = useState<TaskStatus>(task?.status ?? 'todo')
@@ -521,6 +549,28 @@ function TaskModal({
               placeholder="Task title"
             />
           </Field>
+          {section === 'client' && (
+            <Field label="Client">
+              <select
+                value={leadId}
+                onChange={(e) => setLeadId(e.target.value)}
+                className="w-full px-3 py-2 border border-[#e7e1d9] rounded-[6px] text-[13px] bg-white"
+              >
+                <option value="">No client linked</option>
+                {[...leads]
+                  .sort((a, b) => `${a.first} ${a.last}`.localeCompare(`${b.first} ${b.last}`))
+                  .map((lead) => (
+                    <option key={lead.id} value={lead.id}>
+                      {lead.first} {lead.last}
+                      {lead.company && lead.company !== '—' ? ` · ${lead.company}` : ''}
+                    </option>
+                  ))}
+              </select>
+              <p className="text-[11px] text-[#736c63] mt-1">
+                Link this task to a client so it appears in monthly PDF/Word exports.
+              </p>
+            </Field>
+          )}
           <div className="grid grid-cols-2 gap-3">
             <Field label="Category">
               {categoryOptions.length === 0 ? (
@@ -634,6 +684,7 @@ function TaskModal({
                 title: title.trim(),
                 category,
                 assignee,
+                leadId: section === 'client' ? leadId : '',
                 priority,
                 due,
                 status,

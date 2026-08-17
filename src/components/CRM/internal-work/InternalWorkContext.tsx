@@ -189,6 +189,7 @@ export function InternalWorkProvider({ children }: { children: ReactNode }) {
         due: task.due,
         status: task.status,
         notes: task.notes,
+        ...(task.section === 'client' ? { leadId: task.leadId ?? '' } : {}),
       }
 
       if (task.id) {

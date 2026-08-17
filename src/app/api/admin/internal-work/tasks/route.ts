@@ -69,6 +69,7 @@ export async function POST(request: NextRequest) {
     const status = VALID_STATUSES.has(body.status) ? body.status : 'todo'
     const due = typeof body.due === 'string' ? body.due.trim() : ''
     const notes = typeof body.notes === 'string' ? body.notes.trim() : ''
+    const leadId = typeof body.leadId === 'string' ? body.leadId.trim() : ''
 
     if (!VALID_SECTIONS.has(section)) {
       return NextResponse.json({ error: 'Invalid section' }, { status: 400 })
@@ -93,6 +94,8 @@ export async function POST(request: NextRequest) {
       due,
       status,
       notes,
+      leadId: section === 'client' ? leadId : '',
+      completedAt: status === 'done' ? new Date().toISOString().slice(0, 10) : '',
     })
 
     return NextResponse.json({

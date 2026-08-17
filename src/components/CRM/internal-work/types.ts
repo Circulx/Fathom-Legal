@@ -30,6 +30,8 @@ export interface InternalTask {
   due: string
   status: TaskStatus
   notes: string
+  leadId?: string
+  completedAt?: string
 }
 
 export type RegisterViewMode = 'list' | 'kanban'

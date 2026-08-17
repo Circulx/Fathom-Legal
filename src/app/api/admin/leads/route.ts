@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
 import connectDB from '@/lib/mongodb'
 import Lead from '@/models/Lead'
-import { formatTimelineWhen, leadDocToCrmLead } from '@/lib/crm-leads'
+import { formatTimelineWhen, leadDocToCrmLead, resolveAssociationDates } from '@/lib/crm-leads'
 import type { CrmStatus } from '@/components/CRM/data'
 import { applyConsultationSchedule } from '@/lib/lead-consultation-schedule'
 
@@ -14,6 +14,8 @@ const VALID_STATUSES: CrmStatus[] = [
   'engagement',
   'engaged',
   'open',
+  'invoice_generated',
+  'invoice_paid',
   'closed',
 ]
 
@@ -69,6 +71,22 @@ export async function POST(request: NextRequest) {
     const consultationDateIso = body.consultationDateIso?.trim() || ''
     const consultationTime24 = body.consultationTime24?.trim() || ''
 
+    let associationStartDate = ''
+    let associationEndDate = ''
+    try {
+      const dates = resolveAssociationDates({
+        start: body.associationStartDate,
+        end: body.associationEndDate,
+      })
+      associationStartDate = dates.start
+      associationEndDate = dates.end
+    } catch (error) {
+      return NextResponse.json(
+        { error: error instanceof Error ? error.message : 'Invalid association dates' },
+        { status: 400 }
+      )
+    }
+
     const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!first || !last || !emailRe.test(email)) {
       return NextResponse.json(
@@ -110,6 +128,8 @@ export async function POST(request: NextRequest) {
       matter,
       date: '—',
       time: '—',
+      associationStartDate,
+      associationEndDate,
       timeline: [
         {
           icon: 'inbox',

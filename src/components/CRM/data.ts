@@ -5,6 +5,8 @@ export type CrmStatus =
   | 'engagement'
   | 'engaged'
   | 'open'
+  | 'invoice_generated'
+  | 'invoice_paid'
   | 'closed'
 
 export const CRM_STATUSES: Record<CrmStatus, string> = {
@@ -14,6 +16,8 @@ export const CRM_STATUSES: Record<CrmStatus, string> = {
   engagement: 'LOE',
   engaged: 'Engaged',
   open: 'Open',
+  invoice_generated: 'Invoice generated',
+  invoice_paid: 'Invoice paid',
   closed: 'Closed',
 }
 
@@ -50,6 +54,8 @@ export interface CrmLead {
   consultationDateIso?: string
   consultationTime24?: string
   googleMeetLink?: string
+  associationStartDate?: string
+  associationEndDate?: string
   status: CrmStatus
   ago: string
   createdAt: string
@@ -74,6 +80,8 @@ export type LeadPatch = {
   consultationDateIso?: string
   consultationTime24?: string
   clearConsultation?: boolean
+  associationStartDate?: string
+  associationEndDate?: string
 }
 
 export const PRACTICE_AREAS = [
@@ -157,7 +165,13 @@ export const AWAITING_RESPONSE_STATUSES: CrmStatus[] = [
   'engagement',
 ]
 
-export const RETAINED_STATUSES: CrmStatus[] = ['engaged', 'open', 'closed']
+export const RETAINED_STATUSES: CrmStatus[] = [
+  'engaged',
+  'open',
+  'invoice_generated',
+  'invoice_paid',
+  'closed',
+]
 
 export const CONSULTATION_BOOKED_STATUSES: CrmStatus[] = [
   'booked',
@@ -165,6 +179,8 @@ export const CONSULTATION_BOOKED_STATUSES: CrmStatus[] = [
   'engagement',
   'engaged',
   'open',
+  'invoice_generated',
+  'invoice_paid',
   'closed',
 ]
 
@@ -173,6 +189,8 @@ export const PROPOSAL_SENT_STATUSES: CrmStatus[] = [
   'engagement',
   'engaged',
   'open',
+  'invoice_generated',
+  'invoice_paid',
   'closed',
 ]
 

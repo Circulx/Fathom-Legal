@@ -723,7 +723,7 @@ export default function CrmSection({
           )}
           {activeView === 'internal-client' && (
             <InternalWorkLoadingGate>
-              <InternalWorkRegister section="client" />
+              <InternalWorkRegister section="client" leads={filteredLeads} />
             </InternalWorkLoadingGate>
           )}
           {activeView === 'internal-firm' && (

@@ -19,6 +19,8 @@ export const STATUS_STYLES: Record<CrmStatus, string> = {
   engagement: 'bg-[#e7eef0] text-[#2a6b73]',
   engaged: 'bg-[#e8f1ea] text-[#3f7a52]',
   open: 'bg-[#e9eef5] text-[#3a5a8a]',
+  invoice_generated: 'bg-[#fff4e6] text-[#c45a00]',
+  invoice_paid: 'bg-[#e6f4ea] text-[#1e7e34]',
   closed: 'bg-[#eee] text-[#8a8178]',
 }
 
@@ -29,6 +31,8 @@ export const STATUS_SWATCH: Record<CrmStatus, string> = {
   engagement: 'bg-[#2a6b73]',
   engaged: 'bg-[#3f7a52]',
   open: 'bg-[#3a5a8a]',
+  invoice_generated: 'bg-[#c45a00]',
+  invoice_paid: 'bg-[#1e7e34]',
   closed: 'bg-[#8a8178]',
 }
 

@@ -53,6 +53,7 @@ import { formatTimeDisplay, toTime24 } from '@/lib/time-format'
 import BookingMonthCalendar from '@/components/BookingMonthCalendar'
 import { getLeadConsultationDate } from '@/lib/crm-consultation-dates'
 import { toDateKey } from '@/lib/booking-calendar'
+import { formatAssociationDateDisplay } from '@/lib/crm-leads'
 
 const PAGE_SIZE_OPTIONS = [10, 20, 50] as const
 
@@ -64,6 +65,8 @@ const FILTER_CHIPS: { id: StatusFilter; label: string }[] = [
   { id: 'engagement', label: 'LOE' },
   { id: 'engaged', label: 'Engaged' },
   { id: 'open', label: 'Open' },
+  { id: 'invoice_generated', label: 'Invoice generated' },
+  { id: 'invoice_paid', label: 'Invoice paid' },
   { id: 'closed', label: 'Closed' },
 ]
 
@@ -144,6 +147,8 @@ interface AddProspectForm {
   matter: string
   consultationDateIso: string
   consultationTime24: string
+  associationStartDate: string
+  associationEndDate: string
 }
 
 const emptyForm: AddProspectForm = {
@@ -158,6 +163,8 @@ const emptyForm: AddProspectForm = {
   matter: '',
   consultationDateIso: '',
   consultationTime24: '',
+  associationStartDate: '',
+  associationEndDate: '',
 }
 
 interface EditLeadForm {
@@ -171,6 +178,8 @@ interface EditLeadForm {
   matter: string
   consultationDateIso: string
   consultationTime24: string
+  associationStartDate: string
+  associationEndDate: string
 }
 
 function leadToEditForm(lead: CrmLead): EditLeadForm {
@@ -196,6 +205,8 @@ function leadToEditForm(lead: CrmLead): EditLeadForm {
     matter: lead.matter === '—' ? '' : lead.matter,
     consultationDateIso,
     consultationTime24,
+    associationStartDate: lead.associationStartDate || '',
+    associationEndDate: lead.associationEndDate || '',
   }
 }
 
@@ -275,6 +286,8 @@ export default function CrmLeads({
   const [editForm, setEditForm] = useState<EditLeadForm | null>(null)
   const [editError, setEditError] = useState('')
   const [editSubmitting, setEditSubmitting] = useState(false)
+  const [associationSaving, setAssociationSaving] = useState(false)
+  const [associationError, setAssociationError] = useState('')
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [deleteSubmitting, setDeleteSubmitting] = useState(false)
   const [isRescheduling, setIsRescheduling] = useState(false)
@@ -688,6 +701,28 @@ export default function CrmLeads({
     setAvailableSlots([])
   }
 
+  const saveAssociationDates = async (start: string, end: string) => {
+    if (!drawerLead) return
+    if (start && end && end < start) {
+      setAssociationError('End date cannot be before the start date.')
+      return
+    }
+
+    setAssociationSaving(true)
+    setAssociationError('')
+    try {
+      const updated = await onPatchLead(drawerLead.id, {
+        associationStartDate: start,
+        associationEndDate: end,
+      })
+      setDrawerLead(updated)
+    } catch (error) {
+      setAssociationError(error instanceof Error ? error.message : 'Failed to save association dates')
+    } finally {
+      setAssociationSaving(false)
+    }
+  }
+
   const handleEditDateSelect = (dateStr: string) => {
     setEditForm((prev) =>
       prev ? { ...prev, consultationDateIso: dateStr, consultationTime24: '' } : prev
@@ -719,6 +754,15 @@ export default function CrmLeads({
       return
     }
 
+    if (
+      editForm.associationStartDate &&
+      editForm.associationEndDate &&
+      editForm.associationEndDate < editForm.associationStartDate
+    ) {
+      setEditError('Association end date cannot be before the start date.')
+      return
+    }
+
     setEditSubmitting(true)
     setEditError('')
     try {
@@ -731,6 +775,8 @@ export default function CrmLeads({
         source: editForm.source,
         areas: editForm.areas.length > 0 ? editForm.areas : ['Corporate advisory'],
         matter: editForm.matter.trim(),
+        associationStartDate: editForm.associationStartDate,
+        associationEndDate: editForm.associationEndDate,
       }
 
       if (wantsConsultation) {
@@ -912,6 +958,15 @@ export default function CrmLeads({
       }
     }
 
+    if (
+      form.associationStartDate &&
+      form.associationEndDate &&
+      form.associationEndDate < form.associationStartDate
+    ) {
+      setAddError('Association end date cannot be before the start date.')
+      return
+    }
+
     setAddSubmitting(true)
     setAddError('')
 
@@ -926,6 +981,8 @@ export default function CrmLeads({
         status: form.status,
         areas: form.areas.length > 0 ? form.areas : ['Corporate advisory'],
         matter: form.matter.trim(),
+        associationStartDate: form.associationStartDate,
+        associationEndDate: form.associationEndDate,
       }
 
       if (form.status === 'booked') {
@@ -1241,7 +1298,7 @@ export default function CrmLeads({
           <table className="w-full border-collapse min-w-[680px]">
             <thead>
               <tr className="bg-[#fbf9f6]">
-                {['Client', 'Practice areas', 'Source', 'Consultation', 'Status'].map((col) => (
+                {['Client', 'Practice areas', 'Source', 'Association', 'Consultation', 'Status'].map((col) => (
                   <th
                     key={col}
                     className="text-[11px] uppercase tracking-wide text-[#736c63] font-semibold text-left px-4 py-3 border-b border-[#e7e1d9]"
@@ -1254,13 +1311,13 @@ export default function CrmLeads({
             <tbody>
               {leadsLoading ? (
                 <tr>
-                  <td colSpan={5} className="px-4 py-12 text-center text-[#736c63] text-sm">
+                  <td colSpan={6} className="px-4 py-12 text-center text-[#736c63] text-sm">
                     Loading leads…
                   </td>
                 </tr>
               ) : filteredLeads.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-4 py-12 text-center text-[#736c63] text-sm">
+                  <td colSpan={6} className="px-4 py-12 text-center text-[#736c63] text-sm">
                     {searchQuery.trim()
                       ? `No leads match “${searchQuery.trim()}”.`
                       : filter !== 'all' || hasExtraFilters
@@ -1306,6 +1363,17 @@ export default function CrmLeads({
                     </div>
                   </td>
                   <td className="px-4 py-3 text-[13.5px] text-[#736c63]">{lead.source}</td>
+                  <td className="px-4 py-3 text-[12.5px] text-[#736c63] whitespace-nowrap">
+                    {lead.associationStartDate || lead.associationEndDate ? (
+                      <span className="text-[#1c1a18]">
+                        {formatAssociationDateDisplay(lead.associationStartDate)}
+                        {' – '}
+                        {formatAssociationDateDisplay(lead.associationEndDate)}
+                      </span>
+                    ) : (
+                      <span>—</span>
+                    )}
+                  </td>
                   <td className="px-4 py-3 text-[13.5px]">
                     {lead.date === '—' ? (
                       <span className="text-[#736c63]">Not booked</span>
@@ -1575,6 +1643,36 @@ export default function CrmLeads({
                 />
               </div>
 
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[12.5px] font-medium text-[#1c1a18] mb-1.5">
+                    Association start date
+                  </label>
+                  <input
+                    type="date"
+                    value={form.associationStartDate}
+                    onChange={(e) =>
+                      setForm((p) => ({ ...p, associationStartDate: e.target.value }))
+                    }
+                    className={CRM_INPUT_CLASS}
+                  />
+                </div>
+                <div>
+                  <label className="block text-[12.5px] font-medium text-[#1c1a18] mb-1.5">
+                    Association end date
+                  </label>
+                  <input
+                    type="date"
+                    value={form.associationEndDate}
+                    min={form.associationStartDate || undefined}
+                    onChange={(e) =>
+                      setForm((p) => ({ ...p, associationEndDate: e.target.value }))
+                    }
+                    className={CRM_INPUT_CLASS}
+                  />
+                </div>
+              </div>
+
               {addError && (
                 <p className="text-[12px] text-[#7a1322] font-medium">{addError}</p>
               )}
@@ -1814,6 +1912,35 @@ export default function CrmLeads({
                       className={CRM_TEXTAREA_CLASS}
                     />
                   </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-[12.5px] font-medium text-[#1c1a18] mb-1.5">
+                        Association start date
+                      </label>
+                      <input
+                        type="date"
+                        value={editForm.associationStartDate}
+                        onChange={(e) =>
+                          setEditForm((p) => p && { ...p, associationStartDate: e.target.value })
+                        }
+                        className={CRM_INPUT_CLASS}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[12.5px] font-medium text-[#1c1a18] mb-1.5">
+                        Association end date
+                      </label>
+                      <input
+                        type="date"
+                        value={editForm.associationEndDate}
+                        min={editForm.associationStartDate || undefined}
+                        onChange={(e) =>
+                          setEditForm((p) => p && { ...p, associationEndDate: e.target.value })
+                        }
+                        className={CRM_INPUT_CLASS}
+                      />
+                    </div>
+                  </div>
                   <div>
                     <div className="flex items-center justify-between mb-2">
                       <label className="block text-[12.5px] font-medium text-[#1c1a18]">
@@ -2020,6 +2147,52 @@ export default function CrmLeads({
                 <div className="bg-white border border-[#e7e1d9] rounded-[10px] p-3.5 text-[13.5px] leading-relaxed text-[#2a2724]">
                   {drawerLead.matter}
                 </div>
+              </section>
+
+              <section>
+                <h4 className="text-[11px] uppercase tracking-widest text-[#736c63] font-semibold mb-2">
+                  Client association
+                </h4>
+                <p className="text-[12px] text-[#736c63] mb-3">
+                  Record the period this client is associated with the firm. These dates are not filled automatically.
+                </p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[12.5px] font-medium text-[#1c1a18] mb-1.5">
+                      Start date
+                    </label>
+                    <input
+                      type="date"
+                      value={drawerLead.associationStartDate || ''}
+                      disabled={associationSaving}
+                      onChange={(e) => {
+                        void saveAssociationDates(e.target.value, drawerLead.associationEndDate || '')
+                      }}
+                      className={CRM_INPUT_CLASS}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[12.5px] font-medium text-[#1c1a18] mb-1.5">
+                      End date
+                    </label>
+                    <input
+                      type="date"
+                      value={drawerLead.associationEndDate || ''}
+                      min={drawerLead.associationStartDate || undefined}
+                      disabled={associationSaving}
+                      onChange={(e) => {
+                        void saveAssociationDates(drawerLead.associationStartDate || '', e.target.value)
+                      }}
+                      className={CRM_INPUT_CLASS}
+                    />
+                  </div>
+                </div>
+                {associationSaving && (
+                  <p className="text-[12px] text-[#736c63] mt-2">Saving…</p>
+                )}
+                {associationError && (
+                  <p className="text-[12px] text-[#7a1322] font-medium mt-2">{associationError}</p>
+                )}
               </section>
 
               {(rescheduleNotice || resendNotice || composeNotice) && !isRescheduling && !isComposing && (

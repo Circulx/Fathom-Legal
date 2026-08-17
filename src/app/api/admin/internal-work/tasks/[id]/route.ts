@@ -46,8 +46,19 @@ export async function PATCH(
     }
     if (VALID_PRIORITIES.has(body.priority)) task.priority = body.priority
     if (typeof body.due === 'string' && body.due.trim()) task.due = body.due.trim()
-    if (VALID_STATUSES.has(body.status)) task.status = body.status
+    if (VALID_STATUSES.has(body.status)) {
+      const nextStatus = body.status
+      if (nextStatus === 'done' && task.status !== 'done') {
+        task.completedAt = new Date().toISOString().slice(0, 10)
+      } else if (nextStatus !== 'done' && task.status === 'done') {
+        task.completedAt = ''
+      }
+      task.status = nextStatus
+    }
     if (typeof body.notes === 'string') task.notes = body.notes.trim()
+    if (body.leadId !== undefined) {
+      task.leadId = typeof body.leadId === 'string' ? body.leadId.trim() : ''
+    }
 
     await task.save()
 

@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
 import connectDB from '@/lib/mongodb'
 import Lead from '@/models/Lead'
-import { formatTimelineWhen, leadDocToCrmLead, getActionableTimelineEntries, getActionableAssignmentChanges, normalizeActionables, type ActionableAssignmentChange } from '@/lib/crm-leads'
+import { formatTimelineWhen, leadDocToCrmLead, getActionableTimelineEntries, getActionableAssignmentChanges, normalizeActionables, resolveAssociationDates, type ActionableAssignmentChange } from '@/lib/crm-leads'
 import { resolveAssigneeEmails } from '@/lib/resolve-assignee-email'
 import { sendTaskAssignmentEmail } from '@/lib/task-assignment-email'
 import { buildCrmTaskDeepLink } from '@/lib/crm-deep-link'
@@ -20,6 +20,8 @@ const VALID_STATUSES: CrmStatus[] = [
   'engagement',
   'engaged',
   'open',
+  'invoice_generated',
+  'invoice_paid',
   'closed',
 ]
 
@@ -232,6 +234,27 @@ export async function PATCH(
           lead.time = time
           detailsUpdated = true
         }
+      }
+    }
+
+    if (body.associationStartDate !== undefined || body.associationEndDate !== undefined) {
+      try {
+        const { start, end } = resolveAssociationDates({
+          start: body.associationStartDate,
+          end: body.associationEndDate,
+          currentStart: lead.associationStartDate || '',
+          currentEnd: lead.associationEndDate || '',
+        })
+        if (start !== (lead.associationStartDate || '') || end !== (lead.associationEndDate || '')) {
+          lead.associationStartDate = start
+          lead.associationEndDate = end
+          detailsUpdated = true
+        }
+      } catch (error) {
+        return NextResponse.json(
+          { error: error instanceof Error ? error.message : 'Invalid association dates' },
+          { status: 400 }
+        )
       }
     }
 

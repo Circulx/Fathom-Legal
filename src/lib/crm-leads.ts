@@ -26,6 +26,56 @@ export function formatTimelineWhen(date: Date): string {
   })
 }
 
+const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}$/
+
+/** Accepts YYYY-MM-DD or empty. Returns '' for blank. Throws on invalid. */
+export function parseAssociationIsoDate(value: unknown): string {
+  if (value === undefined || value === null) return ''
+  const raw = String(value).trim()
+  if (!raw) return ''
+  if (!ISO_DATE_RE.test(raw)) {
+    throw new Error('Association dates must be YYYY-MM-DD')
+  }
+  const parsed = new Date(`${raw}T12:00:00`)
+  if (Number.isNaN(parsed.getTime())) {
+    throw new Error('Association dates must be a valid calendar date')
+  }
+  return raw
+}
+
+export function formatAssociationDateDisplay(iso: string | undefined): string {
+  if (!iso) return '—'
+  const parsed = new Date(`${iso}T12:00:00`)
+  if (Number.isNaN(parsed.getTime())) return iso
+  return parsed.toLocaleDateString('en-IN', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  })
+}
+
+export function resolveAssociationDates(input: {
+  start?: unknown
+  end?: unknown
+  currentStart?: string
+  currentEnd?: string
+}): { start: string; end: string } {
+  const start =
+    input.start !== undefined
+      ? parseAssociationIsoDate(input.start)
+      : (input.currentStart || '')
+  const end =
+    input.end !== undefined
+      ? parseAssociationIsoDate(input.end)
+      : (input.currentEnd || '')
+
+  if (start && end && end < start) {
+    throw new Error('Association end date cannot be before the start date')
+  }
+
+  return { start, end }
+}
+
 export function getActionableTimelineEntries(
   previous: ILeadActionable[],
   next: ILeadActionable[],
@@ -164,6 +214,8 @@ export function leadDocToCrmLead(doc: ILead | Record<string, unknown>): CrmLead 
     googleMeetLink:
       lead.googleMeetLink ||
       (lead.date && lead.date !== '—' ? DEFAULT_MEET_LINK : ''),
+    associationStartDate: lead.associationStartDate || '',
+    associationEndDate: lead.associationEndDate || '',
     status: lead.status,
     ago: formatLeadAgo(createdAt),
     createdAt: createdAt.toISOString(),

@@ -15,6 +15,7 @@ export interface IInternalWorkTask extends Document {
   status: InternalWorkTaskStatus
   notes: string
   leadId?: string
+  completedAt?: string
   createdAt: Date
   updatedAt: Date
 }
@@ -31,12 +32,14 @@ const InternalWorkTaskSchema = new Schema<IInternalWorkTask>(
     status: { type: String, enum: ['todo', 'progress', 'blocked', 'done'], default: 'todo' },
     notes: { type: String, default: '' },
     leadId: { type: String, default: '' },
+    completedAt: { type: String, default: '' },
   },
   { timestamps: true }
 )
 
 InternalWorkTaskSchema.index({ section: 1, status: 1, due: 1 })
 InternalWorkTaskSchema.index({ assignee: 1 })
+InternalWorkTaskSchema.index({ leadId: 1, section: 1, status: 1, completedAt: 1 })
 
 export default mongoose.models.InternalWorkTask ||
   mongoose.model<IInternalWorkTask>('InternalWorkTask', InternalWorkTaskSchema)

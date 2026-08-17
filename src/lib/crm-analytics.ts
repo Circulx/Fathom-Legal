@@ -111,13 +111,13 @@ export function computeConversionFunnel(leads: CrmLead[], range?: AnalyticsDateR
   }
 
   const booked = scoped.filter((l) =>
-    ['booked', 'proposal', 'engagement', 'engaged', 'open', 'closed'].includes(l.status)
+    ['booked', 'proposal', 'engagement', 'engaged', 'open', 'invoice_generated', 'invoice_paid', 'closed'].includes(l.status)
   ).length
   const proposal = scoped.filter((l) =>
-    ['proposal', 'engagement', 'engaged', 'open', 'closed'].includes(l.status)
+    ['proposal', 'engagement', 'engaged', 'open', 'invoice_generated', 'invoice_paid', 'closed'].includes(l.status)
   ).length
   const retained = scoped.filter((l) =>
-    ['engaged', 'open', 'closed'].includes(l.status)
+    ['engaged', 'open', 'invoice_generated', 'invoice_paid', 'closed'].includes(l.status)
   ).length
 
   const pct = (n: number) => Math.round((n / total) * 100)
@@ -136,9 +136,11 @@ export function computeCrmStats(leads: CrmLead[], range?: AnalyticsDateRange) {
   const recentLeads = scoped.filter((l) => new Date(l.createdAt).getTime() >= sevenDaysAgo)
   const consultationsScheduled = scoped.filter((l) => l.date !== '—')
   const consultationsHeld = scoped.filter((l) =>
-    ['proposal', 'engagement', 'engaged', 'open', 'closed'].includes(l.status)
+    ['proposal', 'engagement', 'engaged', 'open', 'invoice_generated', 'invoice_paid', 'closed'].includes(l.status)
   )
-  const retained = scoped.filter((l) => ['engaged', 'open', 'closed'].includes(l.status))
+  const retained = scoped.filter((l) =>
+    ['engaged', 'open', 'invoice_generated', 'invoice_paid', 'closed'].includes(l.status)
+  )
   const awaitingResponse = scoped.filter((l) =>
     ['prospect', 'booked', 'proposal', 'engagement'].includes(l.status)
   )

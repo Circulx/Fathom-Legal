@@ -14,7 +14,9 @@ const STATUS_RANK: Record<LeadStatus, number> = {
   engagement: 3,
   engaged: 4,
   open: 5,
-  closed: 6,
+  invoice_generated: 6,
+  invoice_paid: 7,
+  closed: 8,
 }
 
 function pickRicherString(keeper: string, incoming: string): string {
@@ -63,6 +65,20 @@ export async function mergeLeadIntoKeeper(
 
   if (!keeper.intakeSessionId && source.intakeSessionId) {
     keeper.intakeSessionId = source.intakeSessionId
+  }
+
+  if (!keeper.associationStartDate && source.associationStartDate) {
+    keeper.associationStartDate = source.associationStartDate
+  }
+  if (!keeper.associationEndDate && source.associationEndDate) {
+    keeper.associationEndDate = source.associationEndDate
+  }
+  if (
+    keeper.associationStartDate &&
+    keeper.associationEndDate &&
+    keeper.associationEndDate < keeper.associationStartDate
+  ) {
+    keeper.associationEndDate = ''
   }
 
   const keeperHasConsult = hasConsultation(keeper)

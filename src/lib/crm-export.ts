@@ -20,6 +20,8 @@ export function downloadLeadsCsv(leads: CrmLead[], filename?: string) {
     'Status',
     'Consultation date',
     'Consultation time',
+    'Association start',
+    'Association end',
     'Created',
   ]
 
@@ -35,6 +37,8 @@ export function downloadLeadsCsv(leads: CrmLead[], filename?: string) {
     CRM_STATUSES[lead.status],
     lead.date,
     lead.time,
+    lead.associationStartDate || '',
+    lead.associationEndDate || '',
     new Date(lead.createdAt).toLocaleDateString('en-US'),
   ])
 

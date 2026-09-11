@@ -162,9 +162,7 @@ export default function AboutUs() {
       ],
       qualifications: [
         "LL.B. from National Law University",
-        "LL.M. in Corporate Law",
         "Member, Bar Council of India",
-        "Certified Corporate Legal Advisor",
       ],
       calendlyUrl: 'https://calendly.com/ishita-fathomlegal/free-20-mins-consultation',
     },

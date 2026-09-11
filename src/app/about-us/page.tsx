@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Navbar } from "@/components/Navbar";
 import Image from "next/image";
 import Footer from "@/components/Footer";
@@ -24,8 +24,22 @@ import {
 } from "lucide-react";
 import emailjs from '@emailjs/browser';
 
+type TeamMember = {
+  id: string
+  name: string
+  title: string
+  image: string
+  imagePosition?: string
+  email?: string
+  bio: string[]
+  practiceAreas: string[]
+  qualifications: string[]
+  calendlyUrl?: string
+}
+
 export default function AboutUs() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
   
   // Contact form state
   const [formData, setFormData] = useState({
@@ -36,6 +50,23 @@ export default function AboutUs() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState('');
+
+  useEffect(() => {
+    if (!selectedMember) return
+
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setSelectedMember(null)
+    }
+    window.addEventListener('keydown', onKeyDown)
+
+    return () => {
+      document.body.style.overflow = previousOverflow
+      window.removeEventListener('keydown', onKeyDown)
+    }
+  }, [selectedMember])
 
   // Contact form handlers
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -105,15 +136,66 @@ export default function AboutUs() {
     },
   ];
 
-  const practiceAreas = [
-    "Corporate & Commercial Law",
-    "Startup Legal Advisory",
-    "Mergers & Acquisitions",
-    "Contract Drafting & Review",
-    "Dispute Resolution & Litigation",
-    "Intellectual Property Rights",
-    "Employment & Labor Law",
-    "Regulatory Compliance",
+  const leadership: TeamMember[] = [
+    {
+      id: 'ishita',
+      name: 'Adv. Ishita Sharma',
+      title: 'Founder & Managing Partner',
+      image: '/2024-06-ishita-fathom.jpg',
+      imagePosition: 'object-[28%_18%]',
+      email: 'assist@fathomlegal.com',
+      bio: [
+        "With over a decade of experience in corporate law and business advisory, Adv. Ishita Sharma founded Fathom Legal with a vision to provide comprehensive legal solutions that truly understand and support business growth.",
+        "She specializes in corporate structuring, startup ecosystem guidance, and strategic legal planning. Her expertise spans across various industries, making her a trusted advisor for businesses at every stage of their growth journey.",
+        "Adv. Ishita is skilled at drafting and negotiating key agreements such as Shareholders' Agreements, Joint Venture Agreements, Technology Licensing Agreements, and Employment Contracts. She has guided companies through compliance and regulatory challenges across India and advised on matters under various corporate laws, helping businesses establish a strong foothold in the market.",
+        "Her expertise extends to employment law, where she advises businesses on workplace policies, contracts, and dispute resolution. She has worked across diverse industries, including automotive, FMCG, manufacturing, real estate, healthcare, education, insurance, and financial services.",
+      ],
+      practiceAreas: [
+        "Corporate & Commercial Law",
+        "Startup Legal Advisory",
+        "Mergers & Acquisitions",
+        "Contract Drafting & Review",
+        "Dispute Resolution & Litigation",
+        "Intellectual Property Rights",
+        "Employment & Labor Law",
+        "Regulatory Compliance",
+      ],
+      qualifications: [
+        "LL.B. from National Law University",
+        "LL.M. in Corporate Law",
+        "Member, Bar Council of India",
+        "Certified Corporate Legal Advisor",
+      ],
+      calendlyUrl: 'https://calendly.com/ishita-fathomlegal/free-20-mins-consultation',
+    },
+    {
+      id: 'vamsi',
+      name: 'Adv. Vamsi Mohana',
+      title: 'Partner & Head of Operations',
+      image: '/vamsi.png',
+      imagePosition: 'object-[50%_12%]',
+      email: 'operations@fathomlegal.com',
+      bio: [
+        "Vamsi Mohana is a lawyer and policy professional with over 10 years of experience across corporate advisory, commercial law, workplace compliance, policy development and emerging technology. She holds a BA LL.B. and LL.M. from Damodaram Sanjivayya National Law University (DSNLU), Visakhapatnam. Her career has included in-house and advisory roles with Gati, K Law and Kyndryl, as well as teaching at Presidency University, Bengaluru. She later worked with Equilibrio Advisory LLP, focusing on POSH, POCSO and child protection, workplace compliance, policy development, data protection and information-security compliance.",
+        "For the past year, she has been associated with Fathom Legal Advocates & Corporate Consultants (FLACC), where she serves as Partner and Head of Operations. Her work increasingly focuses on deep tech and emerging technology, including corporate structuring, commercial transactions, data protection, Web3 and evolving regulatory frameworks.",
+        "Her interest in environmental law and policy is also personal. Having spent significant time in Dehradun over the past five years, she has developed a strong connection with Uttarakhand and its ecology. This has shaped her interest in how law and policy can balance development, conservation and community interests in environmentally sensitive regions.",
+      ],
+      practiceAreas: [
+        "Corporate Advisory",
+        "Commercial Law",
+        "Workplace Compliance",
+        "Policy Development",
+        "Data Protection",
+        "Deep Tech & Emerging Technology",
+        "Web3 & Regulatory Frameworks",
+        "Environmental Law & Policy",
+      ],
+      qualifications: [
+        "BA LL.B. from Damodaram Sanjivayya National Law University (DSNLU), Visakhapatnam",
+        "LL.M. from Damodaram Sanjivayya National Law University (DSNLU), Visakhapatnam",
+        "Partner & Head of Operations, Fathom Legal",
+      ],
+    },
   ];
 
   return (
@@ -314,133 +396,192 @@ export default function AboutUs() {
         </div>
       </section>
 
-      {/* Meet Our Founder */}
-      <section className="py-20 bg-gray-200">
-        <div className="container mx-auto px-4 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-4xl font-bold text-gray-800 mb-4">
-              Meet Our <span style={{ color: '#A5292A' }}>Founder</span>
+      {/* Leadership */}
+      <section className="py-14 sm:py-16 relative overflow-hidden bg-[#ece7e0]">
+        <div
+          className="pointer-events-none absolute inset-0 opacity-50"
+          style={{
+            backgroundImage:
+              'radial-gradient(circle at 12% 18%, rgba(165,41,42,0.12), transparent 42%), radial-gradient(circle at 88% 78%, rgba(28,26,24,0.06), transparent 45%)',
+          }}
+        />
+        <div className="container mx-auto px-4 lg:px-8 relative z-10">
+          <div className="text-center mb-10">
+            <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.28em] text-[#A5292A] mb-2.5">
+              Our people
+            </p>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-4xl font-bold text-gray-800 mb-3">
+              Meet Our <span style={{ color: '#A5292A' }}>Founder and Partner</span>
             </h2>
-            <p className="text-base sm:text-lg md:text-xl text-gray-600">
-              Leadership that drives excellence and innovation
+            <div className="mx-auto mb-3 h-px w-16 bg-[#A5292A]" />
+            <p className="text-sm sm:text-base text-gray-600">
+              Select a profile to explore their experience and practice focus
             </p>
           </div>
 
-          <div className="max-w-6xl mx-auto">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-1 items-start">
-
-              {/* Founder Image */}
-              <div className="text-center lg:text-left">
-                <div className="relative inline-block">
-                  <Image
-                    src="/2024-06-ishita-fathom.jpg"
-                    alt="Adv. Ishita Sharma"
-                    width={300}
-                    height={400}
-                    className="w-80 h-80 sm:w-96 sm:h-96 object-cover shadow-lg mx-auto lg:mx-0"
-                  />
-                </div>
-                
-                {/* Get in Touch Box */}
-                <div className="mt-8 bg-white p-6 shadow-lg border-l-4 w-80 sm:w-96 mx-auto lg:mx-0" >
-                  <h4 className="text-lg sm:text-xl md:text-xl font-bold text-gray-800 mb-4">Get In Touch</h4>
-                  <p className="text-sm sm:text-base text-gray-600 mb-4">
-                    Please feel free to contact us. We will get back to you with 1-2 business days.
-                  </p>
-                  <div className="space-y-3">
-                    <div className="flex items-center">
-                      <Mail className="w-5 h-5 text-[#A5292A] mr-3" />
-                      <span className="text-sm sm:text-base text-gray-700">assist@fathomlegal.com</span>
-                    </div>
-                    <div className="flex items-center">
-                      <Phone className="w-5 h-5 text-[#A5292A] mr-3" />
-                      <span className="text-sm sm:text-base text-gray-700">+919625206671</span>
-                    </div>
-                   
-                  </div>
-
-                  <div className="mt-8">
-                <a 
-                  href="https://calendly.com/ishita-fathomlegal/free-20-mins-consultation"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 bg-[#A5292A] border-2 border-white text-white font-semibold transition-all duration-300 group text-sm sm:text-base "
+          <div className="max-w-2xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-5 md:gap-7">
+            {leadership.map((member) => {
+              const roleLabel = member.id === 'ishita' ? 'Founder' : 'Partner'
+              return (
+                <button
+                  key={member.id}
+                  type="button"
+                  onClick={() => setSelectedMember(member)}
+                  className="group text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#A5292A] focus-visible:ring-offset-4 max-w-[280px] mx-auto w-full"
+                  aria-label={`View profile of ${member.name}`}
                 >
-                  Schedule Consultation <ArrowRight className="ml-2 w-4 h-4" />
-                </a>
-              </div>
-                </div>
-              </div>
+                  <div className="relative h-full overflow-hidden rounded-2xl bg-white shadow-[0_10px_30px_rgba(28,26,24,0.08)] transition-all duration-500 ease-out group-hover:-translate-y-2 group-hover:shadow-[0_22px_45px_rgba(28,26,24,0.16)]">
+                    <div className="absolute left-0 top-0 z-10 h-1 w-full origin-left scale-x-50 bg-[#A5292A] transition-transform duration-500 group-hover:scale-x-100" />
 
-              {/* Founder Details */}
-              <div className="space-y-6 lg:space-y-8 pr-0 lg:pr-8 mt-8 lg:mt-0">
-                {/* Header */}
-                <div>
-                  <h3 className="text-3xl sm:text-4xl lg:text-3xl font-bold text-gray-800 mb-2">
-                    Adv. Ishita Sharma
-                  </h3>
-                  <p className="text-xl sm:text-2xl lg:text-xl font-semibold mb-6" style={{ color: "#A5292A" }}>
-                    Founder & Managing Partner
-                  </p>
-                </div>
+                    <div className="relative h-48 sm:h-52 overflow-hidden bg-[#d9d2c8]">
+                      <Image
+                        src={member.image}
+                        alt={member.name}
+                        fill
+                        sizes="280px"
+                        className={`object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04] ${member.imagePosition ?? 'object-top'}`}
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-50 transition-opacity duration-500 group-hover:opacity-70" />
+                      <span className="absolute left-3 top-3 rounded-full bg-white/95 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-[#A5292A] shadow-sm backdrop-blur-sm">
+                        {roleLabel}
+                      </span>
+                    </div>
 
-                {/* Professional Profile */}
-                <div>
-                 
-                  
-                  <div className="  space-y-4 text-gray-700 ">
-                    <p className="text-sm sm:text-base md:text-lg">
-                      With over a decade of experience in corporate law and business advisory, Adv. Ishita Sharma founded Fathom Legal with a vision to provide comprehensive legal solutions that truly understand and support business growth.
-                    </p>
-
-                    <p className="text-sm sm:text-base md:text-lg">
-                      She specializes in corporate structuring, startup ecosystem guidance, and strategic legal planning. Her expertise spans across various industries, making her a trusted advisor for businesses at every stage of their growth journey.
-                    </p>
-
-                    <p className="text-sm sm:text-base md:text-lg">
-                      Adv. Ishita is skilled at drafting and negotiating key agreements such as Shareholders' Agreements, Joint Venture Agreements, Technology Licensing Agreements, and Employment Contracts. She has guided companies through compliance and regulatory challenges across India and advised on matters under various corporate laws, helping businesses establish a strong foothold in the market.
-                    </p>
-
-                    <p className="text-sm sm:text-base md:text-lg">
-                      Her expertise extends to employment law, where she advises businesses on workplace policies, contracts, and dispute resolution. She has worked across diverse industries, including automotive, FMCG, manufacturing, real estate, healthcare, education, insurance, and financial services.
-                    </p>
+                    <div className="relative px-4 py-3.5">
+                      <p className="text-gray-900 text-[15px] font-bold leading-snug tracking-tight">
+                        {member.name}
+                      </p>
+                      <p className="mt-1 text-[12px] font-medium leading-snug text-[#A5292A]">
+                        {member.title}
+                      </p>
+                      <div className="mt-3 flex items-center justify-between border-t border-gray-100 pt-3">
+                        <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-gray-500 transition-colors group-hover:text-[#A5292A]">
+                          View profile
+                        </span>
+                        <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-gray-200 text-gray-500 transition-all duration-300 group-hover:border-[#A5292A] group-hover:bg-[#A5292A] group-hover:text-white">
+                          <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-0.5" />
+                        </span>
+                      </div>
+                    </div>
                   </div>
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* Profile Modal */}
+      {selectedMember && (
+        <div
+          className="fixed inset-0 z-[80] flex items-end sm:items-center justify-center p-0 sm:p-6"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="leadership-profile-title"
+        >
+          <button
+            type="button"
+            className="absolute inset-0 bg-black/60 backdrop-blur-[2px]"
+            aria-label="Close profile"
+            onClick={() => setSelectedMember(null)}
+          />
+
+          <div className="relative z-10 w-full max-w-3xl max-h-[82vh] overflow-hidden rounded-none sm:rounded-2xl bg-white shadow-2xl">
+            <button
+              type="button"
+              onClick={() => setSelectedMember(null)}
+              className="absolute top-4 right-4 z-20 inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/95 text-gray-700 shadow-md hover:bg-gray-100"
+              aria-label="Close"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="max-h-[82vh] overflow-y-auto p-6 sm:p-8 lg:p-10 space-y-7">
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#A5292A] mb-2">
+                    {selectedMember.id === 'ishita' ? 'Founder' : 'Partner'}
+                  </p>
+                  <h3
+                    id="leadership-profile-title"
+                    className="text-2xl sm:text-3xl font-bold text-gray-800 tracking-tight pr-10"
+                  >
+                    {selectedMember.name}
+                  </h3>
+                  <p className="text-base sm:text-lg font-medium mt-1.5 text-gray-600">
+                    {selectedMember.title}
+                  </p>
+                  <div className="mt-4 h-px w-12 bg-[#A5292A]" />
                 </div>
 
-                {/* Practice Areas */}
+                <div className="space-y-4 text-gray-700">
+                  {selectedMember.bio.map((paragraph, index) => (
+                    <p key={index} className="text-sm sm:text-base leading-relaxed">
+                      {paragraph}
+                    </p>
+                  ))}
+                </div>
+
                 <div>
-                  <h4 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 mb-6 border-b-2 pb-2" style={{ borderColor: "#A5292A" }}>
+                  <h4 className="text-sm font-bold uppercase tracking-[0.14em] text-gray-800 mb-4">
                     Practice Areas
                   </h4>
-                  <div className="flex flex-wrap gap-4 gap-y-4">
-                    {practiceAreas.map((area, index) => (
-                      <div 
-                        key={index} 
-                        className="bg-gray-200 border border-black rounded-full px-3 sm:px-4 py-2 text-gray-700 text-sm sm:text-base font-medium hover:bg-[#A5292A] hover:text-white hover:border-[#A5292A] transition-colors duration-200"
+                  <div className="flex flex-wrap gap-2">
+                    {selectedMember.practiceAreas.map((area) => (
+                      <span
+                        key={area}
+                        className="rounded-full border border-[#e7e1d9] bg-[#f7f4ef] px-3.5 py-1.5 text-[12.5px] font-medium text-gray-700"
                       >
                         {area}
-                      </div>
+                      </span>
                     ))}
                   </div>
                 </div>
 
-                {/* Qualifications */}
                 <div>
-                  <h4 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 mb-6 border-b-2 pb-2" style={{ borderColor: "#A5292A" }}>
+                  <h4 className="text-sm font-bold uppercase tracking-[0.14em] text-gray-800 mb-4">
                     Qualifications
                   </h4>
-                  <ul className="space-y-3 text-gray-700">
-                    <li className="text-sm sm:text-base md:text-lg">• LL.B. from National Law University</li>
-                    <li className="text-sm sm:text-base md:text-lg">• LL.M. in Corporate Law</li>
-                    <li className="text-sm sm:text-base md:text-lg">• Member, Bar Council of India</li>
-                    <li className="text-sm sm:text-base md:text-lg">• Certified Corporate Legal Advisor</li>
+                  <ul className="space-y-2.5 text-gray-700">
+                    {selectedMember.qualifications.map((item) => (
+                      <li key={item} className="flex gap-2 text-sm sm:text-base leading-relaxed">
+                        <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#A5292A]" />
+                        {item}
+                      </li>
+                    ))}
                   </ul>
                 </div>
-              </div>
+
+                <div className="rounded-xl border border-[#e7e1d9] bg-[#faf8f5] p-5 text-center">
+                  <h4 className="text-sm font-bold uppercase tracking-[0.14em] text-gray-800 mb-3">
+                    Get In Touch
+                  </h4>
+                  <div className="space-y-2.5 mb-5">
+                    <div className="flex items-center justify-center">
+                      <Mail className="w-4 h-4 text-[#A5292A] mr-3 shrink-0" />
+                      <span className="text-sm text-gray-700">
+                        {selectedMember.email || 'assist@fathomlegal.com'}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-center">
+                      <Phone className="w-4 h-4 text-[#A5292A] mr-3 shrink-0" />
+                      <span className="text-sm text-gray-700">+919625206671</span>
+                    </div>
+                  </div>
+                  {selectedMember.calendlyUrl && (
+                    <a
+                      href={selectedMember.calendlyUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center justify-center px-5 py-2.5 bg-[#A5292A] text-white text-sm font-semibold hover:bg-[#8a2122] transition-colors"
+                    >
+                      Schedule Consultation <ArrowRight className="ml-2 w-4 h-4" />
+                    </a>
+                  )}
+                </div>
             </div>
           </div>
         </div>
-      </section>
+      )}
 
       {/* Contact Section */}
       <section 

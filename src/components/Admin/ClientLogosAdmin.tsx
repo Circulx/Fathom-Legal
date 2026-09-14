@@ -188,7 +188,6 @@ export default function ClientLogosAdmin() {
                 </label>
                 <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-[#A5292A] bg-gray-50">
                   {preview ? (
-                    // eslint-disable-next-line @next/next/no-img-element
                     <img src={preview} alt="Preview" className="max-h-36 object-contain p-2" />
                   ) : (
                     <div className="text-center text-gray-500 text-sm px-4">

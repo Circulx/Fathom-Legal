@@ -5,6 +5,7 @@ import { useSession, signOut } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import RichTextEditor from '@/components/Admin/RichTextEditor'
 import LegalPoliciesAdmin from '@/components/Admin/LegalPoliciesAdmin'
+import ClientLogosAdmin from '@/components/Admin/ClientLogosAdmin'
 import countries from 'i18n-iso-countries'
 import enLocale from 'i18n-iso-countries/langs/en.json'
 import ReactCountryFlag from 'react-country-flag'
@@ -36,7 +37,8 @@ import {
   ChevronDown,
   ChevronRight,
   Edit,
-  Scale
+  Scale,
+  Building2
 } from 'lucide-react'
 import { Navbar } from '@/components/Navbar'
 import CrmSection, { type CrmView } from '@/components/CRM/CrmSection'
@@ -507,6 +509,7 @@ export default function AdminDashboard() {
     { id: 'gallery-blogs', label: 'Gallery Blogs', icon: Newspaper },
     { id: 'thought-leadership-photos', label: 'Thought Leadership Photos', icon: Camera },
     { id: 'legal-policies', label: 'Legal Policies', icon: Scale },
+    { id: 'client-logos', label: 'Client Logos', icon: Building2 },
   ]
 
   const crmSubItems = [
@@ -2492,6 +2495,7 @@ export default function AdminDashboard() {
             )}
 
             {activeSection === 'legal-policies' && <LegalPoliciesAdmin />}
+            {activeSection === 'client-logos' && <ClientLogosAdmin />}
 
             {/* CRM Section */}
             {isCrmSection(activeSection) && (

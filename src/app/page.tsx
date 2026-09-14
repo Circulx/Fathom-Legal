@@ -25,6 +25,7 @@ import {
   Globe,
 } from "lucide-react";
 import emailjs from '@emailjs/browser';
+import ClientLogosSection from '@/components/Home/ClientLogosSection';
 
 // Custom hook for scroll animations
 const useScrollAnimation = (delay = 0) => {
@@ -585,155 +586,7 @@ export default function Home() {
   </div>
 </section>
 
-      {/* Why Choose Us Section */}
-      <section id="services" ref={whyChooseUsRef} className={`py-20 bg-white transition-all duration-1000 ${whyChooseUsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-  <div className="container mx-auto px-4">
-     <div className="mb-16">
-      {/* Two Column Layout: Heading on Left, Description on Right */}
-      <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 lg:gap-8 mb-6">
-        {/* Left Column: Subtitle and Heading */}
-        <div className="flex-1 w-full lg:w-auto">
-          <p className="text-sm sm:text-base lg:text-sm font-medium text-black uppercase mb-2 lg:mb-3 px-4 sm:px-0 lg:ml-20">WHY CHOOSE US?</p>
-          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-3xl font-bold px-4 sm:px-0 lg:ml-20">
-            <span style={{ color: "black" }}>What Sets Us </span> <span style={{ color: "#A5292A" }}>Apart?</span>
-          </h2>
-        </div>
-        
-        {/* Right Column: Contact Us Button */}
-        <div className="flex justify-end px-4 sm:px-0 lg:mr-20">
-          <Link
-            href="/contact"
-            className="flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 bg-[#A5292A] text-white font-semibold rounded-lg hover:bg-[white] hover:text-[#A5292A] transition-all duration-300 group text-sm sm:text-base shadow-md hover:shadow-lg"
-          >
-            Contact Us
-            <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
-          </Link>
-        </div>
-      </div>
-    </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-2 gap-8 px-4 sm:px-8 md:px-12 lg:px-20">
-            <div className={`bg-white p-8 rounded-xl shadow-sm border border-gray-100 transition-all duration-700 ease-out hover:shadow-lg hover:-translate-y-2 hover:border-[#A5292A] group cursor-pointer ${whyChooseUsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`} style={{ transitionDelay: '0ms' }}>
-              <div className="flex items-center mb-4">
-                <Briefcase className="w-6 h-6 mr-3 group-hover:scale-110 transition-transform duration-300" style={{ color: "#A5292A" }} />
-                <h3 className="text-lg sm:text-xl md:text-xl lg:text-lg font-bold text-gray-800 group-hover:text-[#A5292A] transition-colors duration-300">Expert Legal Team</h3>
-              </div>
-              <p className="text-base sm:text-lg md:text-xl lg:text-base text-gray-600 leading-relaxed group-hover:text-gray-700 transition-colors duration-300">
-                Our dedicated team of experienced legal professionals brings decades of combined expertise in corporate law, startup advisory, and dispute resolution to deliver exceptional results for our clients.
-              </p>
-            </div>
-
-            <div className={`bg-white p-8 rounded-xl shadow-sm border border-gray-100 transition-all duration-700 ease-out hover:shadow-lg hover:-translate-y-2 hover:border-[#A5292A] group cursor-pointer ${whyChooseUsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`} style={{ transitionDelay: '100ms' }}>
-              <div className="flex items-center mb-4">
-                <Rocket className="w-6 h-6 mr-3 group-hover:scale-110 transition-transform duration-300" style={{ color: "#A5292A" }} />
-                <h3 className="text-lg sm:text-xl md:text-xl lg:text-lg font-bold text-gray-800 group-hover:text-[#A5292A] transition-colors duration-300">Startup Specialization</h3>
-              </div>
-              <p className="text-base sm:text-lg md:text-xl lg:text-base text-gray-600 leading-relaxed group-hover:text-gray-700 transition-colors duration-300">
-                We specialize in the startup ecosystem, providing tailored legal solutions for emerging businesses, from incorporation and funding to growth strategies and compliance management.
-              </p>
-            </div>
-
-            <div className={`bg-white p-8 rounded-xl shadow-sm border border-gray-100 transition-all duration-700 ease-out hover:shadow-lg hover:-translate-y-2 hover:border-[#A5292A] group cursor-pointer ${whyChooseUsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`} style={{ transitionDelay: '200ms' }}>
-              <div className="flex items-center mb-4">
-                <Heart className="w-6 h-6 mr-3 group-hover:scale-110 transition-transform duration-300" style={{ color: "#A5292A" }} />
-                <h3 className="text-lg sm:text-xl md:text-xl lg:text-lg font-bold text-gray-800 group-hover:text-[#A5292A] transition-colors duration-300">Client-Focused Approach</h3>
-              </div>
-              <p className="text-base sm:text-lg md:text-xl lg:text-base text-gray-600 leading-relaxed group-hover:text-gray-700 transition-colors duration-300">
-                We prioritize our clients' success with a personalized approach, ethical governance, and transparent communication throughout every legal matter we handle.
-              </p>
-            </div>
-
-            <div className={`bg-white p-8 rounded-xl shadow-sm border border-gray-100 transition-all duration-700 ease-out hover:shadow-lg hover:-translate-y-2 hover:border-[#A5292A] group cursor-pointer ${whyChooseUsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`} style={{ transitionDelay: '300ms' }}>
-              <div className="flex items-center mb-4">
-                <Globe className="w-6 h-6 mr-3 group-hover:scale-110 transition-transform duration-300" style={{ color: "#A5292A" }} />
-                <h3 className="text-lg sm:text-xl md:text-xl lg:text-lg font-bold text-gray-800 group-hover:text-[#A5292A] transition-colors duration-300">Global Reach</h3>
-              </div>
-              <p className="text-base sm:text-lg md:text-xl lg:text-base text-gray-600 leading-relaxed group-hover:text-gray-700 transition-colors duration-300">
-                With nationwide and international service delivery capabilities, we provide comprehensive legal support to clients across diverse practice areas and industry verticals.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Track Record Section */}
-      <section id="track-record" ref={trackRecordRef} className={`py-16 relative overflow-hidden transition-all duration-1000 ${trackRecordVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-        {/* Background Image */}
-        <div
-          className="absolute inset-0"
-          style={{
-            backgroundImage: `url('/number tracker.jpg')`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            backgroundRepeat: "no-repeat",
-          }}
-        ></div>
-        
-        {/* Dark Overlay */}
-        <div className="absolute inset-0 bg-black/50"></div>
-        
-        {/* Content */}
-        <div className="relative z-10 w-full px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl lg:text-3xl font-bold text-white mb-4 drop-shadow-lg">Track Record Since 2016</h2>
-          </div>
-          
-          {/* Key Metrics */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 px-4 sm:px-8 md:px-12 lg:px-20">
-            <div className="text-center relative">
-              {/* Red Icon */}
-              <div className="flex justify-center mb-4">
-                <div className="w-16 h-16 rounded-full flex items-center justify-center shadow-lg" style={{ backgroundColor: "#A5292A" }}>
-                  <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
-                  </svg>
-                </div>
-              </div>
-              <div className="text-4xl md:text-5xl font-bold text-white mb-2 drop-shadow-lg">{counters.years}+</div>
-              <div className="text-white text-lg md:text-xl font-medium drop-shadow-md">Years of Service</div>
-            </div>
-            
-            <div className="text-center relative">
-              {/* Red Icon */}
-              <div className="flex justify-center mb-4">
-                <div className="w-16 h-16 rounded-full flex items-center justify-center shadow-lg" style={{ backgroundColor: "#A5292A" }}>
-                  <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                  </svg>
-                </div>
-              </div>
-              <div className="text-4xl md:text-5xl font-bold text-white mb-2 drop-shadow-lg">{counters.cases}+</div>
-              <div className="text-white text-lg md:text-xl font-medium drop-shadow-md">Cases Handled</div>
-            </div>
-            
-            <div className="text-center relative">
-              {/* Red Icon */}
-              <div className="flex justify-center mb-4">
-                <div className="w-16 h-16 rounded-full flex items-center justify-center shadow-lg" style={{ backgroundColor: "#A5292A" }}>
-                  <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M16 4c0-1.11.89-2 2-2s2 .89 2 2-.89 2-2 2-2-.89-2-2zm4 18v-6h2.5l-2.54-7.63A1.5 1.5 0 0 0 18.54 7H16c-.8 0-1.54.37-2.01.99L12 10.5 10.01 7.99A2.5 2.5 0 0 0 8 7H5.46c-.8 0-1.54.37-2.01.99L1 10.5V22h2v-6h2.5l2.54-7.63A1.5 1.5 0 0 1 9.46 7H12c.8 0 1.54.37 2.01.99L16 10.5V22h4z"/>
-                  </svg>
-                </div>
-              </div>
-              <div className="text-4xl md:text-5xl font-bold text-white mb-2 drop-shadow-lg">{counters.ipSupport}+</div>
-              <div className="text-white text-lg md:text-xl font-medium drop-shadow-md">IP Support</div>
-            </div>
-            
-            <div className="text-center relative">
-              {/* Red Icon */}
-              <div className="flex justify-center mb-4">
-                <div className="w-16 h-16 rounded-full flex items-center justify-center shadow-lg" style={{ backgroundColor: "#A5292A" }}>
-                  <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                  </svg>
-                </div>
-              </div>
-              <div className="text-4xl md:text-5xl font-bold text-white mb-2 drop-shadow-lg">{counters.successRate}%</div>
-              <div className="text-white text-lg md:text-xl font-medium drop-shadow-md">Client Success Rate</div>
-            </div>
-          </div>
-        </div>
-      </section>
+      <ClientLogosSection />
 
       {/* Featured Content */}
       <section id="services" ref={featuredContentRef} className={`py-20 bg-black transition-all duration-1000 ${featuredContentVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
@@ -949,6 +802,157 @@ export default function Home() {
   </div>
 ))}
 
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      {/* Why Choose Us Section */}
+      <section id="services" ref={whyChooseUsRef} className={`py-20 bg-white transition-all duration-1000 ${whyChooseUsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+  <div className="container mx-auto px-4">
+     <div className="mb-16">
+      {/* Two Column Layout: Heading on Left, Description on Right */}
+      <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 lg:gap-8 mb-6">
+        {/* Left Column: Subtitle and Heading */}
+        <div className="flex-1 w-full lg:w-auto">
+          <p className="text-sm sm:text-base lg:text-sm font-medium text-black uppercase mb-2 lg:mb-3 px-4 sm:px-0 lg:ml-20">WHY CHOOSE US?</p>
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-3xl font-bold px-4 sm:px-0 lg:ml-20">
+            <span style={{ color: "black" }}>What Sets Us </span> <span style={{ color: "#A5292A" }}>Apart?</span>
+          </h2>
+        </div>
+        
+        {/* Right Column: Contact Us Button */}
+        <div className="flex justify-end px-4 sm:px-0 lg:mr-20">
+          <Link
+            href="/contact"
+            className="flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 bg-[#A5292A] text-white font-semibold rounded-lg hover:bg-[white] hover:text-[#A5292A] transition-all duration-300 group text-sm sm:text-base shadow-md hover:shadow-lg"
+          >
+            Contact Us
+            <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+          </Link>
+        </div>
+      </div>
+    </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-2 gap-8 px-4 sm:px-8 md:px-12 lg:px-20">
+            <div className={`bg-white p-8 rounded-xl shadow-sm border border-gray-100 transition-all duration-700 ease-out hover:shadow-lg hover:-translate-y-2 hover:border-[#A5292A] group cursor-pointer ${whyChooseUsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`} style={{ transitionDelay: '0ms' }}>
+              <div className="flex items-center mb-4">
+                <Briefcase className="w-6 h-6 mr-3 group-hover:scale-110 transition-transform duration-300" style={{ color: "#A5292A" }} />
+                <h3 className="text-lg sm:text-xl md:text-xl lg:text-lg font-bold text-gray-800 group-hover:text-[#A5292A] transition-colors duration-300">Expert Legal Team</h3>
+              </div>
+              <p className="text-base sm:text-lg md:text-xl lg:text-base text-gray-600 leading-relaxed group-hover:text-gray-700 transition-colors duration-300">
+                Our dedicated team of experienced legal professionals brings decades of combined expertise in corporate law, startup advisory, and dispute resolution to deliver exceptional results for our clients.
+              </p>
+            </div>
+
+            <div className={`bg-white p-8 rounded-xl shadow-sm border border-gray-100 transition-all duration-700 ease-out hover:shadow-lg hover:-translate-y-2 hover:border-[#A5292A] group cursor-pointer ${whyChooseUsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`} style={{ transitionDelay: '100ms' }}>
+              <div className="flex items-center mb-4">
+                <Rocket className="w-6 h-6 mr-3 group-hover:scale-110 transition-transform duration-300" style={{ color: "#A5292A" }} />
+                <h3 className="text-lg sm:text-xl md:text-xl lg:text-lg font-bold text-gray-800 group-hover:text-[#A5292A] transition-colors duration-300">Startup Specialization</h3>
+              </div>
+              <p className="text-base sm:text-lg md:text-xl lg:text-base text-gray-600 leading-relaxed group-hover:text-gray-700 transition-colors duration-300">
+                We specialize in the startup ecosystem, providing tailored legal solutions for emerging businesses, from incorporation and funding to growth strategies and compliance management.
+              </p>
+            </div>
+
+            <div className={`bg-white p-8 rounded-xl shadow-sm border border-gray-100 transition-all duration-700 ease-out hover:shadow-lg hover:-translate-y-2 hover:border-[#A5292A] group cursor-pointer ${whyChooseUsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`} style={{ transitionDelay: '200ms' }}>
+              <div className="flex items-center mb-4">
+                <Heart className="w-6 h-6 mr-3 group-hover:scale-110 transition-transform duration-300" style={{ color: "#A5292A" }} />
+                <h3 className="text-lg sm:text-xl md:text-xl lg:text-lg font-bold text-gray-800 group-hover:text-[#A5292A] transition-colors duration-300">Client-Focused Approach</h3>
+              </div>
+              <p className="text-base sm:text-lg md:text-xl lg:text-base text-gray-600 leading-relaxed group-hover:text-gray-700 transition-colors duration-300">
+                We prioritize our clients' success with a personalized approach, ethical governance, and transparent communication throughout every legal matter we handle.
+              </p>
+            </div>
+
+            <div className={`bg-white p-8 rounded-xl shadow-sm border border-gray-100 transition-all duration-700 ease-out hover:shadow-lg hover:-translate-y-2 hover:border-[#A5292A] group cursor-pointer ${whyChooseUsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`} style={{ transitionDelay: '300ms' }}>
+              <div className="flex items-center mb-4">
+                <Globe className="w-6 h-6 mr-3 group-hover:scale-110 transition-transform duration-300" style={{ color: "#A5292A" }} />
+                <h3 className="text-lg sm:text-xl md:text-xl lg:text-lg font-bold text-gray-800 group-hover:text-[#A5292A] transition-colors duration-300">Global Reach</h3>
+              </div>
+              <p className="text-base sm:text-lg md:text-xl lg:text-base text-gray-600 leading-relaxed group-hover:text-gray-700 transition-colors duration-300">
+                With nationwide and international service delivery capabilities, we provide comprehensive legal support to clients across diverse practice areas and industry verticals.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Track Record Section */}
+      <section id="track-record" ref={trackRecordRef} className={`py-16 relative overflow-hidden transition-all duration-1000 ${trackRecordVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+        {/* Background Image */}
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: `url('/number tracker.jpg')`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundRepeat: "no-repeat",
+          }}
+        ></div>
+        
+        {/* Dark Overlay */}
+        <div className="absolute inset-0 bg-black/50"></div>
+        
+        {/* Content */}
+        <div className="relative z-10 w-full px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl lg:text-3xl font-bold text-white mb-4 drop-shadow-lg">Track Record Since 2016</h2>
+          </div>
+          
+          {/* Key Metrics */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 px-4 sm:px-8 md:px-12 lg:px-20">
+            <div className="text-center relative">
+              {/* Red Icon */}
+              <div className="flex justify-center mb-4">
+                <div className="w-16 h-16 rounded-full flex items-center justify-center shadow-lg" style={{ backgroundColor: "#A5292A" }}>
+                  <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+                  </svg>
+                </div>
+              </div>
+              <div className="text-4xl md:text-5xl font-bold text-white mb-2 drop-shadow-lg">{counters.years}+</div>
+              <div className="text-white text-lg md:text-xl font-medium drop-shadow-md">Years of Service</div>
+            </div>
+            
+            <div className="text-center relative">
+              {/* Red Icon */}
+              <div className="flex justify-center mb-4">
+                <div className="w-16 h-16 rounded-full flex items-center justify-center shadow-lg" style={{ backgroundColor: "#A5292A" }}>
+                  <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                  </svg>
+                </div>
+              </div>
+              <div className="text-4xl md:text-5xl font-bold text-white mb-2 drop-shadow-lg">{counters.cases}+</div>
+              <div className="text-white text-lg md:text-xl font-medium drop-shadow-md">Cases Handled</div>
+            </div>
+            
+            <div className="text-center relative">
+              {/* Red Icon */}
+              <div className="flex justify-center mb-4">
+                <div className="w-16 h-16 rounded-full flex items-center justify-center shadow-lg" style={{ backgroundColor: "#A5292A" }}>
+                  <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M16 4c0-1.11.89-2 2-2s2 .89 2 2-.89 2-2 2-2-.89-2-2zm4 18v-6h2.5l-2.54-7.63A1.5 1.5 0 0 0 18.54 7H16c-.8 0-1.54.37-2.01.99L12 10.5 10.01 7.99A2.5 2.5 0 0 0 8 7H5.46c-.8 0-1.54.37-2.01.99L1 10.5V22h2v-6h2.5l2.54-7.63A1.5 1.5 0 0 1 9.46 7H12c.8 0 1.54.37 2.01.99L16 10.5V22h4z"/>
+                  </svg>
+                </div>
+              </div>
+              <div className="text-4xl md:text-5xl font-bold text-white mb-2 drop-shadow-lg">{counters.ipSupport}+</div>
+              <div className="text-white text-lg md:text-xl font-medium drop-shadow-md">IP Support</div>
+            </div>
+            
+            <div className="text-center relative">
+              {/* Red Icon */}
+              <div className="flex justify-center mb-4">
+                <div className="w-16 h-16 rounded-full flex items-center justify-center shadow-lg" style={{ backgroundColor: "#A5292A" }}>
+                  <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                  </svg>
+                </div>
+              </div>
+              <div className="text-4xl md:text-5xl font-bold text-white mb-2 drop-shadow-lg">{counters.successRate}%</div>
+              <div className="text-white text-lg md:text-xl font-medium drop-shadow-md">Client Success Rate</div>
             </div>
           </div>
         </div>

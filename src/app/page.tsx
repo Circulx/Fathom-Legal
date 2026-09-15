@@ -439,7 +439,7 @@ export default function Home() {
               rel="noopener noreferrer"
               className="flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 bg-white border-2 border-white text-gray-800 font-semibold hover:bg-gray-100 transition-all duration-300 group text-sm sm:text-base"
             >
-              GET FREE CONSULTATION
+              BOOK A CONSULTATION
               <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </a>
             <Link href="/services"

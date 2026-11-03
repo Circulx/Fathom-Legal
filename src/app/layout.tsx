@@ -16,10 +16,22 @@ const playfair = Playfair_Display({
   display: 'swap',
 })
 
+const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'https://www.fathomlegal.com').replace(/\/$/, '')
+const GA_MEASUREMENT_ID = 'G-RYR0EQTYDK'
+
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: 'Fathom Legal',
   description: 'Facilitating commercial legal solutions with expertise across diverse practice areas and sectors.',
   keywords: 'legal services, corporate law, startup advisory, dispute resolution, intellectual property',
+  alternates: {
+    canonical: '/',
+  },
+  // Google Search Console verification -> renders
+  // <meta name="google-site-verification" content="8QS54ucEj5omoO7FMbg8bDc3Cavh_WABYHUpA-3KUSE" />
+  verification: {
+    google: '8QS54ucEj5omoO7FMbg8bDc3Cavh_WABYHUpA-3KUSE',
+  },
 }
 
 export default function RootLayout({
@@ -33,6 +45,23 @@ export default function RootLayout({
         <link rel="icon" type="image/png" href="/cropped-icon-red-192x192.png" />
       </head>
       <body className={`${inter.variable} ${playfair.variable} font-inter antialiased`}>
+        {/* Google tag (gtag.js) - Google Analytics 4 */}
+        <Script
+          src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
+          strategy="afterInteractive"
+        />
+        <Script
+          id="google-analytics"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', '${GA_MEASUREMENT_ID}');
+            `,
+          }}
+        />
         <Script
           id="microsoft-clarity"
           strategy="lazyOnload"

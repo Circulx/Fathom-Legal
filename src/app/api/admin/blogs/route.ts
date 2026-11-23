@@ -1,0 +1,234 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth/next'
+import { authOptions } from '@/lib/auth'
+import connectDB from '@/lib/mongodb'
+import Blog from '@/models/Blog'
+import { put } from '@vercel/blob'
+import { revalidatePath } from 'next/cache'
+
+export async function GET(request: NextRequest) {
+  try {
+    await connectDB()
+    
+    const { searchParams } = new URL(request.url)
+    const category = searchParams.get('category')
+    const search = searchParams.get('search')
+    const page = parseInt(searchParams.get('page') || '1')
+    const limit = parseInt(searchParams.get('limit') || '10')
+
+    // Build query - for admin, show only non-deleted blogs
+    let query: any = { isDeleted: { $ne: true } }
+
+    if (category && category !== 'all') {
+      query.category = category
+    }
+
+    if (search) {
+      query.$or = [
+        { title: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } },
+        { author: { $regex: search, $options: 'i' } }
+      ]
+    }
+
+    // Get blogs with pagination - newest first
+    const skip = (page - 1) * limit
+    const blogs = await Blog.find(query)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+
+    const total = await Blog.countDocuments(query)
+
+    return NextResponse.json({
+      blogs,
+      pagination: {
+        page,
+        limit,
+        total,
+        pages: Math.ceil(total / limit)
+      }
+    })
+
+  } catch (error) {
+    console.error('Get blogs error:', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
+}
+
+export async function PUT(request: NextRequest) {
+  try {
+    // Check authentication
+    const session = await getServerSession(authOptions)
+    if (!session || session.user?.role !== 'admin' && session.user?.role !== 'super-admin') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    await connectDB()
+    
+    const formData = await request.formData()
+    const id = formData.get('id') as string
+    const title = formData.get('title') as string
+    const description = formData.get('description') as string
+    const category = formData.get('category') as string
+    const content = formData.get('content') as string
+    const externalUrl = formData.get('externalUrl') as string
+    const image = formData.get('image') as File | null
+    const removeImage = formData.get('removeImage') === 'true'
+
+    if (!id) {
+      return NextResponse.json({ error: 'Blog ID is required' }, { status: 400 })
+    }
+
+    if (!title || !description || !category) {
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
+    }
+
+    // Validate that either content or externalUrl is provided
+    if (!content && !externalUrl) {
+      return NextResponse.json({ 
+        error: 'Either content or external URL must be provided' 
+      }, { status: 400 })
+    }
+
+    const blog = await Blog.findById(id)
+    
+    if (!blog) {
+      return NextResponse.json({ error: 'Blog not found' }, { status: 404 })
+    }
+
+    // Prefer a new upload over removeImage (supports remove-then-replace)
+    let imageUrl = blog.imageUrl || ''
+    const oldSlug = blog.slug
+
+    if (image && image.size > 0) {
+      const allowedTypes = [
+        'image/jpeg',
+        'image/jpg',
+        'image/png',
+        'image/gif',
+        'image/webp'
+      ]
+
+      if (!allowedTypes.includes(image.type)) {
+        return NextResponse.json({
+          error: 'Invalid image type. Only JPEG, PNG, GIF, and WebP images are allowed.'
+        }, { status: 400 })
+      }
+
+      const maxSize = 5 * 1024 * 1024
+      if (image.size > maxSize) {
+        return NextResponse.json({
+          error: 'Image size too large. Maximum size is 5MB.'
+        }, { status: 400 })
+      }
+
+      try {
+        const timestamp = Date.now()
+        const imageFileName = `blogs/${timestamp}-${image.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`
+        const imageBytes = await image.arrayBuffer()
+        const blob = await put(imageFileName, imageBytes, {
+          access: 'public',
+          contentType: image.type,
+        })
+        imageUrl = blob.url
+      } catch (fileError) {
+        console.error('File upload error:', fileError)
+        return NextResponse.json({
+          error: 'Failed to upload image. Please try again.',
+          details: fileError instanceof Error ? fileError.message : 'Unknown file error'
+        }, { status: 500 })
+      }
+    } else if (removeImage) {
+      imageUrl = ''
+    }
+
+    const oldTitle = blog.title
+
+    blog.title = title
+    blog.description = description
+    blog.category = category as 'WEBINAR' | 'INTERVIEW' | 'FEATURE' | 'ARTICLE' | 'NEWS'
+    blog.content = content || undefined
+    blog.externalUrl = externalUrl || undefined
+    blog.imageUrl = imageUrl || undefined
+
+    if (title !== oldTitle && blog.content && !blog.externalUrl) {
+      const { generateUniqueSlug } = await import('@/lib/slug')
+      const existingBlogs = await Blog.find({ slug: { $exists: true }, _id: { $ne: id } }, 'slug')
+      const existingSlugs = existingBlogs.map(b => b.slug).filter(Boolean) as string[]
+      blog.slug = await generateUniqueSlug(title, existingSlugs)
+    }
+
+    await blog.save()
+
+    try {
+      revalidatePath('/thoughtleadership')
+      revalidatePath('/api/thought-leadership-blogs')
+      if (oldSlug) revalidatePath(`/blog/${oldSlug}`)
+      if (blog.slug) revalidatePath(`/blog/${blog.slug}`)
+    } catch (revalidateError) {
+      console.warn('⚠️ Revalidation warning:', revalidateError)
+    }
+
+    return NextResponse.json({ 
+      success: true,
+      message: 'Blog updated successfully',
+      blog: {
+        id: blog._id,
+        title: blog.title,
+        category: blog.category,
+        slug: blog.slug,
+        hasContent: !!blog.content,
+        hasExternalUrl: !!blog.externalUrl
+      }
+    })
+
+  } catch (error) {
+    console.error('Update blog error:', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  try {
+    // Check authentication
+    const session = await getServerSession(authOptions)
+    if (!session || session.user?.role !== 'admin' && session.user?.role !== 'super-admin') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    await connectDB()
+    
+    const { searchParams } = new URL(request.url)
+    const id = searchParams.get('id')
+
+    if (!id) {
+      return NextResponse.json({ error: 'Blog ID is required' }, { status: 400 })
+    }
+
+    const blog = await Blog.findByIdAndUpdate(id, { 
+      isDeleted: true,
+      isActive: false 
+    })
+    
+    if (!blog) {
+      return NextResponse.json({ error: 'Blog not found' }, { status: 404 })
+    }
+
+    // Revalidate the thought leadership page to remove deleted blog immediately
+    try {
+      revalidatePath('/thoughtleadership')
+      revalidatePath('/api/thought-leadership-blogs')
+      console.log('✅ Revalidated thought leadership page after delete')
+    } catch (revalidateError) {
+      console.warn('⚠️ Revalidation warning:', revalidateError)
+    }
+
+    return NextResponse.json({ message: 'Blog deleted successfully' })
+
+  } catch (error) {
+    console.error('Delete blog error:', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
+}
+

@@ -1,13 +1,20 @@
 'use client'
 
+<<<<<<< HEAD
 import React from "react";
+=======
+import React, { useState } from "react";
+>>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
 import { Navbar } from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Link from "next/link";
 import Breadcrumb from "@/components/Breadcrumb";
+<<<<<<< HEAD
 import ContentSection from "@/components/SEO/ContentSection";
 import InlineContentBlock from "@/components/SEO/InlineContentBlock";
 import FAQSection from "@/components/SEO/FAQSection";
+=======
+>>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
 import { 
   Shield, 
   FileText, 
@@ -48,6 +55,7 @@ import {
 } from "lucide-react";
 
 export default function Web3Law() {
+<<<<<<< HEAD
   const web3Faqs = [
     {
       question: "What Are the Primary Legal Challenges in Web3?",
@@ -92,6 +100,13 @@ export default function Web3Law() {
         "Yes, but the way you structure the raise matters. Foreign investment into an Indian company must follow exchange control rules on pricing, reporting, and permitted routes. Token sales to overseas buyers raise further questions about securities laws in the buyer’s country. Many founders set up a foreign entity for fundraising and keep an Indian entity for operations, supported by properly drafted SAFE or SAFT documents.",
     },
   ];
+=======
+  const [openFAQ, setOpenFAQ] = useState<number | null>(null);
+
+  const toggleFAQ = (index: number) => {
+    setOpenFAQ(openFAQ === index ? null : index);
+  };
+>>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
 
   const handleContactClick = () => {
     window.location.href = '/contact';
@@ -120,7 +135,11 @@ export default function Web3Law() {
         <div className="container mx-auto px-4 relative z-10">
           <div className="text-center max-w-4xl mx-auto">
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-5xl font-bold text-white mb-4">
+<<<<<<< HEAD
               Web3 <span style={{ color: '#A5292A' }}>Legal</span> Services
+=======
+              Web3 <span style={{ color: '#A5292A' }}>Legal</span>
+>>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
             </h1>
             <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-3xl font-semibold text-white mb-4">
               Building Confidence & Mitigating Risk in Web3 Legal Practice
@@ -149,6 +168,7 @@ export default function Web3Law() {
         </div>
       </section>
 
+<<<<<<< HEAD
       {/* Reliable Web3 Legal Services India (new SEO section) */}
       <ContentSection
         title="Reliable Web3 Legal Services India Founders Can Trust"
@@ -159,14 +179,23 @@ export default function Web3Law() {
         ]}
       />
 
+=======
+>>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
       {/*  Web3 Legal Services */}
       <section className="py-20 bg-gray-50">
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
+<<<<<<< HEAD
             <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-4xl font-bold text-gray-800 mb-12 text-center">Comprehensive <span style={{ color: '#A5292A' }}>Web3 Legal Services</span></h2>
             <div className="flex flex-wrap justify-center gap-6">
               {/* Crypto & Digital Assets */}
               <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-2xl hover:scale-105 hover:-translate-y-2 hover:bg-[#A5292A] hover:text-white transition-all duration-300 border border-gray-100 group cursor-pointer w-full md:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)]">
+=======
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-4xl font-bold text-gray-800 mb-12 text-center">Comprehensive <span style={{ color: '#A5292A' }}>Legal Services</span></h1>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {/* Crypto & Digital Assets */}
+              <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-2xl hover:scale-105 hover:-translate-y-2 hover:bg-[#A5292A] hover:text-white transition-all duration-300 border border-gray-100 group cursor-pointer">
+>>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
                 <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4">
                   <FileCheck className="w-6 h-6 text-[#A5292A] group-hover:text-white" />
                 </div>
@@ -203,7 +232,11 @@ export default function Web3Law() {
               </div>
 
               
+<<<<<<< HEAD
               <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-2xl hover:scale-105 hover:-translate-y-2 hover:bg-[#A5292A] hover:text-white transition-all duration-300 border border-gray-100 group cursor-pointer w-full md:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)]">
+=======
+              <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-2xl hover:scale-105 hover:-translate-y-2 hover:bg-[#A5292A] hover:text-white transition-all duration-300 border border-gray-100 group cursor-pointer">
+>>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
                 <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4">
                   <Gavel className="w-6 h-6 text-[#A5292A] group-hover:text-white" />
                 </div>
@@ -240,7 +273,11 @@ export default function Web3Law() {
               </div>
 
               
+<<<<<<< HEAD
               <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-2xl hover:scale-105 hover:-translate-y-2 hover:bg-[#A5292A] hover:text-white transition-all duration-300 border border-gray-100 group cursor-pointer w-full md:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)]">
+=======
+              <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-2xl hover:scale-105 hover:-translate-y-2 hover:bg-[#A5292A] hover:text-white transition-all duration-300 border border-gray-100 group cursor-pointer">
+>>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
                 <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4">
                   <Briefcase className="w-6 h-6 text-[#A5292A] group-hover:text-white" />
                 </div>
@@ -277,7 +314,11 @@ export default function Web3Law() {
               </div>
 
           
+<<<<<<< HEAD
               <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-2xl hover:scale-105 hover:-translate-y-2 hover:bg-[#A5292A] hover:text-white transition-all duration-300 border border-gray-100 group cursor-pointer w-full md:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)]">
+=======
+              <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-2xl hover:scale-105 hover:-translate-y-2 hover:bg-[#A5292A] hover:text-white transition-all duration-300 border border-gray-100 group cursor-pointer">
+>>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
                 <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4">
                   <FileSignature className="w-6 h-6 text-[#A5292A] group-hover:text-white" />
                 </div>
@@ -314,7 +355,11 @@ export default function Web3Law() {
               </div>
 
               
+<<<<<<< HEAD
               <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-2xl hover:scale-105 hover:-translate-y-2 hover:bg-[#A5292A] hover:text-white transition-all duration-300 border border-gray-100 group cursor-pointer w-full md:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)]">
+=======
+              <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-2xl hover:scale-105 hover:-translate-y-2 hover:bg-[#A5292A] hover:text-white transition-all duration-300 border border-gray-100 group cursor-pointer">
+>>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
                 <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4">
                   <Copyright className="w-6 h-6 text-[#A5292A] group-hover:text-white" />
                 </div>
@@ -351,7 +396,11 @@ export default function Web3Law() {
               </div>
 
               
+<<<<<<< HEAD
               <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-2xl hover:scale-105 hover:-translate-y-2 hover:bg-[#A5292A] hover:text-white transition-all duration-300 border border-gray-100 group cursor-pointer w-full md:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)]">
+=======
+              <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-2xl hover:scale-105 hover:-translate-y-2 hover:bg-[#A5292A] hover:text-white transition-all duration-300 border border-gray-100 group cursor-pointer">
+>>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
                 <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4">
                   <UserCheck className="w-6 h-6 text-[#A5292A] group-hover:text-white" />
                 </div>
@@ -388,7 +437,11 @@ export default function Web3Law() {
           </div>
 
               
+<<<<<<< HEAD
               <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-2xl hover:scale-105 hover:-translate-y-2 hover:bg-[#A5292A] hover:text-white transition-all duration-300 border border-gray-100 group cursor-pointer w-full md:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)]">
+=======
+              <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-2xl hover:scale-105 hover:-translate-y-2 hover:bg-[#A5292A] hover:text-white transition-all duration-300 border border-gray-100 group cursor-pointer">
+>>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
                 <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4">
                   <Search className="w-6 h-6 text-[#A5292A] group-hover:text-white" />
                 </div>
@@ -425,6 +478,7 @@ export default function Web3Law() {
               </div>
 
               
+<<<<<<< HEAD
               </div>
 
             {/* Key Legal Considerations for Smart Contracts Under Indian Law (new SEO content) */}
@@ -439,6 +493,9 @@ export default function Web3Law() {
 
             <div className="flex flex-wrap justify-center gap-6">
               <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-2xl hover:scale-105 hover:-translate-y-2 hover:bg-[#A5292A] hover:text-white transition-all duration-300 border border-gray-100 group cursor-pointer w-full md:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)]">
+=======
+              <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-2xl hover:scale-105 hover:-translate-y-2 hover:bg-[#A5292A] hover:text-white transition-all duration-300 border border-gray-100 group cursor-pointer">
+>>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
                 <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4">
                   <FileBarChart className="w-6 h-6 text-[#A5292A] group-hover:text-white" />
                 </div>
@@ -474,6 +531,7 @@ export default function Web3Law() {
                 </ul>
               </div>
 
+<<<<<<< HEAD
               <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-2xl hover:scale-105 hover:-translate-y-2 hover:bg-[#A5292A] hover:text-white transition-all duration-300 border border-gray-100 group cursor-pointer w-full md:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)]">
                 <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4">
                   <Shield className="w-6 h-6 text-[#A5292A] group-hover:text-white" />
@@ -485,6 +543,9 @@ export default function Web3Law() {
               </div>
 
               <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-2xl hover:scale-105 hover:-translate-y-2 hover:bg-[#A5292A] hover:text-white transition-all duration-300 border border-gray-100 group cursor-pointer w-full md:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)]">
+=======
+              <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-2xl hover:scale-105 hover:-translate-y-2 hover:bg-[#A5292A] hover:text-white transition-all duration-300 border border-gray-100 group cursor-pointer">
+>>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
                 <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4">
                   <Calculator className="w-6 h-6 text-[#A5292A] group-hover:text-white" />
                 </div>
@@ -520,6 +581,7 @@ export default function Web3Law() {
                 </ul>
               </div>
 
+<<<<<<< HEAD
               <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-2xl hover:scale-105 hover:-translate-y-2 hover:bg-[#A5292A] hover:text-white transition-all duration-300 border border-gray-100 group cursor-pointer w-full md:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)]">
                 <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4">
                   <FileCheck className="w-6 h-6 text-[#A5292A] group-hover:text-white" />
@@ -531,6 +593,9 @@ export default function Web3Law() {
               </div>
 
               <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-2xl hover:scale-105 hover:-translate-y-2 hover:bg-[#A5292A] hover:text-white transition-all duration-300 border border-gray-100 group cursor-pointer w-full md:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)]">
+=======
+              <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-2xl hover:scale-105 hover:-translate-y-2 hover:bg-[#A5292A] hover:text-white transition-all duration-300 border border-gray-100 group cursor-pointer">
+>>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
                 <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4">
                   <ArrowUpRight className="w-6 h-6 text-[#A5292A] group-hover:text-white" />
                 </div>
@@ -566,7 +631,11 @@ export default function Web3Law() {
                 </ul>
               </div>
 
+<<<<<<< HEAD
               <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-2xl hover:scale-105 hover:-translate-y-2 hover:bg-[#A5292A] hover:text-white transition-all duration-300 border border-gray-100 group cursor-pointer w-full md:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)]">
+=======
+              <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-2xl hover:scale-105 hover:-translate-y-2 hover:bg-[#A5292A] hover:text-white transition-all duration-300 border border-gray-100 group cursor-pointer">
+>>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
                 <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4">
                   <FileSpreadsheet className="w-6 h-6 text-[#A5292A] group-hover:text-white" />
                 </div>
@@ -602,6 +671,7 @@ export default function Web3Law() {
                 </ul>
               </div>
 
+<<<<<<< HEAD
               </div>
 
             {/* FEMA Compliance for Crypto Businesses Made Practical (new SEO content) */}
@@ -616,6 +686,9 @@ export default function Web3Law() {
 
             <div className="flex flex-wrap justify-center gap-6">
               <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-2xl hover:scale-105 hover:-translate-y-2 hover:bg-[#A5292A] hover:text-white transition-all duration-300 border border-gray-100 group cursor-pointer w-full md:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)]">
+=======
+              <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-2xl hover:scale-105 hover:-translate-y-2 hover:bg-[#A5292A] hover:text-white transition-all duration-300 border border-gray-100 group cursor-pointer">
+>>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
                 <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4">
                   <BookOpen className="w-6 h-6 text-[#A5292A] group-hover:text-white" />
                 </div>
@@ -658,7 +731,11 @@ export default function Web3Law() {
                 </ul>
               </div>
 
+<<<<<<< HEAD
               <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-2xl hover:scale-105 hover:-translate-y-2 hover:bg-[#A5292A] hover:text-white transition-all duration-300 border border-gray-100 group cursor-pointer w-full md:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)]">
+=======
+              <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-2xl hover:scale-105 hover:-translate-y-2 hover:bg-[#A5292A] hover:text-white transition-all duration-300 border border-gray-100 group cursor-pointer">
+>>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
                 <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4">
                   <Settings className="w-6 h-6 text-[#A5292A] group-hover:text-white" />
                 </div>
@@ -694,6 +771,7 @@ export default function Web3Law() {
                 </ul>
               </div>
 
+<<<<<<< HEAD
               </div>
 
             {/* Crypto KYC Compliance India for Safer Onboarding (new SEO content) */}
@@ -708,6 +786,9 @@ export default function Web3Law() {
 
             <div className="flex flex-wrap justify-center gap-6">
               <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-2xl hover:scale-105 hover:-translate-y-2 hover:bg-[#A5292A] hover:text-white transition-all duration-300 border border-gray-100 group cursor-pointer w-full md:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)]">
+=======
+              <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-2xl hover:scale-105 hover:-translate-y-2 hover:bg-[#A5292A] hover:text-white transition-all duration-300 border border-gray-100 group cursor-pointer">
+>>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
                 <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4">
                   <Plane className="w-6 h-6 text-[#A5292A] group-hover:text-white" />
                 </div>
@@ -840,6 +921,7 @@ export default function Web3Law() {
       
 
      
+<<<<<<< HEAD
       {/* Crypto Compliance Services India (new SEO section) */}
       <ContentSection
         title="Crypto Compliance Services India for Exchanges and Startups"
@@ -862,6 +944,90 @@ export default function Web3Law() {
 
       {/* 9. Frequently Asked Questions (existing questions kept + new questions added) */}
       <FAQSection items={web3Faqs} bg="white" />
+=======
+      {/* 9. Frequently Asked Questions */}
+      <section className="py-20 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-3xl font-bold text-gray-800 mb-4 text-center">Frequently Asked Questions</h2>
+            
+            <div className="space-y-4">
+              <div className="border border-gray-200 rounded-lg">
+                <button
+                  onClick={() => toggleFAQ(0)}
+                  className="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-gray-50 transition-colors"
+                >
+                  <h3 className="text-lg  text-gray-800">What Are the Primary Legal Challenges in Web3?</h3>
+                  {openFAQ === 0 ? (
+                    <Minus className="w-6 h-6 text-[#A5292A]" />
+                  ) : (
+                    <Plus className="w-6 h-6 text-[#A5292A]" />
+                  )}
+                </button>
+                {openFAQ === 0 && (
+                  <div className="px-6 pb-4">
+                    <p className="text-gray-600 leading-relaxed mb-4">
+                      Web3 technologies present unique legal challenges that traditional legal frameworks weren't designed to address. As these technologies mature, businesses face unprecedented legal complexities that require specialized expertise. Key areas of concern include:
+                    </p>
+                    <ul className="list-disc list-inside text-gray-600 space-y-2 ml-4">
+                      <li><strong>Data privacy and security:</strong> While blockchain technology offers enhanced security through decentralization, the transparent nature of public blockchains can conflict with privacy regulations. Organizations must carefully balance transparency benefits with data protection requirements across different jurisdictions.</li>
+                      <li><strong>Intellectual property protection:</strong> The decentralized and global nature of Web3 creates challenges for traditional IP enforcement. Creators and businesses need innovative strategies to protect their intellectual property in an environment where traditional legal boundaries are less clear.</li>
+                      <li><strong>Regulatory compliance:</strong> The absence of centralized authority in Web3 systems creates uncertainty around regulatory oversight and enforcement. Businesses must proactively develop compliance strategies that anticipate evolving regulatory frameworks across multiple jurisdictions.</li>
+                    </ul>
+                  </div>
+                )}
+          </div>
+
+              <div className="border border-gray-200 rounded-lg">
+                <button
+                  onClick={() => toggleFAQ(1)}
+                  className="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-gray-50 transition-colors"
+                >
+                  <h3 className="text-lg  text-gray-800">What Constitutes Web3 Assets?</h3>
+                  {openFAQ === 1 ? (
+                    <Minus className="w-6 h-6 text-[#A5292A]" />
+                  ) : (
+                    <Plus className="w-6 h-6 text-[#A5292A]" />
+                  )}
+                </button>
+                {openFAQ === 1 && (
+                  <div className="px-6 pb-4">
+                    <p className="text-gray-600 leading-relaxed">
+                      Web3 assets encompass any digital or digitized items that leverage blockchain technology for ownership, transfer, or verification. These assets operate within decentralized networks, creating new possibilities for value creation and exchange. Examples include digital currencies, tokenized real estate, virtual collectibles, digital art, gaming assets, and even fractionalized ownership of physical assets. The flexibility of Web3 technology enables businesses to create innovative asset classes and new forms of customer engagement that weren't possible with traditional systems.
+                    </p>
+                  </div>
+                )}
+                </div>
+
+              <div className="border border-gray-200 rounded-lg">
+                <button
+                  onClick={() => toggleFAQ(2)}
+                  className="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-gray-50 transition-colors"
+                >
+                  <h3 className="text-lg  text-gray-800">What is the Current Legal Status of Cryptocurrency in India?</h3>
+                  {openFAQ === 2 ? (
+                    <Minus className="w-6 h-6 text-[#A5292A]" />
+                  ) : (
+                    <Plus className="w-6 h-6 text-[#A5292A]" />
+                  )}
+                </button>
+                {openFAQ === 2 && (
+                  <div className="px-6 pb-4">
+                    <p className="text-gray-600 leading-relaxed">
+                      India's approach to cryptocurrency regulation is currently in a transitional phase, with the government and regulatory bodies developing comprehensive frameworks for digital assets. While cryptocurrencies are not explicitly prohibited, they are not recognized as legal tender. The regulatory environment includes evolving tax policies, anti-money laundering requirements, and securities law considerations. Successfully operating in this space requires careful legal planning and ongoing compliance monitoring as regulations continue to develop.
+                    </p>
+                </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      
+
+    
+>>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
 
       <Footer />
     </div>

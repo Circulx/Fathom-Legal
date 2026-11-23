@@ -5,8 +5,11 @@ import { Navbar } from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Breadcrumb from "@/components/Breadcrumb";
 import Image from "next/image";
+<<<<<<< HEAD
 import ContentSection from "@/components/SEO/ContentSection";
 import FAQSection from "@/components/SEO/FAQSection";
+=======
+>>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
 import {
   ArrowRight,
   UserCheck,
@@ -31,12 +34,15 @@ export default function ChiefLegalOfficerService() {
         "Access seasoned legal professionals with C-suite experience without the full-time executive overhead and costs.",
     },
     {
+<<<<<<< HEAD
       icon: <Target className="w-6 h-6" />,
       title: "Cost-Effective Leadership",
       description:
         "Hiring a full-time general counsel is a major commitment for an early or mid-stage company. Engaging a fractional chief legal officer in India lets you pay for the time and expertise you actually need. You gain senior judgment on strategy, risk, and governance, while keeping fixed costs low. As your workload grows, the engagement can expand with you, so legal support always matches the stage of your business.",
     },
     {
+=======
+>>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
       icon: <Shield className="w-6 h-6" />,
       title: "Strategic Risk Management",
       description:
@@ -83,6 +89,7 @@ export default function ChiefLegalOfficerService() {
     "Vendor & Partner Relations",
   ];
 
+<<<<<<< HEAD
   const cloFaqs = [
     {
       question: "What does a Chief Legal Officer do for a business?",
@@ -111,6 +118,8 @@ export default function ChiefLegalOfficerService() {
     },
   ];
 
+=======
+>>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
@@ -135,7 +144,11 @@ export default function ChiefLegalOfficerService() {
         <div className="container mx-auto px-4 relative z-10">
           <div className="text-center max-w-4xl mx-auto">
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 sm:mb-8 md:mb-10">
+<<<<<<< HEAD
               <span style={{ color: '#A5292A' }}>Virtual Chief Legal Officer Services</span>
+=======
+              <span style={{ color: '#A5292A' }}>Chief Legal Officer Service</span>
+>>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
             </h1>
             
             {/* Breadcrumb */}
@@ -152,6 +165,7 @@ export default function ChiefLegalOfficerService() {
         </div>
       </section>
 
+<<<<<<< HEAD
       {/* Chief Legal Officer Services in India (new SEO section) */}
       <ContentSection
         title="Chief Legal Officer Services in India for Growing Businesses"
@@ -162,12 +176,18 @@ export default function ChiefLegalOfficerService() {
         ]}
       />
 
+=======
+>>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
       {/* Key Benefits Section */}
       <section className="py-12 sm:py-16 lg:py-20 bg-gray-100">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12 sm:mb-16">
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-4 sm:mb-6">
+<<<<<<< HEAD
               Why Choose Our<span style={{ color: '#A5292A' }}> Chief Legal Officer Services?</span>
+=======
+              Why Choose Our<span style={{ color: '#A5292A' }}> CLO Service?</span>
+>>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
             </h2>
             <p className="text-base sm:text-lg text-gray-600 max-w-3xl mx-auto">
               Our Chief Legal Officer service delivers executive-level legal
@@ -209,13 +229,21 @@ export default function ChiefLegalOfficerService() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center lg:ml-20 lg:mr-20">
             <div>
               <h2 className="text-3xl sm:text-4xl font-bold text-gray-800 mb-4 sm:mb-6 ">
+<<<<<<< HEAD
                 Strategic Legal Leadership for <span style={{ color: '#A5292A' }}>Growing Businesses</span>
+=======
+                <span style={{ color: '#A5292A' }}>Comprehensive Legal Leadership</span>
+>>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
               </h2>
               <p className="text-sm sm:text-base text-gray-600 mb-6 sm:mb-8 leading-relaxed">
                 Our CLO service covers all aspects of legal leadership and
                 strategic guidance. From day-to-day compliance matters to
                 complex corporate transactions, we provide the expertise your
+<<<<<<< HEAD
                 business needs to thrive in today’s competitive landscape.
+=======
+                business needs to thrive in today's competitive landscape.
+>>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
               </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
@@ -238,6 +266,7 @@ export default function ChiefLegalOfficerService() {
               </div>
             </div>
             <div className="lg:pl-8">
+<<<<<<< HEAD
               {/* Virtual CLO for remote-first teams (new SEO content) */}
               <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-4 sm:mb-6">
                 Virtual Chief Legal Officer Services for <span style={{ color: '#A5292A' }}>Remote-First Teams</span>
@@ -245,6 +274,8 @@ export default function ChiefLegalOfficerService() {
               <p className="text-sm sm:text-base text-gray-600 mb-6 sm:mb-8 leading-relaxed">
                 Many businesses now work across cities, time zones, and countries. Our virtual chief legal officer services in India are designed for this reality. We join your meetings, review documents, and advise your leaders through video calls, secure document sharing, and regular check-ins. You receive the same quality of legal leadership as an in-house executive, with the convenience of access whenever decisions need to be made.
               </p>
+=======
+>>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
               <div
                 className="p-6 sm:p-8 rounded-2xl text-white"
                 style={{ backgroundColor: "#A5292A" }}
@@ -286,7 +317,11 @@ export default function ChiefLegalOfficerService() {
         <div className="container mx-auto px-4">
           <div className="text-center mb-12 sm:mb-16">
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-800 mb-4 sm:mb-6">
+<<<<<<< HEAD
               How Our <span style={{ color: '#A5292A' }}>CLO Service</span> Works?
+=======
+              How Our <span style={{ color: '#A5292A' }}>CLO Service</span> Works
+>>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
             </h2>
             <p className="text-base sm:text-lg text-gray-600 max-w-3xl mx-auto">
               We follow a structured approach to integrate seamlessly with your
@@ -362,6 +397,7 @@ export default function ChiefLegalOfficerService() {
         </div>
       </section>
 
+<<<<<<< HEAD
       {/* Startup Legal Advisory alongside CLO (new SEO section) */}
       <ContentSection
         title="Startup Legal Advisory Services in India Alongside Your CLO"
@@ -372,6 +408,8 @@ export default function ChiefLegalOfficerService() {
         ]}
       />
 
+=======
+>>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
       {/* Call to Action Section */}
       <section className="py-12 sm:py-16 lg:py-2" style={{ backgroundColor: "#A5292A" }}>
         <div className="container mx-auto px-4">
@@ -397,9 +435,12 @@ export default function ChiefLegalOfficerService() {
         </div>
       </section>
 
+<<<<<<< HEAD
       {/* Frequently Asked Questions (new SEO section) */}
       <FAQSection items={cloFaqs} bg="light" />
 
+=======
+>>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
       {/* Footer */}
       <Footer />
       

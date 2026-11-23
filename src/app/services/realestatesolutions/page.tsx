@@ -5,9 +5,12 @@ import { Navbar } from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Breadcrumb from "@/components/Breadcrumb";
 import Image from "next/image";
+<<<<<<< HEAD
 import ContentSection from "@/components/SEO/ContentSection";
 import InlineContentBlock from "@/components/SEO/InlineContentBlock";
 import FAQSection from "@/components/SEO/FAQSection";
+=======
+>>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
 import {
   ArrowRight,
   Home,
@@ -33,12 +36,15 @@ const RealEstateSolutions = () => {
       icon: <FileText className="w-6 h-6" />,
     },
     {
+<<<<<<< HEAD
       title: "Property Due Diligence Services in India Before You Buy",
       description:
         "Paying for a property with a hidden defect can lead to years of litigation. Our property due diligence services in India examine the chain of ownership, encumbrances, pending cases, approvals, and statutory dues. We also check whether the seller has the right to sell and whether the land use matches the intended purpose. You receive a clear report that helps you decide whether to proceed, negotiate, or walk away.",
       icon: <Eye className="w-6 h-6" />,
     },
     {
+=======
+>>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
       title: "Survey and Boundary Verification",
       description:
         "Our team conducts property surveys and addresses boundary disputes with neighboring properties, ensuring clarity and legal compliance.",
@@ -57,6 +63,7 @@ const RealEstateSolutions = () => {
       icon: <Scale className="w-6 h-6" />,
     },
     {
+<<<<<<< HEAD
       title: "Agreement to Sell in India: Locking in Terms Before Transfer",
       description:
         "An agreement to sell in India records the price, payment schedule, possession date, and conditions that both parties must meet before the final transfer. It is a promise to sell and does not by itself transfer ownership. We draft clauses on advance payments, delays, default, and refund, so buyers and sellers each know what happens if the deal changes. Careful drafting at this stage prevents disputes later.",
@@ -69,6 +76,8 @@ const RealEstateSolutions = () => {
       icon: <Home className="w-6 h-6" />,
     },
     {
+=======
+>>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
       title: "Taxation",
       description:
         "Navigating tax regulations in your home country and the country where your property is located can be complex. We provide expert advice on property taxation, including property tax documentation and financial audits.",
@@ -76,6 +85,7 @@ const RealEstateSolutions = () => {
     },
   ];
 
+<<<<<<< HEAD
   const realEstateFaqs = [
     {
       question: "Can I manage and protect my Indian property while living abroad?",
@@ -104,6 +114,8 @@ const RealEstateSolutions = () => {
     },
   ];
 
+=======
+>>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
@@ -150,6 +162,7 @@ const RealEstateSolutions = () => {
         </div>
       </section>
 
+<<<<<<< HEAD
       {/* Real Estate Legal Services in India (new SEO section) */}
       <ContentSection
         title="Real Estate Legal Services in India for Owners and Investors"
@@ -160,6 +173,8 @@ const RealEstateSolutions = () => {
         ]}
       />
 
+=======
+>>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
       {/* Property Disputes and Management Sections */}
       <section className="bg-gray-50">
         <div className="container mx-auto px-4 sm:px-8 lg:px-16 xl:px-24 2xl:px-32">
@@ -202,6 +217,7 @@ const RealEstateSolutions = () => {
             </div>
           </div>
 
+<<<<<<< HEAD
           {/* Property Legal Consultant in India (new SEO content) */}
           <InlineContentBlock
             className="my-8"
@@ -213,6 +229,10 @@ const RealEstateSolutions = () => {
 
           {/* Property Management */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 items-stretch">
+=======
+          {/* Property Management */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 items-stretch mt-8 lg:mt-0">
+>>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
             {/* Image */}
             <div className="lg:order-1 h-64 sm:h-80 lg:h-auto">
               <Image
@@ -249,6 +269,7 @@ const RealEstateSolutions = () => {
               </a>
             </div>
           </div>
+<<<<<<< HEAD
 
           {/* Leave and Licence Agreement in India (new SEO content) */}
           <InlineContentBlock
@@ -258,6 +279,8 @@ const RealEstateSolutions = () => {
               "When you allow someone to occupy your property without giving up possession rights, the agreement must be clear. A leave and licence agreement in India sets out the licence fee, deposit, duration, permitted use, and conditions for ending the arrangement. It is commonly used for shorter periods, and stamp duty and registration requirements vary by state. We prepare the document, explain your obligations, and help you register it where required.",
             ]}
           />
+=======
+>>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
         </div>
       </section>
 
@@ -375,6 +398,7 @@ const RealEstateSolutions = () => {
         </div>
       </section>
 
+<<<<<<< HEAD
       {/* Property Transfer Legal Services in India (new SEO section) */}
       <ContentSection
         title="Property Transfer Legal Services in India: Sale, Gift, and Succession"
@@ -385,6 +409,8 @@ const RealEstateSolutions = () => {
         ]}
       />
 
+=======
+>>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
       {/* Trust & Value Section */}
       <section className="py-12 sm:py-16 lg:py-20 bg-white">
         <div className="container mx-auto px-4">
@@ -494,9 +520,12 @@ const RealEstateSolutions = () => {
         </div>
       </section>
 
+<<<<<<< HEAD
       {/* Frequently Asked Questions (new SEO section) */}
       <FAQSection items={realEstateFaqs} bg="white" />
 
+=======
+>>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
       {/* Footer */}
       <Footer />
     </div>

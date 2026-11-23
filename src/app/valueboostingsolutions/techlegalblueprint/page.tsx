@@ -5,9 +5,12 @@ import { Navbar } from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Breadcrumb from "@/components/Breadcrumb";
 import Image from "next/image";
+<<<<<<< HEAD
 import ContentSection from "@/components/SEO/ContentSection";
 import ContentGrid from "@/components/SEO/ContentGrid";
 import FAQSection from "@/components/SEO/FAQSection";
+=======
+>>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
 import {
   ArrowRight,
   Code,
@@ -73,6 +76,7 @@ export default function TechLegalBlueprint() {
     "Risk assessment and mitigation protocols",
   ];
 
+<<<<<<< HEAD
   // New SEO content blocks (from the page-content document)
   const complianceBlocks = [
     {
@@ -158,6 +162,8 @@ export default function TechLegalBlueprint() {
     },
   ];
 
+=======
+>>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
@@ -205,7 +211,11 @@ export default function TechLegalBlueprint() {
           <div className="grid lg:grid-cols-2 gap-12 items-center px-4 sm:px-8 md:px-12 lg:px-20">
             <div>
               <h2 className="text-3xl font-bold mb-8 text-gray-800">
+<<<<<<< HEAD
                 Strategic Blueprint for<span style={{ color: '#A5292A' }}> Legal and Business Success</span>
+=======
+                A Blueprint for<span style={{ color: '#A5292A' }}> Tech Success</span>
+>>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
               </h2>
               <p className="text-base text-gray-600 mb-8 leading-relaxed">
                 Navigating the complex legal landscape of the tech industry can
@@ -251,6 +261,7 @@ export default function TechLegalBlueprint() {
         </div>
       </section>
 
+<<<<<<< HEAD
       {/* Tech Legal Advisory Services (new SEO section) */}
       <ContentSection
         title="Tech Legal Advisory Services for Product-Led Companies"
@@ -261,6 +272,8 @@ export default function TechLegalBlueprint() {
         ]}
       />
 
+=======
+>>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
       {/* Key Features Section */}
       <section className="py-20" style={{ backgroundColor: "#FAFAFA" }}>
         <div className="container mx-auto px-4">
@@ -301,18 +314,25 @@ export default function TechLegalBlueprint() {
         </div>
       </section>
 
+<<<<<<< HEAD
       {/* DPDPA audit, DPDP Act compliance & legal services for tech startups (new SEO sections) */}
       <ContentGrid blocks={complianceBlocks} bg="white" />
 
       {/* Technology licensing, tokenization, SaaS & escrow (new SEO sections) */}
       <ContentGrid blocks={contractBlocks} bg="light" />
 
+=======
+>>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
       {/* Why Choose Tech Legal Blueprint */}
       <section className="py-20 bg-white">
         <div className="container mx-auto ">
           <div className="text-center mb-16">
             <h2 className="text-3xl font-bold text-gray-800 mb-6">
+<<<<<<< HEAD
               Why Tech Companies <span style={{ color: '#A5292A' }}>Trust </span>Our Legal Expertise?
+=======
+              Why Tech Companies <span style={{ color: '#A5292A' }}>Trust </span>Our Blueprint
+>>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
             </h2>
            
           </div>
@@ -373,6 +393,7 @@ export default function TechLegalBlueprint() {
         </div>
       </section>
 
+<<<<<<< HEAD
       {/* IT Legal Consultant in India (new SEO section) */}
       <ContentSection
         title="IT Legal Consultant in India for Day-to-Day Guidance"
@@ -383,6 +404,8 @@ export default function TechLegalBlueprint() {
         ]}
       />
 
+=======
+>>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
       {/* Process Section */}
       <section className="py-20" style={{ backgroundColor: "#FAFAFA" }}>
         <div className="container mx-auto px-4">
@@ -453,7 +476,11 @@ export default function TechLegalBlueprint() {
               <p className="text-lg text-white/90 mb-8 leading-relaxed">
                 Let our Tech Legal Blueprint service provide you with the
                 comprehensive legal framework your technology company needs to
+<<<<<<< HEAD
                 thrive in today’s digital landscape.
+=======
+                thrive in today's digital landscape.
+>>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
               </p>
               <button
                 className="bg-white text-[#A5292A] px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-100 transition-all inline-flex items-center"
@@ -467,9 +494,12 @@ export default function TechLegalBlueprint() {
         </div>
       </section>
 
+<<<<<<< HEAD
       {/* Frequently Asked Questions (new SEO section) */}
       <FAQSection items={techFaqs} bg="light" />
 
+=======
+>>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
       {/* Footer */}
       <Footer />
     </div>

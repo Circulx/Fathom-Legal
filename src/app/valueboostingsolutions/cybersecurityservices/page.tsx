@@ -5,6 +5,8 @@ import { Navbar } from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Breadcrumb from "@/components/Breadcrumb";
 import Image from "next/image";
+import ContentSection from "@/components/SEO/ContentSection";
+import FAQSection from "@/components/SEO/FAQSection";
 import {
   ArrowRight,
   Shield,
@@ -31,11 +33,25 @@ export default function CybersecurityServices() {
       imageUrl: "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
     },
     {
+      icon: <CheckCircle className="w-6 h-6" />,
+      title: "Cybersecurity Compliance Consulting in India From Audit to Action",
+      description:
+        "Knowing your gaps is only useful if you act on them. Our cybersecurity compliance consulting in India turns assessment findings into a prioritized action plan. We rank issues by legal and business risk, suggest realistic timelines, and help your technical and management teams work from the same checklist. This keeps remediation focused and helps you show customers and partners that security is taken seriously.",
+      imageUrl: ""
+    },
+    {
       icon: <Lock className="w-6 h-6" />,
       title: "Data Protection Compliance",
       description:
         "Ensure compliance with GDPR, CCPA, and other data protection regulations through comprehensive privacy frameworks and legal documentation.",
       imageUrl: "https://images.unsplash.com/photo-1555949963-aa79dcee981c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
+    },
+    {
+      icon: <Eye className="w-6 h-6" />,
+      title: "Data Privacy Legal Advisory in India for Lawful Data Handling",
+      description:
+        "Privacy duties apply from the moment you collect personal information. Our data privacy legal advisory in India covers consent, notices, purpose limitation, retention, and the rights of individuals whose data you hold. We also advise on how Indian requirements interact with foreign laws if you serve overseas users. Clear documentation helps you answer customer questions and regulator inquiries with confidence.",
+      imageUrl: ""
     },
     {
       icon: <FileText className="w-6 h-6" />,
@@ -65,6 +81,13 @@ export default function CybersecurityServices() {
         "Prepare for potential security breaches with detailed incident response plans and legal frameworks for data breach notifications.",
       imageUrl: "https://images.unsplash.com/photo-1555949963-aa79dcee981c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
     },
+    {
+      icon: <AlertTriangle className="w-6 h-6" />,
+      title: "Cybersecurity Legal Compliance in India for Breach Readiness",
+      description:
+        "When a breach occurs, time is limited and every decision has legal consequences. Our work on cybersecurity legal compliance in India includes defining who must be informed, what must be reported, and how evidence should be preserved. We build these steps into your incident response plan and test them through simple exercises. Because reporting requirements are updated from time to time, we confirm the current rules before finalizing your procedures.",
+      imageUrl: ""
+    },
   ];
 
   const complianceAreas = [
@@ -85,6 +108,34 @@ export default function CybersecurityServices() {
     "Employee training and awareness programs",
     "Vendor risk assessment and management",
     "Incident response planning and legal support",
+  ];
+
+  const cyberFaqs = [
+    {
+      question: "Why does a business need legal support for cybersecurity?",
+      answer:
+        "Security failures can trigger regulatory action, customer claims, and contract disputes. Legal support helps you meet reporting duties, draft sound policies, manage vendor risk, and respond to an incident in a way that limits liability.",
+    },
+    {
+      question: "What is included in a security assessment?",
+      answer:
+        "It evaluates your current security posture, identifies vulnerabilities, and checks your compliance status against relevant laws and standards. You receive actionable recommendations ranked by risk, so you know what to address first.",
+    },
+    {
+      question: "Which frameworks and standards can you help with?",
+      answer:
+        "We support GDPR, CCPA, SOC 2 Type II, ISO 27001, HIPAA, PCI DSS, and the NIST Cybersecurity Framework, along with industry-specific regulations. The right set depends on your sector, customers, and where you operate.",
+    },
+    {
+      question: "What should an incident response plan contain?",
+      answer:
+        "A good plan names a response team, defines what counts as an incident, sets escalation and communication steps, explains legal and regulatory notification duties, and describes how evidence is preserved. It should be tested and updated regularly.",
+    },
+    {
+      question: "Do employees really need cybersecurity training?",
+      answer:
+        "Yes. Many incidents begin with human error, such as phishing or weak passwords. Regular awareness programs reduce this risk, and they also show regulators and customers that you take reasonable steps to protect data.",
+    },
   ];
 
   return (
@@ -172,6 +223,16 @@ export default function CybersecurityServices() {
         </div>
       </section>
 
+      {/* Cybersecurity Legal Services in India (new SEO section) */}
+      <ContentSection
+        title="Cybersecurity Legal Services in India for Modern Businesses"
+        highlight="Cybersecurity Legal Services in India"
+        bg="light"
+        paragraphs={[
+          "A security incident quickly becomes a legal problem, involving customer claims, regulator questions, and contract disputes. Our cybersecurity legal services in India help you prepare for these risks before they arise. We review your contracts, policies, and internal practices, and we explain your legal duties in plain language. When something goes wrong, you already have documented procedures and a team that knows your business.",
+        ]}
+      />
+
       {/* Services Section */}
       <section className="py-20" style={{ backgroundColor: "#FAFAFA" }}>
         <div className="container mx-auto px-4">
@@ -188,13 +249,14 @@ export default function CybersecurityServices() {
             {services.map((service, index) => (
               <div
                 key={index}
-                className="bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden group hover:scale-105 relative transform hover:-translate-y-2"
+                className="bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden group hover:scale-105 relative transform hover:-translate-y-2 flex flex-col"
                 style={{
                   transformStyle: 'preserve-3d',
                   transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)'
                 }}
               >
-                {/* Image Section */}
+                {/* Image Section (new content cards without an image show the icon on a brand-red band) */}
+                {service.imageUrl ? (
                 <div className="relative h-48 overflow-hidden">
                   <div
                     className="absolute inset-0 bg-cover bg-center"
@@ -210,9 +272,14 @@ export default function CybersecurityServices() {
                     style={{ backgroundColor: 'rgba(0, 0, 0, 0.6)' }}
                   ></div>
                 </div>
+                ) : (
+                <div className="relative h-20 flex items-center px-8 text-white" style={{ backgroundColor: '#A5292A' }}>
+                  {service.icon}
+                </div>
+                )}
                 
                 {/* Text Section */}
-                <div className="p-8" style={{ backgroundColor: '#2D2D2D' }}>
+                <div className="p-8 flex-1" style={{ backgroundColor: '#2D2D2D' }}>
                   <h3 className="text-xl font-bold text-white mb-4">
                     {service.title}
                   </h3>
@@ -283,6 +350,22 @@ export default function CybersecurityServices() {
                     </h4>
                     <p className="text-gray-600">
                       Unique combination of cybersecurity knowledge and legal compliance expertise.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Your Trusted Cyber Law Firm in India (new SEO content) */}
+                <div className="flex items-start">
+                  <div
+                    className="w-3 h-3 rounded-full mr-4 mt-2 flex-shrink-0"
+                    style={{ backgroundColor: "#A5292A" }}
+                  ></div>
+                  <div>
+                    <h3 className="font-semibold text-gray-800 mb-2">
+                      Your Trusted Cyber Law Firm in India
+                    </h3>
+                    <p className="text-gray-600">
+                      Technology risk calls for lawyers who understand both statutes and systems. As a cyber law firm in India, we advise on information technology law, contracts with technology providers, and the legal side of cyber incidents. We work alongside your security and IT teams, so legal advice reflects how your systems actually operate. This practical approach saves time and leads to solutions your teams can implement.
                     </p>
                   </div>
                 </div>
@@ -418,6 +501,9 @@ export default function CybersecurityServices() {
           </div>
         </div>
       </section>
+
+      {/* Frequently Asked Questions (new SEO section) */}
+      <FAQSection items={cyberFaqs} bg="light" />
 
       {/* Footer */}
       <Footer />

@@ -1,10 +1,13 @@
 'use client'
 
-import React, { useState } from "react";
+import React from "react";
 import { Navbar } from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Link from "next/link";
 import Breadcrumb from "@/components/Breadcrumb";
+import ContentSection from "@/components/SEO/ContentSection";
+import InlineContentBlock from "@/components/SEO/InlineContentBlock";
+import FAQSection from "@/components/SEO/FAQSection";
 import { 
   Shield, 
   FileText, 
@@ -45,11 +48,50 @@ import {
 } from "lucide-react";
 
 export default function Web3Law() {
-  const [openFAQ, setOpenFAQ] = useState<number | null>(null);
-
-  const toggleFAQ = (index: number) => {
-    setOpenFAQ(openFAQ === index ? null : index);
-  };
+  const web3Faqs = [
+    {
+      question: "What Are the Primary Legal Challenges in Web3?",
+      answer: (
+        <>
+          <p className="text-gray-600 leading-relaxed mb-4">
+            Web3 technologies present unique legal challenges that traditional legal frameworks weren't designed to address. As these technologies mature, businesses face unprecedented legal complexities that require specialized expertise. Key areas of concern include:
+          </p>
+          <ul className="list-disc list-inside text-gray-600 space-y-2 ml-4">
+            <li><strong>Data privacy and security:</strong> While blockchain technology offers enhanced security through decentralization, the transparent nature of public blockchains can conflict with privacy regulations. Organizations must carefully balance transparency benefits with data protection requirements across different jurisdictions.</li>
+            <li><strong>Intellectual property protection:</strong> The decentralized and global nature of Web3 creates challenges for traditional IP enforcement. Creators and businesses need innovative strategies to protect their intellectual property in an environment where traditional legal boundaries are less clear.</li>
+            <li><strong>Regulatory compliance:</strong> The absence of centralized authority in Web3 systems creates uncertainty around regulatory oversight and enforcement. Businesses must proactively develop compliance strategies that anticipate evolving regulatory frameworks across multiple jurisdictions.</li>
+          </ul>
+        </>
+      ),
+      schemaAnswer:
+        "Web3 technologies present unique legal challenges that traditional legal frameworks weren't designed to address. Key areas of concern include data privacy and security, intellectual property protection, and regulatory compliance across multiple jurisdictions.",
+    },
+    {
+      question: "What Constitutes Web3 Assets?",
+      answer:
+        "Web3 assets encompass any digital or digitized items that leverage blockchain technology for ownership, transfer, or verification. These assets operate within decentralized networks, creating new possibilities for value creation and exchange. Examples include digital currencies, tokenized real estate, virtual collectibles, digital art, gaming assets, and even fractionalized ownership of physical assets. The flexibility of Web3 technology enables businesses to create innovative asset classes and new forms of customer engagement that weren't possible with traditional systems.",
+    },
+    {
+      question: "What is the Current Legal Status of Cryptocurrency in India?",
+      answer:
+        "India's approach to cryptocurrency regulation is currently in a transitional phase, with the government and regulatory bodies developing comprehensive frameworks for digital assets. While cryptocurrencies are not explicitly prohibited, they are not recognized as legal tender. The regulatory environment includes evolving tax policies, anti-money laundering requirements, and securities law considerations. Successfully operating in this space requires careful legal planning and ongoing compliance monitoring as regulations continue to develop.",
+    },
+    {
+      question: "How Are Virtual Digital Assets Taxed in India?",
+      answer:
+        "Virtual digital assets are subject to a dedicated tax regime. Gains on transfer are generally taxed at a flat rate, with limited scope to set off losses, and certain transfers attract tax deducted at source. Businesses also need to consider GST on related services. Because rates and rules are updated periodically, confirm the current position with a tax professional before filing.",
+    },
+    {
+      question: "Is a DAO Legally Recognised in India?",
+      answer:
+        "India has no specific law that recognises DAOs as a distinct legal form. Without a recognised structure, members may face uncertainty about liability, contracts, and taxation. Many projects therefore use a company or foundation in a suitable jurisdiction as a legal wrapper around the DAO. A lawyer can help you choose a structure that protects participants and fits your governance model.",
+    },
+    {
+      question: "Can an Indian Web3 Startup Raise Funds from Overseas Investors?",
+      answer:
+        "Yes, but the way you structure the raise matters. Foreign investment into an Indian company must follow exchange control rules on pricing, reporting, and permitted routes. Token sales to overseas buyers raise further questions about securities laws in the buyer’s country. Many founders set up a foreign entity for fundraising and keep an Indian entity for operations, supported by properly drafted SAFE or SAFT documents.",
+    },
+  ];
 
   const handleContactClick = () => {
     window.location.href = '/contact';
@@ -78,7 +120,7 @@ export default function Web3Law() {
         <div className="container mx-auto px-4 relative z-10">
           <div className="text-center max-w-4xl mx-auto">
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-5xl font-bold text-white mb-4">
-              Web3 <span style={{ color: '#A5292A' }}>Legal</span>
+              Web3 <span style={{ color: '#A5292A' }}>Legal</span> Services
             </h1>
             <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-3xl font-semibold text-white mb-4">
               Building Confidence & Mitigating Risk in Web3 Legal Practice
@@ -107,14 +149,24 @@ export default function Web3Law() {
         </div>
       </section>
 
+      {/* Reliable Web3 Legal Services India (new SEO section) */}
+      <ContentSection
+        title="Reliable Web3 Legal Services India Founders Can Trust"
+        highlight="Web3 Legal Services India"
+        bg="white"
+        paragraphs={[
+          "Blockchain businesses move fast, and regulation rarely waits. Our Web3 legal services India practice helps founders, protocols, exchanges, and investors understand what the law expects before they launch, raise funds, or expand. We translate technical models into clear legal positions, flag risks early, and build compliance structures that regulators and investors can follow. From incorporation to token design and ongoing supervision, you get one team that understands both decentralized technology and Indian regulation.",
+        ]}
+      />
+
       {/*  Web3 Legal Services */}
       <section className="py-20 bg-gray-50">
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-4xl font-bold text-gray-800 mb-12 text-center">Comprehensive <span style={{ color: '#A5292A' }}>Legal Services</span></h1>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-4xl font-bold text-gray-800 mb-12 text-center">Comprehensive <span style={{ color: '#A5292A' }}>Web3 Legal Services</span></h2>
+            <div className="flex flex-wrap justify-center gap-6">
               {/* Crypto & Digital Assets */}
-              <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-2xl hover:scale-105 hover:-translate-y-2 hover:bg-[#A5292A] hover:text-white transition-all duration-300 border border-gray-100 group cursor-pointer">
+              <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-2xl hover:scale-105 hover:-translate-y-2 hover:bg-[#A5292A] hover:text-white transition-all duration-300 border border-gray-100 group cursor-pointer w-full md:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)]">
                 <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4">
                   <FileCheck className="w-6 h-6 text-[#A5292A] group-hover:text-white" />
                 </div>
@@ -151,7 +203,7 @@ export default function Web3Law() {
               </div>
 
               
-              <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-2xl hover:scale-105 hover:-translate-y-2 hover:bg-[#A5292A] hover:text-white transition-all duration-300 border border-gray-100 group cursor-pointer">
+              <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-2xl hover:scale-105 hover:-translate-y-2 hover:bg-[#A5292A] hover:text-white transition-all duration-300 border border-gray-100 group cursor-pointer w-full md:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)]">
                 <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4">
                   <Gavel className="w-6 h-6 text-[#A5292A] group-hover:text-white" />
                 </div>
@@ -188,7 +240,7 @@ export default function Web3Law() {
               </div>
 
               
-              <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-2xl hover:scale-105 hover:-translate-y-2 hover:bg-[#A5292A] hover:text-white transition-all duration-300 border border-gray-100 group cursor-pointer">
+              <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-2xl hover:scale-105 hover:-translate-y-2 hover:bg-[#A5292A] hover:text-white transition-all duration-300 border border-gray-100 group cursor-pointer w-full md:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)]">
                 <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4">
                   <Briefcase className="w-6 h-6 text-[#A5292A] group-hover:text-white" />
                 </div>
@@ -225,7 +277,7 @@ export default function Web3Law() {
               </div>
 
           
-              <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-2xl hover:scale-105 hover:-translate-y-2 hover:bg-[#A5292A] hover:text-white transition-all duration-300 border border-gray-100 group cursor-pointer">
+              <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-2xl hover:scale-105 hover:-translate-y-2 hover:bg-[#A5292A] hover:text-white transition-all duration-300 border border-gray-100 group cursor-pointer w-full md:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)]">
                 <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4">
                   <FileSignature className="w-6 h-6 text-[#A5292A] group-hover:text-white" />
                 </div>
@@ -262,7 +314,7 @@ export default function Web3Law() {
               </div>
 
               
-              <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-2xl hover:scale-105 hover:-translate-y-2 hover:bg-[#A5292A] hover:text-white transition-all duration-300 border border-gray-100 group cursor-pointer">
+              <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-2xl hover:scale-105 hover:-translate-y-2 hover:bg-[#A5292A] hover:text-white transition-all duration-300 border border-gray-100 group cursor-pointer w-full md:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)]">
                 <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4">
                   <Copyright className="w-6 h-6 text-[#A5292A] group-hover:text-white" />
                 </div>
@@ -299,7 +351,7 @@ export default function Web3Law() {
               </div>
 
               
-              <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-2xl hover:scale-105 hover:-translate-y-2 hover:bg-[#A5292A] hover:text-white transition-all duration-300 border border-gray-100 group cursor-pointer">
+              <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-2xl hover:scale-105 hover:-translate-y-2 hover:bg-[#A5292A] hover:text-white transition-all duration-300 border border-gray-100 group cursor-pointer w-full md:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)]">
                 <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4">
                   <UserCheck className="w-6 h-6 text-[#A5292A] group-hover:text-white" />
                 </div>
@@ -336,7 +388,7 @@ export default function Web3Law() {
           </div>
 
               
-              <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-2xl hover:scale-105 hover:-translate-y-2 hover:bg-[#A5292A] hover:text-white transition-all duration-300 border border-gray-100 group cursor-pointer">
+              <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-2xl hover:scale-105 hover:-translate-y-2 hover:bg-[#A5292A] hover:text-white transition-all duration-300 border border-gray-100 group cursor-pointer w-full md:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)]">
                 <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4">
                   <Search className="w-6 h-6 text-[#A5292A] group-hover:text-white" />
                 </div>
@@ -373,7 +425,20 @@ export default function Web3Law() {
               </div>
 
               
-              <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-2xl hover:scale-105 hover:-translate-y-2 hover:bg-[#A5292A] hover:text-white transition-all duration-300 border border-gray-100 group cursor-pointer">
+              </div>
+
+            {/* Key Legal Considerations for Smart Contracts Under Indian Law (new SEO content) */}
+            <InlineContentBlock
+              headingLevel="h2"
+              className="my-10 rounded-lg"
+              title="Key Legal Considerations for Smart Contracts Under Indian Law"
+              paragraphs={[
+                "Code can execute an agreement, but it does not automatically make that agreement enforceable. Questions about smart contracts under Indian law usually turn on offer, acceptance, consideration, and consent, along with how disputes will be resolved. Our legal audit checks whether contract logic matches the commercial deal, whether liability is allocated fairly, and whether upgrade and dispute clauses are workable. The result is a smart contract that performs technically and stands up legally.",
+              ]}
+            />
+
+            <div className="flex flex-wrap justify-center gap-6">
+              <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-2xl hover:scale-105 hover:-translate-y-2 hover:bg-[#A5292A] hover:text-white transition-all duration-300 border border-gray-100 group cursor-pointer w-full md:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)]">
                 <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4">
                   <FileBarChart className="w-6 h-6 text-[#A5292A] group-hover:text-white" />
                 </div>
@@ -409,7 +474,17 @@ export default function Web3Law() {
                 </ul>
               </div>
 
-              <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-2xl hover:scale-105 hover:-translate-y-2 hover:bg-[#A5292A] hover:text-white transition-all duration-300 border border-gray-100 group cursor-pointer">
+              <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-2xl hover:scale-105 hover:-translate-y-2 hover:bg-[#A5292A] hover:text-white transition-all duration-300 border border-gray-100 group cursor-pointer w-full md:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)]">
+                <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4">
+                  <Shield className="w-6 h-6 text-[#A5292A] group-hover:text-white" />
+                </div>
+                <h3 className="text-lg sm:text-xl md:text-xl font-semibold text-gray-800 group-hover:text-white mb-4">FIU-IND Registration Consultant for Virtual Asset Service Providers</h3>
+                <p className="text-gray-600 group-hover:text-white text-sm sm:text-base">
+                  Registration is the first step, and ongoing reporting is where many platforms struggle. As your FIU-IND registration consultant, we prepare the application, design anti-money laundering and counter-terrorist financing programs, and set up reporting systems with proper audit trails. We also help you appoint responsible officers and train staff, so your compliance function works in daily practice and not only on paper.
+                </p>
+              </div>
+
+              <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-2xl hover:scale-105 hover:-translate-y-2 hover:bg-[#A5292A] hover:text-white transition-all duration-300 border border-gray-100 group cursor-pointer w-full md:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)]">
                 <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4">
                   <Calculator className="w-6 h-6 text-[#A5292A] group-hover:text-white" />
                 </div>
@@ -445,7 +520,17 @@ export default function Web3Law() {
                 </ul>
               </div>
 
-              <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-2xl hover:scale-105 hover:-translate-y-2 hover:bg-[#A5292A] hover:text-white transition-all duration-300 border border-gray-100 group cursor-pointer">
+              <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-2xl hover:scale-105 hover:-translate-y-2 hover:bg-[#A5292A] hover:text-white transition-all duration-300 border border-gray-100 group cursor-pointer w-full md:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)]">
+                <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4">
+                  <FileCheck className="w-6 h-6 text-[#A5292A] group-hover:text-white" />
+                </div>
+                <h3 className="text-lg sm:text-xl md:text-xl font-semibold text-gray-800 group-hover:text-white mb-4">VDA Compliance Services India for Tax and Reporting</h3>
+                <p className="text-gray-600 group-hover:text-white text-sm sm:text-base">
+                  Tax treatment of virtual digital assets affects pricing, record keeping, and customer communication. Our VDA compliance services India help you map taxable events, maintain accurate transaction records, and meet reporting and withholding duties. We also prepare you for notices and assessments by organizing documentation early. Because rules and rates are updated from time to time, we confirm the current position before advising on any filing.
+                </p>
+              </div>
+
+              <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-2xl hover:scale-105 hover:-translate-y-2 hover:bg-[#A5292A] hover:text-white transition-all duration-300 border border-gray-100 group cursor-pointer w-full md:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)]">
                 <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4">
                   <ArrowUpRight className="w-6 h-6 text-[#A5292A] group-hover:text-white" />
                 </div>
@@ -481,7 +566,7 @@ export default function Web3Law() {
                 </ul>
               </div>
 
-              <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-2xl hover:scale-105 hover:-translate-y-2 hover:bg-[#A5292A] hover:text-white transition-all duration-300 border border-gray-100 group cursor-pointer">
+              <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-2xl hover:scale-105 hover:-translate-y-2 hover:bg-[#A5292A] hover:text-white transition-all duration-300 border border-gray-100 group cursor-pointer w-full md:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)]">
                 <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4">
                   <FileSpreadsheet className="w-6 h-6 text-[#A5292A] group-hover:text-white" />
                 </div>
@@ -517,7 +602,20 @@ export default function Web3Law() {
                 </ul>
               </div>
 
-              <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-2xl hover:scale-105 hover:-translate-y-2 hover:bg-[#A5292A] hover:text-white transition-all duration-300 border border-gray-100 group cursor-pointer">
+              </div>
+
+            {/* FEMA Compliance for Crypto Businesses Made Practical (new SEO content) */}
+            <InlineContentBlock
+              headingLevel="h2"
+              className="my-10 rounded-lg"
+              title="FEMA Compliance for Crypto Businesses Made Practical"
+              paragraphs={[
+                "Foreign investment, overseas customers, and international token sales all raise exchange control questions. Our approach to FEMA compliance for crypto businesses begins with mapping every cross-border flow, including inward investment, outward remittances, and token transfers. We then structure transactions, prepare required reports, and coordinate with banks and authorities where approvals are needed. This helps you raise capital and serve global users without regulatory surprises.",
+              ]}
+            />
+
+            <div className="flex flex-wrap justify-center gap-6">
+              <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-2xl hover:scale-105 hover:-translate-y-2 hover:bg-[#A5292A] hover:text-white transition-all duration-300 border border-gray-100 group cursor-pointer w-full md:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)]">
                 <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4">
                   <BookOpen className="w-6 h-6 text-[#A5292A] group-hover:text-white" />
                 </div>
@@ -560,7 +658,7 @@ export default function Web3Law() {
                 </ul>
               </div>
 
-              <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-2xl hover:scale-105 hover:-translate-y-2 hover:bg-[#A5292A] hover:text-white transition-all duration-300 border border-gray-100 group cursor-pointer">
+              <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-2xl hover:scale-105 hover:-translate-y-2 hover:bg-[#A5292A] hover:text-white transition-all duration-300 border border-gray-100 group cursor-pointer w-full md:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)]">
                 <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4">
                   <Settings className="w-6 h-6 text-[#A5292A] group-hover:text-white" />
                 </div>
@@ -596,7 +694,20 @@ export default function Web3Law() {
                 </ul>
               </div>
 
-              <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-2xl hover:scale-105 hover:-translate-y-2 hover:bg-[#A5292A] hover:text-white transition-all duration-300 border border-gray-100 group cursor-pointer">
+              </div>
+
+            {/* Crypto KYC Compliance India for Safer Onboarding (new SEO content) */}
+            <InlineContentBlock
+              headingLevel="h2"
+              className="my-10 rounded-lg"
+              title="Crypto KYC Compliance India for Safer Onboarding"
+              paragraphs={[
+                "Strong onboarding protects both your users and your licence to operate. Our crypto KYC compliance India support includes drafting customer due diligence policies, defining verification workflows, and setting rules for monitoring suspicious activity. We align these policies with your privacy obligations, so you collect only the data you need and store it securely. Clear procedures also make audits and regulator queries far easier to handle.",
+              ]}
+            />
+
+            <div className="flex flex-wrap justify-center gap-6">
+              <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-2xl hover:scale-105 hover:-translate-y-2 hover:bg-[#A5292A] hover:text-white transition-all duration-300 border border-gray-100 group cursor-pointer w-full md:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)]">
                 <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4">
                   <Plane className="w-6 h-6 text-[#A5292A] group-hover:text-white" />
                 </div>
@@ -729,88 +840,28 @@ export default function Web3Law() {
       
 
      
-      {/* 9. Frequently Asked Questions */}
-      <section className="py-20 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-3xl font-bold text-gray-800 mb-4 text-center">Frequently Asked Questions</h2>
-            
-            <div className="space-y-4">
-              <div className="border border-gray-200 rounded-lg">
-                <button
-                  onClick={() => toggleFAQ(0)}
-                  className="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-gray-50 transition-colors"
-                >
-                  <h3 className="text-lg  text-gray-800">What Are the Primary Legal Challenges in Web3?</h3>
-                  {openFAQ === 0 ? (
-                    <Minus className="w-6 h-6 text-[#A5292A]" />
-                  ) : (
-                    <Plus className="w-6 h-6 text-[#A5292A]" />
-                  )}
-                </button>
-                {openFAQ === 0 && (
-                  <div className="px-6 pb-4">
-                    <p className="text-gray-600 leading-relaxed mb-4">
-                      Web3 technologies present unique legal challenges that traditional legal frameworks weren't designed to address. As these technologies mature, businesses face unprecedented legal complexities that require specialized expertise. Key areas of concern include:
-                    </p>
-                    <ul className="list-disc list-inside text-gray-600 space-y-2 ml-4">
-                      <li><strong>Data privacy and security:</strong> While blockchain technology offers enhanced security through decentralization, the transparent nature of public blockchains can conflict with privacy regulations. Organizations must carefully balance transparency benefits with data protection requirements across different jurisdictions.</li>
-                      <li><strong>Intellectual property protection:</strong> The decentralized and global nature of Web3 creates challenges for traditional IP enforcement. Creators and businesses need innovative strategies to protect their intellectual property in an environment where traditional legal boundaries are less clear.</li>
-                      <li><strong>Regulatory compliance:</strong> The absence of centralized authority in Web3 systems creates uncertainty around regulatory oversight and enforcement. Businesses must proactively develop compliance strategies that anticipate evolving regulatory frameworks across multiple jurisdictions.</li>
-                    </ul>
-                  </div>
-                )}
-          </div>
+      {/* Crypto Compliance Services India (new SEO section) */}
+      <ContentSection
+        title="Crypto Compliance Services India for Exchanges and Startups"
+        highlight="Crypto Compliance Services India"
+        bg="white"
+        paragraphs={[
+          "Compliance works best when it is built into the product from day one. Our crypto compliance services India cover licensing checks, policy frameworks, internal controls, and regular compliance reviews tailored to your business model. We monitor regulatory developments and update your processes as expectations change, so your team can focus on growth instead of chasing every new notice.",
+        ]}
+      />
 
-              <div className="border border-gray-200 rounded-lg">
-                <button
-                  onClick={() => toggleFAQ(1)}
-                  className="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-gray-50 transition-colors"
-                >
-                  <h3 className="text-lg  text-gray-800">What Constitutes Web3 Assets?</h3>
-                  {openFAQ === 1 ? (
-                    <Minus className="w-6 h-6 text-[#A5292A]" />
-                  ) : (
-                    <Plus className="w-6 h-6 text-[#A5292A]" />
-                  )}
-                </button>
-                {openFAQ === 1 && (
-                  <div className="px-6 pb-4">
-                    <p className="text-gray-600 leading-relaxed">
-                      Web3 assets encompass any digital or digitized items that leverage blockchain technology for ownership, transfer, or verification. These assets operate within decentralized networks, creating new possibilities for value creation and exchange. Examples include digital currencies, tokenized real estate, virtual collectibles, digital art, gaming assets, and even fractionalized ownership of physical assets. The flexibility of Web3 technology enables businesses to create innovative asset classes and new forms of customer engagement that weren't possible with traditional systems.
-                    </p>
-                  </div>
-                )}
-                </div>
+      {/* FIU-IND registration question (new SEO section) */}
+      <ContentSection
+        title="Do Crypto Businesses in India Need to Register with FIU-IND?"
+        highlight="Register with FIU-IND?"
+        bg="light"
+        paragraphs={[
+          "Yes, in most cases. Businesses that exchange, transfer, safekeep, or administer virtual digital assets for others are treated as reporting entities under India’s anti-money laundering law. Meeting PMLA/FIU-IND compliance in India usually means registering with the Financial Intelligence Unit, appointing a compliance officer, verifying customers, keeping records, and filing required reports. Whether your model falls within scope depends on your activities, so a legal review before launch is wise.",
+        ]}
+      />
 
-              <div className="border border-gray-200 rounded-lg">
-                <button
-                  onClick={() => toggleFAQ(2)}
-                  className="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-gray-50 transition-colors"
-                >
-                  <h3 className="text-lg  text-gray-800">What is the Current Legal Status of Cryptocurrency in India?</h3>
-                  {openFAQ === 2 ? (
-                    <Minus className="w-6 h-6 text-[#A5292A]" />
-                  ) : (
-                    <Plus className="w-6 h-6 text-[#A5292A]" />
-                  )}
-                </button>
-                {openFAQ === 2 && (
-                  <div className="px-6 pb-4">
-                    <p className="text-gray-600 leading-relaxed">
-                      India's approach to cryptocurrency regulation is currently in a transitional phase, with the government and regulatory bodies developing comprehensive frameworks for digital assets. While cryptocurrencies are not explicitly prohibited, they are not recognized as legal tender. The regulatory environment includes evolving tax policies, anti-money laundering requirements, and securities law considerations. Successfully operating in this space requires careful legal planning and ongoing compliance monitoring as regulations continue to develop.
-                    </p>
-                </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      
-
-    
+      {/* 9. Frequently Asked Questions (existing questions kept + new questions added) */}
+      <FAQSection items={web3Faqs} bg="white" />
 
       <Footer />
     </div>

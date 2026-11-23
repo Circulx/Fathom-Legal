@@ -6,6 +6,8 @@ import { Navbar } from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Breadcrumb from "@/components/Breadcrumb";
 import Image from "next/image";
+import InlineContentBlock from "@/components/SEO/InlineContentBlock";
+import FAQSection from "@/components/SEO/FAQSection";
 
 const IntellectualProperty = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -80,6 +82,56 @@ const IntellectualProperty = () => {
         "We provide strategic advice and guidance on IP matters, helping clients develop long-term IP strategies aligned with business objectives, evaluate competitive IP landscapes, and manage IP-related risks and opportunities.",
       image:
         "https://images.unsplash.com/photo-1553484771-371a605b060b?ixlib=rb-4.0.3&auto=format&fit=crop&w=2340&q=80",
+    },
+  ];
+
+  // New SEO content shown after specific service blocks (key = index in services)
+  const contentAfterService: Record<number, { title: string; paragraphs: string[] }> = {
+    0: {
+      title: "Trademark Registration Lawyer in India: From Search to Registration",
+      paragraphs: [
+        "A name that cannot be protected is a risky foundation for a brand. A trademark registration lawyer in India checks availability first, selects the right class for your goods or services, and prepares a strong application. We then monitor the file, answer examination objections, and handle any opposition. Careful preparation reduces delays and improves the chances of securing lasting rights.",
+      ],
+    },
+    8: {
+      title: "Intellectual Property Law Firm in India Ready to Enforce Your Rights",
+      paragraphs: [
+        "Rights have value only when they can be enforced. As an intellectual property law firm in India, we handle infringement notices, settlement talks, and court proceedings for owners whose work is copied or misused. We collect evidence, assess the strength of your claim, and advise on whether negotiation or litigation is the better route. This focused approach helps you act quickly and protect your reputation.",
+      ],
+    },
+    9: {
+      title: "Intellectual Property Consultant in India for Long-Term Planning",
+      paragraphs: [
+        "Good IP decisions are made early and revisited as the business changes. As an intellectual property consultant in India, we help you decide which assets to register first, which to keep confidential, and which to license or sell. We also review competitors’ filings to find gaps and risks. The result is a roadmap that matches your budget, market plans, and growth stage.",
+      ],
+    },
+  };
+
+  const ipFaqs = [
+    {
+      question: "What is the difference between a trademark, a copyright, and a patent?",
+      answer:
+        "A trademark protects names, logos, and other signs that identify your goods or services. Copyright protects original creative works such as writing, music, art, and software code. A patent protects new inventions. Each has different registration rules, duration, and enforcement options.",
+    },
+    {
+      question: "Is registration necessary to protect my brand?",
+      answer:
+        "Registration is not always required to claim some protection, but it gives you stronger and clearer rights. A registered mark is much easier to enforce against copycats, and it supports licensing, fundraising, and sale of the business.",
+    },
+    {
+      question: "How long does trademark protection last?",
+      answer:
+        "A registered trademark in India is generally valid for ten years and can be renewed for further periods. You must keep renewing on time and use the mark properly to maintain your rights.",
+    },
+    {
+      question: "How can I protect trade secrets that cannot be registered?",
+      answer:
+        "Trade secrets are protected through confidentiality. Use well-drafted non-disclosure agreements, limit access to sensitive information, adopt internal policies, and keep records of what is confidential. If a secret is misused, these steps support legal action.",
+    },
+    {
+      question: "What should I do if someone copies my brand or content?",
+      answer:
+        "Preserve evidence such as screenshots, dates, and links, then contact a lawyer promptly. Depending on the facts, the response may include a cease and desist letter, a takedown notice, negotiation, or court proceedings.",
     },
   ];
 
@@ -169,6 +221,14 @@ const IntellectualProperty = () => {
                 copyright protection, trade secret safeguarding, IP licensing,
                 portfolio management, and domain name disputes.
               </p>
+
+              {/* Intellectual Property Legal Services in India (new SEO content) */}
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mt-10 mb-6 sm:mb-8">
+                <span style={{ color: '#A5292A' }}>Intellectual Property Legal Services in India</span> That Protect Business Value
+              </h2>
+              <p className="text-sm sm:text-base text-gray-800 leading-relaxed">
+                Names, logos, software, designs, and know-how often make up most of a company’s worth. Our intellectual property legal services in India help you identify what you own, secure it properly, and use it to grow. We begin by listing your assets and the risks around them, then recommend registrations, contracts, and internal policies. This gives you a clear, practical plan instead of a collection of unrelated filings.
+              </p>
             </div>
           </div>
         </div>
@@ -178,11 +238,11 @@ const IntellectualProperty = () => {
       <section className="py-12 sm:py-16 lg:py-20 bg-gray-50">
         <div className="container mx-auto px-4 sm:px-8 lg:px-12 xl:px-16">
           {services.map((service, index) => (
+            <React.Fragment key={index}>
             <div
-              key={index}
               id={`service-${index}`}
               className={`grid grid-cols-1 lg:grid-cols-2 gap-0 items-stretch mb-8 lg:mb-0  lg:ml-20 lg:mr-20 ${
-                index !== services.length - 1 ? "lg:mb-8" : ""
+                index !== services.length - 1 || contentAfterService[index] ? "lg:mb-8" : ""
               }`}
             >
               {/* Text Content with Dark Red Background */}
@@ -215,6 +275,16 @@ const IntellectualProperty = () => {
                 />
               </div>
             </div>
+
+            {/* New SEO content block placed after this service */}
+            {contentAfterService[index] && (
+              <InlineContentBlock
+                title={contentAfterService[index].title}
+                paragraphs={contentAfterService[index].paragraphs}
+                className={`mb-8 lg:ml-20 lg:mr-20 ${index === services.length - 1 ? "lg:mb-0" : ""}`}
+              />
+            )}
+            </React.Fragment>
           ))}
         </div>
       </section>
@@ -244,6 +314,9 @@ const IntellectualProperty = () => {
           </div>
         </div>
       </section>
+
+      {/* Frequently Asked Questions (new SEO section) */}
+      <FAQSection items={ipFaqs} bg="light" />
 
       {/* Footer */}
       <Footer />

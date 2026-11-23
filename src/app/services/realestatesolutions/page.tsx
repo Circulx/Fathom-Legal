@@ -5,6 +5,9 @@ import { Navbar } from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Breadcrumb from "@/components/Breadcrumb";
 import Image from "next/image";
+import ContentSection from "@/components/SEO/ContentSection";
+import InlineContentBlock from "@/components/SEO/InlineContentBlock";
+import FAQSection from "@/components/SEO/FAQSection";
 import {
   ArrowRight,
   Home,
@@ -30,6 +33,12 @@ const RealEstateSolutions = () => {
       icon: <FileText className="w-6 h-6" />,
     },
     {
+      title: "Property Due Diligence Services in India Before You Buy",
+      description:
+        "Paying for a property with a hidden defect can lead to years of litigation. Our property due diligence services in India examine the chain of ownership, encumbrances, pending cases, approvals, and statutory dues. We also check whether the seller has the right to sell and whether the land use matches the intended purpose. You receive a clear report that helps you decide whether to proceed, negotiate, or walk away.",
+      icon: <Eye className="w-6 h-6" />,
+    },
+    {
       title: "Survey and Boundary Verification",
       description:
         "Our team conducts property surveys and addresses boundary disputes with neighboring properties, ensuring clarity and legal compliance.",
@@ -48,10 +57,50 @@ const RealEstateSolutions = () => {
       icon: <Scale className="w-6 h-6" />,
     },
     {
+      title: "Agreement to Sell in India: Locking in Terms Before Transfer",
+      description:
+        "An agreement to sell in India records the price, payment schedule, possession date, and conditions that both parties must meet before the final transfer. It is a promise to sell and does not by itself transfer ownership. We draft clauses on advance payments, delays, default, and refund, so buyers and sellers each know what happens if the deal changes. Careful drafting at this stage prevents disputes later.",
+      icon: <FileCheck className="w-6 h-6" />,
+    },
+    {
+      title: "Rent Agreement Drafting That Protects Landlords and Tenants",
+      description:
+        "Informal tenancy arrangements frequently lead to disagreements over rent, repairs, and eviction. Our rent agreement drafting covers rent and escalation, security deposit, maintenance duties, lock-in periods, notice terms, and handover conditions. We tailor the document to your property type and city requirements. A balanced, well-recorded agreement keeps the relationship smooth and gives you a firm basis if a dispute arises.",
+      icon: <Home className="w-6 h-6" />,
+    },
+    {
       title: "Taxation",
       description:
         "Navigating tax regulations in your home country and the country where your property is located can be complex. We provide expert advice on property taxation, including property tax documentation and financial audits.",
       icon: <Calculator className="w-6 h-6" />,
+    },
+  ];
+
+  const realEstateFaqs = [
+    {
+      question: "Can I manage and protect my Indian property while living abroad?",
+      answer:
+        "Yes. With a power of attorney or a trusted representative, along with regular reporting, you can handle verification, tenant matters, repairs, and legal issues remotely. Choose your representative carefully and define their powers clearly in writing.",
+    },
+    {
+      question: "Which documents should I check before buying a property?",
+      answer:
+        "Review the title deed, previous sale deeds, encumbrance certificate, approved building plan, tax receipts, and any society or builder approvals. A lawyer’s title search confirms that ownership is clear and that no claims or litigation affect the property.",
+    },
+    {
+      question: "What should I do if my property is encroached upon?",
+      answer:
+        "Collect proof of ownership, survey records, and photographs, then consult a lawyer promptly. Depending on the facts, the response may involve a legal notice, a survey, negotiation, or a civil suit to protect your rights.",
+    },
+    {
+      question: "How do NRIs plan inheritance for property in India?",
+      answer:
+        "A properly drafted will is the most important step, often supported by trusts for larger estates. Succession can involve probate and tax compliance, so early planning reduces delays and family disputes.",
+    },
+    {
+      question: "Do tenancy and sale documents need to be registered?",
+      answer:
+        "Requirements depend on the type of document, its duration, and the state in which the property is located. Registration and stamp duty rules vary, so a lawyer should confirm what applies before you sign.",
     },
   ];
 
@@ -101,6 +150,16 @@ const RealEstateSolutions = () => {
         </div>
       </section>
 
+      {/* Real Estate Legal Services in India (new SEO section) */}
+      <ContentSection
+        title="Real Estate Legal Services in India for Owners and Investors"
+        highlight="Real Estate Legal Services in India"
+        bg="white"
+        paragraphs={[
+          "Property is often the largest asset a person or business owns, so mistakes in paperwork can be costly. Our real estate legal services in India cover title checks, documentation, tenancy arrangements, transfers, and disputes. We explain each step in plain language and flag risks before you commit money. Whether you live in India or abroad, you get one team that handles the legal details from start to finish.",
+        ]}
+      />
+
       {/* Property Disputes and Management Sections */}
       <section className="bg-gray-50">
         <div className="container mx-auto px-4 sm:px-8 lg:px-16 xl:px-24 2xl:px-32">
@@ -143,8 +202,17 @@ const RealEstateSolutions = () => {
             </div>
           </div>
 
+          {/* Property Legal Consultant in India (new SEO content) */}
+          <InlineContentBlock
+            className="my-8"
+            title="Property Legal Consultant in India for Early, Practical Advice"
+            paragraphs={[
+              "Many disputes grow from small problems that were ignored. A property legal consultant in India can review your documents, assess your position, and suggest the right response before a conflict reaches court. We advise on notices, negotiation, and settlement, and we prepare cases carefully when litigation is unavoidable. Early guidance often saves time, money, and relationships.",
+            ]}
+          />
+
           {/* Property Management */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 items-stretch mt-8 lg:mt-0">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 items-stretch">
             {/* Image */}
             <div className="lg:order-1 h-64 sm:h-80 lg:h-auto">
               <Image
@@ -181,6 +249,15 @@ const RealEstateSolutions = () => {
               </a>
             </div>
           </div>
+
+          {/* Leave and Licence Agreement in India (new SEO content) */}
+          <InlineContentBlock
+            className="mt-8 mb-12 sm:mb-16 lg:mb-20"
+            title="Leave and Licence Agreement in India for Safe Occupancy"
+            paragraphs={[
+              "When you allow someone to occupy your property without giving up possession rights, the agreement must be clear. A leave and licence agreement in India sets out the licence fee, deposit, duration, permitted use, and conditions for ending the arrangement. It is commonly used for shorter periods, and stamp duty and registration requirements vary by state. We prepare the document, explain your obligations, and help you register it where required.",
+            ]}
+          />
         </div>
       </section>
 
@@ -298,6 +375,16 @@ const RealEstateSolutions = () => {
         </div>
       </section>
 
+      {/* Property Transfer Legal Services in India (new SEO section) */}
+      <ContentSection
+        title="Property Transfer Legal Services in India: Sale, Gift, and Succession"
+        highlight="Property Transfer Legal Services in India"
+        bg="white"
+        paragraphs={[
+          "Property can pass to a new owner through sale, gift, will, or inheritance, and each route has its own legal steps. Our property transfer legal services in India include drafting transfer documents, calculating stamp duty, arranging registration, and updating municipal and revenue records. We also guide families through succession paperwork. Proper completion of these steps ensures the new owner’s rights are recognized and protected.",
+        ]}
+      />
+
       {/* Trust & Value Section */}
       <section className="py-12 sm:py-16 lg:py-20 bg-white">
         <div className="container mx-auto px-4">
@@ -406,6 +493,9 @@ const RealEstateSolutions = () => {
           </div>
         </div>
       </section>
+
+      {/* Frequently Asked Questions (new SEO section) */}
+      <FAQSection items={realEstateFaqs} bg="white" />
 
       {/* Footer */}
       <Footer />

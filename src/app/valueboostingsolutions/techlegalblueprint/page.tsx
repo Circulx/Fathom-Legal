@@ -5,6 +5,9 @@ import { Navbar } from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Breadcrumb from "@/components/Breadcrumb";
 import Image from "next/image";
+import ContentSection from "@/components/SEO/ContentSection";
+import ContentGrid from "@/components/SEO/ContentGrid";
+import FAQSection from "@/components/SEO/FAQSection";
 import {
   ArrowRight,
   Code,
@@ -70,6 +73,91 @@ export default function TechLegalBlueprint() {
     "Risk assessment and mitigation protocols",
   ];
 
+  // New SEO content blocks (from the page-content document)
+  const complianceBlocks = [
+    {
+      title: "DPDPA Audit in India to Identify Gaps Early",
+      highlight: "DPDPA Audit in India",
+      paragraphs: [
+        "An audit shows you where your practices differ from what the law expects. In a DPDPA audit in India, we examine consent flows, data retention, access controls, and breach response procedures. You receive a clear report that ranks gaps by risk and recommends practical fixes. Many companies use the findings to prepare for customer questionnaires, investor reviews, and regulator queries.",
+      ],
+    },
+    {
+      title: "Getting Started with DPDP Act Compliance in India",
+      highlight: "DPDP Act Compliance in India",
+      paragraphs: [
+        "India’s Digital Personal Data Protection Act, 2023 places clear duties on businesses that handle personal data. Our approach to DPDP Act compliance in India begins with mapping what data you collect, why you collect it, and where it is stored. We then draft consent notices, privacy policies, and grievance processes that match your product. Because implementation timelines and rules continue to develop, we confirm the current position before finalizing your plan.",
+      ],
+      subBlocks: [
+        {
+          title: "Legal Services for Tech Startups",
+          paragraphs: [
+            "A seed-stage team and a growth-stage company face very different legal needs. We offer legal services for tech startups that cover founder agreements, equity arrangements, employment documents, customer contracts, and investor readiness. As your user base and revenue grow, we update your documents and policies so they stay accurate. This steady support helps you move through due diligence smoothly when funding opportunities arrive.",
+          ],
+        },
+      ],
+    },
+  ];
+
+  const contractBlocks = [
+    {
+      title: "Technology Licensing Agreement in India: Protecting Your Innovation",
+      highlight: "Technology Licensing Agreement in India",
+      paragraphs: [
+        "Licensing lets you earn from your technology while keeping ownership of it. A well-drafted technology licensing agreement in India defines the scope of use, territory, duration, fees, and restrictions on copying or modification. We also address ownership of improvements, confidentiality, warranties, and termination rights. Clear terms reduce disputes and keep your valuable intellectual property under your control.",
+      ],
+    },
+    {
+      title: "Asset Tokenization Services in India Within a Compliant Framework",
+      highlight: "Asset Tokenization Services in India",
+      paragraphs: [
+        "Tokenization can make assets easier to fractionalize, trade, and manage, but it raises legal questions about ownership, securities treatment, and investor protection. Our asset tokenization services in India help you assess how your model is likely to be viewed under current law, structure rights and obligations clearly, and prepare disclosures and contracts. Since this area is still developing, we review regulatory developments before advising on each project.",
+      ],
+    },
+    {
+      title: "SaaS Agreement Drafting in India for Reliable Customer Contracts",
+      highlight: "SaaS Agreement Drafting in India",
+      paragraphs: [
+        "Software subscriptions depend on contracts that customers can understand and your team can enforce. Our SaaS agreement drafting in India covers service levels, subscription terms, acceptable use, data handling, intellectual property, liability caps, and renewal or termination. We tailor each agreement to your pricing model and customer segment, so sales teams can close deals faster with fewer lengthy negotiations.",
+      ],
+    },
+    {
+      title: "Escrow Services in India for Software and Transaction Security",
+      highlight: "Escrow Services in India",
+      paragraphs: [
+        "Customers who rely on your software often want assurance that they can continue operating if something goes wrong. Our team structures escrow services in India arrangements that cover source code deposit, release conditions, and verification, and can also address transaction escrow where payments depend on milestones. These arrangements build trust with enterprise buyers and protect both sides of a technology deal.",
+      ],
+    },
+  ];
+
+  const techFaqs = [
+    {
+      question: "What is included in the Tech Legal Blueprint?",
+      answer:
+        "It is a customized legal framework for technology companies. It covers strategic legal planning, intellectual property protection, data privacy and cybersecurity compliance, regulatory compliance, and ongoing risk management, built around your product and business model.",
+    },
+    {
+      question: "Who is the Tech Legal Blueprint designed for?",
+      answer:
+        "It suits software companies, SaaS providers, app developers, IT service firms, and technology startups at any stage. Early-stage teams use it to build a sound foundation, while larger companies use it to refine existing contracts and policies.",
+    },
+    {
+      question: "How does the Blueprint process work?",
+      answer:
+        "It has four steps. We assess your current legal position and technology stack, develop a strategy tailored to your goals, implement the required structures, policies, and compliance frameworks, and then monitor and update them as your business changes.",
+    },
+    {
+      question: "Does the Blueprint cover international data protection laws?",
+      answer:
+        "Yes. Beyond Indian privacy law, it addresses frameworks such as GDPR and CCPA where they apply to your users or customers. We identify which laws affect you based on where your users are located and how you process data.",
+    },
+    {
+      question: "How often should a tech company review its legal framework?",
+      answer:
+        "A review at least once a year is a sensible baseline. You should also review it whenever you launch a new product, enter a new market, change vendors, raise funding, or when a relevant law changes.",
+    },
+  ];
+
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
@@ -117,7 +205,7 @@ export default function TechLegalBlueprint() {
           <div className="grid lg:grid-cols-2 gap-12 items-center px-4 sm:px-8 md:px-12 lg:px-20">
             <div>
               <h2 className="text-3xl font-bold mb-8 text-gray-800">
-                A Blueprint for<span style={{ color: '#A5292A' }}> Tech Success</span>
+                Strategic Blueprint for<span style={{ color: '#A5292A' }}> Legal and Business Success</span>
               </h2>
               <p className="text-base text-gray-600 mb-8 leading-relaxed">
                 Navigating the complex legal landscape of the tech industry can
@@ -163,6 +251,16 @@ export default function TechLegalBlueprint() {
         </div>
       </section>
 
+      {/* Tech Legal Advisory Services (new SEO section) */}
+      <ContentSection
+        title="Tech Legal Advisory Services for Product-Led Companies"
+        highlight="Tech Legal Advisory Services"
+        bg="light"
+        paragraphs={[
+          "Technology businesses ship quickly, and legal questions often surface after a product is already live. Our tech legal advisory services in India bring structure to this process. We review your product, data flows, contracts, and growth plans, then build a legal roadmap that supports releases instead of slowing them down. Your team gets clear guidance on what to fix now, what can wait, and what to plan for as you scale.",
+        ]}
+      />
+
       {/* Key Features Section */}
       <section className="py-20" style={{ backgroundColor: "#FAFAFA" }}>
         <div className="container mx-auto px-4">
@@ -203,12 +301,18 @@ export default function TechLegalBlueprint() {
         </div>
       </section>
 
+      {/* DPDPA audit, DPDP Act compliance & legal services for tech startups (new SEO sections) */}
+      <ContentGrid blocks={complianceBlocks} bg="white" />
+
+      {/* Technology licensing, tokenization, SaaS & escrow (new SEO sections) */}
+      <ContentGrid blocks={contractBlocks} bg="light" />
+
       {/* Why Choose Tech Legal Blueprint */}
       <section className="py-20 bg-white">
         <div className="container mx-auto ">
           <div className="text-center mb-16">
             <h2 className="text-3xl font-bold text-gray-800 mb-6">
-              Why Tech Companies <span style={{ color: '#A5292A' }}>Trust </span>Our Blueprint
+              Why Tech Companies <span style={{ color: '#A5292A' }}>Trust </span>Our Legal Expertise?
             </h2>
            
           </div>
@@ -268,6 +372,16 @@ export default function TechLegalBlueprint() {
               </div>
         </div>
       </section>
+
+      {/* IT Legal Consultant in India (new SEO section) */}
+      <ContentSection
+        title="IT Legal Consultant in India for Day-to-Day Guidance"
+        highlight="IT Legal Consultant in India"
+        bg="white"
+        paragraphs={[
+          "Technology teams need a lawyer who understands how software is built, sold, and supported. As your IT legal consultant in India, we review vendor agreements, outsourcing contracts, terms of use, and internal policies in plain language. We work closely with product, engineering, and sales teams, so legal input arrives when it is useful and decisions are not delayed.",
+        ]}
+      />
 
       {/* Process Section */}
       <section className="py-20" style={{ backgroundColor: "#FAFAFA" }}>
@@ -339,7 +453,7 @@ export default function TechLegalBlueprint() {
               <p className="text-lg text-white/90 mb-8 leading-relaxed">
                 Let our Tech Legal Blueprint service provide you with the
                 comprehensive legal framework your technology company needs to
-                thrive in today's digital landscape.
+                thrive in today’s digital landscape.
               </p>
               <button
                 className="bg-white text-[#A5292A] px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-100 transition-all inline-flex items-center"
@@ -352,6 +466,9 @@ export default function TechLegalBlueprint() {
           </div>
         </div>
       </section>
+
+      {/* Frequently Asked Questions (new SEO section) */}
+      <FAQSection items={techFaqs} bg="light" />
 
       {/* Footer */}
       <Footer />

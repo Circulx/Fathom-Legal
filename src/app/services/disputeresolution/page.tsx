@@ -6,6 +6,9 @@ import { Navbar } from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Breadcrumb from "@/components/Breadcrumb";
 import Image from "next/image";
+import ContentSection from "@/components/SEO/ContentSection";
+import InlineContentBlock from "@/components/SEO/InlineContentBlock";
+import FAQSection from "@/components/SEO/FAQSection";
 
 export default function DisputeResolution() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -74,6 +77,56 @@ export default function DisputeResolution() {
       title: "Integrity",
       description:
         "We maintain the highest ethical standards in all our professional dealings. Our commitment to integrity and transparency builds trust with clients, opposing parties, and the judicial system.",
+    },
+  ];
+
+  // New SEO content shown after specific expertise blocks (key = index in expertiseAreas)
+  const contentAfterArea: Record<number, { title: string; paragraphs: string[] }> = {
+    0: {
+      title: "Business Dispute Lawyer in India for Deals That Go Wrong",
+      paragraphs: [
+        "Disagreements between partners, investors, and counterparties can threaten a company’s survival. A business dispute lawyer in India helps you understand your rights under the agreement, preserve evidence, and decide when to negotiate and when to escalate. We also review exit and valuation terms, which often sit at the center of these conflicts. Early advice frequently leads to settlements that protect both the business and its relationships.",
+      ],
+    },
+    2: {
+      title: "Commercial Dispute Resolution Services for Contract and IP Conflicts",
+      paragraphs: [
+        "Delayed payments, breached supply terms, and misused intellectual property can disrupt operations quickly. Our commercial dispute resolution services begin with a careful review of the contract, correspondence, and performance records. We send clear legal notices, explore settlement, and prepare for arbitration or court action where needed. Where the law requires a mediation step before filing a commercial suit, we guide you through it so your case is not delayed.",
+      ],
+    },
+    4: {
+      title: "Employment Dispute Lawyer in India for Employers and Employees",
+      paragraphs: [
+        "Workplace conflicts extend beyond harassment complaints. An employment dispute lawyer in India can advise on wrongful termination claims, unpaid dues, notice periods, restrictive clauses, and disciplinary procedures. We help employers follow fair processes and keep proper records, and we help employees understand their entitlements and options. Both sides benefit from early, practical advice that aims to resolve matters before they escalate.",
+      ],
+    },
+  };
+
+  const disputeFaqs = [
+    {
+      question: "How do I know whether to settle or go to court?",
+      answer:
+        "It depends on the strength of your evidence, the amount at stake, the time you can commit, and your relationship with the other party. A lawyer can compare likely outcomes, costs, and timelines, so you can choose between settlement and litigation with a clear picture.",
+    },
+    {
+      question: "What is the difference between mediation and arbitration?",
+      answer:
+        "Mediation is a voluntary process in which a neutral person helps the parties reach their own agreement. Arbitration is a private process in which an arbitrator hears both sides and issues a binding decision. Mediation is usually faster and less formal, while arbitration produces an enforceable award.",
+    },
+    {
+      question: "How long does a dispute usually take to resolve?",
+      answer:
+        "Timelines vary widely. Negotiated settlements and mediation can conclude in weeks or months, while arbitration and court cases generally take longer. The complexity of the matter, court schedules, and cooperation between parties all affect the duration.",
+    },
+    {
+      question: "What documents should I gather before consulting a lawyer?",
+      answer:
+        "Bring signed agreements, invoices, emails and messages, payment records, notices received or sent, and any relevant identification or company documents. Organized records help your lawyer assess the case quickly and advise you accurately.",
+    },
+    {
+      question: "Are consultations and POSH matters kept confidential?",
+      answer:
+        "Discussions with your lawyer are confidential. POSH matters are handled with particular sensitivity, and we limit information to those who need it for the process. Please speak to our team about the specific confidentiality steps that apply to your case.",
     },
   ];
 
@@ -173,6 +226,14 @@ export default function DisputeResolution() {
                 resources to protect your interests and resolve disputes
                 effectively.
               </p>
+
+              {/* Legal Dispute Resolution Services in India (new SEO content) */}
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mt-10 mb-6 sm:mb-8">
+                <span style={{ color: '#A5292A' }}>Legal Dispute Resolution Services in India:</span> Choosing the Right Path
+              </h2>
+              <p className="text-sm sm:text-base text-gray-800 leading-relaxed">
+                Every dispute calls for a different route, and the best choice depends on cost, speed, confidentiality, and the relationship you want to keep. Our legal dispute resolution services in India cover negotiation, mediation, arbitration, and court litigation. We assess your documents, your goals, and the strength of your position, then recommend the most effective path. This approach avoids unnecessary expense and keeps you informed at every stage.
+              </p>
             </div>
           </div>
         </div>
@@ -182,11 +243,11 @@ export default function DisputeResolution() {
       <section className="py-12 sm:py-16 lg:py-20 bg-gray-50">
         <div className="container mx-auto px-4 sm:px-8 lg:px-12 xl:px-16">
           {expertiseAreas.map((area, index) => (
+            <React.Fragment key={index}>
             <div
-              key={index}
               id={`expertise-${index}`}
               className={`grid grid-cols-1 lg:grid-cols-2 gap-0 items-stretch mb-8 lg:mb-0  lg:ml-20 lg:mr-20 ${
-                index !== expertiseAreas.length - 1 ? "lg:mb-8" : ""
+                index !== expertiseAreas.length - 1 || contentAfterArea[index] ? "lg:mb-8" : ""
               }`}
             >
               {/* Text Content with Dark Blue Background */}
@@ -219,6 +280,16 @@ export default function DisputeResolution() {
                 />
               </div>
             </div>
+
+            {/* New SEO content block placed after this expertise area */}
+            {contentAfterArea[index] && (
+              <InlineContentBlock
+                title={contentAfterArea[index].title}
+                paragraphs={contentAfterArea[index].paragraphs}
+                className={`mb-8 lg:ml-20 lg:mr-20 ${index === expertiseAreas.length - 1 ? "lg:mb-0" : ""}`}
+              />
+            )}
+            </React.Fragment>
           ))}
         </div>
       </section>
@@ -277,6 +348,16 @@ export default function DisputeResolution() {
         </div>
       </section>
 
+      {/* Dispute Resolution Law Firm in India (new SEO section) */}
+      <ContentSection
+        title="Dispute Resolution Law Firm in India You Can Rely On"
+        highlight="Dispute Resolution Law Firm in India"
+        bg="light"
+        paragraphs={[
+          "Clients want a firm that explains options honestly and prepares thoroughly. As a dispute resolution law firm in India, we combine litigation experience with a settlement-first mindset. We tell you early what your case is likely to involve in time and cost, so you can make informed decisions. Our team handles drafting, negotiation, and court appearances with the same attention to detail.",
+        ]}
+      />
+
       {/* Section 3 - Notice Box (Call to Action) */}
       <section className="py-12 sm:py-16 lg:py-20 bg-white">
         <div className="container mx-auto px-4">
@@ -302,6 +383,9 @@ export default function DisputeResolution() {
           </div>
         </div>
       </section>
+
+      {/* Frequently Asked Questions (new SEO section) */}
+      <FAQSection items={disputeFaqs} bg="light" />
 
       {/* Footer */}
       <Footer />

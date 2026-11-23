@@ -5,6 +5,8 @@ import { Navbar } from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Breadcrumb from "@/components/Breadcrumb";
 import Image from "next/image";
+import ContentSection from "@/components/SEO/ContentSection";
+import FAQSection from "@/components/SEO/FAQSection";
 import {
   ArrowRight,
   TrendingUp,
@@ -22,6 +24,8 @@ import {
   BarChart3,
   Handshake,
   Shield,
+  Rocket,
+  Search,
 } from "lucide-react";
 
 export default function VCFundingSupport() {
@@ -48,11 +52,25 @@ export default function VCFundingSupport() {
       imageUrl: "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
     },
     {
+      icon: <Search className="w-6 h-6" />,
+      title: "Due Diligence Support in India From Data Room to Closing",
+      description:
+        "Investors will examine your records closely before committing funds. Our due diligence support in India covers organizing a clean data room, preparing disclosure schedules, and responding to investor questions promptly. We identify weak points before the investor does and suggest ways to fix them. A well-prepared process shortens the timeline, builds confidence, and helps keep the deal on track through closing.",
+      imageUrl: ""
+    },
+    {
       icon: <Scale className="w-6 h-6" />,
       title: "Legal Structure Optimization",
       description:
         "Optimize your corporate structure to be attractive to investors while protecting founder interests.",
       imageUrl: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
+    },
+    {
+      icon: <Users className="w-6 h-6" />,
+      title: "Co-Founder Contracts India: Setting Clear Ground Rules",
+      description:
+        "Investors look at the relationships between founders as closely as they look at the product. Well-drafted co-founder contracts India teams rely on define roles, equity split, vesting, decision-making, and what happens if a founder leaves. Settling these points early prevents painful disputes later. It also shows investors that your leadership team has planned for change and is built to last.",
+      imageUrl: ""
     },
     {
       icon: <Handshake className="w-6 h-6" />,
@@ -67,6 +85,13 @@ export default function VCFundingSupport() {
       description:
         "Ensure regulatory compliance and establish strong corporate governance frameworks for investor confidence.",
       imageUrl: "https://images.unsplash.com/photo-1556075798-4825dfaaf498?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
+    },
+    {
+      icon: <FileText className="w-6 h-6" />,
+      title: "Internal Policies and Corporate Compliance Support in India",
+      description:
+        "Strong governance reassures investors that the company is managed responsibly. Our internal policies and corporate compliance support in India covers statutory filings, board and shareholder meeting records, employment and conduct policies, and reporting practices. We review what you already have, fill the gaps, and set up a routine that keeps records current. This lowers risk and makes future funding rounds far easier to complete.",
+      imageUrl: ""
     },
   ];
 
@@ -84,9 +109,21 @@ export default function VCFundingSupport() {
       icon: <Zap className="w-5 h-5" />,
     },
     {
+      stage: "Legal Due Diligence for Startups in India Before You Raise",
+      description:
+        "Many founders wait for investors to start reviewing their records, then scramble to fix issues. We recommend a self-review earlier. Our legal due diligence for startups in India checks incorporation records, cap table accuracy, contracts, intellectual property ownership, and employment documents. You receive a short list of issues to resolve and a clearer view of how your company will appear to investors.",
+      icon: <CheckCircle className="w-5 h-5" />,
+    },
+    {
       stage: "Series A",
       description: "Advanced structuring and negotiation for growth capital",
       icon: <TrendingUp className="w-5 h-5" />,
+    },
+    {
+      stage: "Series A Funding Legal Advisory for Growth-Stage Rounds",
+      description:
+        "A first large institutional round brings tougher scrutiny and more detailed documents. Our Series A funding legal advisory supports you through term sheet negotiation, definitive agreements, investor rights, and closing conditions. We also help you plan the cap table so that future rounds do not create unwanted dilution or conflicts between investor classes.",
+      icon: <Rocket className="w-5 h-5" />,
     },
     {
       stage: "Series B+",
@@ -102,6 +139,34 @@ export default function VCFundingSupport() {
     "Investor relations legal structure setup",
     "Due diligence coordination and management",
     "Regulatory compliance and reporting systems",
+  ];
+
+  const vcFaqs = [
+    {
+      question: "When should a startup start preparing for fundraising?",
+      answer:
+        "Begin at least three to six months before you plan to approach investors. This gives you time to clean up your records, settle founder arrangements, organize your cap table, and prepare a data room, so the process does not stall midway.",
+    },
+    {
+      question: "What is a term sheet, and is it legally binding?",
+      answer:
+        "A term sheet outlines the main commercial terms of an investment, such as valuation, investment amount, and investor rights. Most of it is non-binding, but clauses on confidentiality and exclusivity are often binding. Always have a lawyer review it before signing.",
+    },
+    {
+      question: "What documents do investors usually ask for?",
+      answer:
+        "Typically they ask for incorporation documents, the shareholding and cap table, financial statements, major contracts, employee and founder agreements, intellectual property records, and proof of regulatory compliance. The exact list varies by investor and funding stage.",
+    },
+    {
+      question: "How can founders protect their control when raising money?",
+      answer:
+        "Careful negotiation of board composition, voting rights, protective provisions, and anti-dilution terms matters most. Understanding how each clause affects future decisions helps you accept investor protections without giving up more control than necessary.",
+    },
+    {
+      question: "How long does a funding round take from term sheet to closing?",
+      answer:
+        "Timelines vary based on how organized your documents are, how complex the terms are, and how quickly each party responds. A prepared company with a clean data room can often move faster. We will give you a realistic estimate once we review your situation.",
+    },
   ];
 
   return (
@@ -196,6 +261,16 @@ export default function VCFundingSupport() {
         </div>
       </section>
 
+      {/* Venture Capital Legal Advisory in India (new SEO section) */}
+      <ContentSection
+        title="Venture Capital Legal Advisory in India for Founders"
+        highlight="Venture Capital Legal Advisory in India"
+        bg="light"
+        paragraphs={[
+          "Raising money changes how a company is owned and run, so the legal details deserve careful attention. Our venture capital legal advisory in India helps founders understand what each investment term means before they sign. We explain valuation mechanics, investor rights, board seats, and exit provisions in plain language. With this clarity, you can negotiate confidently and protect both your control of the company and your long-term interests.",
+        ]}
+      />
+
       {/* Funding Services Section */}
       <section className="py-20" style={{ backgroundColor: "#FAFAFA" }}>
         <div className="container mx-auto px-4">
@@ -219,7 +294,8 @@ export default function VCFundingSupport() {
                   transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)'
                 }}
               >
-                {/* Image Section */}
+                {/* Image Section (new content cards without an image show the icon on a brand-red band) */}
+                {service.imageUrl ? (
                 <div className="relative h-48 overflow-hidden">
                   <div
                     className="absolute inset-0 bg-cover bg-center"
@@ -235,6 +311,11 @@ export default function VCFundingSupport() {
                     style={{ backgroundColor: 'rgba(0, 0, 0, 0.6)' }}
                   ></div>
                 </div>
+                ) : (
+                <div className="relative h-20 flex items-center px-8 text-white" style={{ backgroundColor: '#A5292A' }}>
+                  {service.icon}
+                </div>
+                )}
                 
                 {/* Text Section */}
                 <div className="p-8 flex-1 flex flex-col justify-between" style={{ backgroundColor: '#2D2D2D' }}>
@@ -267,7 +348,7 @@ export default function VCFundingSupport() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 px-4 sm:px-8 md:px-12 lg:px-20">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 px-4 sm:px-8 md:px-12 lg:px-20">
             {fundingStages.map((stage, index) => (
               <div
                 key={index}
@@ -478,6 +559,9 @@ export default function VCFundingSupport() {
           </div>
         </div>
       </section>
+
+      {/* Frequently Asked Questions (new SEO section) */}
+      <FAQSection items={vcFaqs} bg="light" />
 
       {/* Footer */}
       <Footer />

@@ -25,11 +25,12 @@ import {
   Globe,
   Lock,
   Lightbulb,
-  Building2,
+  Building,
 } from "lucide-react";
 import emailjs from '@emailjs/browser';
 import ClientLogosSection from '@/components/Home/ClientLogosSection';
-import { homeFaqs } from '@/components/Home/homeFaqs';
+import ContentGrid from '@/components/SEO/ContentGrid';
+import FAQSection from '@/components/SEO/FAQSection';
 
 // Custom hook for scroll animations
 const useScrollAnimation = (delay = 0) => {
@@ -115,7 +116,7 @@ const DisclaimerPopup = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => 
   );
 };
 
-export default function HomePageClient() {
+export default function Home() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [showDisclaimer, setShowDisclaimer] = useState(true);
@@ -248,70 +249,130 @@ export default function HomePageClient() {
     };
   }, [counters.years]);
 
-  // Each description is split into: before + linked anchor text + after
   const services = [
       {
         icon: <Scale className="w-8 h-8" />,
         title: "Web3 & Blockchain",
-        descBefore: "We offer specialised ",
-        descLinkText: "Web3 legal services in India",
-        descAfter: " for DeFi protocols, NFT platforms, blockchain projects, and regulatory compliance.",
+        description:
+          "We offer specialised Web3 legal services in India for DeFi protocols, NFT platforms, blockchain projects, and regulatory compliance.",
         link: "/web3law",
         image: "/corporatelaw.jpg",
       },
     {
       icon: <Users className="w-8 h-8" />,
       title: "Startup Legal Services",
-      descBefore: "Expert ",
-      descLinkText: "startup legal advisory services in India",
-      descAfter: ", covering company incorporation, funding, compliance, and business growth.",
-      link: "/valueboostingsolutions/chieflegalofficerservice",
+      description:
+        "Expert startup legal advisory services in India, covering company incorporation, funding, compliance, and business growth.",
+      link: "/services/generalcorporateadvisory",
       image: "/legalservices.jpg",
     },
     {
       icon: <FileText className="w-8 h-8" />,
       title: "Contract Management",
-      descBefore: "Expert ",
-      descLinkText: "contract drafting",
-      descAfter: ", review, and management services for businesses of all sizes.",
+      description:
+        "Expert contract drafting, review, and management services for businesses of all sizes.",
       link: "/services/generalcorporateadvisory",
       image: "/contract.jpg",
     },
     {
       icon: <Shield className="w-8 h-8" />,
       title: "Dispute Resolution",
-      descBefore: "Professional ",
-      descLinkText: "dispute resolution services",
-      descAfter: " including arbitration and litigation support.",
+      description:
+        "Professional dispute resolution services including arbitration and litigation support.",
       link: "/services/disputeresolution",
       image: "https://images.unsplash.com/photo-1521791136064-7986c2920216?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
     },
     {
       icon: <Lock className="w-8 h-8" />,
       title: "Cybersecurity Legal Services",
-      descBefore: "",
-      descLinkText: "Cybersecurity legal services",
-      descAfter: " helping businesses address data protection, privacy regulations, cyber risks, and regulatory compliance.",
+      description:
+        "Cybersecurity legal services helping businesses address data protection, privacy regulations, cyber risks, and regulatory compliance.",
       link: "/valueboostingsolutions/cybersecurityservices",
-      image: "/legalservices.jpg",
+      image: "https://images.unsplash.com/photo-1555949963-aa79dcee981c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
     },
     {
       icon: <Lightbulb className="w-8 h-8" />,
       title: "Intellectual Property Legal Services",
-      descBefore: "",
-      descLinkText: "Intellectual property legal services",
-      descAfter: " helping businesses protect trademarks, copyrights, patents, and other valuable intellectual assets.",
+      description:
+        "Intellectual property legal services helping businesses protect trademarks, copyrights, patents, and other valuable intellectual assets.",
       link: "/services/intellectualproperty",
-      image: "/corporatelaw.jpg",
+      image: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
     },
     {
-      icon: <Building2 className="w-8 h-8" />,
+      icon: <Building className="w-8 h-8" />,
       title: "Property Due Diligence Services",
-      descBefore: "We offer property ",
-      descLinkText: "due diligence services",
-      descAfter: " covering title verification, legal documentation, ownership checks, and property-related risk assessments.",
+      description:
+        "We offer property due diligence services covering title verification, legal documentation, ownership checks, and property-related risk assessments.",
       link: "/services/realestatesolutions",
-      image: "/contract.jpg",
+      image: "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+    },
+  ];
+
+  // SEO content blocks (added from the page-content document)
+  const corporateLegalBlocks = [
+    {
+      title: "Corporate Legal Consultant in India for Ongoing Guidance",
+      highlight: "Corporate Legal Consultant in India",
+      paragraphs: [
+        "Businesses often need a steady advisor rather than a one-time lawyer. As a corporate legal consultant in India, we act as an extension of your management team, reviewing board matters, commercial contracts, policies, and statutory obligations. We flag risks early, recommend practical solutions, and keep decision makers informed in clear, concise language.",
+        "Our work also includes preparing board resolutions, advising on shareholder rights, and supporting regulatory filings when deadlines approach. Because we know your business over time, advice becomes faster and more precise. Many clients find this model more affordable than building a full in-house team, while still gaining dependable senior-level guidance whenever important decisions arise.",
+      ],
+    },
+    {
+      title: "Simple GST Registration in India for New Businesses",
+      highlight: "GST Registration in India",
+      paragraphs: [
+        "Many businesses must register for tax once their turnover crosses prescribed limits or when they make interstate supplies. Our team supports GST Registration in India by assessing eligibility, preparing documents, submitting the application, and explaining invoicing and return filing basics. We also help you decide whether voluntary registration makes sense for your business, since it can improve credibility with larger customers and allow input tax credit claims. After registration, we remain available to answer questions about compliance calendars, so small oversights do not turn into penalties or notices later on.",
+      ],
+    },
+    {
+      title: "MSME Registration Support in India to Unlock Benefits",
+      highlight: "MSME Registration Support in India",
+      paragraphs: [
+        "Registering as a micro, small, or medium enterprise can open access to government schemes, easier credit, and protection under delayed payment rules. Our MSME Registration support in India helps you classify your business correctly, gather the required documents, and complete the Udyam process. We also explain the benefits available, so registration becomes a strategic step rather than a formality.",
+        "Many small businesses miss out simply because they are unaware of what is available to them. We review your records, confirm your enterprise category, and ensure the details match your other business documents. Once registered, you can approach lenders, bid for tenders, and negotiate with customers from a stronger position.",
+      ],
+    },
+    {
+      title: "DPIIT Registration in India for Eligible Startups",
+      highlight: "DPIIT Registration in India",
+      paragraphs: [
+        "Recognition from the Department for Promotion of Industry and Internal Trade can give eligible startups tax benefits, easier compliance, and intellectual property support. We guide founders through DPIIT Registration in India, from checking eligibility and preparing incorporation documents to submitting the application on the startup portal. Our team keeps you informed at every stage until the certificate is issued.",
+        "We also explain how recognition works alongside your broader plans, including fundraising and intellectual property strategy. If an application needs clarification, we prepare responses promptly. Founders appreciate having one team handle the paperwork, so they can concentrate on product development, customer conversations, and building a company that investors and partners can trust.",
+      ],
+    },
+  ];
+
+  const homeFaqs = [
+    {
+      question: "Who can work with Fathom Legal?",
+      answer:
+        "We support founders, small and mid-sized businesses, growing companies, and individuals. Our focus is the startup ecosystem and the SMB sector, but clients from many industries rely on our advice.",
+    },
+    {
+      question: "Which legal areas do you cover?",
+      answer:
+        "Our practice includes general corporate advisory, contract management, dispute resolution, intellectual property, real estate, REIT solutions, and Web3 and blockchain law.",
+    },
+    {
+      question: "How do I book a consultation?",
+      answer:
+        "Use the Book a Consultation button on our website to schedule a short call. You can also phone +919625206671 or email assist@fathomlegal.com, and our team will respond with next steps.",
+    },
+    {
+      question: "Where are your offices located?",
+      answer:
+        "We have offices in Bangalore, Delhi, and Pune in India, along with offices in the USA and the UAE.",
+    },
+    {
+      question: "Can you assist with cross-border matters?",
+      answer:
+        "Yes. We deliver services nationwide and internationally, so clients with operations, investors, or partners in other countries can still work with one team.",
+    },
+    {
+      question: "Why does the website show a disclaimer?",
+      answer:
+        "The Bar Council of India restricts lawyers from advertising or soliciting work. The disclaimer confirms that you are voluntarily seeking information about our firm.",
     },
   ];
 
@@ -436,7 +497,7 @@ export default function HomePageClient() {
                 <div className="w-3 h-3 rounded-full border-2 border-white group-hover:bg-white group-hover:scale-110 transition-all duration-300 flex-shrink-0"></div>
                 <button
                   onClick={() => {
-                    const whyChooseUsSection = document.querySelector('section:nth-of-type(3)');
+                    const whyChooseUsSection = document.getElementById('why-choose-us');
                     if (whyChooseUsSection) {
                       whyChooseUsSection.scrollIntoView({ behavior: 'smooth' });
                     }
@@ -512,7 +573,7 @@ export default function HomePageClient() {
               <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full border-2 border-white group-hover:bg-white group-hover:scale-110 transition-all duration-300 flex-shrink-0"></div>
               <button
                 onClick={() => {
-                  const whyChooseUsSection = document.querySelector('section:nth-of-type(3)');
+                  const whyChooseUsSection = document.getElementById('why-choose-us');
                   if (whyChooseUsSection) {
                     whyChooseUsSection.scrollIntoView({ behavior: 'smooth' });
                   }
@@ -549,13 +610,13 @@ export default function HomePageClient() {
 
       </section>
 
-      {/* Trusted Partner Intro (div wrapper keeps existing section:nth-of-type scroll targets unchanged) */}
-      <div id="trusted-partner" className="py-16 sm:py-20 bg-white">
+      {/* Your Trusted Partner for Corporate Legal Solutions (new SEO section) */}
+      <section className="py-16 sm:py-20 bg-white">
         <div className="container mx-auto px-4">
           <div className="max-w-5xl mx-auto px-4 sm:px-8">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-3xl font-bold mb-8 text-center">
-              <span style={{ color: "black" }}>Your Trusted Partner for</span>{" "}
-              <span style={{ color: "#A5292A" }}>Corporate Legal Solutions</span>
+            <div className="w-16 h-1 rounded-full mx-auto mb-6" style={{ backgroundColor: "#A5292A" }}></div>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-3xl font-bold text-gray-800 mb-8 text-center">
+              Your Trusted Partner for <span style={{ color: "#A5292A" }}>Corporate Legal Solutions</span>
             </h2>
             <div className="space-y-5 text-base sm:text-lg lg:text-base text-gray-700 leading-relaxed">
               <p>
@@ -570,7 +631,7 @@ export default function HomePageClient() {
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
       {/* Services Section */}
       <section id="services" ref={servicesRef} className={`py-20 bg-gray-100 transition-all duration-1000 ${servicesVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
@@ -597,7 +658,7 @@ export default function HomePageClient() {
       {services.map((service, index) => (
          <div
            key={index}
-           className={`relative h-96 rounded-xl overflow-hidden group cursor-pointer transition-all duration-700 ${servicesVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
+           className={`relative h-80 rounded-xl overflow-hidden group cursor-pointer transition-all duration-700 ${servicesVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
            style={{ transitionDelay: `${index * 100}ms` }}
          >
           {/* Background Image */}
@@ -626,11 +687,7 @@ export default function HomePageClient() {
              {/* Description and Learn More Button */}
              <div className="relative z-10">
                <p className="text-white text-sm sm:text-base md:text-lg lg:text-sm mb-4 leading-relaxed">
-                 {service.descBefore}
-                 <Link href={service.link} className="underline underline-offset-2 hover:text-gray-200">
-                   {service.descLinkText}
-                 </Link>
-                 {service.descAfter}
+                 {service.description}
                </p>
                <Link
                  href={service.link}
@@ -869,7 +926,7 @@ export default function HomePageClient() {
 
 
       {/* Why Choose Us Section */}
-      <section id="services" ref={whyChooseUsRef} className={`py-20 bg-white transition-all duration-1000 ${whyChooseUsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+      <section id="why-choose-us" ref={whyChooseUsRef} className={`py-20 bg-white transition-all duration-1000 ${whyChooseUsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
   <div className="container mx-auto px-4">
      <div className="mb-16">
       {/* Two Column Layout: Heading on Left, Description on Right */}
@@ -878,9 +935,9 @@ export default function HomePageClient() {
         <div className="flex-1 w-full lg:w-auto">
           <p className="text-sm sm:text-base lg:text-sm font-medium text-black uppercase mb-2 lg:mb-3 px-4 sm:px-0 lg:ml-20">WHY CHOOSE US?</p>
           <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-3xl font-bold px-4 sm:px-0 lg:ml-20">
-            <span style={{ color: "black" }}>Why Choose Us for Legal Advisory for</span> <span style={{ color: "#A5292A" }}>Startups Across India?</span>
+            <span style={{ color: "black" }}>Why Choose Us for </span> <span style={{ color: "#A5292A" }}>Legal Advisory for Startups Across India?</span>
           </h2>
-          <p className="text-base sm:text-lg lg:text-base text-gray-600 mt-3 px-4 sm:px-0 lg:ml-20">
+          <p className="text-base sm:text-lg lg:text-base text-gray-600 mt-3 px-4 sm:px-0 lg:ml-20 max-w-2xl">
             Our dedicated team, startup focus, personal approach, and global reach set Fathom Legal apart.
           </p>
         </div>
@@ -942,73 +999,8 @@ export default function HomePageClient() {
         </div>
       </section>
 
-      {/* Corporate Legal Consultant / Registration Services Content */}
-      <section id="corporate-legal-guidance" className="py-16 sm:py-20 bg-gray-100">
-        <div className="container mx-auto px-4">
-          <div className="max-w-5xl mx-auto px-4 sm:px-8 space-y-14">
-            {/* Corporate Legal Consultant in India */}
-            <div>
-              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-3xl font-bold mb-6">
-                <span style={{ color: "black" }}>Corporate Legal Consultant in India for</span>{" "}
-                <span style={{ color: "#A5292A" }}>Ongoing Guidance</span>
-              </h2>
-              <div className="space-y-5 text-base sm:text-lg lg:text-base text-gray-700 leading-relaxed">
-                <p>
-                  Businesses often need a steady advisor rather than a one-time lawyer. As a corporate legal consultant in India, we act as an extension of your management team, reviewing board matters, commercial contracts, policies, and statutory obligations. We flag risks early, recommend practical solutions, and keep decision makers informed in clear, concise language.
-                </p>
-                <p>
-                  Our work also includes preparing board resolutions, advising on shareholder rights, and supporting regulatory filings when deadlines approach. Because we know your business over time, advice becomes faster and more precise. Many clients find this model more affordable than building a full in-house team, while still gaining dependable senior-level guidance whenever important decisions arise.
-                </p>
-              </div>
-            </div>
-
-            {/* GST Registration */}
-            <div>
-              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-3xl font-bold mb-6">
-                <span style={{ color: "black" }}>Simple GST Registration in India for</span>{" "}
-                <span style={{ color: "#A5292A" }}>New Businesses</span>
-              </h2>
-              <div className="space-y-5 text-base sm:text-lg lg:text-base text-gray-700 leading-relaxed">
-                <p>
-                  Many businesses must register for tax once their turnover crosses prescribed limits or when they make interstate supplies. Our team supports <strong>GST Registration in India</strong> by assessing eligibility, preparing documents, submitting the application, and explaining invoicing and return filing basics. We also help you decide whether voluntary registration makes sense for your business, since it can improve credibility with larger customers and allow input tax credit claims. After registration, we remain available to answer questions about compliance calendars, so small oversights do not turn into penalties or notices later on.
-                </p>
-              </div>
-            </div>
-
-            {/* MSME Registration */}
-            <div>
-              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-3xl font-bold mb-6">
-                <span style={{ color: "black" }}>MSME Registration Support in India to</span>{" "}
-                <span style={{ color: "#A5292A" }}>Unlock Benefits</span>
-              </h2>
-              <div className="space-y-5 text-base sm:text-lg lg:text-base text-gray-700 leading-relaxed">
-                <p>
-                  Registering as a micro, small, or medium enterprise can open access to government schemes, easier credit, and protection under delayed payment rules. Our <strong>MSME Registration support in India</strong> helps you classify your business correctly, gather the required documents, and complete the Udyam process. We also explain the benefits available, so registration becomes a strategic step rather than a formality.
-                </p>
-                <p>
-                  Many small businesses miss out simply because they are unaware of what is available to them. We review your records, confirm your enterprise category, and ensure the details match your other business documents. Once registered, you can approach lenders, bid for tenders, and negotiate with customers from a stronger position.
-                </p>
-              </div>
-            </div>
-
-            {/* DPIIT Registration */}
-            <div>
-              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-3xl font-bold mb-6">
-                <span style={{ color: "black" }}>DPIIT Registration in India for</span>{" "}
-                <span style={{ color: "#A5292A" }}>Eligible Startups</span>
-              </h2>
-              <div className="space-y-5 text-base sm:text-lg lg:text-base text-gray-700 leading-relaxed">
-                <p>
-                  Recognition from the Department for Promotion of Industry and Internal Trade can give eligible startups tax benefits, easier compliance, and intellectual property support. We guide founders through <strong>DPIIT Registration in India</strong>, from checking eligibility and preparing incorporation documents to submitting the application on the startup portal. Our team keeps you informed at every stage until the certificate is issued.
-                </p>
-                <p>
-                  We also explain how recognition works alongside your broader plans, including fundraising and intellectual property strategy. If an application needs clarification, we prepare responses promptly. Founders appreciate having one team handle the paperwork, so they can concentrate on product development, customer conversations, and building a company that investors and partners can trust.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Corporate Legal Consultant, GST, MSME & DPIIT Registration (new SEO sections) */}
+      <ContentGrid blocks={corporateLegalBlocks} bg="light" />
 
       {/* Track Record Section */}
       <section id="track-record" ref={trackRecordRef} className={`py-16 relative overflow-hidden transition-all duration-1000 ${trackRecordVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
@@ -1294,35 +1286,8 @@ export default function HomePageClient() {
         </div>
       </section>
 
-      {/* Frequently Asked Questions */}
-      <section id="faq" className="py-16 sm:py-20 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto px-4 sm:px-8">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-3xl font-bold mb-10 text-center">
-              <span style={{ color: "black" }}>Frequently Asked</span>{" "}
-              <span style={{ color: "#A5292A" }}>Questions</span>
-            </h2>
-            <div className="space-y-4">
-              {homeFaqs.map((faq, index) => (
-                <details
-                  key={index}
-                  className="group bg-gray-50 border border-gray-200 rounded-xl px-5 sm:px-6 py-4 open:border-[#A5292A] transition-colors duration-300"
-                >
-                  <summary className="flex items-center justify-between gap-4 cursor-pointer list-none [&::-webkit-details-marker]:hidden">
-                    <h3 className="text-base sm:text-lg font-semibold text-gray-800 group-open:text-[#A5292A]">
-                      {faq.question}
-                    </h3>
-                    <ChevronDown className="w-5 h-5 flex-shrink-0 text-[#A5292A] transition-transform duration-300 group-open:rotate-180" />
-                  </summary>
-                  <p className="mt-3 text-base text-gray-600 leading-relaxed">
-                    {faq.answer}
-                  </p>
-                </details>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Frequently Asked Questions (new SEO section) */}
+      <FAQSection items={homeFaqs} bg="white" />
 
       {/* Footer */}
       <Footer />

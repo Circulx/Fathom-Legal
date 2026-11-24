@@ -6,11 +6,8 @@ import { Navbar } from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Breadcrumb from "@/components/Breadcrumb";
 import Image from "next/image";
-<<<<<<< HEAD
 import InlineContentBlock from "@/components/SEO/InlineContentBlock";
 import FAQSection from "@/components/SEO/FAQSection";
-=======
->>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
 
 const IntellectualProperty = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -88,7 +85,6 @@ const IntellectualProperty = () => {
     },
   ];
 
-<<<<<<< HEAD
   // New SEO content shown after specific service blocks (key = index in services)
   const contentAfterService: Record<number, { title: string; paragraphs: string[] }> = {
     0: {
@@ -139,8 +135,6 @@ const IntellectualProperty = () => {
     },
   ];
 
-=======
->>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
@@ -227,7 +221,6 @@ const IntellectualProperty = () => {
                 copyright protection, trade secret safeguarding, IP licensing,
                 portfolio management, and domain name disputes.
               </p>
-<<<<<<< HEAD
 
               {/* Intellectual Property Legal Services in India (new SEO content) */}
               <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mt-10 mb-6 sm:mb-8">
@@ -236,8 +229,6 @@ const IntellectualProperty = () => {
               <p className="text-sm sm:text-base text-gray-800 leading-relaxed">
                 Names, logos, software, designs, and know-how often make up most of a company’s worth. Our intellectual property legal services in India help you identify what you own, secure it properly, and use it to grow. We begin by listing your assets and the risks around them, then recommend registrations, contracts, and internal policies. This gives you a clear, practical plan instead of a collection of unrelated filings.
               </p>
-=======
->>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
             </div>
           </div>
         </div>
@@ -247,19 +238,11 @@ const IntellectualProperty = () => {
       <section className="py-12 sm:py-16 lg:py-20 bg-gray-50">
         <div className="container mx-auto px-4 sm:px-8 lg:px-12 xl:px-16">
           {services.map((service, index) => (
-<<<<<<< HEAD
             <React.Fragment key={index}>
             <div
               id={`service-${index}`}
               className={`grid grid-cols-1 lg:grid-cols-2 gap-0 items-stretch mb-8 lg:mb-0  lg:ml-20 lg:mr-20 ${
                 index !== services.length - 1 || contentAfterService[index] ? "lg:mb-8" : ""
-=======
-            <div
-              key={index}
-              id={`service-${index}`}
-              className={`grid grid-cols-1 lg:grid-cols-2 gap-0 items-stretch mb-8 lg:mb-0  lg:ml-20 lg:mr-20 ${
-                index !== services.length - 1 ? "lg:mb-8" : ""
->>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
               }`}
             >
               {/* Text Content with Dark Red Background */}
@@ -292,7 +275,6 @@ const IntellectualProperty = () => {
                 />
               </div>
             </div>
-<<<<<<< HEAD
 
             {/* New SEO content block placed after this service */}
             {contentAfterService[index] && (
@@ -303,8 +285,6 @@ const IntellectualProperty = () => {
               />
             )}
             </React.Fragment>
-=======
->>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
           ))}
         </div>
       </section>
@@ -335,12 +315,9 @@ const IntellectualProperty = () => {
         </div>
       </section>
 
-<<<<<<< HEAD
       {/* Frequently Asked Questions (new SEO section) */}
       <FAQSection items={ipFaqs} bg="light" />
 
-=======
->>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
       {/* Footer */}
       <Footer />
     </div>

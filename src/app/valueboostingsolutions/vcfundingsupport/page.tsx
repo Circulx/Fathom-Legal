@@ -5,11 +5,8 @@ import { Navbar } from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Breadcrumb from "@/components/Breadcrumb";
 import Image from "next/image";
-<<<<<<< HEAD
 import ContentSection from "@/components/SEO/ContentSection";
 import FAQSection from "@/components/SEO/FAQSection";
-=======
->>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
 import {
   ArrowRight,
   TrendingUp,
@@ -27,11 +24,8 @@ import {
   BarChart3,
   Handshake,
   Shield,
-<<<<<<< HEAD
   Rocket,
   Search,
-=======
->>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
 } from "lucide-react";
 
 export default function VCFundingSupport() {
@@ -58,7 +52,6 @@ export default function VCFundingSupport() {
       imageUrl: "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
     },
     {
-<<<<<<< HEAD
       icon: <Search className="w-6 h-6" />,
       title: "Due Diligence Support in India From Data Room to Closing",
       description:
@@ -66,8 +59,6 @@ export default function VCFundingSupport() {
       imageUrl: ""
     },
     {
-=======
->>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
       icon: <Scale className="w-6 h-6" />,
       title: "Legal Structure Optimization",
       description:
@@ -75,7 +66,6 @@ export default function VCFundingSupport() {
       imageUrl: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
     },
     {
-<<<<<<< HEAD
       icon: <Users className="w-6 h-6" />,
       title: "Co-Founder Contracts India: Setting Clear Ground Rules",
       description:
@@ -83,8 +73,6 @@ export default function VCFundingSupport() {
       imageUrl: ""
     },
     {
-=======
->>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
       icon: <Handshake className="w-6 h-6" />,
       title: "Negotiation Support",
       description:
@@ -98,7 +86,6 @@ export default function VCFundingSupport() {
         "Ensure regulatory compliance and establish strong corporate governance frameworks for investor confidence.",
       imageUrl: "https://images.unsplash.com/photo-1556075798-4825dfaaf498?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
     },
-<<<<<<< HEAD
     {
       icon: <FileText className="w-6 h-6" />,
       title: "Internal Policies and Corporate Compliance Support in India",
@@ -106,8 +93,6 @@ export default function VCFundingSupport() {
         "Strong governance reassures investors that the company is managed responsibly. Our internal policies and corporate compliance support in India covers statutory filings, board and shareholder meeting records, employment and conduct policies, and reporting practices. We review what you already have, fill the gaps, and set up a routine that keeps records current. This lowers risk and makes future funding rounds far easier to complete.",
       imageUrl: ""
     },
-=======
->>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
   ];
 
   const fundingStages = [
@@ -124,29 +109,23 @@ export default function VCFundingSupport() {
       icon: <Zap className="w-5 h-5" />,
     },
     {
-<<<<<<< HEAD
       stage: "Legal Due Diligence for Startups in India Before You Raise",
       description:
         "Many founders wait for investors to start reviewing their records, then scramble to fix issues. We recommend a self-review earlier. Our legal due diligence for startups in India checks incorporation records, cap table accuracy, contracts, intellectual property ownership, and employment documents. You receive a short list of issues to resolve and a clearer view of how your company will appear to investors.",
       icon: <CheckCircle className="w-5 h-5" />,
     },
     {
-=======
->>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
       stage: "Series A",
       description: "Advanced structuring and negotiation for growth capital",
       icon: <TrendingUp className="w-5 h-5" />,
     },
     {
-<<<<<<< HEAD
       stage: "Series A Funding Legal Advisory for Growth-Stage Rounds",
       description:
         "A first large institutional round brings tougher scrutiny and more detailed documents. Our Series A funding legal advisory supports you through term sheet negotiation, definitive agreements, investor rights, and closing conditions. We also help you plan the cap table so that future rounds do not create unwanted dilution or conflicts between investor classes.",
       icon: <Rocket className="w-5 h-5" />,
     },
     {
-=======
->>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
       stage: "Series B+",
       description: "Complex funding rounds with multiple investor classes",
       icon: <BarChart3 className="w-5 h-5" />,
@@ -162,7 +141,6 @@ export default function VCFundingSupport() {
     "Regulatory compliance and reporting systems",
   ];
 
-<<<<<<< HEAD
   const vcFaqs = [
     {
       question: "When should a startup start preparing for fundraising?",
@@ -191,8 +169,6 @@ export default function VCFundingSupport() {
     },
   ];
 
-=======
->>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
@@ -285,7 +261,6 @@ export default function VCFundingSupport() {
         </div>
       </section>
 
-<<<<<<< HEAD
       {/* Venture Capital Legal Advisory in India (new SEO section) */}
       <ContentSection
         title="Venture Capital Legal Advisory in India for Founders"
@@ -296,8 +271,6 @@ export default function VCFundingSupport() {
         ]}
       />
 
-=======
->>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
       {/* Funding Services Section */}
       <section className="py-20" style={{ backgroundColor: "#FAFAFA" }}>
         <div className="container mx-auto px-4">
@@ -321,12 +294,8 @@ export default function VCFundingSupport() {
                   transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)'
                 }}
               >
-<<<<<<< HEAD
                 {/* Image Section (new content cards without an image show the icon on a brand-red band) */}
                 {service.imageUrl ? (
-=======
-                {/* Image Section */}
->>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
                 <div className="relative h-48 overflow-hidden">
                   <div
                     className="absolute inset-0 bg-cover bg-center"
@@ -342,14 +311,11 @@ export default function VCFundingSupport() {
                     style={{ backgroundColor: 'rgba(0, 0, 0, 0.6)' }}
                   ></div>
                 </div>
-<<<<<<< HEAD
                 ) : (
                 <div className="relative h-20 flex items-center px-8 text-white" style={{ backgroundColor: '#A5292A' }}>
                   {service.icon}
                 </div>
                 )}
-=======
->>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
                 
                 {/* Text Section */}
                 <div className="p-8 flex-1 flex flex-col justify-between" style={{ backgroundColor: '#2D2D2D' }}>
@@ -382,11 +348,7 @@ export default function VCFundingSupport() {
             </p>
           </div>
 
-<<<<<<< HEAD
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 px-4 sm:px-8 md:px-12 lg:px-20">
-=======
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 px-4 sm:px-8 md:px-12 lg:px-20">
->>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
             {fundingStages.map((stage, index) => (
               <div
                 key={index}
@@ -598,12 +560,9 @@ export default function VCFundingSupport() {
         </div>
       </section>
 
-<<<<<<< HEAD
       {/* Frequently Asked Questions (new SEO section) */}
       <FAQSection items={vcFaqs} bg="light" />
 
-=======
->>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
       {/* Footer */}
       <Footer />
     </div>

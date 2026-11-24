@@ -5,11 +5,8 @@ import { Navbar } from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Breadcrumb from "@/components/Breadcrumb";
 import Image from "next/image";
-<<<<<<< HEAD
 import ContentSection from "@/components/SEO/ContentSection";
 import FAQSection from "@/components/SEO/FAQSection";
-=======
->>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
 import {
   ArrowRight,
   Shield,
@@ -36,7 +33,6 @@ export default function CybersecurityServices() {
       imageUrl: "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
     },
     {
-<<<<<<< HEAD
       icon: <CheckCircle className="w-6 h-6" />,
       title: "Cybersecurity Compliance Consulting in India From Audit to Action",
       description:
@@ -44,8 +40,6 @@ export default function CybersecurityServices() {
       imageUrl: ""
     },
     {
-=======
->>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
       icon: <Lock className="w-6 h-6" />,
       title: "Data Protection Compliance",
       description:
@@ -53,7 +47,6 @@ export default function CybersecurityServices() {
       imageUrl: "https://images.unsplash.com/photo-1555949963-aa79dcee981c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
     },
     {
-<<<<<<< HEAD
       icon: <Eye className="w-6 h-6" />,
       title: "Data Privacy Legal Advisory in India for Lawful Data Handling",
       description:
@@ -61,8 +54,6 @@ export default function CybersecurityServices() {
       imageUrl: ""
     },
     {
-=======
->>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
       icon: <FileText className="w-6 h-6" />,
       title: "Policy Development",
       description:
@@ -90,7 +81,6 @@ export default function CybersecurityServices() {
         "Prepare for potential security breaches with detailed incident response plans and legal frameworks for data breach notifications.",
       imageUrl: "https://images.unsplash.com/photo-1555949963-aa79dcee981c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
     },
-<<<<<<< HEAD
     {
       icon: <AlertTriangle className="w-6 h-6" />,
       title: "Cybersecurity Legal Compliance in India for Breach Readiness",
@@ -98,8 +88,6 @@ export default function CybersecurityServices() {
         "When a breach occurs, time is limited and every decision has legal consequences. Our work on cybersecurity legal compliance in India includes defining who must be informed, what must be reported, and how evidence should be preserved. We build these steps into your incident response plan and test them through simple exercises. Because reporting requirements are updated from time to time, we confirm the current rules before finalizing your procedures.",
       imageUrl: ""
     },
-=======
->>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
   ];
 
   const complianceAreas = [
@@ -122,7 +110,6 @@ export default function CybersecurityServices() {
     "Incident response planning and legal support",
   ];
 
-<<<<<<< HEAD
   const cyberFaqs = [
     {
       question: "Why does a business need legal support for cybersecurity?",
@@ -151,8 +138,6 @@ export default function CybersecurityServices() {
     },
   ];
 
-=======
->>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
@@ -238,7 +223,6 @@ export default function CybersecurityServices() {
         </div>
       </section>
 
-<<<<<<< HEAD
       {/* Cybersecurity Legal Services in India (new SEO section) */}
       <ContentSection
         title="Cybersecurity Legal Services in India for Modern Businesses"
@@ -249,8 +233,6 @@ export default function CybersecurityServices() {
         ]}
       />
 
-=======
->>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
       {/* Services Section */}
       <section className="py-20" style={{ backgroundColor: "#FAFAFA" }}>
         <div className="container mx-auto px-4">
@@ -267,22 +249,14 @@ export default function CybersecurityServices() {
             {services.map((service, index) => (
               <div
                 key={index}
-<<<<<<< HEAD
                 className="bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden group hover:scale-105 relative transform hover:-translate-y-2 flex flex-col"
-=======
-                className="bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden group hover:scale-105 relative transform hover:-translate-y-2"
->>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
                 style={{
                   transformStyle: 'preserve-3d',
                   transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)'
                 }}
               >
-<<<<<<< HEAD
                 {/* Image Section (new content cards without an image show the icon on a brand-red band) */}
                 {service.imageUrl ? (
-=======
-                {/* Image Section */}
->>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
                 <div className="relative h-48 overflow-hidden">
                   <div
                     className="absolute inset-0 bg-cover bg-center"
@@ -298,7 +272,6 @@ export default function CybersecurityServices() {
                     style={{ backgroundColor: 'rgba(0, 0, 0, 0.6)' }}
                   ></div>
                 </div>
-<<<<<<< HEAD
                 ) : (
                 <div className="relative h-20 flex items-center px-8 text-white" style={{ backgroundColor: '#A5292A' }}>
                   {service.icon}
@@ -307,11 +280,6 @@ export default function CybersecurityServices() {
                 
                 {/* Text Section */}
                 <div className="p-8 flex-1" style={{ backgroundColor: '#2D2D2D' }}>
-=======
-                
-                {/* Text Section */}
-                <div className="p-8" style={{ backgroundColor: '#2D2D2D' }}>
->>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
                   <h3 className="text-xl font-bold text-white mb-4">
                     {service.title}
                   </h3>
@@ -386,7 +354,6 @@ export default function CybersecurityServices() {
                   </div>
                 </div>
 
-<<<<<<< HEAD
                 {/* Your Trusted Cyber Law Firm in India (new SEO content) */}
                 <div className="flex items-start">
                   <div
@@ -403,8 +370,6 @@ export default function CybersecurityServices() {
                   </div>
                 </div>
 
-=======
->>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
                 <div className="flex items-start">
                   <div
                     className="w-3 h-3 rounded-full mr-4 mt-2"
@@ -537,12 +502,9 @@ export default function CybersecurityServices() {
         </div>
       </section>
 
-<<<<<<< HEAD
       {/* Frequently Asked Questions (new SEO section) */}
       <FAQSection items={cyberFaqs} bg="light" />
 
-=======
->>>>>>> 59e0d3c087c2128ab9f64cfe9a8d7d0dab1b2466
       {/* Footer */}
       <Footer />
     </div>
